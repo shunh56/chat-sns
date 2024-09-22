@@ -1,0 +1,102 @@
+
+UPATING PODS
+sudo arch -x86_64 gem install ffi
+cd ios 
+pod deintegrate
+rm -f Podfile.lock
+arch -x86_64 pod install --repo-update
+
+Flutter で開発中、よくわからないエラー（特にビルド周り）がでたときにやるコマンドたちです。
+普段は mac のメモ帳に入れているのですが、どなたかの助けに慣れば幸いです。
+flutter clean
+flutter pub cache repair
+pod repo update
+rm ios/Podfile.lock
+rm -Rf ios/Pods
+rm -Rf ios/.symlinks
+rm -Rf ios/Flutter/Flutter.framework
+rm -Rf ios/Flutter/Flutter.podspec
+もし他にも「なんかあったらコレ」的なモノがあれば教えていただけると嬉しいです。
+
+Android gradle error
+find ~/.gradle -type f -name "*.lock" -delete
+
+
+画像の width/heightの取得方法
+import 'dart:io';
+File image = new File('image.png'); // Or any other way to get a File instance.
+var decodedImage = await decodeImageFromList(image.readAsBytesSync());
+print(decodedImage.width);
+print(decodedImage.height);
+
+
+
+
+
+Firebase Deployments
+#functions
+    firebase deploy --only functions
+    firebase deploy --only functions:posts    
+
+
+最後のGitHub更新状態に戻す
+git reset --hard HEAD
+
+APPDATAについて
+- Auto更新されるもの
+    -> snapshotsでdetect
+        -> futurebuilder: HiveUserMethods().getUserData
+- Manual更新するもの
+    -> futurebuilder : get関数
+        -> get関数内にHiveUserMethods().getUserDataを埋め込む
+
+
+
+gradle java version errors => https://qiita.com/TT-RR/items/6866be865c4ab2118030
+
+
+
+
+ANDROID 
+sensor_plusのエラーが出た時
+AndroidManifest.xml ファイルから package 属性を削除する必要があります。以下の手順に従って編集してください。
+ファイルパス /Users/shunh/.pub-cache/hosted/pub.dev/sensors_plus-1.4.1/android/src/main/AndroidManifest.xml に移動します。
+以下に変更する
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+</manifest>
+
+
+
+
+flutter pub run import_sorter:main
+=> importの整理
+
+別パッチをインストールする方法
+=> XCodeでbundle identifierをユニークにする
+=> Info.plistのBundleDisplayNameを変更するとわかりやすいかも
+
+
+
+Xcode データ関係の削除
+https://qiita.com/shtnkgm/items/c96a58579ec406194fa8
+
+
+
+
+
+
+functions:
+    python:
+       gcloud functions deploy generate_ff_graph \
+        --gen2 \
+        --region asia-northeast1 \
+        --runtime python310 \
+        --source graph \ #ディレクトリ位置
+        --entry-point generate_and_save_csv \ #関数名
+        --trigger-topic daily_generate_graph #pubsubのトピック名でトリガー
+
+
+
+Android : 
+Namespace not specified
+=> https://minpro.net/namespace-not-specified

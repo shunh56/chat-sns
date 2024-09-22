@@ -1,0 +1,38 @@
+import 'package:app/domain/entity/reply.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/usecase/posts/post_usecase.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final postRepliesNotifierProvider = StateNotifierProvider.autoDispose
+    .family<PostRepliesNotifier, AsyncValue<List<Reply>>, String>(
+  (ref, postId) => PostRepliesNotifier(
+    ref,
+    ref.watch(postUsecaseProvider),
+    postId,
+  )..init(),
+);
+
+class PostRepliesNotifier extends StateNotifier<AsyncValue<List<Reply>>> {
+  PostRepliesNotifier(
+    this._ref,
+    this._usecase,
+    this.postId,
+  ) : super(const AsyncValue.loading());
+
+  final Ref _ref;
+  final PostUsecase _usecase;
+  final String postId;
+
+  init() async {
+    final stream = _usecase.streamPostReplies(postId);
+
+    stream.listen((event) async {
+      await _ref
+          .read(allUsersNotifierProvider.notifier)
+          .getUserAccounts(event.map((reply) => reply.userId).toList());
+      if (mounted) {
+        state = AsyncValue.data(event);
+      }
+    });
+  }
+}

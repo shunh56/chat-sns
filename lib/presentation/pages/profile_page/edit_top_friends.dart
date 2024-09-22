@@ -1,0 +1,316 @@
+import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
+import 'package:app/presentation/pages/profile_page/profile_page.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:gap/gap.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+class EditTopFriendsScreen extends HookConsumerWidget {
+  const EditTopFriendsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+
+    final notifier = ref.read(myAccountNotifierProvider.notifier);
+    final topFriends = ref.watch(topFriendsProvider);
+    final topFriendsNotifier = ref.watch(topFriendsProvider.notifier);
+    final friendInfos =
+        ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
+    final friendIds = friendInfos.map((item) => item.userId).toList();
+    List users = ref
+        .watch(allUsersNotifierProvider)
+        .asData!
+        .value
+        .values
+        .where((user) => friendIds.contains(user.userId))
+        .toList();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Top Friendsを編集",
+          style: TextStyle(
+            fontSize: 16,
+          ),
+        ),
+        actions: [
+          GestureDetector(
+            onTap: () async {
+              notifier.updateTopFriends(topFriends);
+              Navigator.pop(context);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: Colors.blue,
+              ),
+              child: const Text(
+                "保存する",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          Gap(themeSize.horizontalPadding),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Gap(24),
+              const Text(
+                "選択中の友達",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: ThemeColor.text,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Gap(8),
+              Wrap(
+                children: users
+                    .where((user) => topFriends.contains(user.userId))
+                    .map(
+                      (user) => GestureDetector(
+                        onTap: () {
+                          final list = topFriends
+                              .where((item) => item != user.userId)
+                              .toList();
+
+                          topFriendsNotifier.state = list;
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: SizedBox(
+                                  height: (themeSize.screenWidth -
+                                          2 * themeSize.horizontalPadding -
+                                          24 -
+                                          6 * 8) /
+                                      5,
+                                  width: (themeSize.screenWidth -
+                                          2 * themeSize.horizontalPadding -
+                                          24 -
+                                          6 * 8) /
+                                      5,
+                                  child: CachedNetworkImage(
+                                    imageUrl: user.imageUrl!,
+                                    fadeInDuration:
+                                        const Duration(milliseconds: 120),
+                                    imageBuilder: (context, imageProvider) =>
+                                        Container(
+                                      height: (themeSize.screenWidth -
+                                              2 * themeSize.horizontalPadding -
+                                              24 -
+                                              6 * 8) /
+                                          5,
+                                      width: (themeSize.screenWidth -
+                                              2 * themeSize.horizontalPadding -
+                                              24 -
+                                              6 * 8) /
+                                          5,
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                        image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    placeholder: (context, url) =>
+                                        const SizedBox(),
+                                    errorWidget: (context, url, error) =>
+                                        const SizedBox(),
+                                  ),
+                                ),
+                              ),
+                              const Gap(4),
+                              Text(
+                                user.username,
+                                overflow: TextOverflow.clip,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: ThemeColor.text,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+              const Gap(24),
+              const Text(
+                "他の友達",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: ThemeColor.text,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Gap(8),
+              Wrap(
+                children: users
+                    .where((user) => !topFriends.contains(user.userId))
+                    .map(
+                      (user) => GestureDetector(
+                        onTap: () {
+                          if (topFriends.length >= 10) {
+                            showMessage("10人までしか選択できません。");
+                            return;
+                          }
+                          topFriendsNotifier.state = [
+                            ...topFriends,
+                            user.userId
+                          ];
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: SizedBox(
+                                  height: (themeSize.screenWidth -
+                                          2 * themeSize.horizontalPadding -
+                                          24 -
+                                          6 * 8) /
+                                      5,
+                                  width: (themeSize.screenWidth -
+                                          2 * themeSize.horizontalPadding -
+                                          24 -
+                                          6 * 8) /
+                                      5,
+                                  child: CachedNetworkImage(
+                                    imageUrl: user.imageUrl!,
+                                    fadeInDuration:
+                                        const Duration(milliseconds: 120),
+                                    imageBuilder: (context, imageProvider) =>
+                                        Container(
+                                      height: (themeSize.screenWidth -
+                                              2 * themeSize.horizontalPadding -
+                                              24 -
+                                              6 * 8) /
+                                          5,
+                                      width: (themeSize.screenWidth -
+                                              2 * themeSize.horizontalPadding -
+                                              24 -
+                                              6 * 8) /
+                                          5,
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                        image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    placeholder: (context, url) =>
+                                        const SizedBox(),
+                                    errorWidget: (context, url, error) =>
+                                        const SizedBox(),
+                                  ),
+                                ),
+                              ),
+                              const Gap(4),
+                              Text(
+                                user.username,
+                                overflow: TextOverflow.clip,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: ThemeColor.text,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Map<String, dynamic> generateTagData(String tag, {bool generate = false}) {
+    final String id = FirebaseFirestore.instance.collection("tags").doc().id;
+    final json = {
+      "id": id,
+      "name": tag,
+      "searchCount": 1,
+      "selectedCount": 0,
+      "createdAt": Timestamp.now(),
+    };
+    if (generate) {
+      addTagToFirestore(json);
+    }
+    return json;
+  }
+
+  addTagToFirestore(Map<String, dynamic> json) async {
+    final q = await FirebaseFirestore.instance
+        .collection("tags")
+        .where("name", isEqualTo: json["name"])
+        .get();
+    if (q.docs.isEmpty) {
+      FirebaseFirestore.instance.collection("tags").doc(json["id"]).set(json);
+    }
+  }
+
+  incrementSelectCount(String id) async {
+    FirebaseFirestore.instance.collection("tags").doc(id).update({
+      "selectedCount": FieldValue.increment(1),
+      "updatedAt": Timestamp.now(),
+    });
+  }
+
+  Widget _buildSelectedTag(String tag) {
+    return Container(
+      margin: const EdgeInsets.only(
+        right: 8,
+        bottom: 8,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(100),
+          color: Colors.black.withOpacity(0.3)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            tag,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const Icon(
+            Icons.check,
+            color: ThemeColor.icon,
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -1,0 +1,56 @@
+import 'package:app/domain/entity/posts/post.dart';
+import 'package:app/domain/entity/reply.dart';
+import 'package:app/presentation/providers/state/create_post/post.dart';
+import 'package:app/repository/posts/post_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final postUsecaseProvider = Provider(
+  (ref) => PostUsecase(
+    ref.read(postRepositoryProvider),
+  ),
+);
+
+class PostUsecase {
+  final PostRepository _repository;
+  PostUsecase(this._repository);
+
+  Future<List<Post>> getPosts() async {
+    return await _repository.getPosts();
+  }
+
+  Future<List<Post>> getPublicPosts() async {
+    return await _repository.getPublicPosts();
+  }
+
+  Future<List<Post>> getPopularPosts() async {
+    return await _repository.getPopularPosts();
+  }
+
+  Future<List<Post>> getPostFromUserId(String userId) async {
+    return await _repository.getPostFromUserId(userId);
+  }
+
+  Stream<List<Reply>> streamPostReplies(String postId) {
+    return _repository.streamPostReplies(postId);
+  }
+
+  /* Future<Post?> getPostById(String postId) async {
+    return await _repository.getPostById(postId);
+  } */
+
+  uploadPost(PostState state) {
+    return _repository.uploadPost(state);
+  }
+
+  incrementLikeCount(String id, int count) {
+    return _repository.incrementLikeCount(id, count);
+  }
+
+  addReply(String id, String text) {
+    return _repository.addReply(id, text);
+  }
+
+  incrementLikeCountToReply(String postId, String replyId, int count) {
+    return _repository.incrementLikeCountToReply(postId, replyId, count);
+  }
+}

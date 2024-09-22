@@ -1,0 +1,95 @@
+import 'package:app/core/utils/debug_print.dart';
+import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final userDatasourceProvider = Provider(
+  (ref) => UserDatasource(
+    ref.watch(authProvider),
+    ref.read(firestoreProvider),
+  ),
+);
+
+class UserDatasource {
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+
+  UserDatasource(this._auth, this._firestore);
+
+  Future<DocumentSnapshot<Map<String, dynamic>>?> fetchUserByUsername(
+      String username) async {
+    try {
+      final q = await _firestore
+          .collection("users")
+          .where("username", isEqualTo: username)
+          .limit(1)
+          .get();
+      if (q.docs.isNotEmpty) {
+        return q.docs.first;
+      } else {
+        return null;
+      }
+    } on FirebaseException catch (e) {
+      DebugPrint('FirebaseException: $e');
+      return null;
+    } catch (e) {
+      DebugPrint('Exception: $e');
+      return null;
+    }
+  }
+
+  Future<DocumentSnapshot<Map<String, dynamic>>?> fetchUserByUserId(
+      String userId) async {
+    try {
+      return await _firestore.collection("users").doc(userId).get();
+    } on FirebaseException catch (e) {
+      DebugPrint('FirebaseException: $e');
+      return null;
+    } catch (e) {
+      DebugPrint('Exception: $e');
+      return null;
+    }
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getAllUsers() async {
+    return await _firestore.collection("users").get();
+  }
+
+  updateJson(Map<String, dynamic> json) async {
+    await _firestore.collection("users").doc(json["userId"]).delete();
+    _firestore.collection("users").doc(json["userId"]).set(json);
+  }
+
+  createUser({
+    required String name,
+    String? imageUrl,
+    required String gender,
+  }) {
+    String userId = _auth.currentUser!.uid;
+    Timestamp now = Timestamp.now();
+    _firestore.collection("users").doc(userId).set({
+      "userId": userId,
+      "createdAt": now,
+      "name": name,
+      "imageUrl": imageUrl,
+      "comment": null,
+      "fcmToken": null,
+      "isOnline": false,
+      "lastOpenedAt": now,
+      "friendCount": 0,
+      "privateMode": false,
+      "gender": gender,
+      "accountStatus": "active",
+      "deviceInfo": null,
+    });
+  }
+
+  updateUser(Map<String, dynamic> json) {
+    return _firestore
+        .collection("users")
+        .doc(_auth.currentUser!.uid)
+        .update(json);
+  }
+}
