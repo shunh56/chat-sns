@@ -23,21 +23,32 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_callkit_incoming/entities/call_event.dart';
+import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 //import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:uuid/uuid.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp();
-
   print("Handling a background message: ${message.messageId}");
+  //TODO 時差は命取りなので、送信時との時間差が5秒以内であれば鳴らす
   HapticFeedback.vibrate();
+  final data = message.data;
+  if (data['type'] == "call") {
+    final name = data["name"] ?? "name";
+    final imageUrl = data['imageUrl'];
+    final dateTime = DateTime.parse(data['dateTime']);
+    if (DateTime.now().difference(dateTime).inSeconds.abs() < 5) {
+      showIncomingCall(name, imageUrl);
+    }
+  }
 }
 
 //メンテナンス画面の表示
@@ -105,11 +116,20 @@ configureNotification() async {
   );
 
   FirebaseMessaging.onMessage.listen(
-    (RemoteMessage message) {
+    (RemoteMessage message) async {
       debugPrint(
           '通知を検出: ${message.notification?.title} - ${message.notification?.body}');
       if (message.notification != null) {
         HapticFeedback.vibrate();
+      }
+      final data = message.data;
+      if (data['type'] == "call") {
+        final name = data["name"] ?? "name";
+        final imageUrl = data['imageUrl'];
+        final dateTime = DateTime.parse(data['dateTime']);
+        if (DateTime.now().difference(dateTime).inSeconds.abs() < 5) {
+          showIncomingCall(name, imageUrl);
+        }
       }
     },
   );
@@ -136,10 +156,64 @@ configureNotification() async {
       );
 }
 
+showIncomingCall(String name, String? imageUrl) async {
+  final params = CallKitParams(
+    id: const Uuid().v4(),
+    nameCaller: name,
+    appName: 'AppName',
+    // avatar: 'https://i.pravatar.cc/100',
+    avatar: imageUrl,
+    handle: '',
+    type: 0,
+    duration: 30000,
+    textAccept: '応答',
+    textDecline: '拒否',
+
+    missedCallNotification: const NotificationParams(
+      //showNotification: false,
+      callbackText: "かけ直す",
+      subtitle: "不在着信",
+      //isShowCallback: false,
+      //count: 1,
+    ),
+    //extra: <String, dynamic>{'userId': '1a2b3c4d'},
+    // headers: <String, dynamic>{'apiKey': 'Abc@123!'},
+    android: const AndroidParams(
+      isCustomNotification: true,
+      isShowLogo: true,
+      missedCallNotificationChannelName: "appName",
+      incomingCallNotificationChannelName: "appName",
+      ringtonePath: 'system_ringtone_default',
+      backgroundColor: '#404040',
+      // backgroundUrl: 'https://i.pravatar.cc/500',
+      actionColor: '#4CAF50',
+      isImportant: true,
+      isShowFullLockedScreen: true,
+    ),
+    ios: const IOSParams(
+      iconName: null, //'CallKitLogo',
+      handleType: 'generic',
+      supportsVideo: false,
+      maximumCallGroups: 2,
+      maximumCallsPerCallGroup: 1,
+      audioSessionMode: 'default',
+      audioSessionActive: true,
+      audioSessionPreferredSampleRate: 44100.0,
+      audioSessionPreferredIOBufferDuration: 0.005,
+      supportsDTMF: true,
+      supportsHolding: true,
+      supportsGrouping: false,
+      supportsUngrouping: false,
+      ringtonePath: 'system_ringtone_default',
+    ),
+  );
+  await FlutterCallkitIncoming.showCallkitIncoming(params);
+}
+
 configureVoiceCall() async {
   FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
-    print("callEvent: ${event?.body}");
-    await FlutterCallkitIncoming.endCall(event?.body['id']);
+    //print("callEvent: ${event?.body}");
+    //print("eventType : ${event?.event}");
     switch (event!.event) {
       case Event.actionCallIncoming:
         // TODO: received an incoming call
@@ -149,18 +223,32 @@ configureVoiceCall() async {
         // TODO: show screen calling in Flutter
         break;
       case Event.actionCallAccept:
-        showMessage("action accepted, closing voip");
         // TODO: accepted an incoming call
         // TODO: show screen calling in Flutter
+        await FlutterCallkitIncoming.endCall(event.body['id']);
+        await Future.delayed(const Duration(milliseconds: 30));
+        showMessage("action accepted, closing voip");
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (_) => const Scaffold(
+              body: Center(
+                child: Text("VOICE CALL SCREEN"),
+              ),
+            ),
+          ),
+        );
         break;
       case Event.actionCallDecline:
         // TODO: declined an incoming call
+        await FlutterCallkitIncoming.endCall(event.body['id']);
         break;
       case Event.actionCallEnded:
         // TODO: ended an incoming/outgoing call
+        await FlutterCallkitIncoming.endCall(event.body['id']);
         break;
       case Event.actionCallTimeout:
         // TODO: missed an incoming call
+        await FlutterCallkitIncoming.endCall(event.body['id']);
         break;
       case Event.actionCallCallback:
         // TODO: only Android - click action `Call back` from missed call notification
@@ -191,10 +279,12 @@ configureVoiceCall() async {
 }
 
 void main() {
+  DebugPrint("main()");
   runZonedGuarded<Future<void>>(
     () async {
       //1. initialize system
       configureSystem();
+
       FirebaseMessaging.onBackgroundMessage(
           _firebaseMessagingBackgroundHandler);
       //2. initialize firebase
@@ -246,20 +336,21 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    //4. configure voice call
+    configureVoiceCall();
 
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
-      //navigatorKey: navigatorKey,
-      //  localizationsDelegates: const [
-      // GlobalMaterialLocalizations.delegate,
-      // GlobalWidgetsLocalizations.delegate,
-      // GlobalCupertinoLocalizations.delegate,
-      //  ],
-      // supportedLocales: const [
-      //Locale('en'),
-      // Locale('ja'),
-      // ],
-      //locale: const Locale("ja", "JP"),
+      navigatorKey: navigatorKey,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale("ja", "JP"),
+      ],
+      locale: const Locale("ja", "JP"),
       title: 'appName',
       //theme: AppTheme().lightTheme,
       theme: ThemeData(
@@ -287,60 +378,6 @@ class MyApp extends ConsumerWidget {
           ),
         ),
         scaffoldBackgroundColor: ThemeColor.background,
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(
-            color: ThemeColor.text,
-            fontSize: ThemeTextSize.displayLarge,
-            fontWeight: FontWeight.bold,
-          ),
-          displayMedium: TextStyle(
-              color: ThemeColor.text,
-              fontSize: ThemeTextSize.displayMedium,
-              fontWeight: FontWeight.bold),
-          displaySmall: TextStyle(
-              color: ThemeColor.text,
-              fontSize: ThemeTextSize.displaySmall,
-              fontWeight: FontWeight.bold),
-          headlineLarge: TextStyle(
-              color: ThemeColor.text,
-              fontSize: ThemeTextSize.headlineLarge,
-              fontWeight: FontWeight.bold),
-          headlineMedium: TextStyle(
-              color: ThemeColor.text,
-              fontSize: ThemeTextSize.headlineMedium,
-              fontWeight: FontWeight.bold),
-          headlineSmall: TextStyle(
-              color: ThemeColor.text,
-              fontSize: ThemeTextSize.headlineSmall,
-              fontWeight: FontWeight.bold),
-          titleLarge: TextStyle(
-            color: ThemeColor.text,
-            fontSize: ThemeTextSize.titleLarge,
-            fontWeight: FontWeight.bold,
-          ),
-          titleMedium: TextStyle(
-            color: ThemeColor.text,
-            fontSize: ThemeTextSize.titleMedium,
-            fontWeight: FontWeight.bold,
-          ),
-          titleSmall: TextStyle(
-            color: ThemeColor.text,
-            fontSize: ThemeTextSize.titleSmall,
-            fontWeight: FontWeight.bold,
-          ),
-          bodyLarge: TextStyle(
-            color: ThemeColor.text,
-            fontSize: ThemeTextSize.bodyLarge,
-          ),
-          bodyMedium: TextStyle(
-            color: ThemeColor.text,
-            fontSize: ThemeTextSize.bodyMedium,
-          ),
-          bodySmall: TextStyle(
-            color: ThemeColor.text,
-            fontSize: ThemeTextSize.bodySmall,
-          ),
-        ),
         colorScheme: const ColorScheme(
           brightness: Brightness.light,
           primary: ThemeColor.beige,
@@ -498,7 +535,7 @@ class LoadingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: Text("SPLASH SCREEN"),
       ),
     );
   }

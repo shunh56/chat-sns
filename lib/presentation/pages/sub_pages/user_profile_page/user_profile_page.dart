@@ -4,17 +4,13 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/icons.dart';
-import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/users_friends_screen.dart';
-import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
-import 'package:app/presentation/providers/provider/users/footprints_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,10 +31,11 @@ class UserProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final canvasTheme = user.canvasTheme;
-    final friendIds =
+    final friendInfos =
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
+    final friendIds = friendInfos.map((item) => item.userId);
     bool popped = false;
-    if (!friendIds.contains(user.userId)) {
+    if (!friendInfos.map((item) => item.userId).contains(user.userId)) {
       //return NotFriendScreen(user: user);
     }
     return Scaffold(
@@ -81,14 +78,14 @@ class UserProfileScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user.username,
+                    user.name,
                     style: TextStyle(
                       color: user.canvasTheme.profileTextColor,
                       fontSize: 24,
                     ),
                   ),
                   Text(
-                    "${user.createdAt.toDateStr}〜",
+                    "@${user.username}・${user.createdAt.toDateStr}〜",
                     style: TextStyle(
                       color: user.canvasTheme.profileSecondaryTextColor,
                       fontSize: 14,
@@ -97,24 +94,29 @@ class UserProfileScreen extends ConsumerWidget {
                 ],
               ),
               actions: [
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    ref.read(navigationRouterProvider(context)).goToChat(user);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.chat_bubble_outline,
-                      color: Colors.white,
+                if (friendIds.contains(user.userId))
+                  Padding(
+                    padding: EdgeInsets.only(right: 12),
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        ref
+                            .read(navigationRouterProvider(context))
+                            .goToChat(user);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.chat_bubble_outline,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const Gap(12),
                 GestureDetector(
                   onTap: () {
                     HapticFeedback.lightImpact();
@@ -132,7 +134,7 @@ class UserProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const Gap(12),
-                (friendIds.contains(user.userId))
+                (friendInfos.map((item) => item.userId).contains(user.userId))
                     ? FocusedMenuHolder(
                         onPressed: () {
                           HapticFeedback.lightImpact();
@@ -211,6 +213,19 @@ class UserProfileScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(24),
                         ),
                         menuItems: <FocusedMenuItem>[
+                          FocusedMenuItem(
+                            backgroundColor: ThemeColor.background,
+                            title: const Text(
+                              "フレンド申請",
+                            ),
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              ref
+                                  .read(friendRequestIdListNotifierProvider
+                                      .notifier)
+                                  .sendFriendRequest(user);
+                            },
+                          ),
                           FocusedMenuItem(
                             backgroundColor: ThemeColor.background,
                             title: const Text(
@@ -311,24 +326,32 @@ class UserProfileScreen extends ConsumerWidget {
                       child: SizedBox(
                         height: imageHeight,
                         width: imageHeight,
-                        child: CachedNetworkImage(
-                          imageUrl: user.imageUrl!,
-                          fadeInDuration: const Duration(milliseconds: 120),
-                          imageBuilder: (context, imageProvider) => Container(
-                            height: imageHeight,
-                            width: imageHeight,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              image: DecorationImage(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
+                        child: user.imageUrl != null
+                            ? CachedNetworkImage(
+                                imageUrl: user.imageUrl!,
+                                fadeInDuration:
+                                    const Duration(milliseconds: 120),
+                                imageBuilder: (context, imageProvider) =>
+                                    Container(
+                                  height: imageHeight,
+                                  width: imageHeight,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    image: DecorationImage(
+                                      image: imageProvider,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                placeholder: (context, url) => const SizedBox(),
+                                errorWidget: (context, url, error) =>
+                                    const SizedBox(),
+                              )
+                            : Icon(
+                                Icons.person_outline,
+                                size: imageHeight * 0.8,
+                                color: ThemeColor.stroke,
                               ),
-                            ),
-                          ),
-                          placeholder: (context, url) => const SizedBox(),
-                          errorWidget: (context, url, error) =>
-                              const SizedBox(),
-                        ),
                       ),
                     ),
                   ),
@@ -936,7 +959,7 @@ class UserProfileScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Friends",
+                "${user.username}のフレンド",
                 style: TextStyle(
                   fontSize: 16,
                   color: canvasTheme.boxTextColor,
@@ -1047,76 +1070,6 @@ class UserProfileScreen extends ConsumerWidget {
                       ),
                     ),
                   );
-                  return Wrap(
-                    children: users
-                        .map(
-                          (user) => Container(
-                            margin: const EdgeInsets.all(4),
-                            child: Column(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: SizedBox(
-                                    height: (themeSize.screenWidth -
-                                            2 * themeSize.horizontalPadding -
-                                            24 -
-                                            6 * 8) /
-                                        5,
-                                    width: (themeSize.screenWidth -
-                                            2 * themeSize.horizontalPadding -
-                                            24 -
-                                            6 * 8) /
-                                        5,
-                                    child: CachedNetworkImage(
-                                      imageUrl: user.imageUrl!,
-                                      fadeInDuration:
-                                          const Duration(milliseconds: 120),
-                                      imageBuilder: (context, imageProvider) =>
-                                          Container(
-                                        height: (themeSize.screenWidth -
-                                                2 *
-                                                    themeSize
-                                                        .horizontalPadding -
-                                                24 -
-                                                6 * 8) /
-                                            5,
-                                        width: (themeSize.screenWidth -
-                                                2 *
-                                                    themeSize
-                                                        .horizontalPadding -
-                                                24 -
-                                                6 * 8) /
-                                            5,
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          image: DecorationImage(
-                                            image: imageProvider,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      placeholder: (context, url) =>
-                                          const SizedBox(),
-                                      errorWidget: (context, url, error) =>
-                                          const SizedBox(),
-                                    ),
-                                  ),
-                                ),
-                                const Gap(4),
-                                Text(
-                                  user.username,
-                                  overflow: TextOverflow.clip,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: canvasTheme.boxSecondaryTextColor,
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  );
                 },
               ),
             ],
@@ -1127,6 +1080,7 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
+/*
   Widget _buildWishList(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
     return Column(
@@ -1316,7 +1270,7 @@ class UserProfileScreen extends ConsumerWidget {
       ),
     );
   }
-
+ */
   Widget box(CanvasTheme canvasTheme, Widget child) {
     return Row(
       children: [
@@ -1339,233 +1293,15 @@ class UserProfileScreen extends ConsumerWidget {
   }
 }
 
-class UserProfilePage extends ConsumerWidget {
-  const UserProfilePage({super.key, required this.user});
-  final UserAccount user;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return UserProfileScreen(user: user);
-    final w = MediaQuery.sizeOf(context).width;
-    final imageWidth = w - 24;
-    final imageHeight = imageWidth * 5 / 4;
-    const imageLength = 6;
-    final fullWidth = MediaQuery.sizeOf(context).width;
-    final appBarHeight =
-        MediaQuery.of(context).viewPadding.top + kToolbarHeight;
-    addFootprint() async {
-      await Future.delayed(const Duration(milliseconds: 10));
-      ref.read(footprintsListNotifierProvider.notifier).addFootprint(user);
-    }
-
-    addFootprint();
-    return GestureDetector(
-      onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
-        // ref.read(currentScreenProvider.notifier).state = null;
-      },
-      child: Scaffold(
-        backgroundColor: ThemeColor.icon,
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                //user content
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.only(
-                      top: appBarHeight + 12,
-                      bottom: 12,
-                    ),
-                    children: [
-                      SizedBox(
-                        height: imageHeight,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Center(
-                              child: CachedImage.userImage(
-                                user.imageUrl!,
-                                imageWidth,
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 8,
-                              child: Row(
-                                  children: List.generate(imageLength, (index) {
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 4),
-                                  width: (imageWidth -
-                                          (imageLength - 1) * 8 -
-                                          16 * 2) /
-                                      imageLength,
-                                  height: 4,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: ThemeColor.beige,
-                                  ),
-                                  //padding: EdgeInsets.symmetric(horizontal: 24),
-                                );
-                              }).toList()),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Gap(16),
-                      _buildProfilSection(context, ref, user),
-                    ],
-                  ),
-                ),
-                BottomSection(
-                  user: user,
-                ),
-              ],
-            ),
-            Positioned(
-              top: MediaQuery.of(context).viewPadding.top,
-              child: //top bar
-                  SizedBox(
-                width: fullWidth,
-                height: kToolbarHeight,
-                child: Row(
-                  children: [
-                    const Gap(12),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: ThemeColor.beige.withOpacity(0.3),
-                        child: Icon(
-                          Icons.close,
-                          color: ThemeColor.beige.withOpacity(0.5),
-                        ),
-                      ),
-                    ),
-                    const Expanded(child: SizedBox()),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: ThemeColor.beige.withOpacity(0.3),
-                        child: Icon(
-                          Icons.more_horiz_rounded,
-                          color: ThemeColor.beige.withOpacity(0.5),
-                        ),
-                      ),
-                    ),
-                    const Gap(12),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        /* bottomSheet: Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom),
-          child: BottomSection(user: user),
-        ), */
-      ),
-    );
-  }
-
-  _buildProfilSection(BuildContext context, WidgetRef ref, UserAccount user) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 24,
-        right: 24,
-        bottom: 24,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  CachedImage.userIcon(user.imageUrl, user.username, 28),
-                  const Gap(12),
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                // color: Colors.cyan.withOpacity(0.3),
-                                child: Text(
-                                  user.username,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    color: ThemeColor.beige,
-                                    fontWeight: FontWeight.w600,
-                                    height: 1,
-                                  ),
-                                ),
-                              ),
-                              const Gap(12),
-                              Container(
-                                // color: Colors.orange.withOpacity(0.7),
-                                child: const Text(
-                                  "東京 24",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: ThemeColor.beige,
-                                    fontWeight: FontWeight.w600,
-                                    height: 1.2,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ],
-          ),
-          const Gap(16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: ThemeColor.button,
-            ),
-            child: Text(
-              user.aboutMe ?? "",
-              maxLines: null,
-              style: const TextStyle(
-                fontSize: 14,
-                color: ThemeColor.beige,
-              ),
-            ),
-          ),
-          const Gap(24),
-        ],
-      ),
-    );
-  }
-}
-
-class BottomSection extends HookConsumerWidget {
+/*class BottomSection extends HookConsumerWidget {
   final UserAccount user;
   final controller = TextEditingController();
   BottomSection({super.key, required this.user});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final friendIds =
+    final friendInfos =
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
+    final friendIds = friendInfos.map((item) => item.userId);
     final requestIds =
         ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];
     final requestedIds =
@@ -1774,7 +1510,7 @@ class BottomSection extends HookConsumerWidget {
                       await ref
                           .read(friendRequestIdListNotifierProvider.notifier)
                           .sendFriendRequest(user);
-                      showMessage("フレンド申請を送りました！");
+                    
                     } catch (e) {
                       showMessage("チャットは最初の一回のみ送信できます。");
                     }
@@ -1804,7 +1540,7 @@ class BottomSection extends HookConsumerWidget {
           ref
               .read(friendRequestIdListNotifierProvider.notifier)
               .sendFriendRequest(user.userId, "I sent you a friend request!");
-          showMessage("フレンド申請を送りました！");
+      
         },
         child: Row(
           mainAxisSize: MainAxisSize.max,
@@ -2009,7 +1745,7 @@ class NotFriendScreen extends ConsumerWidget {
             ref
                 .read(friendRequestIdListNotifierProvider.notifier)
                 .sendFriendRequest(user);
-            showMessage("フレンド申請を送りました！");
+            
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -2027,3 +1763,4 @@ class NotFriendScreen extends ConsumerWidget {
     );
   }
 }
+ */

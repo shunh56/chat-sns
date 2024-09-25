@@ -4,11 +4,23 @@ import 'package:app/presentation/providers/provider/users/all_users_notifier.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PublicPostsThread extends ConsumerWidget {
+class PublicPostsThread extends ConsumerStatefulWidget {
   const PublicPostsThread({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _PublicPostsThreadState();
+}
+
+class _PublicPostsThreadState extends ConsumerState<PublicPostsThread>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
     final postList = ref.watch(publicPostsNotiferProvider);
     return postList.when(
       data: (list) {

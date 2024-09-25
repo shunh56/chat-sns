@@ -116,14 +116,14 @@ class ChatInfoScreen extends ConsumerWidget {
                     UserIcon.circleIcon(user, radius: 36),
                     const Gap(12),
                     Text(
-                      user.username,
-                      style: TextStyle(
+                      user.name,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Gap(12),
-                    Text(
+                    const Gap(12),
+                    const Text(
                       "このユーザーとはフレンドではありません。",
                       style: TextStyle(
                         fontSize: 12,
@@ -140,7 +140,7 @@ class ChatInfoScreen extends ConsumerWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        Gap(12),
+                        const Gap(12),
                         TabBar(
                           isScrollable: true,
                           // dividerColor: Colors.transparent,
@@ -168,14 +168,14 @@ class ChatInfoScreen extends ConsumerWidget {
                                   : Colors.transparent;
                             },
                           ),
-                          tabs: [
+                          tabs: const [
                             Tab(child: Text("Images")),
                             Tab(child: Text("Pins")),
                             Tab(child: Text("Links")),
                             Tab(child: Text("Files")),
                           ],
                         ),
-                        Expanded(
+                        const Expanded(
                           child: TabBarView(
                             children: [
                               Center(
@@ -214,13 +214,13 @@ class ChatInfoScreen extends ConsumerWidget {
           UserIcon.circleIcon(user, radius: 36),
           const Gap(12),
           Text(
-            user.username,
-            style: TextStyle(
+            user.name,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
-          Text(
+          const Text(
             "このユーザーとはフレンドではありません。",
             style: TextStyle(
               fontSize: 12,
@@ -237,12 +237,12 @@ class ChatInfoScreen extends ConsumerWidget {
                   CircleAvatar(
                     radius: 24,
                     backgroundColor: Colors.white.withOpacity(0.2),
-                    child: Icon(
+                    child: const Icon(
                       Icons.phone,
                     ),
                   ),
-                  Gap(4),
-                  Text(
+                  const Gap(4),
+                  const Text(
                     "通話",
                     style: TextStyle(
                       fontSize: 12,
@@ -252,18 +252,18 @@ class ChatInfoScreen extends ConsumerWidget {
                   )
                 ],
               ),
-              Gap(32),
+              const Gap(32),
               Column(
                 children: [
                   CircleAvatar(
                     radius: 24,
                     backgroundColor: Colors.white.withOpacity(0.2),
-                    child: Icon(
+                    child: const Icon(
                       Icons.notifications_rounded,
                     ),
                   ),
-                  Gap(4),
-                  Text(
+                  const Gap(4),
+                  const Text(
                     "ミュート",
                     style: TextStyle(
                       fontSize: 12,
@@ -287,15 +287,15 @@ class ChatInfoScreen extends ConsumerWidget {
         UserIcon.circleIcon(user, radius: 36),
         const Gap(12),
         Text(
-          user.username,
-          style: TextStyle(
+          user.name,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         Text(
-          friendInfo.createdAt.toDateStr + " - ",
-          style: TextStyle(
+          "${friendInfo.createdAt.toDateStr} - ",
+          style: const TextStyle(
             fontSize: 12,
             color: ThemeColor.beige,
             fontWeight: FontWeight.w600,
@@ -335,39 +335,59 @@ class ChatInfoScreen extends ConsumerWidget {
                       DebugPrint("error : $e");
                     } */
                     HapticFeedback.lightImpact();
-                    final functions = FirebaseFunctions.instanceFor(
-                        region: "asia-northeast1");
-                    final HttpsCallable callable =
-                        functions.httpsCallable('voip-send');
-                    final voipToken = user.voipToken;
-                    if (voipToken == null) {
-                      showMessage("NO VOIP TOKEN");
-                      return;
-                    }
+                    final fcmCallable =
+                        FirebaseFunctions.instanceFor(region: "asia-northeast1")
+                            .httpsCallable('pushNotification-sendCall');
+
+                    final voipCallable =
+                        FirebaseFunctions.instanceFor(region: "asia-northeast1")
+                            .httpsCallable('voip-send');
+
                     final me =
                         ref.read(myAccountNotifierProvider).asData!.value;
-                    try {
-                      final result = await callable.call({
-                        'tokens': [voipToken],
-                        'name': me.username,
-                      });
-                      showMessage("voip response : ${result.data}");
-                      DebugPrint("response : ${result.data}");
-                    } catch (e) {
-                      showMessage("push notification error : $e");
-                      DebugPrint("error : $e");
+                    final voipToken = user.voipToken;
+                    final fcmToken = user.fcmToken;
+                    if (voipToken == null || voipToken.isEmpty) {
+                      if (fcmToken != null) {
+                        try {
+                          DebugPrint("sending fcm notification");
+                          final result = await fcmCallable.call({
+                            'token': fcmToken,
+                            'userId': me.userId,
+                            'name': me.name,
+                            'imageUrl': me.imageUrl,
+                            'dateTime': DateTime.now().toString(),
+                          });
+                          DebugPrint("response : ${result.data}");
+                        } catch (e) {
+                          DebugPrint("error : $e");
+                        }
+                      }
+                    } else {
+                      try {
+                        DebugPrint("sending voip notification");
+                        final result = await voipCallable.call({
+                          'tokens': [voipToken],
+                          'name': me.name,
+                        });
+                        showMessage("voip response : ${result.data}");
+                        DebugPrint("response : ${result.data}");
+                      } catch (e) {
+                        showMessage("push notification error : $e");
+                        DebugPrint("error : $e");
+                      }
                     }
                   },
                   child: CircleAvatar(
                     radius: 24,
                     backgroundColor: Colors.white.withOpacity(0.2),
-                    child: Icon(
+                    child: const Icon(
                       Icons.phone,
                     ),
                   ),
                 ),
-                Gap(4),
-                Text(
+                const Gap(4),
+                const Text(
                   "通話",
                   style: TextStyle(
                     fontSize: 12,
@@ -377,7 +397,7 @@ class ChatInfoScreen extends ConsumerWidget {
                 )
               ],
             ),
-            Gap(32),
+            const Gap(32),
             isMuted
                 ? Column(
                     children: [
@@ -391,13 +411,13 @@ class ChatInfoScreen extends ConsumerWidget {
                         child: CircleAvatar(
                           radius: 24,
                           backgroundColor: Colors.white.withOpacity(0.2),
-                          child: Icon(
+                          child: const Icon(
                             Icons.notifications_off_rounded,
                           ),
                         ),
                       ),
-                      Gap(4),
-                      Text(
+                      const Gap(4),
+                      const Text(
                         "ミュート",
                         style: TextStyle(
                           fontSize: 12,
@@ -419,13 +439,13 @@ class ChatInfoScreen extends ConsumerWidget {
                         child: CircleAvatar(
                           radius: 24,
                           backgroundColor: Colors.white.withOpacity(0.2),
-                          child: Icon(
+                          child: const Icon(
                             Icons.notifications_rounded,
                           ),
                         ),
                       ),
-                      Gap(4),
-                      Text(
+                      const Gap(4),
+                      const Text(
                         "ミュート",
                         style: TextStyle(
                           fontSize: 12,

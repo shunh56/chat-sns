@@ -143,6 +143,7 @@ class DirectMessageDatasource {
             "updatedAt": json['createdAt'],
             "userInfoList": userInfoList.map((e) => e.toJson()).toList(),
             "users.${_auth.currentUser!.uid}": true,
+            "users.$otherUserId": true,
           });
         }
       });

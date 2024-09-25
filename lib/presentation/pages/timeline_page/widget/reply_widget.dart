@@ -32,7 +32,7 @@ class ReplyWidget extends ConsumerWidget {
                 },
                 child: UserIcon.postIcon(user),
               ),
-              const Gap(12),
+              const Gap(8),
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +45,7 @@ class ReplyWidget extends ConsumerWidget {
                           Row(
                             children: [
                               Text(
-                                user.username,
+                                user.name,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   color: ThemeColor.text,

@@ -22,7 +22,7 @@ class _AllBlogsThreadState extends ConsumerState<AllBlogsThread>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final themeSize = ref.watch(themeSizeProvider(context));
+    //final themeSize = ref.watch(themeSizeProvider(context));
     final blogList = ref.watch(allBlogsNotiferProvider);
     return blogList.when(
       data: (list) {

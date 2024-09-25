@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/user.dart';
@@ -56,6 +57,7 @@ class CurrentStatusPostWidgets {
     if (post.noNewChange) return const SizedBox();
 
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
 
     final notifier = ref.read(isHeartVisibleProvider.notifier);
     final isAnimating = ref.watch(isAnimatingProvider);
@@ -144,6 +146,10 @@ class CurrentStatusPostWidgets {
           decoration: BoxDecoration(
             color: ThemeColor.accent,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+                      color: ThemeColor.stroke,
+                      width: 0.4,
+                    ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +166,7 @@ class CurrentStatusPostWidgets {
                     },
                     child: UserIcon.postIcon(user),
                   ),
-                  const Gap(12),
+                  const Gap(8),
                   Expanded(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,30 +175,28 @@ class CurrentStatusPostWidgets {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Gap(4),
                               Row(
                                 children: [
                                   Text(
                                     user.username,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: ThemeColor.text,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: textStyle.w600(fontSize: 16),
                                   ),
                                   const Gap(4),
-                                  SizedBox(
-                                    height: 12,
-                                    width: 12,
-                                    child: SvgPicture.asset(
-                                      "assets/images/icons/edit.svg",
-                                      color: ThemeColor.white,
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: SizedBox(
+                                      height: 12,
+                                      width: 12,
+                                      child: SvgPicture.asset(
+                                        "assets/images/icons/edit.svg",
+                                        color: ThemeColor.white,
+                                      ),
                                     ),
                                   ),
                                   const Gap(4),
                                   Text(
                                     "・${post.createdAt.xxAgo}",
-                                    style: const TextStyle(
+                                    style: textStyle.w600(
                                       fontSize: 12,
                                       color: ThemeColor.subText,
                                     ),
@@ -214,16 +218,11 @@ class CurrentStatusPostWidgets {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          const Padding(
-                                            padding:
-                                                EdgeInsets.only(top: 8),
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 8),
                                             child: Text(
                                               "タグ : ",
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: ThemeColor.text,
-                                                fontWeight: FontWeight.w400,
-                                              ),
+                                              style: textStyle.w600(),
                                             ),
                                           ),
                                           const Gap(8),
@@ -247,13 +246,15 @@ class CurrentStatusPostWidgets {
                                                         color: Colors.white
                                                             .withOpacity(0.1),
                                                       ),
-                                                      child: Text(
-                                                        tag,
-                                                        style: const TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.w600,
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                bottom: 2),
+                                                        child: Text(
+                                                          tag,
+                                                          style:
+                                                              textStyle.w600(),
                                                         ),
                                                       ),
                                                     ),
@@ -270,13 +271,9 @@ class CurrentStatusPostWidgets {
                                       padding: const EdgeInsets.only(top: 6),
                                       child: Row(
                                         children: [
-                                          const Text(
+                                          Text(
                                             "してること",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: ThemeColor.text,
-                                              fontWeight: FontWeight.w400,
-                                            ),
+                                            style: textStyle.w600(),
                                           ),
                                           const Gap(8),
                                           Container(
@@ -289,10 +286,8 @@ class CurrentStatusPostWidgets {
                                             ),
                                             child: Text(
                                               post.after.doing,
-                                              style: const TextStyle(
-                                                fontSize: 12,
+                                              style: textStyle.w600(
                                                 color: ThemeColor.background,
-                                                fontWeight: FontWeight.w400,
                                               ),
                                             ),
                                           ),
@@ -305,13 +300,9 @@ class CurrentStatusPostWidgets {
                                       padding: const EdgeInsets.only(top: 6),
                                       child: Row(
                                         children: [
-                                          const Text(
+                                          Text(
                                             "食べてる : ",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: ThemeColor.text,
-                                              fontWeight: FontWeight.w400,
-                                            ),
+                                            style: textStyle.w600(),
                                           ),
                                           const Gap(8),
                                           Container(
@@ -324,10 +315,8 @@ class CurrentStatusPostWidgets {
                                             ),
                                             child: Text(
                                               post.after.eating,
-                                              style: const TextStyle(
-                                                fontSize: 12,
+                                              style: textStyle.w600(
                                                 color: ThemeColor.background,
-                                                fontWeight: FontWeight.w400,
                                               ),
                                             ),
                                           ),
@@ -340,13 +329,9 @@ class CurrentStatusPostWidgets {
                                       padding: const EdgeInsets.only(top: 6),
                                       child: Row(
                                         children: [
-                                          const Text(
+                                          Text(
                                             "気分 : ",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: ThemeColor.text,
-                                              fontWeight: FontWeight.w400,
-                                            ),
+                                            style: textStyle.w600(),
                                           ),
                                           const Gap(8),
                                           Container(
@@ -359,10 +344,8 @@ class CurrentStatusPostWidgets {
                                             ),
                                             child: Text(
                                               post.after.mood,
-                                              style: const TextStyle(
-                                                fontSize: 12,
+                                              style: textStyle.w600(
                                                 color: ThemeColor.background,
-                                                fontWeight: FontWeight.w400,
                                               ),
                                             ),
                                           ),
@@ -375,13 +358,9 @@ class CurrentStatusPostWidgets {
                                       padding: const EdgeInsets.only(top: 6),
                                       child: Row(
                                         children: [
-                                          const Text(
+                                          Text(
                                             "場所 : ",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: ThemeColor.text,
-                                              fontWeight: FontWeight.w400,
-                                            ),
+                                            style: textStyle.w600(),
                                           ),
                                           const Gap(8),
                                           Container(
@@ -394,10 +373,8 @@ class CurrentStatusPostWidgets {
                                             ),
                                             child: Text(
                                               post.after.nowAt,
-                                              style: const TextStyle(
-                                                fontSize: 12,
+                                              style: textStyle.w600(
                                                 color: ThemeColor.background,
-                                                fontWeight: FontWeight.w400,
                                               ),
                                             ),
                                           ),
@@ -410,13 +387,9 @@ class CurrentStatusPostWidgets {
                                       padding: const EdgeInsets.only(top: 6),
                                       child: Row(
                                         children: [
-                                          const Text(
+                                          Text(
                                             "次の場所 : ",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: ThemeColor.text,
-                                              fontWeight: FontWeight.w400,
-                                            ),
+                                            style: textStyle.w600(),
                                           ),
                                           const Gap(8),
                                           Container(
@@ -429,10 +402,8 @@ class CurrentStatusPostWidgets {
                                             ),
                                             child: Text(
                                               post.after.nextAt,
-                                              style: const TextStyle(
-                                                fontSize: 12,
+                                              style: textStyle.w600(
                                                 color: ThemeColor.background,
-                                                fontWeight: FontWeight.w400,
                                               ),
                                             ),
                                           ),
@@ -447,13 +418,9 @@ class CurrentStatusPostWidgets {
                                       padding: const EdgeInsets.only(top: 6),
                                       child: Row(
                                         children: [
-                                          const Text(
+                                          Text(
                                             "一緒にいる人 : ",
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: ThemeColor.text,
-                                              fontWeight: FontWeight.w400,
-                                            ),
+                                            style: textStyle.w600(),
                                           ),
                                           const Gap(8),
                                           FutureBuilder(
@@ -484,8 +451,20 @@ class CurrentStatusPostWidgets {
                                                               child: SizedBox(
                                                                 height: 32,
                                                                 width: 32,
-                                                                child:
-                                                                    CachedNetworkImage(
+                                                                child: UserIcon
+                                                                    .tileIcon(
+                                                                        user,
+                                                                        width:
+                                                                            32,
+                                                                        ontapped:
+                                                                            () {
+                                                                  ref
+                                                                      .read(navigationRouterProvider(
+                                                                          context))
+                                                                      .goToProfile(
+                                                                          user);
+                                                                }),
+                                                                /*  CachedNetworkImage(
                                                                   imageUrl: user
                                                                       .imageUrl!,
                                                                   fadeInDuration:
@@ -518,7 +497,7 @@ class CurrentStatusPostWidgets {
                                                                           url,
                                                                           error) =>
                                                                       const SizedBox(),
-                                                                ),
+                                                                ), */
                                                               ),
                                                             ),
                                                           ],
@@ -1061,7 +1040,8 @@ class CurrentStatusPostWidgets {
                         children: post.after.tags
                             .map(
                               (tag) => Container(
-                                margin: const EdgeInsets.only(right: 4,bottom: 4),
+                                margin:
+                                    const EdgeInsets.only(right: 4, bottom: 4),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
                                   vertical: 4,

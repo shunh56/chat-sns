@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final blockDatasourceProvider = Provider<BlockDatasource>(
   (ref) => BlockDatasource(
-    ref,
     ref.watch(authProvider),
     ref.watch(firestoreProvider),
   ),
@@ -15,11 +14,10 @@ final blockDatasourceProvider = Provider<BlockDatasource>(
 
 class BlockDatasource {
   BlockDatasource(
-    this._ref,
     this._auth,
     this._firestore,
   );
-  final Ref _ref;
+
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
 

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/value/user/gender.dart';
+import 'package:app/presentation/pages/onboarding_page/onboarding_page.dart';
 import 'package:app/presentation/providers/notifier/image/image_uploader_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
@@ -53,7 +54,9 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
   onOpen() async {
     final user = state.asData!.value;
     final token = await FirebaseMessaging.instance.getToken();
-    final voipToken = await FlutterCallkitIncoming.getDevicePushTokenVoIP();
+    final voipToken = Platform.isIOS
+        ? await FlutterCallkitIncoming.getDevicePushTokenVoIP()
+        : null;
     //final token = await FirebaseMessaging.instance.getAPNSToken();
     final updatedUser = user.copyWith(
       isOnline: true,
@@ -77,10 +80,11 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
   }
 
   createUser(
+    String username,
     String name,
     File? iconImage,
-    Gender gender,
   ) async {
+    ref.read(creatingProcessProvider.notifier).state = true;
     final String userId = ref.watch(authProvider).currentUser!.uid;
     //Isolate
     //get compressedImage
@@ -91,10 +95,14 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
             .read(imageUploaderNotifierProvider)
             .uploadIconImage(iconImage)
         : null;
-    final account = usecase.createUser(
-        userId: userId, name: name, imageUrl: imageUrl, gender: gender);
-    final userAccount = account;
-    state = AsyncValue.data(userAccount);
+    final user = UserAccount.create(
+      userId: userId,
+      username: username,
+      name: name,
+      imageUrl: imageUrl,
+    );
+    usecase.createUser(user);
+    state = AsyncValue.data(user);
   }
 
   changeColor(CanvasTheme canvasTheme) {

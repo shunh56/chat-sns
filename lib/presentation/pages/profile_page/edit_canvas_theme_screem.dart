@@ -46,7 +46,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          me.username,
+                          me.name,
                           style: TextStyle(
                             fontSize: 24,
                             color: canvasTheme.profileTextColor,

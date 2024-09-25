@@ -31,7 +31,7 @@ class CurrentStatusPostScreen extends ConsumerWidget {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          "${user.username}のステータス",
+          "${user.name}のステータス",
           style: const TextStyle(
             fontSize: 16,
           ),
@@ -179,7 +179,7 @@ class CurrentStatusPostScreen extends ConsumerWidget {
                       fontSize: 24,
                     ),
                   ),
-                  Text("${user.username}がステータスを更新しました。"),
+                  Text("${user.name}がステータスを更新しました。"),
                 ],
               ),
             ],

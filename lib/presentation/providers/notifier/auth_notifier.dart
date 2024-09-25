@@ -42,7 +42,7 @@ class AuthNotifier {
       }
     } catch (e) {
       DebugPrint("auth error : $e");
-      showMessage("予期せぬエラーが発生しました。");
+      showErrorSnackbar(error: e);
       return "unknown_error";
     }
   }

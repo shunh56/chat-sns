@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:ui' as ui;
 
 class Images {
   // static const goodButton = 'assets/images/good_button.png';
@@ -28,10 +27,11 @@ class ThemeColor {
   static const headline = Color(0xFF413E3B);
   static const highlight = Color(0xFF916B51); */
 
-  static const background = Color(0xFF121212);
-  static const accent = Color(0xFF202020);
+  static const background = Color(0xFF080808);
+  static const accent = Color(0xFF0F0F0F);
+  static const stroke = Color(0xFF202020);
   static const white = Color(0xFFFFFFFF);
-  static const beige = Color(0xFF808080);
+  static const beige = Color(0xFFC0C0C0);
   static const icon = Color(0xFFcacaca);
   static const button = Color(0xFFD0D0D0);
 
@@ -40,24 +40,6 @@ class ThemeColor {
 
   static const text = Color(0xFFDDDDDD);
   static const subText = Color(0xFF808080);
-}
-
-class ThemeTextSize {
-  static const displayLarge = 57.0;
-  static const displayMedium = 45.0;
-  static const displaySmall = 36.0;
-  static const headlineLarge = 32.0;
-  static const headlineMedium = 28.0;
-  static const headlineSmall = 24.0;
-  static const titleLarge = 22.0;
-  static const titleMedium = 18.0;
-  static const titleSmall = 14.0;
-  static const bodyLarge = 16.0;
-  static const bodyMedium = 14.0;
-  static const bodySmall = 12.0;
-  static const labelLarge = 14.0;
-  static const labelMedium = 12.0;
-  static const labelSmall = 11.0;
 }
 
 final themeSizeProvider =
@@ -85,7 +67,7 @@ class ThemeSize {
   double get screenWidth => size.width;
   double get screenHeight => size.height;
 
-  double get appbarHeight => kToolbarHeight;
+  double get appbarHeight => kToolbarHeight - 12;
 
   //appbar, titles, regularpadding
   double get horizontalPadding => size.width * 0.04;
@@ -99,6 +81,7 @@ class ThemeSize {
   double get verticalPaddingLarge => size.width * 0.07;
   double get horizontalPaddingMedium => size.width * 0.04;
   double get verticalPaddingMedium => size.width * 0.035;
+  double get verticalPaddingSmall => size.width * 0.025;
   double get horizontalTextSpaceMedium => 12;
   double get horizontalTextSpaceSmall => 8;
   double get horizontalTextSpaceTiny => 4;

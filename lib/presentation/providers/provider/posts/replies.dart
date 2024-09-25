@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/domain/entity/reply.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/usecase/posts/post_usecase.dart';
@@ -23,10 +25,17 @@ class PostRepliesNotifier extends StateNotifier<AsyncValue<List<Reply>>> {
   final PostUsecase _usecase;
   final String postId;
 
+  StreamSubscription<List<Reply>>? _subscription;
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
   init() async {
     final stream = _usecase.streamPostReplies(postId);
 
-    stream.listen((event) async {
+    _subscription = stream.listen((event) async {
       await _ref
           .read(allUsersNotifierProvider.notifier)
           .getUserAccounts(event.map((reply) => reply.userId).toList());

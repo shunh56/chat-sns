@@ -1,4 +1,3 @@
-import 'package:app/datasource/direct_message_datasource.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,19 +9,16 @@ final friendsDatasourceProvider = Provider(
   (ref) => FriendsDatasource(
     ref.watch(authProvider),
     ref.watch(firestoreProvider),
-    ref.watch(dmDatasourceProvider),
   ),
 );
 
 class FriendsDatasource {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  final DirectMessageDatasource _messageDatasource;
 
   FriendsDatasource(
     this._auth,
     this._firestore,
-    this._messageDatasource,
   );
   final collectionName = "friends";
   final requestsCollection = "friendRequests";

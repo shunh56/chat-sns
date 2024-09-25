@@ -34,7 +34,7 @@ class PostScreen extends ConsumerWidget {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          "${user.username}の投稿",
+          "${user.name}の投稿",
           style: const TextStyle(
             fontSize: 16,
           ),
@@ -170,7 +170,7 @@ class PostScreen extends ConsumerWidget {
                 },
                 child: UserIcon.postIcon(user),
               ),
-              const Gap(12),
+              const Gap(8),
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +183,7 @@ class PostScreen extends ConsumerWidget {
                           Row(
                             children: [
                               Text(
-                                user.username,
+                                user.name,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   color: ThemeColor.text,

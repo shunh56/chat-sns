@@ -39,6 +39,7 @@ final pageIndexProvider = StateProvider.autoDispose((ref) => 0);
 class SubsctiptionBottomSheet {
   final BuildContext context;
   SubsctiptionBottomSheet(this.context);
+  Timer? timer;
 
   openBottomSheet() {
     showModalBottomSheet(
@@ -50,11 +51,10 @@ class SubsctiptionBottomSheet {
       builder: (context) {
         return Consumer(
           builder: (context, ref, child) {
-            final themeSize = ref.watch(themeSizeProvider(context));
+            // final themeSize = ref.watch(themeSizeProvider(context));
             final pageController = ref.watch(pageControllerProvider);
             final pageIndex = ref.watch(pageIndexProvider);
             final pageIndexNotifier = ref.watch(pageIndexProvider.notifier);
-            Timer? timer;
 
             change() async {
               timer = Timer.periodic(const Duration(seconds: 4), (Timer timer) {
@@ -252,8 +252,10 @@ class SubsctiptionBottomSheet {
                               const Gap(8),
                               Expanded(
                                 child: Container(
-                                  margin: const EdgeInsets.symmetric(vertical: 4),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                   decoration: BoxDecoration(
                                     color: ThemeColor.accent,
                                     borderRadius: BorderRadius.circular(8),
@@ -284,8 +286,10 @@ class SubsctiptionBottomSheet {
                               ),
                               Expanded(
                                 child: Container(
-                                  margin: const EdgeInsets.symmetric(vertical: 4),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                   decoration: BoxDecoration(
                                     color: ThemeColor.accent,
                                     borderRadius: BorderRadius.circular(8),
@@ -316,8 +320,10 @@ class SubsctiptionBottomSheet {
                               ),
                               Expanded(
                                 child: Container(
-                                  margin: const EdgeInsets.symmetric(vertical: 4),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                   decoration: BoxDecoration(
                                     color: ThemeColor.accent,
                                     borderRadius: BorderRadius.circular(8),
@@ -355,10 +361,8 @@ class SubsctiptionBottomSheet {
                               ),
                             ],
                           ),
-                          Container(
-                            child: const Center(
-                              child: Text("2"),
-                            ),
+                          const Center(
+                            child: Text("2"),
                           ),
                         ],
                       ),

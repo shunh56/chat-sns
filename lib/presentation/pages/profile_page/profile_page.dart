@@ -13,10 +13,7 @@ import 'package:app/presentation/pages/profile_page/edit_current_status_screen.d
 import 'package:app/presentation/pages/profile_page/edit_top_friends.dart';
 import 'package:app/presentation/pages/profile_page/invite_code_screen.dart';
 import 'package:app/presentation/pages/profile_page/qr_code_screen.dart';
-import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -90,7 +87,7 @@ class ProfileScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              me.username,
+                              me.name,
                               style: TextStyle(
                                 color: me.canvasTheme.profileTextColor,
                                 fontSize: 24,
@@ -258,24 +255,33 @@ class ProfileScreen extends ConsumerWidget {
                         child: SizedBox(
                           height: imageHeight,
                           width: imageHeight,
-                          child: CachedNetworkImage(
-                            imageUrl: me.imageUrl!,
-                            fadeInDuration: const Duration(milliseconds: 120),
-                            imageBuilder: (context, imageProvider) => Container(
-                              height: imageHeight,
-                              width: imageHeight,
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                image: DecorationImage(
-                                  image: imageProvider,
-                                  fit: BoxFit.cover,
+                          child: me.imageUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: me.imageUrl!,
+                                  fadeInDuration:
+                                      const Duration(milliseconds: 120),
+                                  imageBuilder: (context, imageProvider) =>
+                                      Container(
+                                    height: imageHeight,
+                                    width: imageHeight,
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  placeholder: (context, url) =>
+                                      const SizedBox(),
+                                  errorWidget: (context, url, error) =>
+                                      const SizedBox(),
+                                )
+                              : Icon(
+                                  Icons.person_outline,
+                                  size: imageHeight,
+                                  color: ThemeColor.stroke,
                                 ),
-                              ),
-                            ),
-                            placeholder: (context, url) => const SizedBox(),
-                            errorWidget: (context, url, error) =>
-                                const SizedBox(),
-                          ),
                         ),
                       ),
                     ),
@@ -778,6 +784,12 @@ class ProfileScreen extends ConsumerWidget {
         .values
         .where((user) => me.topFriends.contains(user.userId))
         .toList();
+    final imageWidth = (themeSize.screenWidth -
+                2 * themeSize.horizontalPadding -
+                canvasTheme.boxWidth * 2 -
+                32) /
+            5 -
+        8;
     return Column(
       children: [
         box(
@@ -830,16 +842,8 @@ class ProfileScreen extends ConsumerWidget {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
                                     child: SizedBox(
-                                      height: (themeSize.screenWidth -
-                                              2 * themeSize.horizontalPadding -
-                                              24 -
-                                              6 * 8) /
-                                          5,
-                                      width: (themeSize.screenWidth -
-                                              2 * themeSize.horizontalPadding -
-                                              24 -
-                                              6 * 8) /
-                                          5,
+                                      height: imageWidth,
+                                      width: imageWidth,
                                       child: CachedNetworkImage(
                                         imageUrl: user.imageUrl!,
                                         fadeInDuration:
@@ -847,20 +851,8 @@ class ProfileScreen extends ConsumerWidget {
                                         imageBuilder:
                                             (context, imageProvider) =>
                                                 Container(
-                                          height: (themeSize.screenWidth -
-                                                  2 *
-                                                      themeSize
-                                                          .horizontalPadding -
-                                                  24 -
-                                                  6 * 8) /
-                                              5,
-                                          width: (themeSize.screenWidth -
-                                                  2 *
-                                                      themeSize
-                                                          .horizontalPadding -
-                                                  24 -
-                                                  6 * 8) /
-                                              5,
+                                          height: imageWidth,
+                                          width: imageWidth,
                                           decoration: BoxDecoration(
                                             color: Colors.transparent,
                                             image: DecorationImage(
@@ -878,7 +870,7 @@ class ProfileScreen extends ConsumerWidget {
                                   ),
                                   const Gap(4),
                                   Text(
-                                    user.username,
+                                    user.name,
                                     overflow: TextOverflow.clip,
                                     style: TextStyle(
                                       fontSize: 12,
@@ -907,8 +899,7 @@ class ProfileScreen extends ConsumerWidget {
 
   Widget _buildFriends(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount me) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final userId = ref.watch(authProvider).currentUser!.uid;
+    //final themeSize = ref.watch(themeSizeProvider(context));
 
     const displayCount = 5;
     const imageRadius = 24.0;
@@ -1017,8 +1008,8 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                error: (e, s) => SizedBox(),
-                loading: () => SizedBox(),
+                error: (e, s) => const SizedBox(),
+                loading: () => const SizedBox(),
               ),
             ],
           ),
@@ -1038,7 +1029,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildWishList(BuildContext context, WidgetRef ref,
+  /* Widget _buildWishList(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount me) {
     return Column(
       children: [
@@ -1231,7 +1222,7 @@ class ProfileScreen extends ConsumerWidget {
       isEditable: false,
     );
   }
-
+ */
   Widget box(CanvasTheme canvasTheme, Widget child, Function onPressed,
       {bool isEditable = true}) {
     return Stack(
@@ -1282,6 +1273,7 @@ class ProfileScreen extends ConsumerWidget {
                   width: 18,
                   child: SvgPicture.asset(
                     "assets/images/icons/edit.svg",
+                    // ignore: deprecated_member_use
                     color: canvasTheme.boxTextColor,
                   ),
                 ),

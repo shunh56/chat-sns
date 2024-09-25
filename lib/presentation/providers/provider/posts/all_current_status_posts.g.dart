@@ -7,7 +7,7 @@ part of 'all_current_status_posts.dart';
 // **************************************************************************
 
 String _$allCurrentStatusPostsNotifierHash() =>
-    r'ad8bbe27d0a946e458a9063a5489a79f2a265280';
+    r'f25cd735479ddd88859942acf5b30597ed8bbc2f';
 
 /// See also [AllCurrentStatusPostsNotifier].
 @ProviderFor(AllCurrentStatusPostsNotifier)

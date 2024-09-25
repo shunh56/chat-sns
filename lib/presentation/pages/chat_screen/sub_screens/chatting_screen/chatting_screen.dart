@@ -105,7 +105,7 @@ class ChattingScreen extends ConsumerWidget {
                           },
                           child: CachedImage.userIcon(
                             user.imageUrl,
-                            user.username,
+                            user.name,
                             18,
                           ),
                         ),
@@ -131,7 +131,7 @@ class ChattingScreen extends ConsumerWidget {
                                 Row(
                                   children: [
                                     Text(
-                                      user.username,
+                                      user.name,
                                       style: const TextStyle(
                                         color: ThemeColor.white,
                                         fontSize: 16,
@@ -139,8 +139,8 @@ class ChattingScreen extends ConsumerWidget {
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    Gap(4),
-                                    Icon(
+                                    const Gap(4),
+                                    const Icon(
                                       Icons.arrow_forward_ios_rounded,
                                       size: 12,
                                       color: ThemeColor.white,
@@ -224,12 +224,12 @@ class ChattingScreen extends ConsumerWidget {
           itemBuilder: (context, index) {
             if (isShort && index == data.length) {
               List<String> messages = [
-                "お待たせしました！${user.username}とのチャットの舞台が開幕です。さぁ、メッセージの交換を始めましょう！",
-                "おっす！ここからが${user.username}とのチャットのスタート地点。面白い会話をガンガン繰り広げよう！",
-                "${user.username}とのチャットの魔法が始まるよ！この先にはどんな会話が待っているのか、楽しみだね。",
-                "${user.username}とのチャットの時間がやってきました。さあ、楽しいおしゃべりを始めましょう！",
+                "お待たせしました！${user.name}とのチャットの舞台が開幕です。さぁ、メッセージの交換を始めましょう！",
+                "おっす！ここからが${user.name}とのチャットのスタート地点。面白い会話をガンガン繰り広げよう！",
+                "${user.name}とのチャットの魔法が始まるよ！この先にはどんな会話が待っているのか、楽しみだね。",
+                "${user.name}とのチャットの時間がやってきました。さあ、楽しいおしゃべりを始めましょう！",
                 "新しい物語の始まりだ！ここからチャットの冒険がスタートします。さぁ、話を続けよう！",
-                "${user.username}とのチャットの世界へようこそ！ここからが本格的な会話の始まりだ。楽しんでね！"
+                "${user.name}とのチャットの世界へようこそ！ここからが本格的な会話の始まりだ。楽しんでね！"
               ];
               return Container(
                 margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
@@ -244,11 +244,14 @@ class ChattingScreen extends ConsumerWidget {
                             .goToProfile(user);
                       },
                       child: CachedImage.userIcon(
-                          user.imageUrl, user.username, 48),
+                        user.imageUrl,
+                        user.name,
+                        48,
+                      ),
                     ),
                     const Gap(8),
                     Text(
-                      user.username,
+                      user.name,
                       style: const TextStyle(
                         color: ThemeColor.text,
                         fontSize: 24,

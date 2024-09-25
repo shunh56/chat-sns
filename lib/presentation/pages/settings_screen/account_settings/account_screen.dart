@@ -24,11 +24,13 @@ class AccountScreen extends ConsumerWidget {
     final accountInfo = ascyncValue.when(
       data: (me) {
         final username = me.username;
+        final name = me.name;
         final createdAt = me.createdAt.toDateStr;
         return _buildContainer(
           "アカウント情報",
           [
-            _buildTopTile("ユーザー名", username),
+            _buildTopTile("ユーザー名", "@$username"),
+            _buildTile("ニックネーム", name),
             _buildBottomTile("メンバーになった日", createdAt),
           ],
         );
@@ -81,11 +83,11 @@ class AccountScreen extends ConsumerWidget {
           child: InkWell(
             onTap: () {
               HapticFeedback.lightImpact();
-              try {
+              /* try {
                 auth.currentUser!.updateEmail("");
               } catch (e) {
                 showMessage("error : $e");
-              }
+              } */
             },
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(8),
@@ -116,11 +118,11 @@ class AccountScreen extends ConsumerWidget {
           child: InkWell(
             onTap: () {
               HapticFeedback.lightImpact();
-              try {
+              /*  try {
                 auth.currentUser!.updatePassword("");
               } catch (e) {
                 showMessage("error : $e");
-              }
+              } */
             },
             borderRadius: const BorderRadius.only(
               bottomLeft: Radius.circular(8),
@@ -186,7 +188,9 @@ class AccountScreen extends ConsumerWidget {
                 child: InkWell(
                   onTap: () async {
                     HapticFeedback.lightImpact();
-                    ref.read(myAccountNotifierProvider.notifier).onClosed();
+                    await ref
+                        .read(myAccountNotifierProvider.notifier)
+                        .onClosed();
                     Navigator.popUntil(context, (route) => route.isFirst);
                     await Future.delayed(const Duration(milliseconds: 30));
                     ref.watch(authProvider).signOut();

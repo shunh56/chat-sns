@@ -1,9 +1,11 @@
 // Flutter imports:
 
 // Package imports:
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/posts/timeline_post.dart';
+import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
@@ -16,6 +18,7 @@ final friendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
     FriendsPostsNotifier, AsyncValue<List<PostBase>>>((ref) {
   return FriendsPostsNotifier(
     ref,
+    ref.watch(friendIdListNotifierProvider),
     ref.watch(postUsecaseProvider),
     ref.watch(currentStatusPostUsecaseProvider),
   )..initialize();
@@ -25,24 +28,25 @@ final friendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
 class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   FriendsPostsNotifier(
     this.ref,
+    this.asyncValue,
     this.postUsecase,
     this.currentStatusPostUsecase,
   ) : super(const AsyncValue.loading());
 
   final Ref ref;
+  final AsyncValue<List<FriendInfo>> asyncValue;
   final PostUsecase postUsecase;
   final CurrentStatusPostUsecase currentStatusPostUsecase;
-  bool initialized = false;
 
   Future<void> initialize() async {
     List<PostBase> posts = [];
-    while (!initialized) {
-      final friendIds = ref.read(friendIdListNotifierProvider);
-      if (friendIds.hasValue) {
+    asyncValue.maybeWhen(
+      data: (infos) async {
+        DebugPrint("fetching friends posts");
         List<Future<List<PostBase>>> futures = [];
         futures.add(getMyPosts());
         futures.add(getMyCurrentStatusPosts());
-        for (String userId in friendIds.asData!.value.map((item)=> item.userId)) {
+        for (String userId in infos.map((item) => item.userId)) {
           futures.add(postUsecase.getPostFromUserId(userId));
           futures.add(currentStatusPostUsecase.getUsersPosts(userId));
         }
@@ -64,11 +68,9 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
         if (mounted) {
           state = AsyncValue.data(posts);
         }
-        initialized = true;
-      } else {
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-    }
+      },
+      orElse: () {},
+    );
   }
 
   Future<void> refresh() async {
@@ -78,7 +80,7 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
     List<Future<List<PostBase>>> futures = [];
     futures.add(getMyPosts());
     futures.add(getMyCurrentStatusPosts());
-    for (String userId in friendIds.map((item)=> item.userId)) {
+    for (String userId in friendIds.map((item) => item.userId)) {
       futures.add(postUsecase.getPostFromUserId(userId));
       futures.add(currentStatusPostUsecase.getUsersPosts(userId));
     }
@@ -165,6 +167,7 @@ final friendFriendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
     FriendFriendsPostsNotifier, AsyncValue<List<Post>>>((ref) {
   return FriendFriendsPostsNotifier(
     ref,
+    ref.watch(friendsFriendListNotifierProvider),
     ref.watch(postUsecaseProvider),
   )..initialize();
 });
@@ -172,20 +175,20 @@ final friendFriendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
 class FriendFriendsPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
   FriendFriendsPostsNotifier(
     this.ref,
+    this.asyncValue,
     this.usecase,
   ) : super(const AsyncValue.loading());
 
   final Ref ref;
+  final AsyncValue<List<UserAccount>> asyncValue;
   final PostUsecase usecase;
-  bool initialized = false;
 
   Future<void> initialize() async {
     List<Post> posts = [];
-    while (!initialized) {
-      final users = ref.watch(friendsFriendListNotifierProvider);
-      if (users.hasValue) {
+    asyncValue.maybeWhen(
+      data: (users) async {
         List<Future<List<Post>>> futures = [];
-        for (String userId in users.asData!.value.map((user) => user.userId)) {
+        for (String userId in users.map((user) => user.userId)) {
           futures.add(usecase.getPostFromUserId(userId));
         }
         await Future.wait(futures);
@@ -197,11 +200,9 @@ class FriendFriendsPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
         if (mounted) {
           state = AsyncValue.data(posts);
         }
-        initialized = true;
-      } else {
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-    }
+      },
+      orElse: () {},
+    );
   }
 
   Future<void> refresh() async {

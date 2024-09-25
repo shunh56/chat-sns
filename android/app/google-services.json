@@ -7,25 +7,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:889410445548:android:cdfe1835774e7c9c0185c9",
-        "android_client_info": {
-          "package_name": "com.chatsns.prod"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCZA_7jMPI5b9MHQM7-cdywMhiCnnVLMvk"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:889410445548:android:bd75359cfff78bf00185c9",
         "android_client_info": {
           "package_name": "com.shunh.exampleApp"

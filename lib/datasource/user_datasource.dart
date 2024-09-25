@@ -62,28 +62,8 @@ class UserDatasource {
     _firestore.collection("users").doc(json["userId"]).set(json);
   }
 
-  createUser({
-    required String name,
-    String? imageUrl,
-    required String gender,
-  }) {
-    String userId = _auth.currentUser!.uid;
-    Timestamp now = Timestamp.now();
-    _firestore.collection("users").doc(userId).set({
-      "userId": userId,
-      "createdAt": now,
-      "name": name,
-      "imageUrl": imageUrl,
-      "comment": null,
-      "fcmToken": null,
-      "isOnline": false,
-      "lastOpenedAt": now,
-      "friendCount": 0,
-      "privateMode": false,
-      "gender": gender,
-      "accountStatus": "active",
-      "deviceInfo": null,
-    });
+  createUser(Map<String, dynamic> json) {
+    return _firestore.collection("users").doc(_auth.currentUser!.uid).set(json);
   }
 
   updateUser(Map<String, dynamic> json) {

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/pov.dart';
 import 'package:app/presentation/phase_01/pov_screen/buttons.dart';
 import 'package:app/presentation/phase_01/pov_screen/card.dart';
@@ -159,6 +160,8 @@ class _SwipePageState extends ConsumerState<SwipePage> {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
-    } catch (e) {}
+    } catch (e) {
+      DebugPrint("error : $e");
+    }
   }
 }

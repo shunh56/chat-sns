@@ -7,17 +7,15 @@ import 'package:uuid/uuid.dart';
 
 final blogDatasourceProvider = Provider(
   (ref) => BlogDatasource(
-    ref,
     ref.watch(authProvider),
     ref.watch(firestoreProvider),
   ),
 );
 
 class BlogDatasource {
-  final Ref _ref;
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  BlogDatasource(this._ref, this._auth, this._firestore);
+  BlogDatasource(this._auth, this._firestore);
   final collectionName = "post_blogs";
 
   Future<QuerySnapshot<Map<String, dynamic>>> getPosts() async {
@@ -46,10 +44,10 @@ class BlogDatasource {
         .get();
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> _getPostById(
+  /* Future<DocumentSnapshot<Map<String, dynamic>>> _getPostById(
       String postId) async {
     return await _firestore.collection(collectionName).doc(postId).get();
-  }
+  } */
 
   uploadPost(String title, List<dynamic> contents) async {
     final String id = const Uuid().v4();

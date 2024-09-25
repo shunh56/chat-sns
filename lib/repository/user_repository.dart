@@ -31,16 +31,8 @@ class UserRepository {
     }
   }
 
-  createUser({
-    required String name,
-    String? imageUrl,
-    required Gender gender,
-  }) {
-    _datasource.createUser(
-      name: name,
-      imageUrl: imageUrl,
-      gender: GenderConverter.convertToString(gender),
-    );
+  createUser(Map<String, dynamic> json) {
+    _datasource.createUser(json);
   }
 
   updateUser(Map<String, dynamic> json) {

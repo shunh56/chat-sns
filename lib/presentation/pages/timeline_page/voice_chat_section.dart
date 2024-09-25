@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:app/core/utils/theme.dart';
-import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/entity/voice_chat.dart';
 import 'package:app/presentation/components/dialogs/voice_chat_dialogs.dart';
 import 'package:app/presentation/components/user_icon.dart';
@@ -10,7 +9,6 @@ import 'package:app/presentation/providers/provider/users/all_users_notifier.dar
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
 class VoiceChatSection extends ConsumerWidget {
   const VoiceChatSection({super.key});
@@ -18,7 +16,7 @@ class VoiceChatSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncValue = ref.watch(friendIdListNotifierProvider);
-    final themeSize = ref.watch(themeSizeProvider(context));
+    //final themeSize = ref.watch(themeSizeProvider(context));
     final listView = asyncValue.when(
       data: (friendIds) {
         final vcAsyncValue = ref.watch(voiceChatListNotifierProvider);
@@ -138,6 +136,10 @@ class VoiceChatSection extends ConsumerWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(100),
                 color: ThemeColor.accent,
+                border: Border.all(
+                  color: ThemeColor.stroke,
+                  width: 0.4,
+                ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -180,25 +182,12 @@ class VoiceChatSection extends ConsumerWidget {
               ),
             ),
           );
-          switch (vc.joinedUsers.length) {
-            case 0:
-              return const SizedBox();
-            case 1:
-              return _buildOneUserCard(context, ref, vc, users);
-            case 2:
-              return _buildTwoUserCard(context, ref, vc, users);
-            case 3:
-              return _buildFouruserCard(context, ref, vc, users);
-            case 4:
-            default:
-              return _buildFouruserCard(context, ref, vc, users);
-          }
         }
       },
     );
   }
 
-  Widget _buildOneUserCard(BuildContext context, WidgetRef ref, VoiceChat vc,
+/*  Widget _buildOneUserCard(BuildContext context, WidgetRef ref, VoiceChat vc,
       List<UserAccount> users) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -275,33 +264,5 @@ class VoiceChatSection extends ConsumerWidget {
       ),
     );
   }
-
-  _joinButton(VoiceChat vc) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(100),
-        color: Colors.pink,
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.phone_outlined,
-            color: Colors.white,
-            size: 18,
-          ),
-          Gap(4),
-          Text(
-            "通話中",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          )
-        ],
-      ),
-    );
-  }
+ */
 }

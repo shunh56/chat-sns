@@ -62,7 +62,7 @@ class FriendsScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  user.username,
+                                  user.name,
                                   style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,

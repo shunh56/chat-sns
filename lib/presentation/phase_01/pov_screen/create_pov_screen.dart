@@ -90,6 +90,7 @@ class CreatePovScreen extends ConsumerWidget {
                         HapticFeedback.lightImpact();
                         textNotifier.state = "test : ${DateTime.now()}";
                         await ref.read(povUsecaseProvider).uploadPov(state);
+                       
                         Navigator.pop(context);
                       },
                       child: CircleAvatar(

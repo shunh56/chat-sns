@@ -137,7 +137,7 @@ class EditNowWithScreen extends HookConsumerWidget {
                               ),
                               const Gap(4),
                               Text(
-                                user.username,
+                                user.name,
                                 overflow: TextOverflow.clip,
                                 style: const TextStyle(
                                   fontSize: 12,
@@ -231,7 +231,7 @@ class EditNowWithScreen extends HookConsumerWidget {
                               ),
                               const Gap(4),
                               Text(
-                                user.username,
+                                user.name,
                                 overflow: TextOverflow.clip,
                                 style: const TextStyle(
                                   fontSize: 12,

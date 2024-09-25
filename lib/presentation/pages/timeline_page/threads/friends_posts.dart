@@ -18,7 +18,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 
 //keepAlive => stateful widget
-
 class FriendsPostsThread extends ConsumerStatefulWidget {
   const FriendsPostsThread({super.key});
 

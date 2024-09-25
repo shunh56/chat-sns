@@ -4,7 +4,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
-import 'package:app/presentation/pages/timeline_page/threads/all_blogs.dart';
+import 'package:app/presentation/pages/timeline_page/_not_used/all_blogs.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -67,7 +67,7 @@ class SearchPage extends ConsumerWidget {
               ),
             );
           },
-          child: CachedImage.userIcon(user.imageUrl, user.username, 18),
+          child: CachedImage.userIcon(user.imageUrl, user.name, 18),
         );
       },
       error: (e, s) => const SizedBox(),

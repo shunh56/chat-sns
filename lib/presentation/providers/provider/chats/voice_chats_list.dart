@@ -7,10 +7,11 @@ final vcStreamProvider = StreamProvider.family(
   (ref, String id) => ref.watch(voiceChatUsecaseProvider).streamVoiceChat(id),
 );
 
-final voiceChatListNotifierProvider =
-    StateNotifierProvider<VoiceChatListNotifier, AsyncValue<List<VoiceChat>>>(
+final voiceChatListNotifierProvider = StateNotifierProvider.autoDispose<
+    VoiceChatListNotifier, AsyncValue<List<VoiceChat>>>(
   (ref) => VoiceChatListNotifier(
     ref,
+    ref.watch(friendIdListNotifierProvider),
     ref.watch(voiceChatUsecaseProvider),
   )..init(),
 );
@@ -18,19 +19,25 @@ final voiceChatListNotifierProvider =
 class VoiceChatListNotifier extends StateNotifier<AsyncValue<List<VoiceChat>>> {
   VoiceChatListNotifier(
     this._ref,
+    this.asyncValue,
     this._usecase,
-  ) : super(const AsyncValue.loading());
+  ) : super(
+          const AsyncValue.loading(),
+        );
 
   final Ref _ref;
+  final AsyncValue<List<FriendInfo>> asyncValue;
   final VoiceChatUsecase _usecase;
 
   init() async {
-    final asyncValue = _ref.watch(friendIdListNotifierProvider);
     asyncValue.maybeWhen(
       data: (friendIds) async {
         final voiceChats = await _usecase.getFriendsVoiceChats(
             friendIds.map((item) => item.userId).toList());
-        state = AsyncValue.data(voiceChats);
+        if (mounted) {
+          state = AsyncValue.data(voiceChats);
+        }
+
         return;
       },
       orElse: () => null,

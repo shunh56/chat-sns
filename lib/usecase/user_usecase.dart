@@ -1,5 +1,4 @@
 import 'package:app/core/extenstions/string_extenstion.dart';
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/value/user/gender.dart';
 import 'package:app/repository/user_repository.dart';
@@ -34,27 +33,13 @@ class UserUsecase {
     return _repository.getUserByUserId(userId);
   }
 
-  UserAccount createUser({
-    required String userId,
-    required String name,
-    String? imageUrl,
-    required Gender gender,
-  }) {
-    _repository.createUser(
-      name: name,
-      imageUrl: imageUrl,
-      gender: gender,
-    );
-    return UserAccount.create(
-      userId: userId,
-      username: name,
-      imageUrl: imageUrl,
-    );
+  createUser(
+    UserAccount user,
+  ) {
+    _repository.createUser(user.toJson());
   }
 
   updateUser(UserAccount user) {
-    DebugPrint("UPDATE USER ${user.aboutMe}");
-    DebugPrint("UPDATE USER ${user.wantToDoList}");
     return _repository.updateUser(user.toJson());
   }
 

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -13,9 +16,8 @@ class FriendInfo {
   FriendInfo(this.createdAt, this.userId);
 }
 
-final friendIdListNotifierProvider =
-    StateNotifierProvider<FriendIdListNotifier, AsyncValue<List<FriendInfo>>>(
-        (ref) {
+final friendIdListNotifierProvider = StateNotifierProvider.autoDispose<
+    FriendIdListNotifier, AsyncValue<List<FriendInfo>>>((ref) {
   return FriendIdListNotifier(
     ref,
     ref.watch(friendsUsecaseProvider),
@@ -27,10 +29,16 @@ class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
       : super(const AsyncValue<List<FriendInfo>>.loading());
   final Ref _ref;
   final FriendsUsecase usecase;
+  StreamSubscription<List<FriendInfo>>? _subscription;
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
 
   void initialize() async {
     Stream<List<FriendInfo>> stream = usecase.streamFriends();
-    stream.listen((friendInfos) async {
+    _subscription = stream.listen((friendInfos) async {
       await _ref
           .read(allUsersNotifierProvider.notifier)
           .getUserAccounts(friendInfos.map((item) => item.userId).toList());
@@ -51,8 +59,10 @@ class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
   }
 }
 
-final friendRequestIdListNotifierProvider = StateNotifierProvider<
+final friendRequestIdListNotifierProvider = StateNotifierProvider.autoDispose<
     FriendRequestIdListNotifier, AsyncValue<List<String>>>((ref) {
+  //TODO ondisposeでfirestore streamを破棄する
+  //ref.onDispose(() => cancelToken.cancel());
   return FriendRequestIdListNotifier(
     ref,
     ref.watch(friendsUsecaseProvider),
@@ -65,11 +75,12 @@ class FriendRequestIdListNotifier
       : super(const AsyncValue<List<String>>.loading());
   final Ref _ref;
   final FriendsUsecase usecase;
+  StreamSubscription<List<String>>? _subscription;
 
   void initialize() async {
     DebugPrint("initializing friendRequests");
     Stream<List<String>> stream = usecase.streamFriendRequests();
-    stream.listen((userIds) async {
+    _subscription = stream.listen((userIds) async {
       DebugPrint("request users : $userIds");
       await _ref
           .read(allUsersNotifierProvider.notifier)
@@ -79,8 +90,19 @@ class FriendRequestIdListNotifier
     });
   }
 
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
   sendFriendRequest(UserAccount user) async {
-    return usecase.sendFriendRequest(user);
+    try {
+      await usecase.sendFriendRequest(user);
+      showMessage("フレンド申請を送りました！");
+    } catch (e) {
+      showErrorSnackbar(error: e);
+    }
   }
 
   void cancelFriendRequest(String userId) async {
@@ -88,7 +110,7 @@ class FriendRequestIdListNotifier
   }
 }
 
-final friendRequestedIdListNotifierProvider = StateNotifierProvider<
+final friendRequestedIdListNotifierProvider = StateNotifierProvider.autoDispose<
     FriendRequestedIdListNotifier, AsyncValue<List<String>>>((ref) {
   return FriendRequestedIdListNotifier(
     ref,
@@ -102,11 +124,16 @@ class FriendRequestedIdListNotifier
       : super(const AsyncValue<List<String>>.loading());
   final Ref _ref;
   final FriendsUsecase usecase;
+  StreamSubscription<List<String>>? _subscription;
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
 
   void initialize() async {
-    DebugPrint("initializing friendRequesteds");
     Stream<List<String>> stream = usecase.streamFriendRequesteds();
-    stream.listen((userIds) async {
+    _subscription = stream.listen((userIds) async {
       await _ref
           .read(allUsersNotifierProvider.notifier)
           .getUserAccounts(userIds);
@@ -123,25 +150,31 @@ class FriendRequestedIdListNotifier
   }
 }
 
-final friendsFriendListNotifierProvider = StateNotifierProvider<
+final friendsFriendListNotifierProvider = StateNotifierProvider.autoDispose<
     FriendsFriendListNotifier, AsyncValue<List<UserAccount>>>((ref) {
   return FriendsFriendListNotifier(
     ref,
+    ref.watch(friendIdListNotifierProvider),
     ref.watch(friendsUsecaseProvider),
   )..initialize();
 });
 
 class FriendsFriendListNotifier
     extends StateNotifier<AsyncValue<List<UserAccount>>> {
-  FriendsFriendListNotifier(this._ref, this.usecase)
-      : super(const AsyncValue<List<UserAccount>>.loading());
+  FriendsFriendListNotifier(
+    this._ref,
+    this.asyncValue,
+    this.usecase,
+  ) : super(const AsyncValue<List<UserAccount>>.loading());
   final Ref _ref;
+  final AsyncValue<List<FriendInfo>> asyncValue;
   final FriendsUsecase usecase;
+
   bool initialized = false;
 
   void initialize() async {
     Map<String, UserAccount> userMap = {};
-    final friendIds = _ref.watch(friendIdListNotifierProvider);
+    final friendIds = asyncValue;
     friendIds.maybeWhen(
       data: (friendInfos) async {
         final friendIds = friendInfos.map((item) => item.userId).toList();

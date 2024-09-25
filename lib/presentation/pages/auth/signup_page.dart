@@ -526,7 +526,7 @@ class SignUpPage extends ConsumerWidget {
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(100),
-                          color: ThemeColor.beige,
+                          color: ThemeColor.stroke,
                         ),
                         child: TextFormField(
                           cursorColor: ThemeColor.highlight,
@@ -580,7 +580,7 @@ class SignUpPage extends ConsumerWidget {
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(100),
-                          color: ThemeColor.beige,
+                          color: ThemeColor.stroke,
                         ),
                         child: TextFormField(
                           cursorColor: ThemeColor.highlight,

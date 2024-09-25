@@ -1,5 +1,5 @@
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/pages/profile_page/edit_nowWith_screen.dart';
+import 'package:app/presentation/pages/profile_page/edit_now_with_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_tags_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';

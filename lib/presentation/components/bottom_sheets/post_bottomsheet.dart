@@ -283,13 +283,11 @@ class PostBottomModelSheet {
                                   borderRadius: BorderRadius.circular(100),
                                   color: Colors.pink,
                                 ),
-                                child: Container(
-                                  child: const Text(
-                                    "作成する",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                child: const Text(
+                                  "作成する",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
@@ -302,13 +300,11 @@ class PostBottomModelSheet {
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(100),
                                     color: ThemeColor.accent),
-                                child: Container(
-                                  child: const Text(
-                                    "作成する",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                child: const Text(
+                                  "作成する",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),

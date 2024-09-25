@@ -48,7 +48,7 @@ class SignInPage extends ConsumerWidget {
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(100),
-                          color: ThemeColor.beige,
+                          color: ThemeColor.stroke,
                         ),
                         child: TextFormField(
                           cursorColor: ThemeColor.highlight,
@@ -102,7 +102,7 @@ class SignInPage extends ConsumerWidget {
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(100),
-                          color: ThemeColor.beige,
+                          color: ThemeColor.stroke,
                         ),
                         child: TextFormField(
                           cursorColor: ThemeColor.highlight,
@@ -220,6 +220,7 @@ class SignInPage extends ConsumerWidget {
                         ref.read(errorTextProvider.notifier).state = status;
                         ref.read(loginProcessProvider.notifier).state = false;
                         if (status == "success") {
+                          // ignore: use_build_context_synchronously
                           Navigator.popUntil(context, (route) => route.isFirst);
                         }
                       },
@@ -304,7 +305,9 @@ class SignInPage extends ConsumerWidget {
                                       .state = false;
                                   if (status == "success") {
                                     Navigator.popUntil(
-                                        context, (route) => route.isFirst);
+                                        // ignore: use_build_context_synchronously
+                                        context,
+                                        (route) => route.isFirst);
                                   }
                                 },
                                 title: Text(

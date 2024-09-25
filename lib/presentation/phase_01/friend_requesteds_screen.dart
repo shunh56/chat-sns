@@ -48,7 +48,7 @@ class FriendRequestedsScreen extends ConsumerWidget {
                       children: [
                         const Gap(4),
                         Text(
-                          user.username,
+                          user.name,
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w600,

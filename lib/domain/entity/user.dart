@@ -1,4 +1,5 @@
 import 'package:app/core/utils/debug_print.dart';
+import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/value/user/account_status.dart';
 import 'package:app/domain/value/user/gender.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -117,6 +118,7 @@ class CurrentStatus {
   final String nowAt;
   final String nextAt;
   final List<String> nowWith;
+  final Timestamp updatedAt;
 
   CurrentStatus({
     required this.tags,
@@ -126,6 +128,7 @@ class CurrentStatus {
     required this.nowAt,
     required this.nextAt,
     required this.nowWith,
+    required this.updatedAt,
   });
 
   factory CurrentStatus.fromJson(Map<String, dynamic> json) {
@@ -137,6 +140,12 @@ class CurrentStatus {
       nowAt: json["nowAt"] ?? "",
       nextAt: json["nextAt"] ?? "",
       nowWith: List<String>.from(json["nowWith"] ?? []),
+      updatedAt: json["updatedAt"] ??
+          Timestamp.fromDate(
+            DateTime.now().subtract(
+              const Duration(days: 1),
+            ),
+          ),
     );
   }
 
@@ -149,6 +158,7 @@ class CurrentStatus {
       "nowAt": nowAt,
       "nextAt": nextAt,
       "nowWith": nowWith,
+      "updatedAt": updatedAt,
     };
   }
 
@@ -161,6 +171,7 @@ class CurrentStatus {
       nowAt: "",
       nextAt: "",
       nowWith: [],
+      updatedAt: Timestamp.now(),
     );
   }
 
@@ -181,7 +192,23 @@ class CurrentStatus {
       nowAt: nowAt ?? this.nowAt,
       nextAt: nextAt ?? this.nextAt,
       nowWith: nowWith ?? this.nowWith,
+      updatedAt: Timestamp.now(),
     );
+  }
+
+  bool get updatedRecently {
+    return (DateTime.now().difference(updatedAt.toDate()).inHours < 4 &&
+        bubbles.isNotEmpty);
+  }
+
+  List<String> get bubbles {
+    List<String> list = [];
+    if (doing.isNotEmpty) list.add(doing);
+    if (eating.isNotEmpty) list.add(eating);
+    if (mood.isNotEmpty) list.add(mood);
+    if (nowAt.isNotEmpty) list.add(nowAt);
+    if (nextAt.isNotEmpty) list.add(nextAt);
+    return list;
   }
 }
 
@@ -245,18 +272,18 @@ class CanvasTheme {
 
   static CanvasTheme defaultCanvasTheme() {
     return CanvasTheme(
-      bgColor: Color(Colors.white.value),
-      profileTextColor: Color(Colors.black.value),
-      profileSecondaryTextColor: Color(Colors.black45.value),
-      boxBgColor: const Color(0xFFE0E0E0),
-      boxTextColor: Colors.grey,
-      boxSecondaryTextColor: const Color(0xFF424242),
-      boxWidth: 4.0,
+      bgColor: ThemeColor.background,
+      profileTextColor: ThemeColor.text,
+      profileSecondaryTextColor: ThemeColor.subText,
+      boxBgColor: ThemeColor.accent,
+      boxTextColor: ThemeColor.subText,
+      boxSecondaryTextColor: ThemeColor.text,
+      boxWidth: 0.4,
       boxRadius: 12.0,
       iconGradientStartColor: Color(Colors.purpleAccent.value),
       iconGradientEndColor: Color(Colors.cyan.value),
       iconStrokeWidth: 2.0,
-      iconRadius: 24.0,
+      iconRadius: 12.0,
       iconHideBorder: false,
       iconHideLevel: false,
     );
@@ -415,6 +442,7 @@ class UserAccount {
   final AccountStatus accountStatus;
   final DeviceInfo? deviceInfo;
   //info
+  final String name;
   final String username;
   String? imageUrl;
   //profile info
@@ -422,7 +450,7 @@ class UserAccount {
   final String aboutMe;
   final CurrentStatus currentStatus;
   final List<String> topFriends;
-  final int friendCount;
+ 
   final List<String> wishList;
   final List<String> wantToDoList;
   final SubscriptionStatus subscriptionStatus;
@@ -442,6 +470,7 @@ class UserAccount {
     required this.accountStatus,
     required this.deviceInfo,
     //
+    required this.name,
     required this.username,
     required this.imageUrl,
     //
@@ -449,7 +478,7 @@ class UserAccount {
     required this.aboutMe,
     required this.currentStatus,
     required this.topFriends,
-    required this.friendCount,
+   
     required this.wishList,
     required this.wantToDoList,
     //
@@ -480,6 +509,7 @@ class UserAccount {
             )
           : null,
       //
+      name: json["name"] ?? "DEFAULT NAME",
       username: json["username"],
       imageUrl: json["imageUrl"],
       //profile
@@ -487,7 +517,7 @@ class UserAccount {
       aboutMe: json["profile"]["aboutMe"],
       currentStatus: CurrentStatus.fromJson(json["profile"]["currentStatus"]),
       topFriends: List<String>.from(json["profile"]["topFriends"]),
-      friendCount: json["profile"]["friendCount"],
+      
       wishList: List<String>.from(json['profile']['wishList'] ?? []),
       wantToDoList: List<String>.from(json['profile']['wantToDoList'] ?? []),
       canvasTheme: CanvasTheme.fromJson(json["canvasTheme"]),
@@ -503,34 +533,28 @@ class UserAccount {
   Map<String, dynamic> toJson() {
     DebugPrint("JSON :$topFriends $wantToDoList");
     return {
-      //"userId":userId,
-      //"createdAt":createdAt,
-      // "name": name,
-      // "imageUrl": imageUrl,
-      // "aboutMe": aboutMe,
-      // "fcmToken": fcmToken,
-      // "isOnline": isOnline,
-      // "lastOpenedAt": lastOpenedAt,
-      //"friendCount":friendCount
-      //"gender"
-      //status
-      //deviceInfo
-      "lastOpenedAt": lastOpenedAt,
-      "isOnline": isOnline,
-      //
-      "fcmToken": fcmToken,
-      "voipToken":voipToken,
-      "accountStatus": AccountStatusConverter.convertToString(accountStatus),
-      "deviceInfo": deviceInfo?.toJson(),
-      //
+      "userId": userId,
+      "createdAt": createdAt,
+      "name": name,
+      "username": username,
       "imageUrl": imageUrl,
       //
-      "profile.bio": bio.toJson(),
-      "profile.aboutMe": aboutMe,
-      "profile.currentStatus": currentStatus.toJson(),
-      "profile.topFriends": topFriends,
-      "profile.wishList": wishList,
-      "profile.wantToDoList": wantToDoList,
+      "fcmToken": fcmToken,
+      "voipToken": voipToken,
+      "isOnline": isOnline,
+      "lastOpenedAt": lastOpenedAt,
+      //status
+      //deviceInfo
+      "accountStatus": AccountStatusConverter.convertToString(accountStatus),
+      "deviceInfo": deviceInfo?.toJson(),
+      "profile": {
+        "bio": bio.toJson(),
+        "aboutMe": aboutMe,
+        "currentStatus": currentStatus.toJson(),
+        "topFriends": topFriends,
+        "wishList": wishList,
+        "wantToDoList": wantToDoList,
+      },
       //canvas
       "canvasTheme": canvasTheme.toJson(),
     };
@@ -548,12 +572,13 @@ class UserAccount {
       accountStatus: AccountStatus.normal,
       deviceInfo: null,
       //
+      name: "null",
       username: "null",
       imageUrl: null,
       bio: Bio.defaultBio(),
       aboutMe: "",
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
-      friendCount: 0,
+      
       wishList: [],
       wantToDoList: [],
       canvasTheme: CanvasTheme.defaultCanvasTheme(),
@@ -566,6 +591,7 @@ class UserAccount {
   factory UserAccount.create({
     required String userId,
     required String username,
+    required String name,
     String? imageUrl,
   }) {
     return UserAccount(
@@ -579,6 +605,7 @@ class UserAccount {
       accountStatus: AccountStatus.normal,
       deviceInfo: null,
       //
+      name: name,
       username: username,
       imageUrl: imageUrl,
       //
@@ -590,7 +617,7 @@ class UserAccount {
       ),
       aboutMe: "I am cringe, but I am free",
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
-      friendCount: 0,
+     
       wishList: [],
       wantToDoList: [],
       canvasTheme: CanvasTheme.defaultCanvasTheme(),
@@ -604,6 +631,7 @@ class UserAccount {
   }
 
   UserAccount copyWith({
+    String? name,
     String? imageUrl,
     String? fcmToken,
     String? voipToken,
@@ -631,6 +659,7 @@ class UserAccount {
       accountStatus: accountStatus,
       deviceInfo: deviceInfo ?? this.deviceInfo,
       //
+      name: name ?? this.name,
       username: username,
       imageUrl: imageUrl ?? this.imageUrl,
       //
@@ -638,7 +667,7 @@ class UserAccount {
       aboutMe: aboutMe ?? this.aboutMe,
       currentStatus: currentStatus ?? this.currentStatus,
       topFriends: topFriends ?? this.topFriends,
-      friendCount: friendCount,
+    
       wishList: wishList,
       wantToDoList: wantToDoList,
       canvasTheme: canvasTheme ?? this.canvasTheme,

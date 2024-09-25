@@ -60,6 +60,7 @@ class InboxScreen extends ConsumerWidget {
                       width: 24,
                       child: SvgPicture.asset(
                         "assets/images/icons/send.svg",
+                        
                         color: ThemeColor.button,
                       ),
                     ),
@@ -158,7 +159,7 @@ class InboxScreen extends ConsumerWidget {
                                 children: [
                                   const Gap(4),
                                   Text(
-                                    user.username,
+                                    user.name,
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600,

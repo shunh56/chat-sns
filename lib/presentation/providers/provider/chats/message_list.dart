@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/datasource/direct_message_datasource.dart';
 import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/message_overview.dart';
@@ -25,6 +27,13 @@ class MessageListNotifier extends StateNotifier<AsyncValue<List<CoreMessage>>> {
   final DirectMessageRepository _repository;
   final String userId;
 
+  StreamSubscription<List<CoreMessage>>? _subscription;
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
   init() async {
     List<CoreMessage> cache = [];
     String id = DMKeyConverter.getKey(
@@ -33,7 +42,7 @@ class MessageListNotifier extends StateNotifier<AsyncValue<List<CoreMessage>>> {
     cache = list;
     state = AsyncValue.data(cache);
     final stream = _repository.streamMessages(id);
-    stream.listen((event) {
+    _subscription = stream.listen((event) {
       if (mounted) {
         if (event.isNotEmpty) {
           if (cache.isEmpty) {

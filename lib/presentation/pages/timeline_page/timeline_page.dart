@@ -1,34 +1,23 @@
-import 'package:app/core/utils/debug_print.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/datasource/local/tags.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/subscription_bottomsheet.dart';
 import 'package:app/presentation/components/core/sticky_tabbar.dart';
-import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
-import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/threads/friend_friends_post.dart';
 import 'package:app/presentation/pages/timeline_page/threads/friends_posts.dart';
 import 'package:app/presentation/pages/timeline_page/threads/public_posts.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
-
-class Tag {
-  final String fieldName;
-  final String type; // "array" or "string"
-  Tag({required this.fieldName, required this.type});
-}
 
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -37,40 +26,11 @@ class TimelinePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    //return FloatingShakeScreen();
     final themeSize = ref.watch(themeSizeProvider(context));
-    final myId = ref.read(authProvider).currentUser!.uid;
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(myAccountNotifierProvider);
-    final List<Tag> tagsList = asyncValue.when(
-      data: (me) {
-        List<Tag> tags = [];
-        const careerTag = "univ";
-        // const schoolTag = "waseda";
-        const locationTag = "tokyo";
-        final selectedTags = selectionTags.map((tag) => tag.jp).toList();
-        tags.addAll([
-          Tag(
-            fieldName: careerTag,
-            type: "string",
-          ),
-          Tag(
-            fieldName: locationTag,
-            type: "string",
-          ),
-        ]);
-        for (var tag in selectedTags) {
-          tags.add(Tag(fieldName: tag, type: "array"));
-        }
-        return tags;
-      },
-      error: (e, s) {
-        return [];
-      },
-      loading: () {
-        return [];
-      },
-    );
-    final chatIcon = GestureDetector(
+
+    /*   final chatIcon = GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
         HapticFeedback.lightImpact();
@@ -119,7 +79,7 @@ class TimelinePage extends ConsumerWidget {
       },
       error: (e, s) => const SizedBox(),
       loading: () => const SizedBox(),
-    );
+    ); */
     final subscriptionLogo = asyncValue.when(
       data: (user) {
         final subscription = user.subscriptionStatus;
@@ -139,13 +99,14 @@ class TimelinePage extends ConsumerWidget {
               ),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              SubscriptionConverter.convertToString(subscription) ?? "アップグレード",
-              style: const TextStyle(
-                fontSize: 12,
-                letterSpacing: -0.4,
-                fontWeight: FontWeight.w600,
-                color: ThemeColor.headline,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 1),
+              child: Text(
+                SubscriptionConverter.convertToString(subscription) ??
+                    "アップグレード",
+                style: textStyle.w600(
+                  color: ThemeColor.headline,
+                ),
               ),
             ),
           ),
@@ -156,24 +117,17 @@ class TimelinePage extends ConsumerWidget {
     );
     final isHeartVisible = ref.watch(isHeartVisibleProvider);
     final dmAsyncValue = ref.watch(dmOverviewListNotifierProvider);
-    const double strokeWidth = 2.0;
-    const double padding = 4.0;
-    double imageHeight = 40;
-    double radius = imageHeight * 2 / 9;
-    final canvasTheme = CanvasTheme.defaultCanvasTheme();
+
     return Scaffold(
       key: _scaffoldKey,
       drawer: Drawer(
         width: 80,
         clipBehavior: Clip.none,
         backgroundColor: ThemeColor.background,
-        //①appbar:と同階層に配置
         child: SafeArea(
           child: ListView(
-            //②child:としてListViewを配置
             padding: EdgeInsets.zero,
             children: <Widget>[
-              //③ListViewのchidrenにはHeaderをひとつ、子要素を複数個配置。
               /*   Center(
                 child: Padding(
                   padding: const EdgeInsets.all(8),
@@ -235,7 +189,7 @@ class TimelinePage extends ConsumerWidget {
               dmAsyncValue.when(
                 data: (list) {
                   if (list.isEmpty) {
-                    return const Center(child: Text("no chats"));
+                    return const SizedBox();
                   }
                   return ListView.builder(
                     shrinkWrap: true,
@@ -312,9 +266,8 @@ class TimelinePage extends ConsumerWidget {
         child: Stack(
           children: [
             DefaultTabController(
-              length: 3, //tagsList.length + 1,
+              length: 3,
               child: Scaffold(
-                //TODO -> SliverAppBarに変更する
                 body: NestedScrollView(
                   controller: ref.watch(timelineScrollController),
                   headerSliverBuilder:
@@ -325,23 +278,18 @@ class TimelinePage extends ConsumerWidget {
                           [
                             Container(
                               height: kToolbarHeight,
-                              padding: EdgeInsets.only(
-                                left: themeSize.horizontalPadding,
-                                right: themeSize.horizontalPadding,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: themeSize.horizontalPadding,
                               ),
                               child: Row(
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      DebugPrint("APPBAR");
+                                      _scaffoldKey.currentState?.openDrawer();
                                     },
-                                    child: const Text(
+                                    child: Text(
                                       "APPNAME",
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w600,
-                                        color: ThemeColor.headline,
-                                      ),
+                                      style: textStyle.appbarText(),
                                     ),
                                   ),
                                   const Expanded(child: SizedBox()),
@@ -368,7 +316,6 @@ class TimelinePage extends ConsumerWidget {
                                 ],
                               ),
                             ),
-                            Gap(themeSize.verticalSpaceSmall),
                           ],
                         ),
                       ),
@@ -387,8 +334,12 @@ class TimelinePage extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(100),
                             ),
                             tabAlignment: TabAlignment.start,
-                            indicatorPadding: const EdgeInsets.symmetric(
-                                vertical: 6, horizontal: 4),
+                            indicatorPadding: const EdgeInsets.only(
+                              left: 4,
+                              right: 4,
+                              top: 5,
+                              bottom: 7,
+                            ),
                             labelPadding:
                                 const EdgeInsets.symmetric(horizontal: 24),
                             indicatorSize: TabBarIndicatorSize.tab,
@@ -405,43 +356,34 @@ class TimelinePage extends ConsumerWidget {
                                     : Colors.transparent;
                               },
                             ),
-                            tabs: const [
+                            tabs: [
                               Tab(
                                 child: Text(
                                   "友達",
-                                  textAlign: TextAlign.center,
+                                  style: textStyle.tabText(),
                                 ),
                               ),
                               Tab(
                                 child: Text(
                                   "知り合いかも",
-                                  textAlign: TextAlign.center,
+                                  style: textStyle.tabText(),
                                 ),
                               ),
                               Tab(
                                 child: Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       size: 18,
                                       Icons.public_rounded,
                                     ),
-                                    Gap(4),
+                                    const Gap(4),
                                     Text(
                                       "公開",
-                                      textAlign: TextAlign.center,
+                                      style: textStyle.tabText(),
                                     ),
                                   ],
                                 ),
                               ),
-
-                              /* ...tagsList.map(
-                                (tag) => Tab(
-                                  child: Text(
-                                    tag.fieldName,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ) */
                             ],
                           ),
                         ),
@@ -449,24 +391,16 @@ class TimelinePage extends ConsumerWidget {
                     ];
                   },
                   body: const TabBarView(
-                    //physics: const NeverScrollableScrollPhysics(),
                     children: [
                       FriendsPostsThread(),
                       FriendFriendsPostsThread(),
                       PublicPostsThread(),
-                      // AllPostsThread(),
-                      // PopularPostsThread(),
-
-                      /*...tagsList.map(
-                        (e) => const Center(
-                          child: Text("INDEX : 1"),
-                        ),
-                      ) */
                     ],
                   ),
                 ),
               ),
             ),
+            //heart animation
             AnimatedPositioned(
               duration: isHeartVisible
                   ? const Duration(milliseconds: 400)

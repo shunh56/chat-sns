@@ -11,6 +11,7 @@
     <application
         android:label="app"
         android:name="${applicationName}"
+        android:launchMode="singleInstance"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"

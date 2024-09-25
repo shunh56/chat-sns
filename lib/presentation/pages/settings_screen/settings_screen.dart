@@ -149,7 +149,7 @@ class SettingsScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(8),
               onTap: () async {
                 HapticFeedback.lightImpact();
-                ref.read(myAccountNotifierProvider.notifier).onClosed();
+                await ref.read(myAccountNotifierProvider.notifier).onClosed();
                 Navigator.popUntil(context, (route) => route.isFirst);
                 await Future.delayed(const Duration(milliseconds: 30));
                 ref.watch(authProvider).signOut();

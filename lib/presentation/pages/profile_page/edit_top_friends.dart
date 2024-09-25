@@ -5,9 +5,7 @@ import 'package:app/presentation/providers/provider/users/all_users_notifier.dar
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -248,68 +246,6 @@ class EditTopFriendsScreen extends HookConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Map<String, dynamic> generateTagData(String tag, {bool generate = false}) {
-    final String id = FirebaseFirestore.instance.collection("tags").doc().id;
-    final json = {
-      "id": id,
-      "name": tag,
-      "searchCount": 1,
-      "selectedCount": 0,
-      "createdAt": Timestamp.now(),
-    };
-    if (generate) {
-      addTagToFirestore(json);
-    }
-    return json;
-  }
-
-  addTagToFirestore(Map<String, dynamic> json) async {
-    final q = await FirebaseFirestore.instance
-        .collection("tags")
-        .where("name", isEqualTo: json["name"])
-        .get();
-    if (q.docs.isEmpty) {
-      FirebaseFirestore.instance.collection("tags").doc(json["id"]).set(json);
-    }
-  }
-
-  incrementSelectCount(String id) async {
-    FirebaseFirestore.instance.collection("tags").doc(id).update({
-      "selectedCount": FieldValue.increment(1),
-      "updatedAt": Timestamp.now(),
-    });
-  }
-
-  Widget _buildSelectedTag(String tag) {
-    return Container(
-      margin: const EdgeInsets.only(
-        right: 8,
-        bottom: 8,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100),
-          color: Colors.black.withOpacity(0.3)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            tag,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const Icon(
-            Icons.check,
-            color: ThemeColor.icon,
-          ),
-        ],
       ),
     );
   }

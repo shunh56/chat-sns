@@ -47,7 +47,7 @@ class LeftMessage extends ConsumerWidget {
               margin: const EdgeInsets.only(right: 8),
               child: CachedImage.userIcon(
                 user.imageUrl,
-                user.username,
+                user.name,
                 14,
               ),
             ),
@@ -63,7 +63,7 @@ class LeftMessage extends ConsumerWidget {
                       horizontal: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: ThemeColor.beige,
+                      color: ThemeColor.stroke,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -161,7 +161,7 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
                   margin: const EdgeInsets.only(right: 8),
                   child: CachedImage.userIcon(
                     user.imageUrl,
-                    user.username,
+                    user.name,
                     14,
                   ),
                 ),
@@ -177,7 +177,7 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
                           horizontal: 12,
                         ),
                         decoration: const BoxDecoration(
-                          color: ThemeColor.beige,
+                          color: ThemeColor.stroke,
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(4),
                             topRight: Radius.circular(16),

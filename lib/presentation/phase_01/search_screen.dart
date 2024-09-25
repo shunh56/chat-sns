@@ -186,7 +186,7 @@ class SearchScreen extends ConsumerWidget {
                           children: [
                             const Gap(4),
                             Text(
-                              user.username,
+                              user.name,
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w600,
@@ -353,7 +353,7 @@ class SearchScreen extends ConsumerWidget {
               children: [
                 const Gap(4),
                 Text(
-                  user.username,
+                  user.name,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -376,7 +376,7 @@ class SearchScreen extends ConsumerWidget {
                                   .read(friendRequestIdListNotifierProvider
                                       .notifier)
                                   .sendFriendRequest(user);
-                              showMessage("フレンド申請を送りました！");
+                            
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -457,7 +457,7 @@ class SearchScreen extends ConsumerWidget {
               children: [
                 const Gap(4),
                 Text(
-                  user.username,
+                  user.name,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,

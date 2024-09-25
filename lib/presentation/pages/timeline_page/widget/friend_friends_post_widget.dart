@@ -1,9 +1,11 @@
 import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
@@ -29,6 +31,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id]!;
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final notifier = ref.read(isHeartVisibleProvider.notifier);
     final isAnimating = ref.watch(isAnimatingProvider);
 
@@ -117,6 +120,10 @@ class FriendFriendsPostWidget extends ConsumerWidget {
           decoration: BoxDecoration(
             color: ThemeColor.accent,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: ThemeColor.stroke,
+              width: 0.4,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,30 +141,38 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                               margin: const EdgeInsets.all(2),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(100),
-                                child: SizedBox(
+                                child: Container(
+                                  color: ThemeColor.stroke,
                                   height: 20,
                                   width: 20,
-                                  child: CachedNetworkImage(
-                                    imageUrl: user.imageUrl!,
-                                    fadeInDuration:
-                                        const Duration(milliseconds: 120),
-                                    imageBuilder: (context, imageProvider) =>
-                                        Container(
-                                      height: 20,
-                                      width: 20,
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        image: DecorationImage(
-                                          image: imageProvider,
-                                          fit: BoxFit.cover,
+                                  child: user.imageUrl != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: user.imageUrl!,
+                                          fadeInDuration:
+                                              const Duration(milliseconds: 120),
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            height: 20,
+                                            width: 20,
+                                            decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              image: DecorationImage(
+                                                image: imageProvider,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          placeholder: (context, url) =>
+                                              const SizedBox(),
+                                          errorWidget: (context, url, error) =>
+                                              const SizedBox(),
+                                        )
+                                      : Icon(
+                                          Icons.person_outline,
+                                          size: 20 * 0.8,
+                                          color: ThemeColor.accent,
                                         ),
-                                      ),
-                                    ),
-                                    placeholder: (context, url) =>
-                                        const SizedBox(),
-                                    errorWidget: (context, url, error) =>
-                                        const SizedBox(),
-                                  ),
                                 ),
                               ),
                             ),
@@ -167,8 +182,8 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                     const Gap(4),
                     Text(
                       shorten
-                          ? "${mutualFriends.sublist(0, 2).map((user) => user.username).toList().join("、")} 他$shortenCount人 の友達"
-                          : "${mutualFriends.map((user) => user.username).toList().join("、")} の友達",
+                          ? "${mutualFriends.sublist(0, 2).map((user) => user.name).toList().join("、")} 他$shortenCount人 の友達"
+                          : "${mutualFriends.map((user) => user.name).toList().join("、")} の友達",
                       style: const TextStyle(
                         fontSize: 12,
                       ),
@@ -188,13 +203,9 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                             .read(navigationRouterProvider(context))
                             .goToProfile(user);
                       },
-                      child: Stack(
-                        children: [
-                          UserIcon.postIcon(user),
-                        ],
-                      ),
+                      child: UserIcon.postIcon(user),
                     ),
-                    const Gap(12),
+                    const Gap(8),
                     Expanded(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,28 +214,26 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Gap(4),
                                 Row(
                                   children: [
                                     Text(
-                                      user.username,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: ThemeColor.text,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      user.name,
+                                      style: textStyle.w600(fontSize: 16),
                                     ),
                                     const Gap(4),
-                                    Icon(
-                                      size: 12,
-                                      post.isPublic
-                                          ? Icons.public_outlined
-                                          : Icons.lock_outline,
-                                      color: Colors.white,
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2),
+                                      child: Icon(
+                                        size: 12,
+                                        post.isPublic
+                                            ? Icons.public_outlined
+                                            : Icons.lock_outline,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                     Text(
                                       "・${post.createdAt.xxAgo}",
-                                      style: const TextStyle(
+                                      style: textStyle.w600(
                                         fontSize: 12,
                                         color: ThemeColor.subText,
                                       ),
@@ -234,11 +243,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                                 const Gap(4),
                                 Text(
                                   post.text,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: ThemeColor.text,
-                                    fontWeight: FontWeight.w400,
-                                  ),
+                                  style: textStyle.w400(fontSize: 16),
                                 ),
                               ],
                             ),
@@ -250,7 +255,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                 ),
               ),
               _buildImages(context, post),
-              _buildPostBottomSection(context, post),
+              _buildPostBottomSection(context, ref, post),
               const Gap(8),
             ],
           ),
@@ -360,7 +365,9 @@ class FriendFriendsPostWidget extends ConsumerWidget {
     }
   }
 
-  _buildPostBottomSection(BuildContext context, Post post) {
+  _buildPostBottomSection(BuildContext context, WidgetRef ref, Post post) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Padding(
       padding: const EdgeInsets.only(
         top: 8,
@@ -368,52 +375,34 @@ class FriendFriendsPostWidget extends ConsumerWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (post.replyCount > 0)
-            Row(
-              children: [
-                Text(
-                  post.replyCount.toString(),
-                  style: const TextStyle(
-                    color: ThemeColor.text,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+            GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                PostBottomModelSheet(context).openReplies(post);
+              },
+              child: Row(
+                children: [
+                  Text(
+                    post.replyCount.toString(),
+                    style: textStyle.numText(fontSize: 16),
                   ),
-                ),
-                const Gap(4),
-                const Text(
-                  "コメント",
-                  style: TextStyle(
-                    color: ThemeColor.subText,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                  const Gap(4),
+                  Text(
+                    "コメント",
+                    style: textStyle.numText(color: ThemeColor.subText),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           if (post.likeCount > 0)
             Row(
               children: [
                 const Gap(12),
                 GradientText(
-                  post.likeCount.toString(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFF0064),
-                      Color(0xFFFF7600),
-                      Color(0xFFFFD500),
-                      Color(0xFF8CFE00),
-                      Color(0xFF00E86C),
-                      Color(0xFF00F4F2),
-                      Color(0xFF00CCFF),
-                      Color(0xFF70A2FF),
-                      Color(0xFFA96CFF),
-                    ],
-                  ),
+                  text: post.likeCount.toString(),
                 ),
               ],
             ),

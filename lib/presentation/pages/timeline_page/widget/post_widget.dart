@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
@@ -40,6 +41,7 @@ class PostWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id]!;
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
 
     final notifier = ref.read(isHeartVisibleProvider.notifier);
     final isAnimating = ref.watch(isAnimatingProvider);
@@ -118,6 +120,10 @@ class PostWidget extends ConsumerWidget {
           decoration: BoxDecoration(
             color: ThemeColor.accent,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: ThemeColor.stroke,
+              width: 0.4,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,7 +142,7 @@ class PostWidget extends ConsumerWidget {
                       },
                       child: UserIcon.postIcon(user),
                     ),
-                    const Gap(12),
+                    const Gap(8),
                     Expanded(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,28 +151,26 @@ class PostWidget extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Gap(4),
                                 Row(
                                   children: [
                                     Text(
-                                      user.username,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: ThemeColor.text,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      user.name,
+                                      style: textStyle.w600(fontSize: 16),
                                     ),
                                     const Gap(4),
-                                    Icon(
-                                      size: 12,
-                                      post.isPublic
-                                          ? Icons.public_outlined
-                                          : Icons.lock_outline,
-                                      color: Colors.white,
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2),
+                                      child: Icon(
+                                        size: 12,
+                                        post.isPublic
+                                            ? Icons.public_outlined
+                                            : Icons.lock_outline,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                     Text(
                                       "・${post.createdAt.xxAgo}",
-                                      style: const TextStyle(
+                                      style: textStyle.w600(
                                         fontSize: 12,
                                         color: ThemeColor.subText,
                                       ),
@@ -176,11 +180,7 @@ class PostWidget extends ConsumerWidget {
                                 const Gap(4),
                                 Text(
                                   post.text,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: ThemeColor.text,
-                                    fontWeight: FontWeight.w400,
-                                  ),
+                                  style: textStyle.w400(fontSize: 16),
                                 ),
                               ],
                             ),
@@ -192,7 +192,7 @@ class PostWidget extends ConsumerWidget {
                 ),
               ),
               _buildImages(context, post),
-              _buildPostBottomSection(context, post),
+              _buildPostBottomSection(context, ref, post),
               const Gap(8),
             ],
           ),
@@ -302,7 +302,9 @@ class PostWidget extends ConsumerWidget {
     }
   }
 
-  _buildPostBottomSection(BuildContext context, Post post) {
+  _buildPostBottomSection(BuildContext context, WidgetRef ref, Post post) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Padding(
       padding: const EdgeInsets.only(
         top: 8,
@@ -322,20 +324,12 @@ class PostWidget extends ConsumerWidget {
                 children: [
                   Text(
                     post.replyCount.toString(),
-                    style: const TextStyle(
-                      color: ThemeColor.text,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: textStyle.numText(fontSize: 16),
                   ),
                   const Gap(4),
-                  const Text(
+                  Text(
                     "コメント",
-                    style: TextStyle(
-                      color: ThemeColor.subText,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: textStyle.numText(color: ThemeColor.subText),
                   ),
                 ],
               ),
@@ -345,24 +339,7 @@ class PostWidget extends ConsumerWidget {
               children: [
                 const Gap(12),
                 GradientText(
-                  post.likeCount.toString(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFF0064),
-                      Color(0xFFFF7600),
-                      Color(0xFFFFD500),
-                      Color(0xFF8CFE00),
-                      Color(0xFF00E86C),
-                      Color(0xFF00F4F2),
-                      Color(0xFF00CCFF),
-                      Color(0xFF70A2FF),
-                      Color(0xFFA96CFF),
-                    ],
-                  ),
+                  text: post.likeCount.toString(),
                 ),
               ],
             ),
@@ -378,26 +355,35 @@ class PostWidget extends ConsumerWidget {
   }
 }
 
-class GradientText extends StatelessWidget {
-  const GradientText(
-    this.text, {
-    super.key,
-    required this.gradient,
-    this.style,
-  });
-
+class GradientText extends ConsumerWidget {
+  const GradientText({super.key, required this.text});
   final String text;
-  final TextStyle? style;
-  final Gradient gradient;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+
     return ShaderMask(
       blendMode: BlendMode.srcIn,
-      shaderCallback: (bounds) => gradient.createShader(
+      shaderCallback: (bounds) => const LinearGradient(
+        colors: [
+          Color(0xFFFF0064),
+          Color(0xFFFF7600),
+          Color(0xFFFFD500),
+          Color(0xFF8CFE00),
+          Color(0xFF00E86C),
+          Color(0xFF00F4F2),
+          Color(0xFF00CCFF),
+          Color(0xFF70A2FF),
+          Color(0xFFA96CFF),
+        ],
+      ).createShader(
         Rect.fromLTWH(0, 0, bounds.width, bounds.height),
       ),
-      child: Text(text, style: style),
+      child: Text(
+        text,
+        style: textStyle.w600(fontSize: 16),
+      ),
     );
   }
 }

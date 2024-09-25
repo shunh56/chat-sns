@@ -1,4 +1,5 @@
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
@@ -20,6 +21,7 @@ class ChatScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(dmOverviewListNotifierProvider);
     final myId = ref.watch(authProvider).currentUser!.uid;
     final listView = asyncValue.when(
@@ -30,6 +32,7 @@ class ChatScreen extends ConsumerWidget {
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
           itemCount: list.length,
           itemBuilder: (context, index) {
             final overview = list[index];
@@ -57,79 +60,66 @@ class ChatScreen extends ConsumerWidget {
                   ),
                 );
               },
-              splashColor: ThemeColor.highlight,
-              highlightColor: ThemeColor.beige.withOpacity(0.3),
-              child: Container(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          ref
-                              .read(navigationRouterProvider(context))
-                              .goToProfile(user);
-                        },
-                        child: UserIcon.tileIcon(user, width: 40),
-                      ),
-                      const Gap(12),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Row(
+              splashColor: ThemeColor.accent,
+              highlightColor: ThemeColor.stroke,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: Stack(
+                  children: [
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            ref
+                                .read(navigationRouterProvider(context))
+                                .goToProfile(user);
+                          },
+                          child: UserIcon.tileIcon(user, width: 54),
+                        ),
+                        const Gap(12),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          user.username,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            color: ThemeColor.text,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        Text(
-                                          "・${overview.lastMessage.createdAt.xxAgo}",
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: ThemeColor.beige,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      overview.lastMessage.text,
-                                      maxLines: 1,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: ThemeColor.text,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ],
+                              Row(
+                                children: [
+                                  Text(
+                                    user.name,
+                                    style: textStyle.w600(fontSize: 16),
+                                  ),
+                                  Text(
+                                    "・${overview.lastMessage.createdAt.xxAgo}",
+                                    style: textStyle.w600(
+                                        color: ThemeColor.subText),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                overview.lastMessage.text,
+                                maxLines: 1,
+                                style: textStyle.w400(
+                                  fontSize: 14,
+                                  color: ThemeColor.subText,
                                 ),
                               ),
-                              if (unseenCheck)
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 8),
-                                  child: CircleAvatar(
-                                    radius: 4,
-                                    backgroundColor: Colors.cyan,
-                                  ),
-                                ),
                             ],
                           ),
                         ),
+                      ],
+                    ),
+                    if (unseenCheck)
+                      const Positioned(
+                        top: 0,
+                        bottom: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          radius: 4,
+                          backgroundColor: Colors.cyan,
+                        ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             );
@@ -142,6 +132,7 @@ class ChatScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: themeSize.appbarHeight,
         centerTitle: false,
         title: const Text(
           "チャット",
@@ -165,7 +156,7 @@ class ChatScreen extends ConsumerWidget {
                 EdgeInsets.symmetric(horizontal: themeSize.horizontalPadding),
             child: Text(
               "フレンドとのチャットはここからできるよ！",
-              style: Theme.of(context).textTheme.bodySmall,
+              style: textStyle.w400(color: ThemeColor.subText),
             ),
           ),
           Gap(themeSize.verticalSpaceSmall),
@@ -173,8 +164,9 @@ class ChatScreen extends ConsumerWidget {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                friendsListView(ref),
-                Gap(themeSize.verticalPaddingMedium),
+                Gap(themeSize.verticalPaddingSmall),
+                friendsListView(context, ref),
+                Gap(themeSize.verticalPaddingSmall),
                 listView,
               ],
             ),
@@ -184,7 +176,9 @@ class ChatScreen extends ConsumerWidget {
     );
   }
 
-  Widget friendsListView(WidgetRef ref) {
+  Widget friendsListView(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(friendIdListNotifierProvider);
     return asyncValue.when(
       data: (friendInfos) {
@@ -200,9 +194,11 @@ class ChatScreen extends ConsumerWidget {
             .where((user) => friendIds.contains(user.userId))
             .toList();
 
-        users.sort((a, b) => b.lastOpenedAt.compareTo(a.lastOpenedAt));
+        users.sort((a, b) {
+          return b.currentStatus.updatedAt.compareTo(a.currentStatus.updatedAt);
+        });
         return SizedBox(
-          height: 68,
+          height: 92,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: friendIds.length,
@@ -219,61 +215,102 @@ class ChatScreen extends ConsumerWidget {
                   ref.read(navigationRouterProvider(context)).goToChat(user);
                 },
                 child: Container(
+                  padding: const EdgeInsets.all(12),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
+                  decoration: BoxDecoration(
+                    color: ThemeColor.accent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: ThemeColor.stroke,
+                      width: 0.4,
+                    ),
+                  ),
+                  child: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        child: CachedImage.userIcon(
-                          user.imageUrl,
-                          user.username,
-                          30,
-                        ),
-                      ),
-                      user.isOnline ||
-                              DateTime.now()
-                                      .difference(user.lastOpenedAt.toDate())
-                                      .inMinutes <
-                                  3
-                          ? Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  width: 2,
-                                  color: ThemeColor.background,
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const CircleAvatar(
-                                radius: 8,
-                                backgroundColor: Colors.green,
-                              ),
-                            )
-                          : DateTime.now()
-                                      .difference(user.lastOpenedAt.toDate())
-                                      .inDays <
-                                  1
+                      Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            child: CachedImage.userIcon(
+                              user.imageUrl,
+                              user.name,
+                              30,
+                            ),
+                          ),
+                          user.isOnline ||
+                                  DateTime.now()
+                                          .difference(
+                                              user.lastOpenedAt.toDate())
+                                          .inMinutes <
+                                      3
                               ? Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100),
                                     border: Border.all(
                                       width: 2,
                                       color: ThemeColor.background,
                                     ),
-                                    color: ThemeColor.highlight,
+                                    shape: BoxShape.circle,
                                   ),
-                                  child: Text(
-                                    user.lastOpenedAt.xxStatus,
-                                    style: const TextStyle(
-                                      fontSize: 8,
-                                      fontWeight: FontWeight.w600,
-                                      color: ThemeColor.white,
-                                    ),
+                                  child: const CircleAvatar(
+                                    radius: 8,
+                                    backgroundColor: Colors.green,
                                   ),
                                 )
-                              : const SizedBox(),
+                              : DateTime.now()
+                                          .difference(
+                                              user.lastOpenedAt.toDate())
+                                          .inDays <
+                                      1
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        border: Border.all(
+                                          width: 2,
+                                          color: ThemeColor.background,
+                                        ),
+                                        color: ThemeColor.highlight,
+                                      ),
+                                      child: Text(
+                                        user.lastOpenedAt.xxStatus,
+                                        style: const TextStyle(
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w600,
+                                          color: ThemeColor.white,
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox(),
+                        ],
+                      ),
+                      if (user.currentStatus.updatedRecently)
+                        Container(
+                          constraints: const BoxConstraints(maxWidth: 180),
+                          padding: const EdgeInsets.only(left: 12),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.name,
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                  color: ThemeColor.text,
+                                ),
+                              ),
+                              const Gap(4),
+                              Text(
+                                user.currentStatus.bubbles.first,
+                                style: textStyle.w400(
+                                  color: ThemeColor.subText,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),

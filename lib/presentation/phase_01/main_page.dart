@@ -16,7 +16,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 
 class Phase01MainPage extends ConsumerStatefulWidget {
-  const Phase01MainPage({super.key});
+  const Phase01MainPage({
+    super.key,
+  });
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -123,6 +125,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
             width: 22,
             child: SvgPicture.asset(
               "assets/images/icons/edit.svg",
+              // ignore: deprecated_member_use
               color: Colors.white,
             ),
           ),
@@ -247,6 +250,7 @@ class BottomBar extends ConsumerWidget {
               width: 24,
               child: SvgPicture.asset(
                 path,
+                // ignore: deprecated_member_use
                 color: index == ref.watch(bottomNavIndexProvider)
                     ? Colors.white
                     : ThemeColor.button.withOpacity(0.3),

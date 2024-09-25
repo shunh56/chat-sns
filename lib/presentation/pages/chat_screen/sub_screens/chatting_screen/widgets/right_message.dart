@@ -110,7 +110,7 @@ class RightMessage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      message.text ?? "",
+                      message.text ,
                       style: const TextStyle(
                         fontSize: 15,
                         color: ThemeColor.white,
