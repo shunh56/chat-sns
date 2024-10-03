@@ -418,74 +418,77 @@ class CurrentStatusPostScreen extends ConsumerWidget {
                         ),
                       ),
                       const Gap(8),
-                      FutureBuilder(
-                        future: ref
-                            .read(allUsersNotifierProvider.notifier)
-                            .getUserAccounts(post.after.nowWith),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const SizedBox();
-                          }
-                          final users = snapshot.data!;
-                          if (users.isEmpty) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12),
-                              child: Center(
-                                child: Text(
-                                  "No Top Friends",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-                          return Wrap(
-                            children: users
-                                .map(
-                                  (user) => Container(
-                                    margin: const EdgeInsets.all(4),
-                                    child: Column(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(9),
-                                          child: SizedBox(
-                                            height: 40,
-                                            width: 40,
-                                            child: CachedNetworkImage(
-                                              imageUrl: user.imageUrl!,
-                                              fadeInDuration: const Duration(
-                                                  milliseconds: 120),
-                                              imageBuilder:
-                                                  (context, imageProvider) =>
-                                                      Container(
-                                                height: 40,
-                                                width: 40,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.transparent,
-                                                  image: DecorationImage(
-                                                    image: imageProvider,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                              ),
-                                              placeholder: (context, url) =>
-                                                  const SizedBox(),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      const SizedBox(),
+                      Expanded(
+                        child: FutureBuilder(
+                          future: ref
+                              .read(allUsersNotifierProvider.notifier)
+                              .getUserAccounts(post.after.nowWith),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox();
+                            }
+                            final users = snapshot.data!;
+
+                            return Wrap(
+                              children: users
+                                  .map(
+                                    (user) => Container(
+                                      margin: const EdgeInsets.all(4),
+                                      child: Column(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(9),
+                                            child: Container(
+                                              color: ThemeColor.accent,
+                                              height: 32,
+                                              width: 32,
+                                              child: user.imageUrl != null
+                                                  ? CachedNetworkImage(
+                                                      imageUrl: user.imageUrl!,
+                                                      fadeInDuration:
+                                                          const Duration(
+                                                              milliseconds:
+                                                                  120),
+                                                      imageBuilder: (context,
+                                                              imageProvider) =>
+                                                          Container(
+                                                        height: 32,
+                                                        width: 32,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .transparent,
+                                                          image:
+                                                              DecorationImage(
+                                                            image:
+                                                                imageProvider,
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      placeholder:
+                                                          (context, url) =>
+                                                              const SizedBox(),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          const SizedBox(),
+                                                    )
+                                                  : Icon(
+                                                      Icons.person_outline,
+                                                      size: 32 * 0.8,
+                                                      color: ThemeColor.stroke,
+                                                    ),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                )
-                                .toList(),
-                          );
-                        },
+                                  )
+                                  .toList(),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),

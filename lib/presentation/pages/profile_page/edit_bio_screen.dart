@@ -5,7 +5,7 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/providers/notifier/image/image_processor.dart';
-import 'package:app/presentation/providers/notifier/image/image_uploader_notifier.dart';
+import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -653,7 +653,7 @@ class EditBioScreen extends ConsumerWidget {
                   if (iconImage != null) {
                     ref.read(imageUploadingProvider.notifier).state = true;
                     imageUrl = await ref
-                        .read(imageUploaderNotifierProvider)
+                        .read(imageUploadUsecaseProvider)
                         .uploadIconImage(iconImage);
                   }
                   notifier.updateBio(bio, aboutMe, imageUrl: imageUrl);

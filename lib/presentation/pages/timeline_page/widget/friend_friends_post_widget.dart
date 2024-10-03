@@ -168,7 +168,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                                           errorWidget: (context, url, error) =>
                                               const SizedBox(),
                                         )
-                                      : Icon(
+                                      : const Icon(
                                           Icons.person_outline,
                                           size: 20 * 0.8,
                                           color: ThemeColor.accent,

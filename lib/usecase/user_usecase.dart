@@ -1,6 +1,5 @@
 import 'package:app/core/extenstions/string_extenstion.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/domain/value/user/gender.dart';
 import 'package:app/repository/user_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

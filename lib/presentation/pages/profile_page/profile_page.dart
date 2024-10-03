@@ -32,6 +32,10 @@ final currentStatusStateProvider =
     StateProvider((ref) => CurrentStatus.defaultCurrentStatus());
 final topFriendsProvider = StateProvider<List<String>>((ref) => []);
 
+final notificationDataProvider =
+    StateProvider((ref) => NotificationData.defaultSettings());
+final privacyProvider = StateProvider((ref) => Privacy.defaultPrivacy());
+
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -277,7 +281,7 @@ class ProfileScreen extends ConsumerWidget {
                                   errorWidget: (context, url, error) =>
                                       const SizedBox(),
                                 )
-                              : Icon(
+                              : const Icon(
                                   Icons.person_outline,
                                   size: imageHeight,
                                   color: ThemeColor.stroke,
@@ -724,32 +728,42 @@ class ProfileScreen extends ConsumerWidget {
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(12),
-                                          child: SizedBox(
+                                          child: Container(
+                                            color: ThemeColor.accent,
                                             height: 48,
                                             width: 48,
-                                            child: CachedNetworkImage(
-                                              imageUrl: user.imageUrl!,
-                                              fadeInDuration: const Duration(
-                                                  milliseconds: 120),
-                                              imageBuilder:
-                                                  (context, imageProvider) =>
-                                                      Container(
-                                                height: 48,
-                                                width: 48,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.transparent,
-                                                  image: DecorationImage(
-                                                    image: imageProvider,
-                                                    fit: BoxFit.cover,
+                                            child: user.imageUrl != null
+                                                ? CachedNetworkImage(
+                                                    imageUrl: user.imageUrl!,
+                                                    fadeInDuration:
+                                                        const Duration(
+                                                            milliseconds: 120),
+                                                    imageBuilder: (context,
+                                                            imageProvider) =>
+                                                        Container(
+                                                      height: 48,
+                                                      width: 48,
+                                                      decoration: BoxDecoration(
+                                                        color:
+                                                            Colors.transparent,
+                                                        image: DecorationImage(
+                                                          image: imageProvider,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    placeholder:
+                                                        (context, url) =>
+                                                            const SizedBox(),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            const SizedBox(),
+                                                  )
+                                                : Icon(
+                                                    Icons.person_outline,
+                                                    size: 48 * 0.8,
+                                                    color: ThemeColor.stroke,
                                                   ),
-                                                ),
-                                              ),
-                                              placeholder: (context, url) =>
-                                                  const SizedBox(),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      const SizedBox(),
-                                            ),
                                           ),
                                         ),
                                       ),
@@ -815,7 +829,7 @@ class ProfileScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Center(
                         child: Text(
-                          "No Top Friends",
+                          "TOPフレンドはいません",
                           style: TextStyle(
                             fontSize: 16,
                             color: canvasTheme.boxSecondaryTextColor,
@@ -837,43 +851,53 @@ class ProfileScreen extends ConsumerWidget {
                             },
                             child: Container(
                               margin: const EdgeInsets.all(4),
+                              width: imageWidth,
                               child: Column(
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child: SizedBox(
+                                    child: Container(
+                                      color: ThemeColor.accent,
                                       height: imageWidth,
                                       width: imageWidth,
-                                      child: CachedNetworkImage(
-                                        imageUrl: user.imageUrl!,
-                                        fadeInDuration:
-                                            const Duration(milliseconds: 120),
-                                        imageBuilder:
-                                            (context, imageProvider) =>
-                                                Container(
-                                          height: imageWidth,
-                                          width: imageWidth,
-                                          decoration: BoxDecoration(
-                                            color: Colors.transparent,
-                                            image: DecorationImage(
-                                              image: imageProvider,
-                                              fit: BoxFit.cover,
+                                      child: user.imageUrl != null
+                                          ? CachedNetworkImage(
+                                              imageUrl: user.imageUrl!,
+                                              fadeInDuration: const Duration(
+                                                  milliseconds: 120),
+                                              imageBuilder:
+                                                  (context, imageProvider) =>
+                                                      Container(
+                                                height: imageWidth,
+                                                width: imageWidth,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.transparent,
+                                                  image: DecorationImage(
+                                                    image: imageProvider,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              ),
+                                              placeholder: (context, url) =>
+                                                  const SizedBox(),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      const SizedBox(),
+                                            )
+                                          : Icon(
+                                              Icons.person_outline,
+                                              size: imageWidth * 0.8,
+                                              color: ThemeColor.stroke,
                                             ),
-                                          ),
-                                        ),
-                                        placeholder: (context, url) =>
-                                            const SizedBox(),
-                                        errorWidget: (context, url, error) =>
-                                            const SizedBox(),
-                                      ),
                                     ),
                                   ),
                                   const Gap(4),
                                   Text(
                                     user.name,
-                                    overflow: TextOverflow.clip,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 10,
                                       color: canvasTheme.boxSecondaryTextColor,
                                     ),
                                   )
@@ -958,11 +982,16 @@ class ProfileScreen extends ConsumerWidget {
                             shape: BoxShape.circle,
                             border: Border.all(
                               width: stroke,
-                              color: canvasTheme.boxBgColor,
+                              color: Color.alphaBlend(
+                                Colors.black.withOpacity(0.05),
+                                canvasTheme.boxBgColor,
+                              ),
                             ),
                           ),
-                          child: UserIcon.circleIcon(users[i],
-                              radius: imageRadius),
+                          child: UserIcon.circleIcon(
+                            users[i],
+                            radius: imageRadius,
+                          ),
                         ),
                       ),
                     );

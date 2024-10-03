@@ -51,7 +51,7 @@ class InviteCode {
 
   factory InviteCode.init() {
     return InviteCode(
-      code: "init",
+      code: "",
       createdAt: Timestamp.now(),
       userId: "",
       slot: [],

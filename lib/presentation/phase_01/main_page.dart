@@ -2,10 +2,14 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/core/shader.dart';
+import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/pages/chat_screen/chat_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
+import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
+import 'package:app/presentation/phase_01/cube.dart';
 import 'package:app/presentation/phase_01/search_screen.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -14,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:gap/gap.dart';
 
 class Phase01MainPage extends ConsumerStatefulWidget {
   const Phase01MainPage({
@@ -55,11 +60,82 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
   @override
   void initState() {
     super.initState();
+    _setupVoIPListener();
     WidgetsBinding.instance.addObserver(this);
     ref.read(myAccountNotifierProvider.notifier).onOpen();
-    ref.read(friendIdListNotifierProvider.notifier).initialize();
-    ref.read(friendRequestIdListNotifierProvider.notifier).initialize();
-    ref.read(friendRequestedIdListNotifierProvider.notifier).initialize();
+  }
+
+  // VoIP応答時の処理
+  void _setupVoIPListener() {
+    const platform = MethodChannel('com.shunh.exampleApp/voip');
+    platform.setMethodCallHandler(
+      (MethodCall call) async {
+        if (call.method == "onVoIPReceived") {
+          final Map<String, dynamic> args =
+              Map<String, dynamic>.from(call.arguments);
+          final id = args['extra']['id'] ?? "";
+          final uuid = args['uuid'];
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => VoiceChatScreen(
+                id: id,
+                uuid: uuid,
+              ),
+            ),
+          );
+          /* Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("voice chat screen"),
+                      Text("$args"),
+                      Gap(12),
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          final id = args['extra']['id'] ?? "";
+                          final uuid = args['uuid'];
+                          if (id.isEmpty) {
+                            showMessage("SOME KIND OF ERROR");
+                            return;
+                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => VoiceChatScreen(
+                                id: id,
+                                uuid: uuid,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: ThemeColor.accent,
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              color: ThemeColor.stroke,
+                              width: 0.4,
+                            ),
+                          ),
+                          child: Text("JOIN"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ); */
+        }
+      },
+    );
   }
 
   @override
@@ -111,28 +187,24 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
     checkFriendsCurrentStatusPosts();
     */
 
-    final asyncValue = ref.watch(myAccountNotifierProvider);
-    final fab = asyncValue.when(
-      data: (me) {
-        return FloatingActionButton(
-          shape: const StadiumBorder(),
-          onPressed: () {
-            navToEditCurrentStatus(context, ref, me);
-          },
-          backgroundColor: ThemeColor.highlight,
-          child: SizedBox(
-            height: 22,
-            width: 22,
-            child: SvgPicture.asset(
-              "assets/images/icons/edit.svg",
-              // ignore: deprecated_member_use
-              color: Colors.white,
-            ),
-          ),
-        );
+    final fab = FloatingActionButton(
+      shape: const StadiumBorder(),
+      onPressed: () {
+        final me = ref.read(myAccountNotifierProvider).asData?.value;
+        if (me != null) {
+          navToEditCurrentStatus(context, ref, me);
+        }
       },
-      error: (e, s) => const SizedBox(),
-      loading: () => const SizedBox(),
+      backgroundColor: ThemeColor.highlight,
+      child: SizedBox(
+        height: 22,
+        width: 22,
+        child: SvgPicture.asset(
+          "assets/images/icons/edit.svg",
+          // ignore: deprecated_member_use
+          color: Colors.white,
+        ),
+      ),
     );
 
     return Scaffold(

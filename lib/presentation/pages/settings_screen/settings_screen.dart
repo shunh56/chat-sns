@@ -1,5 +1,14 @@
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/account_screen.dart';
+import 'package:app/presentation/pages/settings_screen/notification_settings/current_status_posts_screen.dart';
+import 'package:app/presentation/pages/settings_screen/notification_settings/direct_messages_screen.dart';
+import 'package:app/presentation/pages/settings_screen/notification_settings/friend_requests_screen.dart';
+import 'package:app/presentation/pages/settings_screen/notification_settings/posts_screen.dart';
+import 'package:app/presentation/pages/settings_screen/notification_settings/voice_chats_screen.dart';
+import 'package:app/presentation/pages/settings_screen/privacy_settings/contents_publicity_screen.dart';
+import 'package:app/presentation/pages/settings_screen/privacy_settings/friend_requests_screen.dart';
+import 'package:app/presentation/pages/settings_screen/privacy_settings/private_mode_screen.dart';
 import 'package:app/presentation/phase_01/friend_requesteds_screen.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -14,6 +23,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final me = ref.watch(myAccountNotifierProvider).asData!.value;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -46,7 +56,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 page: const AccountScreen(),
               ),
-              _buildTile(
+              _buildBottomTile(
                 context,
                 _tileContent(
                   Icons.people_outline_rounded,
@@ -54,10 +64,10 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 page: const FriendRequestedsScreen(),
               ),
-              _buildBottomTile(
+              /* _buildBottomTile(
                 context,
                 _tileContent(Icons.qr_code_rounded, "QRコードをスキャン"),
-              ),
+              ), */
             ],
           ),
           const Gap(32),
@@ -67,18 +77,31 @@ class SettingsScreen extends ConsumerWidget {
               _buildTopTile(
                 context,
                 _tileContent(Icons.lock_outline_rounded, "プライベートモード"),
+                page: PrivateModeScreen(),
+                function: () {
+                  ref.read(privacyProvider.notifier).state = me.privacy;
+                },
               ),
+              /*
               _buildTile(
                 context,
                 _tileContent(Icons.public_rounded, "プロフィールの公開範囲"),
-              ),
+              ),*/
               _buildTile(
                 context,
                 _tileContent(Icons.public_rounded, "コンテンツの公開範囲"),
+                page: ContentRangeScreen(),
+                function: () {
+                  ref.read(privacyProvider.notifier).state = me.privacy;
+                },
               ),
               _buildBottomTile(
                 context,
                 _tileContent(Icons.people_outline_rounded, "フレンド申請"),
+                page: RequestRangeScreen(),
+                function: () {
+                  ref.read(privacyProvider.notifier).state = me.privacy;
+                },
               ),
             ],
           ),
@@ -89,22 +112,47 @@ class SettingsScreen extends ConsumerWidget {
               _buildTopTile(
                 context,
                 _tileContent(Icons.chat_bubble_outline_outlined, "ダイレクトメッセージ"),
-              ),
-              _buildTile(
-                context,
-                _tileContent(Icons.post_add_rounded, "投稿"),
+                page: DirectMessageNotificationScreen(),
+                function: () {
+                  ref.read(notificationDataProvider.notifier).state =
+                      me.notificationData;
+                },
               ),
               _buildTile(
                 context,
                 _tileContent(Icons.post_add_rounded, "ステータス投稿"),
+                page: CurrentStatusPostNotificationScreen(),
+                function: () {
+                  ref.read(notificationDataProvider.notifier).state =
+                      me.notificationData;
+                },
+              ),
+              _buildTile(
+                context,
+                _tileContent(Icons.post_add_rounded, "投稿"),
+                page: PostNotificationScreen(),
+                function: () {
+                  ref.read(notificationDataProvider.notifier).state =
+                      me.notificationData;
+                },
               ),
               _buildTile(
                 context,
                 _tileContent(Icons.graphic_eq_rounded, "ボイスチャット"),
+                page: VoiceChatNotificationScreen(),
+                function: () {
+                  ref.read(notificationDataProvider.notifier).state =
+                      me.notificationData;
+                },
               ),
               _buildBottomTile(
                 context,
                 _tileContent(Icons.people_outline_rounded, "フレンド申請"),
+                page: FriendRequestNotificationScreen(),
+                function: () {
+                  ref.read(notificationDataProvider.notifier).state =
+                      me.notificationData;
+                },
               ),
             ],
           ),
@@ -214,7 +262,8 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTopTile(BuildContext context, Widget child, {Widget? page}) {
+  Widget _buildTopTile(BuildContext context, Widget child,
+      {Widget? page, Function? function}) {
     return Column(
       children: [
         Material(
@@ -230,7 +279,11 @@ class SettingsScreen extends ConsumerWidget {
             ),
             onTap: () {
               HapticFeedback.lightImpact();
+
               if (page != null) {
+                if (function != null) {
+                  function();
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => page),
@@ -240,16 +293,17 @@ class SettingsScreen extends ConsumerWidget {
             child: child,
           ),
         ),
-        const Divider(
+        Divider(
           height: 0,
-          color: ThemeColor.beige,
+          color: ThemeColor.white.withOpacity(0.5),
           thickness: 0.2,
         ),
       ],
     );
   }
 
-  Widget _buildTile(BuildContext context, Widget child, {Widget? page}) {
+  Widget _buildTile(BuildContext context, Widget child,
+      {Widget? page, Function? function}) {
     return Column(
       children: [
         Material(
@@ -258,6 +312,9 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () {
               HapticFeedback.lightImpact();
               if (page != null) {
+                if (function != null) {
+                  function();
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => page),
@@ -267,16 +324,17 @@ class SettingsScreen extends ConsumerWidget {
             child: child,
           ),
         ),
-        const Divider(
+        Divider(
           height: 0,
-          color: ThemeColor.beige,
+          color: ThemeColor.white.withOpacity(0.5),
           thickness: 0.2,
         ),
       ],
     );
   }
 
-  Widget _buildBottomTile(BuildContext context, Widget child, {Widget? page}) {
+  Widget _buildBottomTile(BuildContext context, Widget child,
+      {Widget? page, Function? function}) {
     return Material(
       color: ThemeColor.accent,
       borderRadius: const BorderRadius.only(
@@ -291,6 +349,9 @@ class SettingsScreen extends ConsumerWidget {
         onTap: () {
           HapticFeedback.lightImpact();
           if (page != null) {
+            if (function != null) {
+              function();
+            }
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => page),

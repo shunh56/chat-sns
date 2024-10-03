@@ -187,6 +187,8 @@ class FriendFriendsPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
     List<Post> posts = [];
     asyncValue.maybeWhen(
       data: (users) async {
+        users.removeWhere((user) =>
+            (user.privacy.contentRange == PublicityRange.onlyFriends));
         List<Future<List<Post>>> futures = [];
         for (String userId in users.map((user) => user.userId)) {
           futures.add(usecase.getPostFromUserId(userId));

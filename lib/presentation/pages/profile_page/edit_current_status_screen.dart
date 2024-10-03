@@ -388,32 +388,42 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(12),
-                                          child: SizedBox(
+                                          child: Container(
+                                            color: ThemeColor.accent,
                                             height: 48,
                                             width: 48,
-                                            child: CachedNetworkImage(
-                                              imageUrl: user.imageUrl!,
-                                              fadeInDuration: const Duration(
-                                                  milliseconds: 120),
-                                              imageBuilder:
-                                                  (context, imageProvider) =>
-                                                      Container(
-                                                height: 48,
-                                                width: 48,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.transparent,
-                                                  image: DecorationImage(
-                                                    image: imageProvider,
-                                                    fit: BoxFit.cover,
+                                            child: user.imageUrl != null
+                                                ? CachedNetworkImage(
+                                                    imageUrl: user.imageUrl!,
+                                                    fadeInDuration:
+                                                        const Duration(
+                                                            milliseconds: 120),
+                                                    imageBuilder: (context,
+                                                            imageProvider) =>
+                                                        Container(
+                                                      height: 48,
+                                                      width: 48,
+                                                      decoration: BoxDecoration(
+                                                        color:
+                                                            Colors.transparent,
+                                                        image: DecorationImage(
+                                                          image: imageProvider,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    placeholder:
+                                                        (context, url) =>
+                                                            const SizedBox(),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            const SizedBox(),
+                                                  )
+                                                : const Icon(
+                                                    Icons.person_outline,
+                                                    size: 48 * 0.8,
+                                                    color: ThemeColor.stroke,
                                                   ),
-                                                ),
-                                              ),
-                                              placeholder: (context, url) =>
-                                                  const SizedBox(),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      const SizedBox(),
-                                            ),
                                           ),
                                         ),
                                       ),

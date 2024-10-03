@@ -22,6 +22,9 @@ class EditNowWithScreen extends HookConsumerWidget {
     final friendInfos =
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
     final friendIds = friendInfos.map((item) => item.userId).toList();
+    final imageWidth =
+        (themeSize.screenWidth - 2 * themeSize.horizontalPadding) / 5 - 8;
+    5;
     List users = ref
         .watch(allUsersNotifierProvider)
         .asData!
@@ -88,59 +91,53 @@ class EditNowWithScreen extends HookConsumerWidget {
                               .state = list;
                         },
                         child: Container(
-                          margin: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.all(4),
+                          width: imageWidth,
                           child: Column(
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: SizedBox(
-                                  height: (themeSize.screenWidth -
-                                          2 * themeSize.horizontalPadding -
-                                          24 -
-                                          6 * 8) /
-                                      5,
-                                  width: (themeSize.screenWidth -
-                                          2 * themeSize.horizontalPadding -
-                                          24 -
-                                          6 * 8) /
-                                      5,
-                                  child: CachedNetworkImage(
-                                    imageUrl: user.imageUrl!,
-                                    fadeInDuration:
-                                        const Duration(milliseconds: 120),
-                                    imageBuilder: (context, imageProvider) =>
-                                        Container(
-                                      height: (themeSize.screenWidth -
-                                              2 * themeSize.horizontalPadding -
-                                              24 -
-                                              6 * 8) /
-                                          5,
-                                      width: (themeSize.screenWidth -
-                                              2 * themeSize.horizontalPadding -
-                                              24 -
-                                              6 * 8) /
-                                          5,
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        image: DecorationImage(
-                                          image: imageProvider,
-                                          fit: BoxFit.cover,
+                                child: Container(
+                                  color: ThemeColor.accent,
+                                  height: imageWidth,
+                                  width: imageWidth,
+                                  child: user.imageUrl != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: user.imageUrl!,
+                                          fadeInDuration:
+                                              const Duration(milliseconds: 120),
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            height: imageWidth,
+                                            width: imageWidth,
+                                            decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              image: DecorationImage(
+                                                image: imageProvider,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          placeholder: (context, url) =>
+                                              const SizedBox(),
+                                          errorWidget: (context, url, error) =>
+                                              const SizedBox(),
+                                        )
+                                      : Icon(
+                                          Icons.person_outline,
+                                          size: imageWidth * 0.8,
+                                          color: ThemeColor.stroke,
                                         ),
-                                      ),
-                                    ),
-                                    placeholder: (context, url) =>
-                                        const SizedBox(),
-                                    errorWidget: (context, url, error) =>
-                                        const SizedBox(),
-                                  ),
                                 ),
                               ),
                               const Gap(4),
                               Text(
                                 user.name,
-                                overflow: TextOverflow.clip,
-                                style: const TextStyle(
-                                  fontSize: 12,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontSize: 10,
                                   color: ThemeColor.text,
                                 ),
                               )
@@ -182,59 +179,53 @@ class EditNowWithScreen extends HookConsumerWidget {
                           ];
                         },
                         child: Container(
-                          margin: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.all(4),
+                          width: imageWidth,
                           child: Column(
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: SizedBox(
-                                  height: (themeSize.screenWidth -
-                                          2 * themeSize.horizontalPadding -
-                                          24 -
-                                          6 * 8) /
-                                      5,
-                                  width: (themeSize.screenWidth -
-                                          2 * themeSize.horizontalPadding -
-                                          24 -
-                                          6 * 8) /
-                                      5,
-                                  child: CachedNetworkImage(
-                                    imageUrl: user.imageUrl!,
-                                    fadeInDuration:
-                                        const Duration(milliseconds: 120),
-                                    imageBuilder: (context, imageProvider) =>
-                                        Container(
-                                      height: (themeSize.screenWidth -
-                                              2 * themeSize.horizontalPadding -
-                                              24 -
-                                              6 * 8) /
-                                          5,
-                                      width: (themeSize.screenWidth -
-                                              2 * themeSize.horizontalPadding -
-                                              24 -
-                                              6 * 8) /
-                                          5,
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        image: DecorationImage(
-                                          image: imageProvider,
-                                          fit: BoxFit.cover,
+                                child: Container(
+                                  color: ThemeColor.accent,
+                                  height: imageWidth,
+                                  width: imageWidth,
+                                  child: user.imageUrl != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: user.imageUrl!,
+                                          fadeInDuration:
+                                              const Duration(milliseconds: 120),
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            height: imageWidth,
+                                            width: imageWidth,
+                                            decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              image: DecorationImage(
+                                                image: imageProvider,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          placeholder: (context, url) =>
+                                              const SizedBox(),
+                                          errorWidget: (context, url, error) =>
+                                              const SizedBox(),
+                                        )
+                                      : Icon(
+                                          Icons.person_outline,
+                                          size: imageWidth * 0.8,
+                                          color: ThemeColor.stroke,
                                         ),
-                                      ),
-                                    ),
-                                    placeholder: (context, url) =>
-                                        const SizedBox(),
-                                    errorWidget: (context, url, error) =>
-                                        const SizedBox(),
-                                  ),
                                 ),
                               ),
                               const Gap(4),
                               Text(
                                 user.name,
-                                overflow: TextOverflow.clip,
-                                style: const TextStyle(
-                                  fontSize: 12,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontSize: 10,
                                   color: ThemeColor.text,
                                 ),
                               )

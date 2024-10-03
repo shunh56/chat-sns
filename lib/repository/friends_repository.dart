@@ -22,6 +22,10 @@ class FriendsRepository {
     return _datasource.admitFriendRequested(userId);
   }
 
+  void addFriend(String userId) {
+    return _datasource.addFriend(userId);
+  }
+
   //READ
   Stream<List<String>> streamFriendRequesteds() {
     final stream = _datasource.streamFriendRequesteds();
@@ -59,5 +63,14 @@ class FriendsRepository {
 
   void deleteFriend(String userId) {
     return _datasource.deleteFriend(userId);
+  }
+
+  Future<List<String>> getDeletes() async {
+    final res = await _datasource.fetchDeletes();
+    return res.docs.map((doc) => doc.id).toList();
+  }
+
+  void deleteUser(String userId) {
+    return _datasource.deleteUser(userId);
   }
 }

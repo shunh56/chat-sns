@@ -1,4 +1,4 @@
-import 'package:app/core/utils/theme.dart';
+/*import 'package:app/core/utils/theme.dart';
 import 'package:app/datasource/local/tags.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
@@ -497,3 +497,4 @@ class SearchPage extends ConsumerWidget {
     );
   }
 }
+ */

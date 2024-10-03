@@ -349,14 +349,14 @@ class CanvasTheme {
   }
 }
 
-class NotificationSettings {
+class NotificationData {
   final bool isActive;
   final bool directMessage;
   final bool currentStatusPost;
   final bool post;
   final bool voiceChat;
   final bool friendRequest;
-  NotificationSettings({
+  NotificationData({
     required this.isActive,
     required this.directMessage,
     required this.currentStatusPost,
@@ -365,8 +365,11 @@ class NotificationSettings {
     required this.friendRequest,
   });
 
-  factory NotificationSettings.fromJson(Map<String, dynamic> json) {
-    return NotificationSettings(
+  factory NotificationData.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return NotificationData.defaultSettings();
+    }
+    return NotificationData(
       isActive: json["isActive"] ?? true,
       directMessage: json["directMessage"] ?? true,
       currentStatusPost: json["currentStatusPost"] ?? true,
@@ -375,8 +378,8 @@ class NotificationSettings {
       friendRequest: json["friendRequest"] ?? true,
     );
   }
-  factory NotificationSettings.defaultSettings() {
-    return NotificationSettings(
+  factory NotificationData.defaultSettings() {
+    return NotificationData(
       isActive: true,
       directMessage: true,
       currentStatusPost: true,
@@ -397,7 +400,7 @@ class NotificationSettings {
     };
   }
 
-  NotificationSettings copyWith({
+  NotificationData copyWith({
     bool? isActive,
     bool? directMessage,
     bool? currentStatusPost,
@@ -405,7 +408,7 @@ class NotificationSettings {
     bool? voiceChat,
     bool? friendRequest,
   }) {
-    return NotificationSettings(
+    return NotificationData(
       isActive: isActive ?? this.isActive,
       directMessage: directMessage ?? this.directMessage,
       currentStatusPost: currentStatusPost ?? this.currentStatusPost,
@@ -416,18 +419,87 @@ class NotificationSettings {
   }
 }
 
-class PrivacySettings {
-  final bool isPrivate;
-  final String availableFriendRequests; // friend_of_friend or anyone
-  //final String profilePublicity; //
-  //final String contentPublicity;
+class Privacy {
+  final bool privateMode;
+  final PublicityRange contentRange;
+  final PublicityRange requestRange;
 
-  PrivacySettings({
-    required this.isPrivate,
-    required this.availableFriendRequests,
-    // required this.profilePublicity,
-    // required this.contentPublicity,
+  Privacy({
+    required this.privateMode,
+    required this.contentRange, // friends, friendOfFriend
+    required this.requestRange, // friends, friendOfFriend , public
   });
+
+  factory Privacy.fromJson(Map<String, dynamic>? json) {
+    if (json == null) return Privacy.defaultPrivacy();
+    return Privacy(
+      privateMode: json["privateMode"],
+      contentRange: PublicityRangeConverter.fromString(json["contentRange"]),
+      requestRange: PublicityRangeConverter.fromString(json["requestRange"]),
+    );
+  }
+
+  factory Privacy.defaultPrivacy() {
+    return Privacy(
+      privateMode: false,
+      contentRange: PublicityRange.friendOfFriend,
+      requestRange: PublicityRange.public,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "privateMode": privateMode,
+      "contentRange": PublicityRangeConverter.convertToString(contentRange),
+      "requestRange": PublicityRangeConverter.convertToString(requestRange),
+    };
+  }
+
+  Privacy copyWith({
+    bool? privateMode,
+    PublicityRange? contentRange,
+    PublicityRange? requestRange,
+  }) {
+    return Privacy(
+      privateMode: privateMode ?? this.privateMode,
+      contentRange: contentRange ?? this.contentRange,
+      requestRange: requestRange ?? this.requestRange,
+    );
+  }
+}
+
+enum PublicityRange {
+  onlyFriends,
+  friendOfFriend,
+  public,
+}
+
+class PublicityRangeConverter {
+  static PublicityRange fromString(String? str) {
+    switch (str) {
+      case "onlyFriends":
+        return PublicityRange.onlyFriends;
+      case "friendOfFriend":
+        return PublicityRange.friendOfFriend;
+      case "public":
+        return PublicityRange.public;
+      default:
+        return PublicityRange.public;
+    }
+  }
+
+  static String convertToString(PublicityRange range) {
+    switch (range) {
+      case PublicityRange.onlyFriends:
+        return "onlyFriends";
+      case PublicityRange.friendOfFriend:
+        return "friendOfFriend";
+      case PublicityRange.public:
+        return "public";
+      default:
+        return "public";
+    }
+  }
 }
 
 class UserAccount {
@@ -436,11 +508,15 @@ class UserAccount {
   final Timestamp createdAt;
   final Timestamp lastOpenedAt;
   final bool isOnline;
+
   //backend
+  final String? usedCode;
   final String? fcmToken;
   final String? voipToken;
+
   final AccountStatus accountStatus;
   final DeviceInfo? deviceInfo;
+
   //info
   final String name;
   final String username;
@@ -450,14 +526,15 @@ class UserAccount {
   final String aboutMe;
   final CurrentStatus currentStatus;
   final List<String> topFriends;
- 
+
   final List<String> wishList;
   final List<String> wantToDoList;
   final SubscriptionStatus subscriptionStatus;
   //canvas
   final CanvasTheme canvasTheme;
   //settings
-  final NotificationSettings notificationSettings;
+  final NotificationData notificationData;
+  final Privacy privacy;
 
   UserAccount({
     required this.userId,
@@ -465,6 +542,7 @@ class UserAccount {
     required this.lastOpenedAt,
     required this.isOnline,
     //
+    required this.usedCode,
     required this.fcmToken,
     required this.voipToken,
     required this.accountStatus,
@@ -478,26 +556,27 @@ class UserAccount {
     required this.aboutMe,
     required this.currentStatus,
     required this.topFriends,
-   
     required this.wishList,
     required this.wantToDoList,
     //
     required this.canvasTheme,
     required this.subscriptionStatus,
     //
-    required this.notificationSettings,
+    required this.notificationData,
+    required this.privacy,
   });
 
   factory UserAccount.fromJson(Map<String, dynamic> json) {
-    if (json["username"] == null) {
+    /*if (json["username"] == null) {
       FirebaseAuth.instance.signOut();
-    }
+    } */
     return UserAccount(
       userId: json["userId"],
       createdAt: json["createdAt"],
       lastOpenedAt: json["lastOpenedAt"],
       isOnline: json["isOnline"],
       //
+      usedCode: json["usedCode"],
       fcmToken: json["fcmToken"],
       voipToken: json["voipToken"],
       accountStatus: AccountStatusConverter.convertToStatus(
@@ -510,43 +589,50 @@ class UserAccount {
           : null,
       //
       name: json["name"] ?? "DEFAULT NAME",
-      username: json["username"],
+      username: "${json["username"]}",
       imageUrl: json["imageUrl"],
-      //profile
+
+      //
       bio: Bio.fromJson(json["profile"]["bio"]),
       aboutMe: json["profile"]["aboutMe"],
       currentStatus: CurrentStatus.fromJson(json["profile"]["currentStatus"]),
       topFriends: List<String>.from(json["profile"]["topFriends"]),
-      
+
       wishList: List<String>.from(json['profile']['wishList'] ?? []),
       wantToDoList: List<String>.from(json['profile']['wantToDoList'] ?? []),
       canvasTheme: CanvasTheme.fromJson(json["canvasTheme"]),
       subscriptionStatus: SubscriptionConverter.convertToSubScriptionStatus(
         json["subscription"],
       ),
+
       //
-      notificationSettings:
-          NotificationSettings.fromJson(json["settings_notification"] ?? {}),
+      notificationData: NotificationData.fromJson(json["notificationData"]),
+      privacy: Privacy.fromJson(
+        json["privacy"],
+      ),
     );
   }
 
   Map<String, dynamic> toJson() {
-    DebugPrint("JSON :$topFriends $wantToDoList");
     return {
       "userId": userId,
       "createdAt": createdAt,
+      "lastOpenedAt": lastOpenedAt,
+      "isOnline": isOnline,
+
+      //
+      "usedCode": usedCode,
+      "fcmToken": fcmToken,
+      "voipToken": voipToken,
+      "accountStatus": AccountStatusConverter.convertToString(accountStatus),
+      "deviceInfo": deviceInfo?.toJson(),
+
+      //
       "name": name,
       "username": username,
       "imageUrl": imageUrl,
+
       //
-      "fcmToken": fcmToken,
-      "voipToken": voipToken,
-      "isOnline": isOnline,
-      "lastOpenedAt": lastOpenedAt,
-      //status
-      //deviceInfo
-      "accountStatus": AccountStatusConverter.convertToString(accountStatus),
-      "deviceInfo": deviceInfo?.toJson(),
       "profile": {
         "bio": bio.toJson(),
         "aboutMe": aboutMe,
@@ -557,16 +643,19 @@ class UserAccount {
       },
       //canvas
       "canvasTheme": canvasTheme.toJson(),
+      "notificationData": notificationData.toJson(),
+      "privacy": privacy.toJson()
     };
   }
 
   factory UserAccount.nullUser() {
     return UserAccount(
-      userId: "nullUser",
+      userId: FirebaseAuth.instance.currentUser!.uid,
       createdAt: Timestamp.now(),
       lastOpenedAt: Timestamp.now(),
       isOnline: false,
       //
+      usedCode: null,
       fcmToken: null,
       voipToken: null,
       accountStatus: AccountStatus.normal,
@@ -578,13 +667,14 @@ class UserAccount {
       bio: Bio.defaultBio(),
       aboutMe: "",
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
-      
+
       wishList: [],
       wantToDoList: [],
       canvasTheme: CanvasTheme.defaultCanvasTheme(),
       subscriptionStatus: SubscriptionStatus.none,
       //
-      notificationSettings: NotificationSettings.defaultSettings(),
+      notificationData: NotificationData.defaultSettings(),
+      privacy: Privacy.defaultPrivacy(),
     );
   }
 
@@ -600,6 +690,7 @@ class UserAccount {
       lastOpenedAt: Timestamp.fromDate(DateTime.now()),
       isOnline: false,
       //
+      usedCode: null,
       fcmToken: null,
       voipToken: null,
       accountStatus: AccountStatus.normal,
@@ -617,23 +708,25 @@ class UserAccount {
       ),
       aboutMe: "I am cringe, but I am free",
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
-     
+
       wishList: [],
       wantToDoList: [],
       canvasTheme: CanvasTheme.defaultCanvasTheme(),
       subscriptionStatus: SubscriptionStatus.none,
       //
-      notificationSettings: NotificationSettings.defaultSettings(),
+      notificationData: NotificationData.defaultSettings(),
+      privacy: Privacy.defaultPrivacy(),
     );
   }
   isNull() {
-    return userId == "nullUser";
+    return username == "null";
   }
 
   UserAccount copyWith({
     String? name,
     String? imageUrl,
     String? fcmToken,
+    String? usedCode,
     String? voipToken,
     bool? isOnline,
     Timestamp? lastOpenedAt,
@@ -646,14 +739,17 @@ class UserAccount {
     CurrentStatus? currentStatus,
     List<String>? topFriends,
     CanvasTheme? canvasTheme,
-    NotificationSettings? notificationSettings,
+    NotificationData? notificationData,
+    Privacy? privacy,
   }) {
     return UserAccount(
       userId: userId,
       createdAt: createdAt,
       lastOpenedAt: lastOpenedAt ?? this.lastOpenedAt,
       isOnline: isOnline ?? this.isOnline,
+
       //
+      usedCode: usedCode ?? this.usedCode,
       fcmToken: fcmToken ?? this.fcmToken,
       voipToken: voipToken ?? this.voipToken,
       accountStatus: accountStatus,
@@ -667,14 +763,59 @@ class UserAccount {
       aboutMe: aboutMe ?? this.aboutMe,
       currentStatus: currentStatus ?? this.currentStatus,
       topFriends: topFriends ?? this.topFriends,
-    
       wishList: wishList,
       wantToDoList: wantToDoList,
       canvasTheme: canvasTheme ?? this.canvasTheme,
       subscriptionStatus: subscriptionStatus,
       //
-      notificationSettings: notificationSettings ?? this.notificationSettings,
+      notificationData: notificationData ?? this.notificationData,
+      privacy: privacy ?? this.privacy,
     );
+  }
+
+  UserAccount create({
+    required String userId,
+    required String username,
+    required String name,
+    String? imageUrl,
+  }) {
+    return UserAccount(
+      userId: userId,
+      createdAt: createdAt,
+      lastOpenedAt: lastOpenedAt,
+      isOnline: isOnline,
+
+      //
+      usedCode: usedCode,
+      fcmToken: fcmToken,
+      voipToken: voipToken,
+      accountStatus: accountStatus,
+      deviceInfo: deviceInfo,
+      //
+      name: name,
+      username: username,
+      imageUrl: imageUrl,
+      //
+      bio: bio,
+      aboutMe: aboutMe,
+      currentStatus: currentStatus,
+      topFriends: topFriends,
+
+      wishList: wishList,
+      wantToDoList: wantToDoList,
+      canvasTheme: canvasTheme,
+      subscriptionStatus: subscriptionStatus,
+      //
+      notificationData: notificationData,
+      privacy: privacy,
+    );
+  }
+
+  bool get validCode {
+    return (usedCode != null &&
+        usedCode != "WAITING" &&
+        usedCode != "NO_CODE" &&
+        usedCode?.length == 8);
   }
 }
 

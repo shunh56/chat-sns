@@ -1,6 +1,5 @@
 import 'package:app/datasource/user_datasource.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/domain/value/user/gender.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final userRepositoryProvider = Provider(

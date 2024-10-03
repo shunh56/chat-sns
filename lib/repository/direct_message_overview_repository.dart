@@ -20,11 +20,15 @@ class DirectMessageOverviewRepository {
         e.docs.map((doc) => DMOverview.fromJson(doc.data(), _ref)).toList());
   }
 
+  closeChat(String userId) {
+    return _datasource.closeChat(userId);
+  }
+
   leaveChat(String userId) {
     return _datasource.leaveChat(userId);
   }
 
-  joinChat(String userId){
+  joinChat(String userId) {
     return _datasource.joinChat(userId);
   }
 }

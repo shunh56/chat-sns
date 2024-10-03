@@ -1,18 +1,21 @@
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/reply.dart';
+import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
 import 'package:app/repository/posts/post_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final postUsecaseProvider = Provider(
   (ref) => PostUsecase(
+    ref,
     ref.read(postRepositoryProvider),
   ),
 );
 
 class PostUsecase {
+  final Ref _ref;
   final PostRepository _repository;
-  PostUsecase(this._repository);
+  PostUsecase(this._ref, this._repository);
 
   Future<List<Post>> getPosts() async {
     return await _repository.getPosts();
@@ -38,8 +41,11 @@ class PostUsecase {
     return await _repository.getPostById(postId);
   } */
 
-  uploadPost(PostState state) {
-    return _repository.uploadPost(state);
+  uploadPost(PostState state) async {
+    final uploader = _ref.read(imageUploadUsecaseProvider);
+    final imageUrls = await uploader.uploadPostImage(state.id, state.images);
+    final aspectRatios = uploader.getAspectRatios(state.images);
+    return _repository.uploadPost(state, imageUrls, aspectRatios);
   }
 
   incrementLikeCount(String id, int count) {

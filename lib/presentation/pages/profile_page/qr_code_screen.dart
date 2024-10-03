@@ -86,7 +86,7 @@ class QrCodeScreen extends ConsumerWidget {
                         ),
                         const Gap(36),
                         Text(
-                          "@${me.username}",
+                          me.username,
                           style: TextStyle(
                             color: me.canvasTheme.boxTextColor,
                             fontSize: 24,

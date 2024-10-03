@@ -18,7 +18,7 @@ showMessage(
       backgroundColor: ThemeColor.accent,
       content: Text(
         message,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
         ),
       ),

@@ -88,6 +88,7 @@ class CreatePostScreen extends ConsumerWidget {
                         final text = ref.read(inputTextProvider);
                         if (text.isNotEmpty) {
                           FocusManager.instance.primaryFocus?.unfocus();
+                          
                           postUsecase.uploadPost(postState);
                           showMessage("送信を開始しました。");
                           Navigator.pop(context);

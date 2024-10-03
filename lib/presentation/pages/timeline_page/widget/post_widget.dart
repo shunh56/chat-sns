@@ -208,7 +208,7 @@ class PostWidget extends ConsumerWidget {
               width: MediaQuery.sizeOf(context).width,
               margin: const EdgeInsets.only(
                 top: 8,
-                left: 12 + 48 + 12,
+                left: 12 + 44.4 + 8,
                 right: 12,
               ),
               child: FadeTransitionWidget(

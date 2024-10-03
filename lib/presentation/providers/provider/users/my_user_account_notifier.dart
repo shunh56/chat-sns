@@ -2,12 +2,14 @@
 import 'dart:io';
 
 import 'package:app/core/utils/debug_print.dart';
+import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/domain/value/user/gender.dart';
 import 'package:app/presentation/pages/onboarding_page/onboarding_page.dart';
-import 'package:app/presentation/providers/notifier/image/image_uploader_notifier.dart';
+import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/usecase/invite_code_usecase.dart';
 import 'package:app/usecase/posts/current_status_post_usecase.dart';
 import 'package:app/usecase/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -41,6 +43,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
             .addUserAccounts([userAccount]);
       } else {
         state = AsyncValue.data(UserAccount.nullUser());
+        usecase.createUser(UserAccount.nullUser());
       }
     }
     /*if (!userAccount.isDummy()) {
@@ -79,12 +82,30 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     usecase.updateUser(updatedUser);
   }
 
+  //usedCodeにしようするコードを書き換える => ホームに行けるようになる
+  useInviteCode(InviteCode code) {
+    final user = state.asData!.value;
+    final updatedUser = user.copyWith(usedCode: code.code);
+    state = AsyncValue.data(updatedUser);
+    usecase.updateUser(updatedUser);
+  }
+
   createUser(
     String username,
     String name,
     File? iconImage,
   ) async {
     ref.read(creatingProcessProvider.notifier).state = true;
+    final user = state.asData!.value;
+    if (user.validCode) {
+      final code = await ref
+          .read(inviteCodeUsecaseProvider)
+          .getInviteCode(user.usedCode!);
+      if (code.getStatus == InviteCodeStatus.valid) {
+        ref.read(inviteCodeUsecaseProvider).useCode(user.usedCode!);
+        ref.read(friendIdListNotifierProvider.notifier).addFriend(code.userId);
+      }
+    }
     final String userId = ref.watch(authProvider).currentUser!.uid;
     //Isolate
     //get compressedImage
@@ -92,17 +113,17 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     //userAccount =
     String? imageUrl = iconImage != null
         ? await ref
-            .read(imageUploaderNotifierProvider)
+            .read(imageUploadUsecaseProvider)
             .uploadIconImage(iconImage)
         : null;
-    final user = UserAccount.create(
+    final updatedUser = user.create(
       userId: userId,
       username: username,
       name: name,
       imageUrl: imageUrl,
     );
-    usecase.createUser(user);
-    state = AsyncValue.data(user);
+    state = AsyncValue.data(updatedUser);
+    usecase.updateUser(updatedUser);
   }
 
   changeColor(CanvasTheme canvasTheme) {
@@ -151,6 +172,19 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     }
   }
 
+  updatePrivacy(Privacy privacy) {
+    final user = state.asData!.value;
+    final updatedUser = user.copyWith(privacy: privacy);
+    usecase.updateUser(updatedUser);
+    state = AsyncValue.data(updatedUser);
+  }
+
+  updateNotificationData(NotificationData notificationData) {
+    final user = state.asData!.value;
+    final updatedUser = user.copyWith(notificationData: notificationData);
+    usecase.updateUser(updatedUser);
+    state = AsyncValue.data(updatedUser);
+  }
 /*
   _checkInitialUpdates(UserAccount userAccount) {
     //update deviceInfo

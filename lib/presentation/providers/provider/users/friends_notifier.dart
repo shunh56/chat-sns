@@ -42,8 +42,14 @@ class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
       await _ref
           .read(allUsersNotifierProvider.notifier)
           .getUserAccounts(friendInfos.map((item) => item.userId).toList());
-      state = AsyncValue.data(friendInfos);
+      if (mounted) {
+        state = AsyncValue.data(friendInfos);
+      }
     });
+  }
+
+  addFriend(String userId) {
+    usecase.addFriend(userId);
   }
 
   void deleteFriend(UserAccount user) async {
@@ -53,9 +59,42 @@ class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
 
   Future<List<UserAccount>> getFriends(String userId) async {
     final list = await usecase.getFriends(userId);
+
     return await _ref
         .read(allUsersNotifierProvider.notifier)
         .getUserAccounts(list);
+  }
+}
+
+final deletesIdListNotifierProvider =
+    StateNotifierProvider<DeletesIdListNotifier, AsyncValue<List<String>>>(
+        (ref) {
+  return DeletesIdListNotifier(
+    ref,
+    ref.watch(friendsUsecaseProvider),
+  )..initialize();
+});
+
+class DeletesIdListNotifier extends StateNotifier<AsyncValue<List<String>>> {
+  DeletesIdListNotifier(this._ref, this.usecase)
+      : super(const AsyncValue<List<String>>.loading());
+  final Ref _ref;
+  final FriendsUsecase usecase;
+  void initialize() async {
+    final deleteIds = await usecase.getDeletes();
+    if (mounted) {
+      state = AsyncValue.data(deleteIds);
+    }
+  }
+
+  deleteUser(UserAccount user) {
+    final list = state.asData?.value ?? [];
+    list.add(user.userId);
+
+    if (mounted) {
+      state = AsyncValue.data(list);
+    }
+    usecase.deleteUser(user);
   }
 }
 
@@ -81,12 +120,13 @@ class FriendRequestIdListNotifier
     DebugPrint("initializing friendRequests");
     Stream<List<String>> stream = usecase.streamFriendRequests();
     _subscription = stream.listen((userIds) async {
-      DebugPrint("request users : $userIds");
       await _ref
           .read(allUsersNotifierProvider.notifier)
           .getUserAccounts(userIds);
 
-      state = AsyncValue.data(userIds);
+      if (mounted) {
+        state = AsyncValue.data(userIds);
+      }
     });
   }
 
@@ -137,16 +177,18 @@ class FriendRequestedIdListNotifier
       await _ref
           .read(allUsersNotifierProvider.notifier)
           .getUserAccounts(userIds);
-      state = AsyncValue.data(userIds);
+      if (mounted) {
+        state = AsyncValue.data(userIds);
+      }
     });
   }
 
-  admitFriendRequested(String userId) {
-    usecase.admitFriendRequested(userId);
+  admitFriendRequested(UserAccount user) {
+    usecase.admitFriendRequested(user.userId);
   }
 
-  deleteRequested(String userId) {
-    usecase.deleteRequested(userId);
+  deleteRequested(UserAccount user) {
+    usecase.deleteRequested(user.userId);
   }
 }
 
@@ -170,49 +212,62 @@ class FriendsFriendListNotifier
   final AsyncValue<List<FriendInfo>> asyncValue;
   final FriendsUsecase usecase;
 
-  bool initialized = false;
-
+  //TODO グリッチが起きてしまう
   void initialize() async {
-    Map<String, UserAccount> userMap = {};
+    Set<String> userIds = {};
     final friendIds = asyncValue;
     friendIds.maybeWhen(
       data: (friendInfos) async {
+        userIds = {};
+        final map =
+            Map<String, Set<String>>.from(_ref.read(friendsFriendMapProvider));
         final friendIds = friendInfos.map((item) => item.userId).toList();
         final filterIds =
             friendIds + [_ref.read(authProvider).currentUser!.uid];
+        //futures
         List<Future<List<UserAccount>>> futures = [];
         for (String userId in friendIds) {
-          futures.add(_ref
-              .read(friendIdListNotifierProvider.notifier)
-              .getFriends(userId));
+          final user =
+              _ref.read(allUsersNotifierProvider).asData?.value[userId];
+          if (user != null) {
+            futures.add(
+              _ref
+                  .read(allUsersNotifierProvider.notifier)
+                  .getUserAccounts(user.topFriends),
+            );
+          }
         }
         await Future.wait(futures);
-        final map = _ref.read(friendsFriendMapProvider);
+
+        //
         for (int i = 0; i < friendIds.length; i++) {
           final userId = friendIds[i];
           final list = await futures[i];
           for (var user in list) {
-            userMap[user.userId] = user;
-            if (map[user.userId] == null) {
-              map[user.userId] = {userId};
-            } else {
-              map[user.userId]!.add(userId);
+            if (!user.privacy.privateMode) {
+              userIds.add(user.userId);
+              if (map[user.userId] == null) {
+                map[user.userId] = {userId};
+              } else {
+                map[user.userId]!.add(userId);
+              }
             }
           }
         }
         _ref.read(friendsFriendMapProvider.notifier).state = map;
-        userMap.removeWhere((userId, val) => filterIds.contains(userId));
-        List<UserAccount> users = userMap.entries.map((e) => e.value).toList();
-        state = AsyncValue.data(users);
+        userIds.removeWhere((userId) => filterIds.contains(userId));
+        final users = _ref
+            .read(allUsersNotifierProvider)
+            .asData
+            ?.value
+            .entries
+            .where((item) => userIds.contains(item.value.userId))
+            .map((item) => item.value)
+            .toSet();
+        state = AsyncValue.data(users!.toList());
       },
       orElse: () {},
     );
-  }
-
-  void removeUser(UserAccount user) async {
-    final list = state.asData!.value;
-    list.removeWhere((e) => e.userId == user.userId);
-    state = AsyncValue.data(list);
   }
 }
 

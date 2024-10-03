@@ -14,6 +14,7 @@ import 'package:app/presentation/providers/state/count_down.dart';
 import 'package:app/usecase/voice_chat_usecase.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -28,8 +29,9 @@ final speakerListProvider = StateProvider.autoDispose<List<int>>((ref) => []);
 //final speakerUidProvider = StateProvider.autoDispose((ref) => -1);
 
 class VoiceChatScreen extends ConsumerWidget {
-  const VoiceChatScreen({super.key, required this.id});
+  const VoiceChatScreen({super.key, required this.id, this.uuid = ""});
   final String id;
+  final String uuid;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,9 +44,15 @@ class VoiceChatScreen extends ConsumerWidget {
           ),
           child: Column(
             children: [
-              VoiceChatAppBar(id: id),
+              VoiceChatAppBar(
+                id: id,
+                uuid: uuid,
+              ),
               Expanded(
-                child: VoiceChatFeed(id: id),
+                child: VoiceChatFeed(
+                  id: id,
+                  uuid: uuid,
+                ),
               ),
             ],
           ),
@@ -55,8 +63,9 @@ class VoiceChatScreen extends ConsumerWidget {
 }
 
 class VoiceChatAppBar extends ConsumerWidget {
-  const VoiceChatAppBar({super.key, required this.id});
+  const VoiceChatAppBar({super.key, required this.id, required this.uuid});
   final String id;
+  final String uuid;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
@@ -65,6 +74,9 @@ class VoiceChatAppBar extends ConsumerWidget {
     final popped = ref.watch(poppedProvider);
     void leave() async {
       if (!popped) {
+        if (uuid.isNotEmpty) {
+          await FlutterCallkitIncoming.endCall(uuid);
+        }
         await Future.delayed(const Duration(milliseconds: 100));
         ref.read(poppedProvider.notifier).state = true;
         ref.read(voiceChatUsecaseProvider).leaveVoiceChat(id);
@@ -116,9 +128,9 @@ class VoiceChatAppBar extends ConsumerWidget {
 }
 
 class VoiceChatFeed extends ConsumerStatefulWidget {
-  const VoiceChatFeed({super.key, required this.id});
+  const VoiceChatFeed({super.key, required this.id, required this.uuid});
   final String id;
-
+  final String uuid;
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _VoiceChatFeedState();
 }
@@ -251,10 +263,13 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
     }
   }
 
-  void leave() {
+  void leave() async {
     final popped = ref.read(poppedProvider);
     if (mounted) {
       if (!popped) {
+        if (widget.uuid.isNotEmpty) {
+          await FlutterCallkitIncoming.endCall(widget.uuid);
+        }
         ref.read(poppedProvider.notifier).state = true;
         ref.read(voiceChatUsecaseProvider).leaveVoiceChat(widget.id);
         Navigator.pop(context);

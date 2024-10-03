@@ -23,6 +23,7 @@ class FriendsDatasource {
   final collectionName = "friends";
   final requestsCollection = "friendRequests";
   final requestedsCollection = "friendRequesteds";
+  final deletes = "deletes";
 
   //CREATE
 
@@ -48,12 +49,12 @@ class FriendsDatasource {
   }
 
   void admitFriendRequested(String userId) {
-    _addFriend(userId);
+    addFriend(userId);
     deleteRequest(userId);
     deleteRequested(userId);
   }
 
-  void _addFriend(String userId) {
+  void addFriend(String userId) {
     if (userId == _auth.currentUser!.uid) {
       debugPrint("invitecode user and user is SAME!");
       throw Exception("Cannot add yourself as friend!");
@@ -158,5 +159,31 @@ class FriendsDatasource {
         .collection(collectionName)
         .doc(_auth.currentUser!.uid)
         .delete();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> fetchDeletes() async {
+    final timestamp =
+        Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 7)));
+    return await _firestore
+        .collection("users")
+        .doc(_auth.currentUser!.uid)
+        .collection(deletes)
+        .where("createdAt", isGreaterThanOrEqualTo: timestamp)
+        .get();
+  }
+
+  void deleteUser(String userId) {
+    _firestore
+        .collection("users")
+        .doc(_auth.currentUser!.uid)
+        .collection(deletes)
+        .doc(userId)
+        .set(
+      {
+        "userId": userId,
+        "createdAt": Timestamp.now(),
+      },
+      SetOptions(merge: true),
+    );
   }
 }

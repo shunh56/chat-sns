@@ -2,11 +2,13 @@ import 'dart:math';
 
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/invite_code.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/usecase/invite_code_usecase.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
@@ -251,30 +253,38 @@ class InviteCodeScreen extends ConsumerWidget {
                                 ],
                               ),
                               const Expanded(child: SizedBox()),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                child: DottedBorder(
-                                  color: me.canvasTheme
-                                      .boxTextColor, //color of dotted/dash line
-                                  strokeWidth: 3, //thickness of dash/dots
-                                  dashPattern: const [24, 8],
-                                  radius: const Radius.circular(8),
-                                  borderType: BorderType.RRect,
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        inviteCode.code,
-                                        style: TextStyle(
-                                          fontSize: 32,
-                                          color: me.canvasTheme
-                                              .boxSecondaryTextColor,
-                                          fontWeight: FontWeight.w600,
+                              GestureDetector(
+                                onLongPress: () {
+                                  HapticFeedback.mediumImpact();
+                                  Clipboard.setData(
+                                      ClipboardData(text: inviteCode.code));
+                                  showMessage("招待コードをコピーしました");
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  child: DottedBorder(
+                                    color: me.canvasTheme
+                                        .boxTextColor, //color of dotted/dash line
+                                    strokeWidth: 3, //thickness of dash/dots
+                                    dashPattern: const [24, 8],
+                                    radius: const Radius.circular(8),
+                                    borderType: BorderType.RRect,
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          inviteCode.code,
+                                          style: TextStyle(
+                                            fontSize: 32,
+                                            color: me.canvasTheme
+                                                .boxSecondaryTextColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
                                     ),

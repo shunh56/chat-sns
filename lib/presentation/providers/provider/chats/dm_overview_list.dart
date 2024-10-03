@@ -36,6 +36,15 @@ class DmOverviewListNotifier
     _ref.onDispose(subscription.cancel);
   }
 
+  // delete from both users
+  closeChat(UserAccount user) {
+    final listToUpdate = state.value ?? [];
+    listToUpdate.removeWhere((item) => item.userId == user.userId);
+    state = AsyncValue.data(listToUpdate);
+    _usecase.closeChat(user.userId);
+  }
+
+  //delete just me
   leaveChat(UserAccount user) {
     final listToUpdate = state.value ?? [];
     listToUpdate.removeWhere((item) => item.userId == user.userId);

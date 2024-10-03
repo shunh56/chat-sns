@@ -16,6 +16,10 @@ class DirectMessageOverviewUsecase {
     return _repository.streamDMOverviews();
   }
 
+  closeChat(String userId) {
+    return _repository.closeChat(userId);
+  }
+
   leaveChat(String userId) {
     return _repository.leaveChat(userId);
   }

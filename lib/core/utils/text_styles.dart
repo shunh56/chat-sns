@@ -154,7 +154,7 @@ class ThemeTextStyle {
   TextStyle appbarText({bool japanese = false}) {
     return TextStyle(
       color: ThemeColor.text,
-      fontSize: japanese ? 18 : 20,
+      fontSize: japanese ? 16 : 20,
       fontWeight: FontWeight.w600,
       fontFamily: japanese ? primary : null,
     );

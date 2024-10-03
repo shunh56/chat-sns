@@ -1,6 +1,5 @@
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/sub/blocks_screen.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/sub/mutes_screen.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
@@ -29,7 +28,7 @@ class AccountScreen extends ConsumerWidget {
         return _buildContainer(
           "アカウント情報",
           [
-            _buildTopTile("ユーザー名", "@$username"),
+            _buildTopTile("ユーザー名", username),
             _buildTile("ニックネーム", name),
             _buildBottomTile("メンバーになった日", createdAt),
           ],

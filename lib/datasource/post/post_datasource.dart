@@ -1,4 +1,4 @@
-import 'package:app/presentation/providers/notifier/image/image_uploader_notifier.dart';
+import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
@@ -6,7 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import 'package:image/image.dart' as img;
 
 final postDatasourceProvider = Provider(
   (ref) => PostDatasource(
@@ -72,36 +71,8 @@ class PostDatasource {
     return await _firestore.collection(collectionName).doc(postId).get();
   }
 
-  uploadPost(PostState state) async {
-    final String id = const Uuid().v4();
-    final Timestamp now = Timestamp.now();
-
-    List<double> aspectRatios = [];
-    List<Future<String>> futures = [];
-    for (var file in state.images) {
-      final originalImage = img.decodeImage((file).readAsBytesSync());
-      int? width = originalImage?.width;
-      int? height = originalImage?.height;
-      aspectRatios.add((height! / width!) * 100.roundToDouble() / 100);
-      futures
-          .add(_ref.read(imageUploaderNotifierProvider).uploadIconImage(file));
-    }
-    List<String> mediaUrls = await Future.wait(futures);
-
-    _firestore.collection(collectionName).doc(id).set({
-      "id": id,
-      "createdAt": now,
-      "userId": _auth.currentUser!.uid,
-      "text": state.text,
-      "mediaUrls": mediaUrls,
-      "aspectRatios": aspectRatios,
-      "likeCount": 0,
-      "replyCount": 0,
-      "isDeletedByUser": false,
-      "isDeletedByAdmin": false,
-      "isDeletedByModerator": false,
-      "isPublic": state.isPublic,
-    });
+  uploadPost(Map<String, dynamic> json) async {
+    _firestore.collection(collectionName).doc(json["id"]).set(json);
   }
 
   incrementLikeCount(String id, int count) {
@@ -144,5 +115,4 @@ class PostDatasource {
       },
     );
   }
-
 }

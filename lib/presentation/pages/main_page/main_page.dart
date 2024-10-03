@@ -6,7 +6,6 @@ import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/threads_screen/screen.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
 import 'package:flutter/material.dart';
@@ -18,14 +17,6 @@ class MainPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    initializeProviders() {
-      ref.read(friendIdListNotifierProvider);
-      ref.read(friendRequestIdListNotifierProvider);
-      ref.read(friendRequestedIdListNotifierProvider);
-    }
-
-    initializeProviders();
-
     return Scaffold(
       extendBody: true,
       body: IndexedStack(
@@ -97,7 +88,7 @@ class BottomBar extends ConsumerWidget {
       showUnselectedLabels: false,
       onTap: (value) {
         HapticFeedback.lightImpact();
-        ref.watch(bottomNavIndexProvider.notifier).changeIndex(context,value);
+        ref.watch(bottomNavIndexProvider.notifier).changeIndex(context, value);
       },
       items: [
         BottomNavigationBarItem(

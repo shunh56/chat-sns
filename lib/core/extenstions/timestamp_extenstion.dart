@@ -31,9 +31,9 @@ extension TimestampExtension on Timestamp {
     if (diff < 60 * 60) {
       return "${diff ~/ 60}min";
     } else if (diff < 60 * 60 * 24) {
-      return "${diff ~/ (60 * 60)}時間";
+      return "${diff ~/ (60 * 60)}hrs";
     } else {
-      return "${diff ~/ (60 * 60 * 24)}日";
+      return "${diff ~/ (60 * 60 * 24)}day";
     }
   }
 }

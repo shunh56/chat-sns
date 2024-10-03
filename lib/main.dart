@@ -6,8 +6,9 @@ import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/firebase_options.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/auth/signin_page.dart';
+import 'package:app/presentation/pages/onboarding_page/awaiting_screen.dart';
+import 'package:app/presentation/pages/onboarding_page/input_invite_code_screen.dart';
 import 'package:app/presentation/pages/onboarding_page/onboarding_page.dart';
 import 'package:app/presentation/phase_01/main_page.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
@@ -225,10 +226,10 @@ configureVoiceCall() async {
       case Event.actionCallAccept:
         // TODO: accepted an incoming call
         // TODO: show screen calling in Flutter
-        await FlutterCallkitIncoming.endCall(event.body['id']);
+        // await FlutterCallkitIncoming.endCall(event.body['id']);
         await Future.delayed(const Duration(milliseconds: 30));
-        showMessage("action accepted, closing voip");
-        navigatorKey.currentState?.push(
+        //showMessage("action accepted, closing voip");
+        /* navigatorKey.currentState?.push(
           MaterialPageRoute(
             builder: (_) => const Scaffold(
               body: Center(
@@ -236,7 +237,7 @@ configureVoiceCall() async {
               ),
             ),
           ),
-        );
+        ); */
         break;
       case Event.actionCallDecline:
         // TODO: declined an incoming call
@@ -278,6 +279,20 @@ configureVoiceCall() async {
   });
 }
 
+/*configureSwiftMethodChannel() {
+  const platform = MethodChannel('com.shunh.exampleApp/voip');
+  platform.setMethodCallHandler(_handleVoIPCall);
+}
+
+Future<void> _handleVoIPCall(MethodCall call) async {
+  if (call.method == 'onVoIPReceived') {
+    final Map<String, dynamic> payloadData =
+        Map<String, dynamic>.from(call.arguments);
+    DebugPrint("voip method channel RECIEVED! : $payloadData");
+    
+  }
+}
+ */
 void main() {
   DebugPrint("main()");
   runZonedGuarded<Future<void>>(
@@ -294,6 +309,9 @@ void main() {
 
       //3. initialize notification
       configureNotification();
+
+      //methodChannelhandler
+      //configureSwiftMethodChannel();
 
       if (kDebugMode) {
         await FirebaseCrashlytics.instance
@@ -366,8 +384,8 @@ class MyApp extends ConsumerWidget {
             fontWeight: FontWeight.w600,
           ),
           iconTheme: const IconThemeData(
-            color: ThemeColor.highlight,
-            size: 24,
+            color: ThemeColor.text,
+            size: 20,
           ),
           systemOverlayStyle: const SystemUiOverlayStyle(
             //android
@@ -429,14 +447,36 @@ class SplashScreen extends ConsumerWidget {
               if (user == null) {
                 return const WelcomePage();
               } else {
-                final myAccountAsync = ref.watch(myAccountNotifierProvider);
-                return myAccountAsync.when(
-                  data: (myAccount) {
-                    if (myAccount.isNull()) {
-                      return const OnboardingScreen();
-                    } else {
-                      return const Phase01MainPage();
-                      // return const MainPage();
+                final usedCodeAsync =
+                    ref.watch(myAccountNotifierProvider.select((userAccount) {
+                  return userAccount.whenData((user) => user.usedCode);
+                }));
+                return usedCodeAsync.when(
+                  data: (usedCode) {
+                    DebugPrint("usedCode async");
+                    switch (usedCode) {
+                      case null:
+                        return const InputInviteCodeScreen();
+                      case "WAITING":
+                        return const AwaitingScreen();
+                      default:
+                        final usernameAsync = ref.watch(
+                            myAccountNotifierProvider.select((userAccount) {
+                          return userAccount.whenData((user) => user.username);
+                        }));
+                        return usernameAsync.when(
+                          data: (username) {
+                            DebugPrint("username async");
+                            if (username == "null") {
+                              return const OnboardingScreen();
+                            } else {
+                              DebugPrint("phase 01");
+                              return const Phase01MainPage();
+                            }
+                          },
+                          loading: () => const LoadingPage(),
+                          error: (e, _) => const ErrorPage(),
+                        );
                     }
                   },
                   loading: () => const LoadingPage(),

@@ -1,5 +1,4 @@
 // Flutter imports:
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
@@ -7,6 +6,7 @@ import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chat_info_screen.dart';
@@ -44,7 +44,8 @@ class ChattingScreen extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () {
-        FocusManager.instance.primaryFocus?.unfocus();
+        primaryFocus?.unfocus();
+        //FocusManager.instance.primaryFocus?.unfocus();
         // ref.read(currentScreenProvider.notifier).state = null;
       },
       onHorizontalDragEnd: (DragEndDetails details) {
@@ -319,8 +320,7 @@ class BottomTextField extends HookConsumerWidget {
         ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];
     final requestedIds =
         ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
-    final bottomPadding = MediaQuery.of(context).viewPadding.bottom +
-        (Platform.isAndroid ? 12 : 0);
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom + 12;
     if (friendIds.map((item) => item.userId).contains(user.userId)) {
       return Container(
         width: MediaQuery.sizeOf(context).width,
@@ -417,10 +417,8 @@ class BottomTextField extends HookConsumerWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        ref
-                            .read(
-                                friendRequestedIdListNotifierProvider.notifier)
-                            .deleteRequested(user.userId);
+                        HapticFeedback.lightImpact();
+                        showUpcomingSnackbar();
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -446,9 +444,12 @@ class BottomTextField extends HookConsumerWidget {
                     child: GestureDetector(
                       onTap: () {
                         ref
+                            .read(dmOverviewListNotifierProvider.notifier)
+                            .leaveChat(user);
+                        ref
                             .read(
                                 friendRequestedIdListNotifierProvider.notifier)
-                            .deleteRequested(user.userId);
+                            .deleteRequested(user);
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -476,7 +477,7 @@ class BottomTextField extends HookConsumerWidget {
                         ref
                             .read(
                                 friendRequestedIdListNotifierProvider.notifier)
-                            .admitFriendRequested(user.userId);
+                            .admitFriendRequested(user);
                         ref
                             .read(dmOverviewListNotifierProvider.notifier)
                             .joinChat(user);

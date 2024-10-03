@@ -1,3 +1,4 @@
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
@@ -8,35 +9,58 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+final inputTextProvider = StateProvider.autoDispose((ref) => "");
+final controllerProvider =
+    Provider.autoDispose((ref) => TextEditingController());
+
 class FriendsScreen extends ConsumerWidget {
   const FriendsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    final controller = ref.watch(controllerProvider);
     final asyncValue = ref.watch(friendIdListNotifierProvider);
     final friendsCount = asyncValue.maybeWhen(
-        data: (data) => " (${data.length})", orElse: () => "");
+        data: (data) => "(${data.length})", orElse: () => "");
+
+    final text = ref.watch(inputTextProvider);
+
     final listView = asyncValue.when(
       data: (userIds) {
+        final friends = ref
+            .watch(allUsersNotifierProvider)
+            .asData!
+            .value
+            .values
+            .where((user) =>
+                userIds.map((item) => item.userId).contains(user.userId))
+            .toList();
+        final users =
+            friends.where((user) => user.name.contains(text)).toList();
         if (userIds.isEmpty) {
           return const Center(
             child: Text("フレンドはいません"),
           );
         }
+        if (users.isEmpty) {
+          return const Center(
+            child: Text("検索結果がありません"),
+          );
+        }
         return ListView.builder(
-          itemCount: userIds.length,
-          padding: EdgeInsets.zero,
+          itemCount: users.length,
+          padding: const EdgeInsets.only(bottom: 48),
           itemBuilder: (context, index) {
-            String userId = userIds[index].userId;
-            final user =
-                ref.watch(allUsersNotifierProvider).asData!.value[userId]!;
+            final user = users[index];
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 color: ThemeColor.accent,
+                border: Border.all(color: ThemeColor.stroke, width: 0.4),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,34 +94,13 @@ class FriendsScreen extends ConsumerWidget {
                                       height: 1.0),
                                 ),
                                 Text(
-                                  "@${user.userId.substring(0, 12)}",
+                                  user.username,
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey,
                                   ),
                                 ),
                               ],
-                            ),
-                            const Expanded(child: SizedBox()),
-                            GestureDetector(
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                ref
-                                    .read(navigationRouterProvider(context))
-                                    .goToChat(user);
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: ThemeColor.white.withOpacity(0.1),
-                                ),
-                                child: const Icon(
-                                  Icons.chat_bubble_outline,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
                             ),
                           ],
                         ),
@@ -125,12 +128,54 @@ class FriendsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           "フレンド$friendsCount",
-          style: const TextStyle(
-            fontSize: 16,
-          ),
+          style: textStyle.appbarText(japanese: true),
         ),
       ),
-      body: listView,
+      body: Column(
+        children: [
+          Container(
+            width: MediaQuery.sizeOf(context).width,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.name,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: ThemeColor.text,
+                    ),
+                    onChanged: (value) {
+                      ref.read(inputTextProvider.notifier).state = value;
+                    },
+                    decoration: InputDecoration(
+                      hintText: "検索",
+                      filled: true,
+                      isDense: true,
+                      fillColor: ThemeColor.stroke,
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      hintStyle: const TextStyle(
+                        fontSize: 14,
+                        color: ThemeColor.white,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Gap(themeSize.verticalSpaceSmall),
+          Expanded(child: listView),
+        ],
+      ),
     );
   }
 }

@@ -29,7 +29,14 @@ class DirectMessageOverviewDatasource {
     String roomId = DMKeyConverter.getKey(_auth.currentUser!.uid, otherUserId);
     _firestore.collection("direct_messages").doc(roomId).update({
       "users.${_auth.currentUser!.uid}": true,
-      "users.$otherUserId": true,
+    });
+  }
+
+  closeChat(String otherUserId) {
+    String roomId = DMKeyConverter.getKey(_auth.currentUser!.uid, otherUserId);
+    _firestore.collection("direct_messages").doc(roomId).update({
+      "users.${_auth.currentUser!.uid}": false,
+      "users.$otherUserId": false,
     });
   }
 
@@ -37,7 +44,6 @@ class DirectMessageOverviewDatasource {
     String roomId = DMKeyConverter.getKey(_auth.currentUser!.uid, otherUserId);
     _firestore.collection("direct_messages").doc(roomId).update({
       "users.${_auth.currentUser!.uid}": false,
-      "users.$otherUserId": false,
     });
   }
 }

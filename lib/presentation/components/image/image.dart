@@ -161,7 +161,7 @@ class CachedImage {
     );
   }
 
-  static postImage(String imageUrl, {int ms = 300}) {
+  static Widget postImage(String imageUrl, {int ms = 300}) {
     return CachedNetworkImage(
       imageUrl: imageUrl,
       color: ThemeColor.beige,

@@ -98,8 +98,8 @@ class DirectMessageDatasource {
             "lastMessage": json,
             "updatedAt": json['createdAt'],
             'users': {
-              otherUserId: false,
-              _auth.currentUser!.uid: false,
+              otherUserId: true,
+              _auth.currentUser!.uid: true,
             },
             "userInfoList": [
               OverviewUserInfo(
@@ -142,8 +142,10 @@ class DirectMessageDatasource {
             "lastMessage": json,
             "updatedAt": json['createdAt'],
             "userInfoList": userInfoList.map((e) => e.toJson()).toList(),
-            "users.${_auth.currentUser!.uid}": true,
-            "users.$otherUserId": true,
+            'users': {
+              otherUserId: true,
+              _auth.currentUser!.uid: true,
+            },
           });
         }
       });
@@ -188,6 +190,7 @@ class DirectMessageDatasource {
               .unseenCount = 0;
           transaction.update(roomRef, {
             "userInfoList": userInfoList.map((e) => e.toJson()).toList(),
+            "users.${_auth.currentUser!.uid}": true,
           });
         }
 

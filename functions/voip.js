@@ -17,11 +17,12 @@ const client = new ApnsClient({
 
 // Function to send the notification
 const sendNotification = async (data) => {
-  const { tokens, name } = data;
+  const { tokens, name, id } = data;
   const notificationPayload = {
     aps: {
       alert: {
         name: name,
+        id: id,
       },
       sound: "default",
       "content-available": 1, // Indicates a VoIP notification

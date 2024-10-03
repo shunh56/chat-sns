@@ -49,8 +49,9 @@ class PostRepository {
     }
   } */
 
-  uploadPost(PostState state) {
-    return _datasource.uploadPost(state);
+  uploadPost(
+      PostState state, List<String> imageUrls, List<double> aspectRatios) {
+    return _datasource.uploadPost(state.toJson(aspectRatios, imageUrls));
   }
 
   incrementLikeCount(String id, int count) {

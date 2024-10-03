@@ -147,9 +147,9 @@ class CurrentStatusPostWidgets {
             color: ThemeColor.accent,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                      color: ThemeColor.stroke,
-                      width: 0.4,
-                    ),
+              color: ThemeColor.stroke,
+              width: 0.4,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,7 +178,7 @@ class CurrentStatusPostWidgets {
                               Row(
                                 children: [
                                   Text(
-                                    user.username,
+                                    user.name,
                                     style: textStyle.w600(fontSize: 16),
                                   ),
                                   const Gap(4),
@@ -219,7 +219,8 @@ class CurrentStatusPostWidgets {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Padding(
-                                            padding: const EdgeInsets.only(top: 8),
+                                            padding:
+                                                const EdgeInsets.only(top: 8),
                                             child: Text(
                                               "タグ : ",
                                               style: textStyle.w600(),
@@ -423,90 +424,59 @@ class CurrentStatusPostWidgets {
                                             style: textStyle.w600(),
                                           ),
                                           const Gap(8),
-                                          FutureBuilder(
-                                            future: ref
-                                                .read(allUsersNotifierProvider
-                                                    .notifier)
-                                                .getUserAccounts(
-                                                    post.after.nowWith),
-                                            builder: (context, snapshot) {
-                                              if (!snapshot.hasData) {
-                                                return const SizedBox();
-                                              }
-                                              final users = snapshot.data!;
+                                          Expanded(
+                                            child: FutureBuilder(
+                                              future: ref
+                                                  .read(allUsersNotifierProvider
+                                                      .notifier)
+                                                  .getUserAccounts(
+                                                      post.after.nowWith),
+                                              builder: (context, snapshot) {
+                                                if (!snapshot.hasData) {
+                                                  return const SizedBox();
+                                                }
+                                                final users = snapshot.data!;
 
-                                              return Wrap(
-                                                children: users
-                                                    .map(
-                                                      (user) => Container(
-                                                        margin: const EdgeInsets
-                                                            .all(4),
-                                                        child: Column(
-                                                          children: [
-                                                            ClipRRect(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          9),
-                                                              child: SizedBox(
-                                                                height: 32,
-                                                                width: 32,
-                                                                child: UserIcon
-                                                                    .tileIcon(
-                                                                        user,
-                                                                        width:
-                                                                            32,
-                                                                        ontapped:
-                                                                            () {
-                                                                  ref
-                                                                      .read(navigationRouterProvider(
-                                                                          context))
-                                                                      .goToProfile(
-                                                                          user);
-                                                                }),
-                                                                /*  CachedNetworkImage(
-                                                                  imageUrl: user
-                                                                      .imageUrl!,
-                                                                  fadeInDuration:
-                                                                      const Duration(
-                                                                          milliseconds:
-                                                                              120),
-                                                                  imageBuilder:
-                                                                      (context,
-                                                                              imageProvider) =>
-                                                                          Container(
-                                                                    height: 32,
+                                                return Wrap(
+                                                  children: users
+                                                      .map(
+                                                        (user) => Container(
+                                                          margin:
+                                                              const EdgeInsets
+                                                                  .all(4),
+                                                          child: Column(
+                                                            children: [
+                                                              ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            9),
+                                                                child: SizedBox(
+                                                                  height: 32,
+                                                                  width: 32,
+                                                                  child: UserIcon
+                                                                      .tileIcon(
+                                                                    user,
                                                                     width: 32,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: Colors
-                                                                          .transparent,
-                                                                      image:
-                                                                          DecorationImage(
-                                                                        image:
-                                                                            imageProvider,
-                                                                        fit: BoxFit
-                                                                            .cover,
-                                                                      ),
-                                                                    ),
+                                                                    ontapped:
+                                                                        () {
+                                                                      ref
+                                                                          .read(navigationRouterProvider(
+                                                                              context))
+                                                                          .goToProfile(
+                                                                              user);
+                                                                    },
                                                                   ),
-                                                                  placeholder: (context,
-                                                                          url) =>
-                                                                      const SizedBox(),
-                                                                  errorWidget: (context,
-                                                                          url,
-                                                                          error) =>
-                                                                      const SizedBox(),
-                                                                ), */
+                                                                ),
                                                               ),
-                                                            ),
-                                                          ],
+                                                            ],
+                                                          ),
                                                         ),
-                                                      ),
-                                                    )
-                                                    .toList(),
-                                              );
-                                            },
+                                                      )
+                                                      .toList(),
+                                                );
+                                              },
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -906,20 +876,7 @@ class CurrentStatusPostWidgets {
                               return const SizedBox();
                             }
                             final users = snapshot.data!;
-                            if (users.isEmpty) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: Center(
-                                  child: Text(
-                                    "No Top Friends",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
+
                             return Wrap(
                               children: users
                                   .map(
@@ -930,32 +887,46 @@ class CurrentStatusPostWidgets {
                                           ClipRRect(
                                             borderRadius:
                                                 BorderRadius.circular(9),
-                                            child: SizedBox(
-                                              height: 40,
-                                              width: 40,
-                                              child: CachedNetworkImage(
-                                                imageUrl: user.imageUrl!,
-                                                fadeInDuration: const Duration(
-                                                    milliseconds: 120),
-                                                imageBuilder:
-                                                    (context, imageProvider) =>
-                                                        Container(
-                                                  height: 40,
-                                                  width: 40,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.transparent,
-                                                    image: DecorationImage(
-                                                      image: imageProvider,
-                                                      fit: BoxFit.cover,
+                                            child: Container(
+                                              color: ThemeColor.accent,
+                                              height: 48,
+                                              width: 48,
+                                              child: user.imageUrl != null
+                                                  ? CachedNetworkImage(
+                                                      imageUrl: user.imageUrl!,
+                                                      fadeInDuration:
+                                                          const Duration(
+                                                              milliseconds:
+                                                                  120),
+                                                      imageBuilder: (context,
+                                                              imageProvider) =>
+                                                          Container(
+                                                        height: 48,
+                                                        width: 48,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .transparent,
+                                                          image:
+                                                              DecorationImage(
+                                                            image:
+                                                                imageProvider,
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      placeholder:
+                                                          (context, url) =>
+                                                              const SizedBox(),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          const SizedBox(),
+                                                    )
+                                                  : Icon(
+                                                      Icons.person_outline,
+                                                      size: 48 * 0.8,
+                                                      color: ThemeColor.stroke,
                                                     ),
-                                                  ),
-                                                ),
-                                                placeholder: (context, url) =>
-                                                    const SizedBox(),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        const SizedBox(),
-                                              ),
                                             ),
                                           ),
                                         ],
@@ -1271,32 +1242,40 @@ class CurrentStatusPostWidgets {
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(9),
-                                        child: SizedBox(
+                                        child: Container(
+                                          color: ThemeColor.accent,
                                           height: 32,
                                           width: 32,
-                                          child: CachedNetworkImage(
-                                            imageUrl: user.imageUrl!,
-                                            fadeInDuration: const Duration(
-                                                milliseconds: 120),
-                                            imageBuilder:
-                                                (context, imageProvider) =>
-                                                    Container(
-                                              height: 32,
-                                              width: 32,
-                                              decoration: BoxDecoration(
-                                                color: Colors.transparent,
-                                                image: DecorationImage(
-                                                  image: imageProvider,
-                                                  fit: BoxFit.cover,
+                                          child: user.imageUrl != null
+                                              ? CachedNetworkImage(
+                                                  imageUrl: user.imageUrl!,
+                                                  fadeInDuration:
+                                                      const Duration(
+                                                          milliseconds: 120),
+                                                  imageBuilder: (context,
+                                                          imageProvider) =>
+                                                      Container(
+                                                    height: 32,
+                                                    width: 32,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.transparent,
+                                                      image: DecorationImage(
+                                                        image: imageProvider,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  placeholder: (context, url) =>
+                                                      const SizedBox(),
+                                                  errorWidget:
+                                                      (context, url, error) =>
+                                                          const SizedBox(),
+                                                )
+                                              : Icon(
+                                                  Icons.person_outline,
+                                                  size: 32 * 0.8,
+                                                  color: ThemeColor.stroke,
                                                 ),
-                                              ),
-                                            ),
-                                            placeholder: (context, url) =>
-                                                const SizedBox(),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    const SizedBox(),
-                                          ),
                                         ),
                                       ),
                                     ],

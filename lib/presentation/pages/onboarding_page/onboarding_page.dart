@@ -1,5 +1,4 @@
 import 'package:app/core/utils/theme.dart';
-import 'package:app/domain/value/user/gender.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/providers/notifier/image/image_processor.dart';
@@ -218,7 +217,7 @@ class OnboardingScreen extends ConsumerWidget {
                               width: 0.4,
                             ),
                           ),
-                          child: Center(
+                          child: const Center(
                             child: Icon(
                               Icons.image_rounded,
                               size: 48,
@@ -239,7 +238,7 @@ class OnboardingScreen extends ConsumerWidget {
                         },
                         child: Container(
                           padding:
-                              EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                              const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                           decoration: BoxDecoration(
                             color: ThemeColor.accent,
                             borderRadius: BorderRadius.circular(80 * 2 / 9),
@@ -258,7 +257,7 @@ class OnboardingScreen extends ConsumerWidget {
                         },
                         child: Container(
                           padding:
-                              EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                              const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                           decoration: BoxDecoration(
                             color: ThemeColor.accent,
                             borderRadius: BorderRadius.circular(80 * 2 / 9),
@@ -328,6 +327,7 @@ class OnboardingScreen extends ConsumerWidget {
                     await ref
                         .read(myAccountNotifierProvider.notifier)
                         .createUser(username, name, image);
+                   
                     ref.read(creatingProcessProvider.notifier).state = false;
                     showMessage('アカウントが作成されました');
                   }
@@ -340,7 +340,7 @@ class OnboardingScreen extends ConsumerWidget {
               }
             },
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               decoration: BoxDecoration(
                 color: ThemeColor.accent,
                 borderRadius: BorderRadius.circular(80 * 2 / 9),

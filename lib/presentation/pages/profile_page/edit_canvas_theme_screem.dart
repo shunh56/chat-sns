@@ -449,30 +449,38 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             child: ClipRRect(
                               borderRadius:
                                   BorderRadius.circular(canvasTheme.iconRadius),
-                              child: SizedBox(
+                              child: Container(
+                                color: ThemeColor.accent,
                                 height: imageHeight,
                                 width: imageHeight,
-                                child: CachedNetworkImage(
-                                  imageUrl: me.imageUrl!,
-                                  fadeInDuration:
-                                      const Duration(milliseconds: 120),
-                                  imageBuilder: (context, imageProvider) =>
-                                      Container(
-                                    height: imageHeight,
-                                    width: imageHeight,
-                                    decoration: BoxDecoration(
-                                      color: Colors.transparent,
-                                      image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover,
+                                child: me.imageUrl != null
+                                    ? CachedNetworkImage(
+                                        imageUrl: me.imageUrl!,
+                                        fadeInDuration:
+                                            const Duration(milliseconds: 120),
+                                        imageBuilder:
+                                            (context, imageProvider) =>
+                                                Container(
+                                          height: imageHeight,
+                                          width: imageHeight,
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        placeholder: (context, url) =>
+                                            const SizedBox(),
+                                        errorWidget: (context, url, error) =>
+                                            const SizedBox(),
+                                      )
+                                    : const Icon(
+                                        Icons.person_outline,
+                                        size: imageHeight * 0.8,
+                                        color: ThemeColor.stroke,
                                       ),
-                                    ),
-                                  ),
-                                  placeholder: (context, url) =>
-                                      const SizedBox(),
-                                  errorWidget: (context, url, error) =>
-                                      const SizedBox(),
-                                ),
                               ),
                             ),
                           ),

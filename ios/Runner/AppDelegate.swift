@@ -1,4 +1,130 @@
+import UIKit
+import CallKit
+import AVFAudio
+import PushKit
+import Flutter
+import flutter_callkit_incoming
 
+@UIApplicationMain
+@objc class AppDelegate: FlutterAppDelegate, PKPushRegistryDelegate, CallkitIncomingAppDelegate {
+
+    override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        GeneratedPluginRegistrant.register(with: self)
+        
+        // Setup VOIP
+        let mainQueue = DispatchQueue.main
+        let voipRegistry: PKPushRegistry = PKPushRegistry(queue: mainQueue)
+        voipRegistry.delegate = self
+        voipRegistry.desiredPushTypes = [PKPushType.voIP]
+
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+    
+    // Call back from Recent history
+    override func application(_ application: UIApplication,
+                              continue userActivity: NSUserActivity,
+                              restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        guard let handleObj = userActivity.handle else {
+            return false
+        }
+        
+        guard let isVideo = userActivity.isVideo else {
+            return false
+        }
+        let objData = handleObj.getDecryptHandle()
+        let nameCaller = objData["nameCaller"] as? String ?? ""
+        let handle = objData["handle"] as? String ?? ""
+        let data = flutter_callkit_incoming.Data(id: UUID().uuidString, nameCaller: nameCaller, handle: handle, type: isVideo ? 1 : 0)
+
+        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.startCall(data, fromPushKit: true)
+        
+        return super.application(application, continue: userActivity, restorationHandler: restorationHandler)
+    }
+    
+    // Handle updated push credentials
+    func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
+        print(credentials.token)
+        let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
+        print(deviceToken)
+        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP(deviceToken)
+    }
+    
+    func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
+        print("didInvalidatePushTokenFor")
+        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP("")
+    }
+    
+    // Handle incoming pushes
+    func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType, completion: @escaping () -> Void) {
+        print("didReceiveIncomingPushWith")
+        guard type == .voIP else { return }
+        guard let aps = payload.dictionaryPayload["aps"] as? [String: Any] else { return }
+        guard let alert = aps["alert"] as? [String: Any] else { return }
+        let id = UUID().uuidString
+        let name = alert["name"] as? String ?? "Unknown Caller"
+        let vc_id = alert["id"] as? String ?? ""
+        let handle = payload.dictionaryPayload["handle"] as? String ?? ""
+        let isVideo = payload.dictionaryPayload["isVideo"] as? Bool ?? false
+        let data = flutter_callkit_incoming.Data(id: id, nameCaller: name, handle: handle, type: isVideo ? 1 : 0)
+        data.extra = ["id": vc_id]
+        data.iconName = ""
+
+        SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(data, fromPushKit: true)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            completion()
+        }
+    }
+    
+    // Func Call API for Accept
+    func onAccept(_ call: Call, _ action: CXAnswerCallAction) {
+        print("LOG: onAccept")
+        if let controller = window?.rootViewController as? FlutterViewController {
+            let channel = FlutterMethodChannel(name: "com.shunh.exampleApp/voip", binaryMessenger: controller.binaryMessenger)
+            channel.invokeMethod("onVoIPReceived", arguments: call.data.toJSON())
+        }
+        action.fulfill()
+    }
+    
+    // Func Call API for Decline
+    func onDecline(_ call: Call, _ action: CXEndCallAction) {
+        print("LOG: onDecline")
+        action.fulfill()
+    }
+    
+    // Func Call API for End
+    func onEnd(_ call: Call, _ action: CXEndCallAction) {
+        print("LOG: onEnd")
+        //TODO --
+        // もし、callkitから切断した時は、flutterのvoice chat画面から退出するようにする
+        // => methodChannelを使用して、 checkScreen的なことをすれば良い？
+        action.fulfill()
+    }
+    
+    // Func Call API for TimeOut
+    func onTimeOut(_ call: Call) {
+        print("LOG: onTimeOut")
+    }
+    
+    // Func Callback Toggle Audio Session
+    func didActivateAudioSession(_ audioSession: AVAudioSession) {
+        //RTCAudioSession.sharedInstance().audioSessionDidActivate(audioSession)
+        //RTCAudioSession.sharedInstance().isAudioEnabled = true
+    }
+    
+    // Func Callback Toggle Audio Session
+    func didDeactivateAudioSession(_ audioSession: AVAudioSession) {
+        //RTCAudioSession.sharedInstance().audioSessionDidDeactivate(audioSession)
+        //RTCAudioSession.sharedInstance().isAudioEnabled = false
+    }
+}
+
+
+
+/*
 import UIKit
 import CallKit
 import AVFAudio
@@ -94,10 +220,26 @@ import flutter_callkit_incoming
     func onAccept(_ call: Call, _ action: CXAnswerCallAction) {
         let json = ["action": "ACCEPT", "data": call.data.toJSON()] as [String: Any]
         print("LOG: onAccept")
+        if let controller = window?.rootViewController as? FlutterViewController {
+                    let channel = FlutterMethodChannel(name: "com.shunh.exampleApp/voip", binaryMessenger: controller.binaryMessenger)
+                    channel.invokeMethod("onVoIPReceived", arguments: call.data.toJSON())
+                }
+        /*if let flutterEngine = (UIApplication.shared.delegate as? AppDelegate)?.flutterEngine {
+         let methodChannel = FlutterMethodChannel(name: "com.shunh.examplApp/voip", binaryMessenger: flutterEngine.binaryMessenger)
+         methodChannel.invokeMethod("onVoIPReceived", arguments: call.data.toJSON())
+         }
+        */
         self.performRequest(parameters: json) { result in
             switch result {
             case .success(let data):
                 print("Received data: \(data)")
+                /*
+                if let controller = window?.rootViewController as? FlutterViewController {
+                            let channel = FlutterMethodChannel(name: "com.shunh.exampleApp/voip", binaryMessenger: controller.binaryMessenger)
+                            channel.invokeMethod("onVoIPReceived", arguments: json)
+                        }
+                
+                */
                 //Make sure call action.fulfill() when you are done(connected WebRTC - Start counting seconds)
                 action.fulfill()
 
@@ -159,15 +301,15 @@ import flutter_callkit_incoming
     // Func Callback Toggle Audio Session
     func didActivateAudioSession(_ audioSession: AVAudioSession) {
         //Use if using WebRTC
-        //RTCAudioSession.sharedInstance().audioSessionDidActivate(audioSession)
-        //RTCAudioSession.sharedInstance().isAudioEnabled = true
+        RTCAudioSession.sharedInstance().audioSessionDidActivate(audioSession)
+        RTCAudioSession.sharedInstance().isAudioEnabled = true
     }
     
     // Func Callback Toggle Audio Session
     func didDeactivateAudioSession(_ audioSession: AVAudioSession) {
         //Use if using WebRTC
-        //RTCAudioSession.sharedInstance().audioSessionDidDeactivate(audioSession)
-        //RTCAudioSession.sharedInstance().isAudioEnabled = false
+        RTCAudioSession.sharedInstance().audioSessionDidDeactivate(audioSession)
+        RTCAudioSession.sharedInstance().isAudioEnabled = false
     }
     
     func performRequest(parameters: [String: Any], completion: @escaping (Result<Any, Error>) -> Void) {
@@ -211,3 +353,4 @@ import flutter_callkit_incoming
     
     
 }
+*/
