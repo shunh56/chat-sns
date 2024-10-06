@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
@@ -19,27 +20,19 @@ import 'package:gap/gap.dart';
 final iconImageStateProvider = StateProvider.autoDispose<File?>((ref) => null);
 final imageUploadingProvider = StateProvider.autoDispose((ref) => false);
 
-updateProfile(WidgetRef ref) async {
-  //ref.read(checkStatus.notifier).state = false;
-  //ref.read(updatingProcessProvider.notifier).state = true;
-
-  /*await ref.read(myAccountNotifierProvider.notifier).updateProfile(
-        thubnailFile,
-        iconFile,
-        nameText,
-        commentText,
-      ); */
-}
-
 class EditBioScreen extends ConsumerWidget {
   const EditBioScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     const imageHeight = 100.0;
     final notifier = ref.read(myAccountNotifierProvider.notifier);
     final bio = ref.watch(bioStateProvider);
     final bioStateNotifier = ref.watch(bioStateProvider.notifier);
+
+    final links = ref.watch(linksStateProvider);
+    final linksStateNotifier = ref.watch(linksStateProvider.notifier);
     final aboutMe = ref.watch(aboutMeStateProvider);
     final aboutMeStateNotifier = ref.watch(aboutMeStateProvider.notifier);
     final asyncValue = ref.watch(myAccountNotifierProvider);
@@ -81,31 +74,40 @@ class EditBioScreen extends ConsumerWidget {
                             )
                           : ClipRRect(
                               borderRadius: BorderRadius.circular(
-                                  me.canvasTheme.iconRadius * 1.25),
-                              child: SizedBox(
+                                me.canvasTheme.iconRadius * 1.25,
+                              ),
+                              child: Container(
                                 height: imageHeight,
                                 width: imageHeight,
-                                child: CachedNetworkImage(
-                                  imageUrl: me.imageUrl!,
-                                  fadeInDuration:
-                                      const Duration(milliseconds: 120),
-                                  imageBuilder: (context, imageProvider) =>
-                                      Container(
-                                    height: imageHeight,
-                                    width: imageHeight,
-                                    decoration: BoxDecoration(
-                                      color: Colors.transparent,
-                                      image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover,
+                                color: ThemeColor.accent,
+                                child: me.imageUrl != null
+                                    ? CachedNetworkImage(
+                                        imageUrl: me.imageUrl!,
+                                        fadeInDuration:
+                                            const Duration(milliseconds: 120),
+                                        imageBuilder:
+                                            (context, imageProvider) =>
+                                                Container(
+                                          height: imageHeight,
+                                          width: imageHeight,
+                                          decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        placeholder: (context, url) =>
+                                            const SizedBox(),
+                                        errorWidget: (context, url, error) =>
+                                            const SizedBox(),
+                                      )
+                                    : const Icon(
+                                        Icons.person_outline,
+                                        size: imageHeight * 0.8,
+                                        color: ThemeColor.stroke,
                                       ),
-                                    ),
-                                  ),
-                                  placeholder: (context, url) =>
-                                      const SizedBox(),
-                                  errorWidget: (context, url, error) =>
-                                      const SizedBox(),
-                                ),
                               ),
                             ),
                     ),
@@ -155,7 +157,7 @@ class EditBioScreen extends ConsumerWidget {
 
                   //bio
                   const Text(
-                    "自己紹介",
+                    "ひとこと",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -195,6 +197,288 @@ class EditBioScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  const Gap(24),
+
+                  //
+
+                  const Text(
+                    "リンク",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+
+                  /*Container(
+                    margin: EdgeInsets.only(top: 12),
+                    padding: EdgeInsets.only(
+                      left: 24,
+                      right: 24,
+                      top: 24,
+                      bottom: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: ThemeColor.stroke,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              child: Image.asset(
+                                links.line.assetString,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                linksStateNotifier.state = links.copyWith(
+                                    line: links.line.copyWith(
+                                        isShown: !links.line.isShown));
+                              },
+                              child: links.line.isShown
+                                  ? Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue,
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: Text(
+                                        "公開中",
+                                        style: textStyle.w600(),
+                                      ),
+                                    )
+                                  : Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.3),
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: Text(
+                                        "公開",
+                                        style: textStyle.w600(),
+                                      ),
+                                    ),
+                            )
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              links.line.urlScheme,
+                              style: textStyle.w600(),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                style: textStyle.w600(),
+                                onChanged: (value) {
+                                  linksStateNotifier.state = links.copyWith(
+                                      line: links.line.copyWith(path: value));
+                                },
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ), */
+                  Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.only(
+                      left: 24,
+                      right: 24,
+                      top: 24,
+                      bottom: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: ThemeColor.stroke,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              child: Image.asset(
+                                links.instagram.assetString,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                linksStateNotifier.state = links.copyWith(
+                                    instagram: links.instagram.copyWith(
+                                        isShown: !links.instagram.isShown));
+                              },
+                              child: links.instagram.isShown
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue,
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: Text(
+                                        "公開中",
+                                        style: textStyle.w600(
+                                          color: ThemeColor.white,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.3),
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: Text(
+                                        "公開",
+                                        style: textStyle.w600(),
+                                      ),
+                                    ),
+                            )
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              links.instagram.urlScheme,
+                              style: textStyle.w600(),
+                            ),
+                            Expanded(
+                              child: TextFormField(
+                                style: textStyle.w600(),
+                                initialValue: links.instagram.path,
+                                onChanged: (value) {
+                                  linksStateNotifier.state = links.copyWith(
+                                      instagram: links.instagram
+                                          .copyWith(path: value));
+                                },
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.only(
+                      left: 24,
+                      right: 24,
+                      top: 24,
+                      bottom: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: ThemeColor.stroke,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              child: Image.asset(
+                                links.x.assetString,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                linksStateNotifier.state = links.copyWith(
+                                    x: links.x
+                                        .copyWith(isShown: !links.x.isShown));
+                              },
+                              child: links.x.isShown
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue,
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: Text(
+                                        "公開中",
+                                        style: textStyle.w600(
+                                          color: ThemeColor.white,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.3),
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                      ),
+                                      child: Text(
+                                        "公開",
+                                        style: textStyle.w600(),
+                                      ),
+                                    ),
+                            )
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              links.x.urlScheme,
+                              style: textStyle.w600(),
+                            ),
+                            Expanded(
+                              child: TextFormField(
+                                style: textStyle.w600(),
+                                initialValue: links.x.path,
+                                onChanged: (value) {
+                                  linksStateNotifier.state = links.copyWith(
+                                      x: links.x.copyWith(path: value));
+                                },
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
                   const Gap(24),
                   //age
                   const Text(
@@ -656,11 +940,12 @@ class EditBioScreen extends ConsumerWidget {
                         .read(imageUploadUsecaseProvider)
                         .uploadIconImage(iconImage);
                   }
-                  notifier.updateBio(bio, aboutMe, imageUrl: imageUrl);
+                  notifier.updateBio(bio, aboutMe, links, imageUrl: imageUrl);
                   Navigator.pop(context);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),
                     color: Colors.blue,

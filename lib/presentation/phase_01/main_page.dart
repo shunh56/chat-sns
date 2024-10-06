@@ -2,14 +2,12 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/core/shader.dart';
-import 'package:app/presentation/components/image/image.dart';
-import 'package:app/presentation/components/user_icon.dart';
+import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/chat_screen/chat_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
-import 'package:app/presentation/phase_01/cube.dart';
 import 'package:app/presentation/phase_01/search_screen.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -18,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:gap/gap.dart';
 
 class Phase01MainPage extends ConsumerStatefulWidget {
   const Phase01MainPage({
@@ -241,8 +238,8 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
     ref.read(currentStatusStateProvider.notifier).state = me.currentStatus;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const EditCurrentStatusScreen(),
+      PageTransitionMethods.slideUp(
+        const EditCurrentStatusScreen(),
       ),
     );
   }

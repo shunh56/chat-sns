@@ -92,6 +92,7 @@ class ProfileBottomSheet {
                         ref.read(bioStateProvider.notifier).state = me.bio;
                         ref.read(aboutMeStateProvider.notifier).state =
                             me.aboutMe;
+                        ref.read(linksStateProvider.notifier).state = me.links;
                         Navigator.pushReplacement(
                           context,
                           PageTransitionMethods.slideUp(
@@ -489,6 +490,10 @@ class ProfileBottomSheet {
                       return const Text("テキスト");
                     case ("profileSecondaryTextColor"):
                       return const Text("サブテキスト");
+                    case ("profileLinksColor"):
+                      return const Text("アイコン");
+                    case ("profileAboutMeColor"):
+                      return const Text("ひとこと");
                     case ("boxBgColor"):
                       return const Text("背景色");
                     case ("boxTextColor"):
@@ -529,6 +534,12 @@ class ProfileBottomSheet {
                                 case ("profileSecondaryTextColor"):
                                   stateNotifier.state = canvasTheme.copyWith(
                                       profileSecondaryTextColor: item);
+                                case ("profileLinksColor"):
+                                  stateNotifier.state = canvasTheme.copyWith(
+                                      profileLinksColor: item);
+                                case ("profileAboutMeColor"):
+                                  stateNotifier.state = canvasTheme.copyWith(
+                                      profileAboutMeColor: item);
                                 case ("boxBgColor"):
                                   stateNotifier.state =
                                       canvasTheme.copyWith(boxBgColor: item);

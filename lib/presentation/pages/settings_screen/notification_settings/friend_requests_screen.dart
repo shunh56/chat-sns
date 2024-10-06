@@ -5,7 +5,6 @@ import 'package:app/presentation/pages/settings_screen/notification_settings/dir
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
 
 class FriendRequestNotificationScreen extends ConsumerWidget {
   const FriendRequestNotificationScreen({super.key});

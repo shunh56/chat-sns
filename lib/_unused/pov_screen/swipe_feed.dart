@@ -1,9 +1,9 @@
 import 'dart:developer';
 
+import 'package:app/_unused/pov_screen/buttons.dart';
+import 'package:app/_unused/pov_screen/card.dart';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/pov.dart';
-import 'package:app/presentation/phase_01/pov_screen/buttons.dart';
-import 'package:app/presentation/phase_01/pov_screen/card.dart';
 import 'package:appinio_swiper/appinio_swiper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

@@ -189,8 +189,10 @@ class ChatScreen extends ConsumerWidget {
             .values
             .where((user) => friendIds.contains(user.userId))
             .toList();
+        //4時間以内のユーザーのみ表示
         users.removeWhere((user) =>
-            DateTime.now().difference(user.lastOpenedAt.toDate()).inHours > 8);
+            DateTime.now().difference(user.lastOpenedAt.toDate()).inHours > 4);
+        // status => online => lastOpenedAt順
         users.sort((a, b) {
           if (a.currentStatus.updatedRecently &&
               !b.currentStatus.updatedRecently) {
@@ -200,10 +202,10 @@ class ChatScreen extends ConsumerWidget {
               b.currentStatus.updatedRecently) {
             return 1;
           }
-          if (a.isOnline && !b.isOnline) {
+          if (a.greenBadge && !b.greenBadge) {
             return -1;
           }
-          if (!a.isOnline && b.isOnline) {
+          if (!a.greenBadge && b.greenBadge) {
             return 1;
           }
           return b.lastOpenedAt.compareTo(a.lastOpenedAt);
@@ -256,12 +258,8 @@ class ChatScreen extends ConsumerWidget {
                                 30,
                               ),
                             ),
-                            (user.isOnline ||
-                                    DateTime.now()
-                                            .difference(
-                                                user.lastOpenedAt.toDate())
-                                            .inMinutes <
-                                        1)
+                            // online and 10mins
+                            (user.greenBadge)
                                 ? Container(
                                     decoration: BoxDecoration(
                                       border: Border.all(
@@ -275,11 +273,12 @@ class ChatScreen extends ConsumerWidget {
                                       backgroundColor: Colors.green,
                                     ),
                                   )
+                                //blue status
                                 : DateTime.now()
                                             .difference(
                                                 user.lastOpenedAt.toDate())
                                             .inHours <
-                                        8
+                                        4
                                     ? Container(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 6, vertical: 2),

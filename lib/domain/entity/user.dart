@@ -1,4 +1,3 @@
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/value/user/account_status.dart';
 import 'package:app/domain/value/user/gender.dart';
@@ -103,6 +102,141 @@ class Bio {
       gender: gender ?? this.gender,
       interestedIn: interestedIn ?? this.interestedIn,
     );
+  }
+}
+
+class Link {
+  final bool isShown;
+  final String? path;
+  final String urlScheme;
+  final String assetString;
+  final String title;
+  Link({
+    required this.isShown,
+    required this.path,
+    required this.urlScheme,
+    required this.assetString,
+    required this.title,
+  });
+
+  factory Link.fromJson(
+    Map<String, dynamic>? json,
+    String urlSheme,
+    String assetString,
+    String title,
+  ) {
+    return Link(
+      isShown: json?["isShown"] ?? false,
+      path: json?["path"],
+      urlScheme: urlSheme,
+      assetString: assetString,
+      title: title,
+    );
+  }
+  Link copyWith({bool? isShown, String? path}) {
+    return Link(
+      isShown: isShown ?? this.isShown,
+      path: path ?? this.path,
+      urlScheme: urlScheme,
+      assetString: assetString,
+      title: title,
+    );
+  }
+
+  toJson() {
+    return {
+      "isShown": isShown,
+      "path": path,
+    };
+  }
+
+  String? get url {
+    if (path == null) return null;
+    return urlScheme + path!;
+  }
+}
+
+class Links {
+  final Link line;
+  final Link instagram;
+  final Link x;
+
+  Links({
+    required this.line,
+    required this.instagram,
+    required this.x,
+  });
+
+  factory Links.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return Links.defaultLinks();
+    }
+    return Links(
+      line: Link.fromJson(
+        json["line"],
+        "https://line.me/",
+        Images.lineIcon,
+        "Line",
+      ),
+      instagram: Link.fromJson(
+        json["instagram"],
+        "https://www.instagram.com/",
+        Images.instagramIcon,
+        "Instagram",
+      ),
+      x: Link.fromJson(
+        json["x"],
+        "https://x.com/",
+        Images.xIcon,
+        "X",
+      ),
+    );
+  }
+
+  factory Links.defaultLinks() {
+    return Links(
+      line: Link.fromJson(
+        null,
+        "https://line.me/",
+        Images.lineIcon,
+        "Line",
+      ),
+      instagram: Link.fromJson(
+        null,
+        "https://www.instagram.com/",
+        Images.instagramIcon,
+        "Instagram",
+      ),
+      x: Link.fromJson(
+        null,
+        "https://x.com/",
+        Images.xIcon,
+        "X",
+      ),
+    );
+  }
+
+  toJson() {
+    return {
+      "line": line.toJson(),
+      "instagram": instagram.toJson(),
+      "x": x.toJson(),
+    };
+  }
+
+  Links copyWith({Link? line, Link? instagram, Link? x}) {
+    return Links(
+      line: line ?? this.line,
+      instagram: instagram ?? this.instagram,
+      x: x ?? this.x,
+    );
+  }
+
+  bool get isShown {
+    bool lineShown = line.isShown;
+    bool igShown = instagram.isShown;
+    bool xShown = x.isShown;
+    return lineShown || igShown || xShown;
   }
 }
 
@@ -217,6 +351,8 @@ class CanvasTheme {
   final Color bgColor; // = Color(Colors.white.value);
   final Color profileTextColor; // = Color(Colors.black.value);
   final Color profileSecondaryTextColor; // = Color(Colors.black45.value);
+  final Color profileLinksColor;
+  final Color profileAboutMeColor;
   //box
   final Color boxBgColor; // = Color(Colors.black12.value);
   final Color boxTextColor; // = Color(Colors.black38.value);
@@ -235,11 +371,17 @@ class CanvasTheme {
     required this.bgColor,
     required this.profileTextColor,
     required this.profileSecondaryTextColor,
+    required this.profileLinksColor,
+    required this.profileAboutMeColor,
+
+    //
     required this.boxBgColor,
     required this.boxTextColor,
     required this.boxSecondaryTextColor,
+    //
     required this.boxWidth,
     required this.boxRadius,
+    //
     required this.iconGradientStartColor,
     required this.iconGradientEndColor,
     required this.iconStrokeWidth,
@@ -253,9 +395,20 @@ class CanvasTheme {
       return defaultCanvasTheme();
     }
     return CanvasTheme(
-      bgColor: Color(json["bgColor"]),
+      //
+      bgColor: json["bgColor"] != null
+          ? Color(json["bgColor"])
+          : ThemeColor.background,
       profileTextColor: Color(json["profileTextColor"]),
       profileSecondaryTextColor: Color(json["profileSecondaryTextColor"]),
+      profileLinksColor: json["profileLinksColor"] != null
+          ? Color(json["profileLinksColor"])
+          : Colors.white,
+      profileAboutMeColor: json["profileAboutMeColor"] != null
+          ? Color(json["profileAboutMeColor"])
+          : Colors.white,
+
+      //
       boxBgColor: Color(json["boxBgColor"]),
       boxTextColor: Color(json["boxTextColor"]),
       boxSecondaryTextColor: Color(json["boxSecondaryTextColor"]),
@@ -275,6 +428,8 @@ class CanvasTheme {
       bgColor: ThemeColor.background,
       profileTextColor: ThemeColor.text,
       profileSecondaryTextColor: ThemeColor.subText,
+      profileLinksColor: Colors.white,
+      profileAboutMeColor: Colors.white,
       boxBgColor: ThemeColor.accent,
       boxTextColor: ThemeColor.subText,
       boxSecondaryTextColor: ThemeColor.text,
@@ -315,11 +470,16 @@ class CanvasTheme {
     Color? bgColor,
     Color? profileTextColor,
     Color? profileSecondaryTextColor,
+    Color? profileLinksColor,
+    Color? profileAboutMeColor,
+    //
     Color? boxBgColor,
     Color? boxTextColor,
     Color? boxSecondaryTextColor,
+    //
     double? boxWidth,
     double? boxRadius,
+    //
     Color? iconGradientStartColor,
     Color? iconGradientEndColor,
     double? iconStrokeWidth,
@@ -332,6 +492,8 @@ class CanvasTheme {
       profileTextColor: profileTextColor ?? this.profileTextColor,
       profileSecondaryTextColor:
           profileSecondaryTextColor ?? this.profileSecondaryTextColor,
+      profileLinksColor: profileLinksColor ?? this.profileLinksColor,
+      profileAboutMeColor: profileAboutMeColor ?? this.profileAboutMeColor,
       boxBgColor: boxBgColor ?? this.boxBgColor,
       boxTextColor: boxTextColor ?? this.boxTextColor,
       boxSecondaryTextColor:
@@ -522,6 +684,8 @@ class UserAccount {
   final String username;
   String? imageUrl;
   //profile info
+
+  final Links links;
   final Bio bio;
   final String aboutMe;
   final CurrentStatus currentStatus;
@@ -552,6 +716,7 @@ class UserAccount {
     required this.username,
     required this.imageUrl,
     //
+    required this.links,
     required this.bio,
     required this.aboutMe,
     required this.currentStatus,
@@ -593,6 +758,7 @@ class UserAccount {
       imageUrl: json["imageUrl"],
 
       //
+      links: Links.fromJson(json["links"]),
       bio: Bio.fromJson(json["profile"]["bio"]),
       aboutMe: json["profile"]["aboutMe"],
       currentStatus: CurrentStatus.fromJson(json["profile"]["currentStatus"]),
@@ -633,6 +799,7 @@ class UserAccount {
       "imageUrl": imageUrl,
 
       //
+      "links": links.toJson(),
       "profile": {
         "bio": bio.toJson(),
         "aboutMe": aboutMe,
@@ -664,6 +831,7 @@ class UserAccount {
       name: "null",
       username: "null",
       imageUrl: null,
+      links: Links.defaultLinks(),
       bio: Bio.defaultBio(),
       aboutMe: "",
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
@@ -700,6 +868,7 @@ class UserAccount {
       username: username,
       imageUrl: imageUrl,
       //
+      links: Links.defaultLinks(),
       bio: Bio(
         age: null,
         birthday: null,
@@ -734,6 +903,7 @@ class UserAccount {
     Gender? gender,
     AccountStatus? status,
     DeviceInfo? deviceInfo,
+    Links? links,
     Bio? bio,
     String? aboutMe,
     CurrentStatus? currentStatus,
@@ -759,6 +929,7 @@ class UserAccount {
       username: username,
       imageUrl: imageUrl ?? this.imageUrl,
       //
+      links: links ?? this.links,
       bio: bio ?? this.bio,
       aboutMe: aboutMe ?? this.aboutMe,
       currentStatus: currentStatus ?? this.currentStatus,
@@ -796,6 +967,7 @@ class UserAccount {
       username: username,
       imageUrl: imageUrl,
       //
+      links: links,
       bio: bio,
       aboutMe: aboutMe,
       currentStatus: currentStatus,
@@ -816,6 +988,11 @@ class UserAccount {
         usedCode != "WAITING" &&
         usedCode != "NO_CODE" &&
         usedCode?.length == 8);
+  }
+
+  bool get greenBadge {
+    return isOnline &&
+        DateTime.now().difference(lastOpenedAt.toDate()).inMinutes < 10;
   }
 }
 

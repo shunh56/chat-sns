@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
+import 'package:app/core/values.dart';
 import 'package:app/firebase_options.dart';
 import 'package:app/presentation/pages/auth/signin_page.dart';
 import 'package:app/presentation/pages/onboarding_page/awaiting_screen.dart';
@@ -161,7 +162,7 @@ showIncomingCall(String name, String? imageUrl) async {
   final params = CallKitParams(
     id: const Uuid().v4(),
     nameCaller: name,
-    appName: 'AppName',
+    appName: appName,
     // avatar: 'https://i.pravatar.cc/100',
     avatar: imageUrl,
     handle: '',
@@ -179,11 +180,11 @@ showIncomingCall(String name, String? imageUrl) async {
     ),
     //extra: <String, dynamic>{'userId': '1a2b3c4d'},
     // headers: <String, dynamic>{'apiKey': 'Abc@123!'},
-    android: const AndroidParams(
+    android: AndroidParams(
       isCustomNotification: true,
       isShowLogo: true,
-      missedCallNotificationChannelName: "appName",
-      incomingCallNotificationChannelName: "appName",
+      missedCallNotificationChannelName: appName,
+      incomingCallNotificationChannelName: appName,
       ringtonePath: 'system_ringtone_default',
       backgroundColor: '#404040',
       // backgroundUrl: 'https://i.pravatar.cc/500',
@@ -369,7 +370,7 @@ class MyApp extends ConsumerWidget {
         Locale("ja", "JP"),
       ],
       locale: const Locale("ja", "JP"),
-      title: 'appName',
+      title: appName,
       //theme: AppTheme().lightTheme,
       theme: ThemeData(
         appBarTheme: AppBarTheme(
@@ -529,7 +530,7 @@ class WelcomePage extends ConsumerWidget {
             ),
             const Expanded(child: SizedBox()),
             Text(
-              'Welcome to\nappName',
+              'Welcome to\n${appName}',
               style: Theme.of(context).textTheme.displayMedium!.copyWith(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),

@@ -136,7 +136,7 @@ class EditNowWithScreen extends HookConsumerWidget {
                                 user.name,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 10,
                                   color: ThemeColor.text,
                                 ),
@@ -224,7 +224,7 @@ class EditNowWithScreen extends HookConsumerWidget {
                                 user.name,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 10,
                                   color: ThemeColor.text,
                                 ),

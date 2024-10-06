@@ -3,6 +3,7 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/images_widget.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/post_content_menu_widget.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/post_text_input_widget.dart';
+import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/state/create_post/core.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
 import 'package:app/usecase/posts/post_usecase.dart';
@@ -88,8 +89,11 @@ class CreatePostScreen extends ConsumerWidget {
                         final text = ref.read(inputTextProvider);
                         if (text.isNotEmpty) {
                           FocusManager.instance.primaryFocus?.unfocus();
-                          
+
                           postUsecase.uploadPost(postState);
+                          ref
+                              .read(pushNotificationNotifierProvider)
+                              .uploadPost();
                           showMessage("送信を開始しました。");
                           Navigator.pop(context);
                         } else {

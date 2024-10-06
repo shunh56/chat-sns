@@ -1,17 +1,85 @@
+import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/usecase/push_notification_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final pushNotificationNotifierProvider = Provider(
-  (ref) => PushNotificationNotifier(ref),
+  (ref) => PushNotificationNotifier(
+    ref,
+    ref.watch(pushNotificationUsecaseProvider),
+  ),
 );
 
 class PushNotificationNotifier {
   final Ref ref;
-  PushNotificationNotifier(this.ref);
+  final PushNotificationUsecase _usecase;
+  PushNotificationNotifier(
+    this.ref,
+    this._usecase,
+  );
 
+  sendDm(
+    UserAccount user,
+    String text,
+  ) {
+    _usecase.sendDm(user, "TITLE", text);
+  }
 
-  sendDm(){}
-  sendCurrentStatusPost(){}
-  sendPost(){}
-  sendVoiceChat(){}
-  sendFriendReqeust(){}
+  sendCurrentStatusPost() {
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    final friendIds = ref
+        .read(friendIdListNotifierProvider)
+        .asData!
+        .value
+        .map((item) => item.userId)
+        .toList();
+    final friends = ref
+        .watch(allUsersNotifierProvider)
+        .asData!
+        .value
+        .values
+        .where((user) => friendIds.contains(user.userId))
+        .toList();
+    return _usecase.sendPost(friends, "${me.name}がステータスを更新しました。");
+  }
+
+  uploadPost() {
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    final friendIds = ref
+        .read(friendIdListNotifierProvider)
+        .asData!
+        .value
+        .map((item) => item.userId)
+        .toList();
+    final friends = ref
+        .watch(allUsersNotifierProvider)
+        .asData!
+        .value
+        .values
+        .where((user) => friendIds.contains(user.userId))
+        .toList();
+    return _usecase.sendPost(friends, "${me.name}が投稿をしました。");
+  }
+
+  sendVoiceChat() {}
+  sendFriendReqeust() {}
+
+  sendMulticast() {
+    final friendIds = ref
+        .read(friendIdListNotifierProvider)
+        .asData!
+        .value
+        .map((item) => item.userId)
+        .toList();
+    final friends = ref
+        .watch(allUsersNotifierProvider)
+        .asData!
+        .value
+        .values
+        .where((user) => friendIds.contains(user.userId))
+        .toList();
+    return _usecase.sendmulticast(friends, "TITLE", "THIS IS BODY");
+  }
 }

@@ -43,7 +43,7 @@ class PostState {
 
 final postStateProvider = Provider.autoDispose(
   (ref) {
-    final id = Uuid().v4();
+    final id = const Uuid().v4();
     final text = ref.watch(inputTextProvider);
     final images = ref.watch(imageListNotifierProvider);
     final isPublic = ref.watch(isPublicProvider);

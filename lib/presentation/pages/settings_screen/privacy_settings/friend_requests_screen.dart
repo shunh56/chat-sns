@@ -43,7 +43,7 @@ class RequestRangeScreen extends ConsumerWidget {
                   color: ThemeColor.subText,
                 ),
               ),
-              Gap(8),
+              const Gap(8),
               Row(
                 children: [
                   Radio(

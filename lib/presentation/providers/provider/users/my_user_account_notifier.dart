@@ -112,9 +112,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     //compressedImage = ...
     //userAccount =
     String? imageUrl = iconImage != null
-        ? await ref
-            .read(imageUploadUsecaseProvider)
-            .uploadIconImage(iconImage)
+        ? await ref.read(imageUploadUsecaseProvider).uploadIconImage(iconImage)
         : null;
     final updatedUser = user.create(
       userId: userId,
@@ -133,10 +131,10 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     usecase.updateUser(updatedUser);
   }
 
-  updateBio(Bio bio, String aboutMe, {String? imageUrl}) async {
+  updateBio(Bio bio, String aboutMe, Links links, {String? imageUrl}) async {
     final user = state.asData!.value;
-    final updatedUser =
-        user.copyWith(bio: bio, aboutMe: aboutMe, imageUrl: imageUrl);
+    final updatedUser = user.copyWith(
+        bio: bio, aboutMe: aboutMe, imageUrl: imageUrl, links: links);
     usecase.updateUser(updatedUser);
     state = AsyncValue.data(updatedUser);
   }

@@ -77,7 +77,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildTopTile(
                 context,
                 _tileContent(Icons.lock_outline_rounded, "プライベートモード"),
-                page: PrivateModeScreen(),
+                page: const PrivateModeScreen(),
                 function: () {
                   ref.read(privacyProvider.notifier).state = me.privacy;
                 },
@@ -90,7 +90,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 context,
                 _tileContent(Icons.public_rounded, "コンテンツの公開範囲"),
-                page: ContentRangeScreen(),
+                page: const ContentRangeScreen(),
                 function: () {
                   ref.read(privacyProvider.notifier).state = me.privacy;
                 },
@@ -98,7 +98,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildBottomTile(
                 context,
                 _tileContent(Icons.people_outline_rounded, "フレンド申請"),
-                page: RequestRangeScreen(),
+                page: const RequestRangeScreen(),
                 function: () {
                   ref.read(privacyProvider.notifier).state = me.privacy;
                 },
@@ -112,7 +112,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildTopTile(
                 context,
                 _tileContent(Icons.chat_bubble_outline_outlined, "ダイレクトメッセージ"),
-                page: DirectMessageNotificationScreen(),
+                page: const DirectMessageNotificationScreen(),
                 function: () {
                   ref.read(notificationDataProvider.notifier).state =
                       me.notificationData;
@@ -121,7 +121,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 context,
                 _tileContent(Icons.post_add_rounded, "ステータス投稿"),
-                page: CurrentStatusPostNotificationScreen(),
+                page: const CurrentStatusPostNotificationScreen(),
                 function: () {
                   ref.read(notificationDataProvider.notifier).state =
                       me.notificationData;
@@ -130,7 +130,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 context,
                 _tileContent(Icons.post_add_rounded, "投稿"),
-                page: PostNotificationScreen(),
+                page: const PostNotificationScreen(),
                 function: () {
                   ref.read(notificationDataProvider.notifier).state =
                       me.notificationData;
@@ -139,7 +139,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildTile(
                 context,
                 _tileContent(Icons.graphic_eq_rounded, "ボイスチャット"),
-                page: VoiceChatNotificationScreen(),
+                page: const VoiceChatNotificationScreen(),
                 function: () {
                   ref.read(notificationDataProvider.notifier).state =
                       me.notificationData;
@@ -148,7 +148,7 @@ class SettingsScreen extends ConsumerWidget {
               _buildBottomTile(
                 context,
                 _tileContent(Icons.people_outline_rounded, "フレンド申請"),
-                page: FriendRequestNotificationScreen(),
+                page: const FriendRequestNotificationScreen(),
                 function: () {
                   ref.read(notificationDataProvider.notifier).state =
                       me.notificationData;

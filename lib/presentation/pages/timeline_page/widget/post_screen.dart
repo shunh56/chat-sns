@@ -11,7 +11,7 @@ import 'package:app/presentation/components/widgets/fade_transition_widget.dart'
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/sub_pages/post_images_screen.dart';
-import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
+import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -374,24 +374,7 @@ class PostScreen extends ConsumerWidget {
               children: [
                 const Gap(12),
                 GradientText(
-                  post.likeCount.toString(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFF0064),
-                      Color(0xFFFF7600),
-                      Color(0xFFFFD500),
-                      Color(0xFF8CFE00),
-                      Color(0xFF00E86C),
-                      Color(0xFF00F4F2),
-                      Color(0xFF00CCFF),
-                      Color(0xFF70A2FF),
-                      Color(0xFFA96CFF),
-                    ],
-                  ),
+                  text: post.likeCount.toString(),
                 ),
               ],
             ),

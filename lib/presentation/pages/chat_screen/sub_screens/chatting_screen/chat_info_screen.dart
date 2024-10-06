@@ -72,7 +72,7 @@ class ChatInfoScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-            Gap(12),
+            const Gap(12),
             if (queue.isNotEmpty)
               FocusedMenuHolder(
                 onPressed: () {

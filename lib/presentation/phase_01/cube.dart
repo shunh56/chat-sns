@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import 'package:app/presentation/components/user_icon.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

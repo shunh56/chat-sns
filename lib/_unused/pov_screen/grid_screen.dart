@@ -1,7 +1,7 @@
+import 'package:app/_unused/pov_screen/swipe_feed.dart';
 import 'package:app/domain/entity/pov.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
-import 'package:app/presentation/phase_01/pov_screen/swipe_feed.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

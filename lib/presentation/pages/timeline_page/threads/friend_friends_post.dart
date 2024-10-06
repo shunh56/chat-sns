@@ -1,3 +1,4 @@
+import 'package:app/presentation/components/share_widget.dart';
 import 'package:app/presentation/pages/timeline_page/widget/friend_friends_post_widget.dart';
 import 'package:app/presentation/providers/provider/posts/friends_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
@@ -25,6 +26,12 @@ class _FriendFriendsPostsThreadState
     final postList = ref.watch(friendFriendsPostsNotiferProvider);
     return postList.when(
       data: (list) {
+        if (list.isEmpty) {
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 60),
+            child: const ShareWidget(),
+          );
+        }
         return RefreshIndicator(
           onRefresh: () async {
             return await ref

@@ -5,7 +5,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
+import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/usecase/direct_message_usecase.dart';
@@ -474,7 +474,7 @@ class CurrentStatusPostScreen extends ConsumerWidget {
                                                               url, error) =>
                                                           const SizedBox(),
                                                     )
-                                                  : Icon(
+                                                  : const Icon(
                                                       Icons.person_outline,
                                                       size: 32 * 0.8,
                                                       color: ThemeColor.stroke,
@@ -536,24 +536,8 @@ class CurrentStatusPostScreen extends ConsumerWidget {
               children: [
                 const Gap(12),
                 GradientText(
-                  post.likeCount.toString(),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFF0064),
-                      Color(0xFFFF7600),
-                      Color(0xFFFFD500),
-                      Color(0xFF8CFE00),
-                      Color(0xFF00E86C),
-                      Color(0xFF00F4F2),
-                      Color(0xFF00CCFF),
-                      Color(0xFF70A2FF),
-                      Color(0xFFA96CFF),
-                    ],
-                  ),
+                  text:post.likeCount.toString(),
+                
                 ),
               ],
             ),

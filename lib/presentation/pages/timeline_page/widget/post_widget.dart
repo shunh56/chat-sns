@@ -258,7 +258,7 @@ class PostWidget extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.only(
                   top: 8,
-                  left: 12 + 48 + 12,
+                  left: 12 + 44.4 + 8,
                   right: 4,
                 ),
                 itemBuilder: (context, index) {

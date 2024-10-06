@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/utils/theme.dart';
+import 'package:app/core/values.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -352,8 +353,8 @@ class SubsctiptionBottomSheet {
                                   ),
                                 ),
                               ),
-                              const Text(
-                                "サブスクライブすると、AppNameの売買規約に同意したとみなされます。",
+                              Text(
+                                "サブスクライブすると、$appNameの売買規約に同意したとみなされます。",
                                 style: TextStyle(
                                   color: ThemeColor.beige,
                                   fontSize: 10,

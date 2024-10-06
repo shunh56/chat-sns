@@ -11,6 +11,7 @@ import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/users_friends_screen.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
+import 'package:app/presentation/providers/provider/images/images.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
@@ -58,10 +59,8 @@ class UserProfileScreen extends ConsumerWidget {
         },
         child:*/
           ListView(
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           bottom: 120,
-          left: themeSize.horizontalPadding,
-          right: themeSize.horizontalPadding,
         ),
         children: [
           AppBar(
@@ -97,7 +96,7 @@ class UserProfileScreen extends ConsumerWidget {
             actions: [
               if (friendIds.contains(user.userId))
                 Padding(
-                  padding: EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.only(right: 12),
                   child: GestureDetector(
                     onTap: () {
                       HapticFeedback.lightImpact();
@@ -270,6 +269,7 @@ class UserProfileScreen extends ConsumerWidget {
           ),
           const Gap(24),
           _buildIconAndBio(context, ref, canvasTheme, user),
+          _buildImages(context, ref, user),
           _buildAboutMe(context, ref, canvasTheme, user),
           _buildCurrentStatus(context, ref, canvasTheme, user),
           _buildTopFriends(context, ref, canvasTheme, user),
@@ -283,453 +283,350 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildIconAndBio(BuildContext context, WidgetRef ref,
-      CanvasTheme canvasTheme, UserAccount user) {
-    const imageHeight = 80.0;
-    return Column(
-      children: [
-        //icon bio
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(canvasTheme.iconStrokeWidth),
-                  decoration: BoxDecoration(
-                    gradient: !canvasTheme.iconHideBorder
-                        ? LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              canvasTheme.iconGradientStartColor,
-                              canvasTheme.iconGradientEndColor,
-                            ],
-                          )
-                        : null,
-                    borderRadius: BorderRadius.circular(
-                      canvasTheme.iconRadius + 12,
-                    ),
-                  ),
-                  child: Container(
-                    padding: EdgeInsets.all(12 - canvasTheme.iconStrokeWidth),
-                    decoration: BoxDecoration(
-                      color: canvasTheme.bgColor,
-                      borderRadius: BorderRadius.circular(
-                        canvasTheme.iconRadius +
-                            12 -
-                            canvasTheme.iconStrokeWidth,
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(canvasTheme.iconRadius),
-                      child: SizedBox(
-                        height: imageHeight,
-                        width: imageHeight,
-                        child: user.imageUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: user.imageUrl!,
-                                fadeInDuration:
-                                    const Duration(milliseconds: 120),
-                                imageBuilder: (context, imageProvider) =>
-                                    Container(
-                                  height: imageHeight,
-                                  width: imageHeight,
-                                  decoration: BoxDecoration(
-                                    color: Colors.transparent,
-                                    image: DecorationImage(
-                                      image: imageProvider,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                placeholder: (context, url) => const SizedBox(),
-                                errorWidget: (context, url, error) =>
-                                    const SizedBox(),
-                              )
-                            : Icon(
-                                Icons.person_outline,
-                                size: imageHeight * 0.8,
-                                color: ThemeColor.stroke,
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-                const Gap(8),
-                Text(
-                  !canvasTheme.iconHideLevel ? "LEVEL 1" : "",
-                  style: TextStyle(
-                    color: canvasTheme.profileTextColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const Gap(12),
-            Expanded(
-              child: box(
-                canvasTheme,
+  Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
+    final asyncValue = ref.watch(userImagesNotiferProvider(me.userId));
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    const imageHeight = 96.0;
+
+    return asyncValue.when(
+      data: (imageUrls) {
+        if (imageUrls.isEmpty) return const SizedBox();
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: themeSize.horizontalPadding,
+          ),
+          child: Column(
+            children: [
+              box(
+                me.canvasTheme,
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          "年齢",
-                          style: TextStyle(
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const Gap(4),
-                        Text(
-                          user.bio.age != null
-                              ? user.bio.age.toString()
-                              : "未設定",
-                          style: TextStyle(
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontSize: 14,
-                          ),
-                        )
-                      ],
+                    Text(
+                      "Photos",
+                      style: textStyle.w600(
+                        fontSize: 18,
+                        color: me.canvasTheme.profileTextColor,
+                      ),
                     ),
-                    Row(
-                      children: [
-                        Text(
-                          "誕生日",
-                          style: TextStyle(
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const Gap(4),
-                        Text(
-                          user.bio.birthday != null
-                              ? user.bio.birthday!.toDateStr
-                              : "未設定",
-                          style: TextStyle(
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontSize: 14,
-                          ),
-                        )
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "性別",
-                          style: TextStyle(
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const Gap(4),
-                        Text(
-                          user.bio.gender == null
-                              ? "未設定"
-                              : user.bio.gender == "system_male"
-                                  ? "男性"
-                                  : user.bio.gender == "system_female"
-                                      ? "女性"
-                                      : user.bio.gender!
-                                              .startsWith("system_custom")
-                                          ? user.bio.gender!.substring(
-                                              13, user.bio.gender!.length)
-                                          : "未設定",
-                          style: TextStyle(
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontSize: 14,
-                          ),
-                        )
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "興味",
-                          style: TextStyle(
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const Gap(4),
-                        Text(
-                          user.bio.interestedIn == null
-                              ? "未設定"
-                              : user.bio.interestedIn == "system_male"
-                                  ? "男性"
-                                  : user.bio.interestedIn == "system_female"
-                                      ? "女性"
-                                      : user.bio.interestedIn!
-                                              .startsWith("system_custom")
-                                          ? user.bio.interestedIn!.substring(
-                                              13, user.bio.interestedIn!.length)
-                                          : "未設定",
-                          style: TextStyle(
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontSize: 14,
-                          ),
-                        )
-                      ],
-                    )
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
+              const Gap(12),
+            ],
+          ),
+        );
+      },
+      error: (e, s) => Text("error : $e, $s"),
+      loading: () => const SizedBox(),
+    );
+  }
 
-        const Gap(12),
-      ],
+  Widget _buildIconAndBio(BuildContext context, WidgetRef ref,
+      CanvasTheme canvasTheme, UserAccount user) {
+    const imageHeight = 80.0;
+    final themeSize = ref.watch(themeSizeProvider(context));
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: themeSize.horizontalPadding,
+      ),
+      child: Column(
+        children: [
+          //icon bio
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(canvasTheme.iconStrokeWidth),
+                    decoration: BoxDecoration(
+                      gradient: !canvasTheme.iconHideBorder
+                          ? LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                canvasTheme.iconGradientStartColor,
+                                canvasTheme.iconGradientEndColor,
+                              ],
+                            )
+                          : null,
+                      borderRadius: BorderRadius.circular(
+                        canvasTheme.iconRadius + 12,
+                      ),
+                    ),
+                    child: Container(
+                      padding: EdgeInsets.all(12 - canvasTheme.iconStrokeWidth),
+                      decoration: BoxDecoration(
+                        color: canvasTheme.bgColor,
+                        borderRadius: BorderRadius.circular(
+                          canvasTheme.iconRadius +
+                              12 -
+                              canvasTheme.iconStrokeWidth,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(canvasTheme.iconRadius),
+                        child: SizedBox(
+                          height: imageHeight,
+                          width: imageHeight,
+                          child: user.imageUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: user.imageUrl!,
+                                  fadeInDuration:
+                                      const Duration(milliseconds: 120),
+                                  imageBuilder: (context, imageProvider) =>
+                                      Container(
+                                    height: imageHeight,
+                                    width: imageHeight,
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  placeholder: (context, url) =>
+                                      const SizedBox(),
+                                  errorWidget: (context, url, error) =>
+                                      const SizedBox(),
+                                )
+                              : const Icon(
+                                  Icons.person_outline,
+                                  size: imageHeight * 0.8,
+                                  color: ThemeColor.stroke,
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(8),
+                  Text(
+                    !canvasTheme.iconHideLevel ? "LEVEL 1" : "",
+                    style: TextStyle(
+                      color: canvasTheme.profileTextColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(12),
+              Expanded(
+                child: box(
+                  canvasTheme,
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "年齢",
+                            style: TextStyle(
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Gap(4),
+                          Text(
+                            user.bio.age != null
+                                ? user.bio.age.toString()
+                                : "未設定",
+                            style: TextStyle(
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontSize: 14,
+                            ),
+                          )
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "誕生日",
+                            style: TextStyle(
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Gap(4),
+                          Text(
+                            user.bio.birthday != null
+                                ? user.bio.birthday!.toDateStr
+                                : "未設定",
+                            style: TextStyle(
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontSize: 14,
+                            ),
+                          )
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "性別",
+                            style: TextStyle(
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Gap(4),
+                          Text(
+                            user.bio.gender == null
+                                ? "未設定"
+                                : user.bio.gender == "system_male"
+                                    ? "男性"
+                                    : user.bio.gender == "system_female"
+                                        ? "女性"
+                                        : user.bio.gender!
+                                                .startsWith("system_custom")
+                                            ? user.bio.gender!.substring(
+                                                13, user.bio.gender!.length)
+                                            : "未設定",
+                            style: TextStyle(
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontSize: 14,
+                            ),
+                          )
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "興味",
+                            style: TextStyle(
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Gap(4),
+                          Text(
+                            user.bio.interestedIn == null
+                                ? "未設定"
+                                : user.bio.interestedIn == "system_male"
+                                    ? "男性"
+                                    : user.bio.interestedIn == "system_female"
+                                        ? "女性"
+                                        : user.bio.interestedIn!
+                                                .startsWith("system_custom")
+                                            ? user.bio.interestedIn!.substring(
+                                                13,
+                                                user.bio.interestedIn!.length)
+                                            : "未設定",
+                            style: TextStyle(
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontSize: 14,
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const Gap(12),
+        ],
+      ),
     );
   }
 
   Widget _buildAboutMe(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
-    return Column(
-      children: [
-        box(
-          canvasTheme,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "自己紹介",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: canvasTheme.boxTextColor,
-                  fontWeight: FontWeight.w600,
+    final themeSize = ref.watch(themeSizeProvider(context));
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: themeSize.horizontalPadding,
+      ),
+      child: Column(
+        children: [
+          box(
+            canvasTheme,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "ひとこと",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: canvasTheme.boxTextColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const Gap(8),
-              Text(
-                user.aboutMe,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: canvasTheme.boxSecondaryTextColor,
-                  fontWeight: FontWeight.w600,
+                const Gap(8),
+                Text(
+                  user.aboutMe,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: canvasTheme.boxSecondaryTextColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const Gap(12),
-      ],
+          const Gap(12),
+        ],
+      ),
     );
   }
 
   Widget _buildCurrentStatus(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
-    return Column(
-      children: [
-        box(
-          canvasTheme,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "「いま」ボード",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: canvasTheme.boxTextColor,
-                  fontWeight: FontWeight.w600,
+    final themeSize = ref.watch(themeSizeProvider(context));
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: themeSize.horizontalPadding,
+      ),
+      child: Column(
+        children: [
+          box(
+            canvasTheme,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "「いま」ボード",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: canvasTheme.boxTextColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const Gap(8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Wrap(
-                  children: user.currentStatus.tags
-                      .map((tag) => Container(
-                            margin: const EdgeInsets.all(4),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                              color: Colors.black.withOpacity(0.1),
-                            ),
-                            child: Text(
-                              tag,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: canvasTheme.boxSecondaryTextColor,
-                                fontWeight: FontWeight.w600,
+                const Gap(8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Wrap(
+                    children: user.currentStatus.tags
+                        .map((tag) => Container(
+                              margin: const EdgeInsets.all(4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
                               ),
-                            ),
-                          ))
-                      .toList(),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        "なにしてる？",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: canvasTheme.boxSecondaryTextColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.black.withOpacity(0.1),
-                        ),
-                        child: Text(
-                          user.currentStatus.doing,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        "なに食べてる？",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: canvasTheme.boxSecondaryTextColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.black.withOpacity(0.1),
-                        ),
-                        child: Text(
-                          user.currentStatus.eating,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        "今の気分は？",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: canvasTheme.boxSecondaryTextColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.black.withOpacity(0.1),
-                        ),
-                        child: Text(
-                          user.currentStatus.mood,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        "どこにいる？",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: canvasTheme.boxSecondaryTextColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.black.withOpacity(0.1),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              user.currentStatus.nowAt,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: canvasTheme.boxSecondaryTextColor,
-                                fontWeight: FontWeight.w600,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                color: Colors.black.withOpacity(0.1),
                               ),
-                            ),
-                            Text(
-                              "next: ${user.currentStatus.nextAt}",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: canvasTheme.boxSecondaryTextColor,
-                                fontWeight: FontWeight.w600,
+                              child: Text(
+                                tag,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: canvasTheme.boxSecondaryTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
+                            ))
+                        .toList(),
+                  ),
                 ),
-              ),
-              if (user.currentStatus.nowWith.isNotEmpty || true)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Row(
@@ -737,7 +634,7 @@ class UserProfileScreen extends ConsumerWidget {
                       Expanded(
                         flex: 1,
                         child: Text(
-                          "一緒にいる人",
+                          "なにしてる？",
                           style: TextStyle(
                             fontSize: 14,
                             color: canvasTheme.boxSecondaryTextColor,
@@ -747,80 +644,248 @@ class UserProfileScreen extends ConsumerWidget {
                       ),
                       Expanded(
                         flex: 2,
-                        child: FutureBuilder(
-                          future: ref
-                              .read(allUsersNotifierProvider.notifier)
-                              .getUserAccounts(user.currentStatus.nowWith),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const SizedBox();
-                            }
-                            final users = snapshot.data!;
-                            return SizedBox(
-                              height: 48,
-                              child: ListView(
-                                scrollDirection: Axis.horizontal,
-                                children: users
-                                    .map(
-                                      (user) => Container(
-                                        margin: const EdgeInsets.only(right: 8),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          child: Container(
-                                            color: ThemeColor.accent,
-                                            height: 48,
-                                            width: 48,
-                                            child: user.imageUrl != null
-                                                ? CachedNetworkImage(
-                                                    imageUrl: user.imageUrl!,
-                                                    fadeInDuration:
-                                                        const Duration(
-                                                            milliseconds: 120),
-                                                    imageBuilder: (context,
-                                                            imageProvider) =>
-                                                        Container(
-                                                      height: 48,
-                                                      width: 48,
-                                                      decoration: BoxDecoration(
-                                                        color:
-                                                            Colors.transparent,
-                                                        image: DecorationImage(
-                                                          image: imageProvider,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    placeholder:
-                                                        (context, url) =>
-                                                            const SizedBox(),
-                                                    errorWidget:
-                                                        (context, url, error) =>
-                                                            const SizedBox(),
-                                                  )
-                                                : Icon(
-                                                    Icons.person_outline,
-                                                    size: 48 * 0.8,
-                                                    color: ThemeColor.stroke,
-                                                  ),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            );
-                          },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.black.withOpacity(0.1),
+                          ),
+                          child: Text(
+                            user.currentStatus.doing,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       )
                     ],
                   ),
                 ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "なに食べてる？",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: canvasTheme.boxSecondaryTextColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.black.withOpacity(0.1),
+                          ),
+                          child: Text(
+                            user.currentStatus.eating,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "今の気分は？",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: canvasTheme.boxSecondaryTextColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.black.withOpacity(0.1),
+                          ),
+                          child: Text(
+                            user.currentStatus.mood,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          "どこにいる？",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: canvasTheme.boxSecondaryTextColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.black.withOpacity(0.1),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.currentStatus.nowAt,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: canvasTheme.boxSecondaryTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                "next: ${user.currentStatus.nextAt}",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: canvasTheme.boxSecondaryTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                if (user.currentStatus.nowWith.isNotEmpty || true)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            "一緒にいる人",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: FutureBuilder(
+                            future: ref
+                                .read(allUsersNotifierProvider.notifier)
+                                .getUserAccounts(user.currentStatus.nowWith),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const SizedBox();
+                              }
+                              final users = snapshot.data!;
+                              return SizedBox(
+                                height: 48,
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  children: users
+                                      .map(
+                                        (user) => Container(
+                                          margin:
+                                              const EdgeInsets.only(right: 8),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            child: Container(
+                                              color: ThemeColor.accent,
+                                              height: 48,
+                                              width: 48,
+                                              child: user.imageUrl != null
+                                                  ? CachedNetworkImage(
+                                                      imageUrl: user.imageUrl!,
+                                                      fadeInDuration:
+                                                          const Duration(
+                                                              milliseconds:
+                                                                  120),
+                                                      imageBuilder: (context,
+                                                              imageProvider) =>
+                                                          Container(
+                                                        height: 48,
+                                                        width: 48,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .transparent,
+                                                          image:
+                                                              DecorationImage(
+                                                            image:
+                                                                imageProvider,
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      placeholder:
+                                                          (context, url) =>
+                                                              const SizedBox(),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          const SizedBox(),
+                                                    )
+                                                  : const Icon(
+                                                      Icons.person_outline,
+                                                      size: 48 * 0.8,
+                                                      color: ThemeColor.stroke,
+                                                    ),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
-        const Gap(12),
-      ],
+          const Gap(12),
+        ],
+      ),
     );
   }
 
@@ -833,122 +898,128 @@ class UserProfileScreen extends ConsumerWidget {
                 32) /
             5 -
         8;
-    return Column(
-      children: [
-        box(
-          canvasTheme,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "TOP 10 Friends",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: canvasTheme.boxTextColor,
-                  fontWeight: FontWeight.w600,
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: themeSize.horizontalPadding,
+      ),
+      child: Column(
+        children: [
+          box(
+            canvasTheme,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "TOP 10 Friends",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: canvasTheme.boxTextColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const Gap(8),
-              FutureBuilder(
-                future: ref
-                    .read(allUsersNotifierProvider.notifier)
-                    .getUserAccounts(user.topFriends),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const SizedBox();
-                  }
-                  final users = snapshot.data!;
-                  if (users.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Center(
-                        child: Text(
-                          "TOPフレンドはいません",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  return Wrap(
-                    children: users
-                        .map(
-                          (user) => GestureDetector(
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              ref
-                                  .read(navigationRouterProvider(context))
-                                  .goToProfile(user);
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.all(4),
-                              width: imageWidth,
-                              child: Column(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Container(
-                                      color: ThemeColor.accent,
-                                      height: imageWidth,
-                                      width: imageWidth,
-                                      child: user.imageUrl != null
-                                          ? CachedNetworkImage(
-                                              imageUrl: user.imageUrl!,
-                                              fadeInDuration: const Duration(
-                                                  milliseconds: 120),
-                                              imageBuilder:
-                                                  (context, imageProvider) =>
-                                                      Container(
-                                                height: imageWidth,
-                                                width: imageWidth,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.transparent,
-                                                  image: DecorationImage(
-                                                    image: imageProvider,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                              ),
-                                              placeholder: (context, url) =>
-                                                  const SizedBox(),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      const SizedBox(),
-                                            )
-                                          : Icon(
-                                              Icons.person_outline,
-                                              size: imageWidth * 0.8,
-                                              color: ThemeColor.stroke,
-                                            ),
-                                    ),
-                                  ),
-                                  const Gap(4),
-                                  Text(
-                                    user.name,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: canvasTheme.boxSecondaryTextColor,
-                                    ),
-                                  )
-                                ],
-                              ),
+                const Gap(8),
+                FutureBuilder(
+                  future: ref
+                      .read(allUsersNotifierProvider.notifier)
+                      .getUserAccounts(user.topFriends),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox();
+                    }
+                    final users = snapshot.data!;
+                    if (users.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Center(
+                          child: Text(
+                            "TOPフレンドはいません",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        )
-                        .toList(),
-                  );
-                },
-              ),
-            ],
+                        ),
+                      );
+                    }
+                    return Wrap(
+                      children: users
+                          .map(
+                            (user) => GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                ref
+                                    .read(navigationRouterProvider(context))
+                                    .goToProfile(user);
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.all(4),
+                                width: imageWidth,
+                                child: Column(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        color: ThemeColor.accent,
+                                        height: imageWidth,
+                                        width: imageWidth,
+                                        child: user.imageUrl != null
+                                            ? CachedNetworkImage(
+                                                imageUrl: user.imageUrl!,
+                                                fadeInDuration: const Duration(
+                                                    milliseconds: 120),
+                                                imageBuilder:
+                                                    (context, imageProvider) =>
+                                                        Container(
+                                                  height: imageWidth,
+                                                  width: imageWidth,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.transparent,
+                                                    image: DecorationImage(
+                                                      image: imageProvider,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+                                                placeholder: (context, url) =>
+                                                    const SizedBox(),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        const SizedBox(),
+                                              )
+                                            : Icon(
+                                                Icons.person_outline,
+                                                size: imageWidth * 0.8,
+                                                color: ThemeColor.stroke,
+                                              ),
+                                      ),
+                                    ),
+                                    const Gap(4),
+                                    Text(
+                                      user.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color:
+                                            canvasTheme.boxSecondaryTextColor,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-        const Gap(12),
-      ],
+          const Gap(12),
+        ],
+      ),
     );
   }
 
@@ -958,135 +1029,140 @@ class UserProfileScreen extends ConsumerWidget {
     const displayCount = 5;
     const imageRadius = 24.0;
     const stroke = 4.0;
-    return Column(
-      children: [
-        box(
-          canvasTheme,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "${user.name}のフレンド",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: canvasTheme.boxTextColor,
-                  fontWeight: FontWeight.w600,
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: themeSize.horizontalPadding,
+      ),
+      child: Column(
+        children: [
+          box(
+            canvasTheme,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${user.name}のフレンド",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: canvasTheme.boxTextColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const Gap(8),
-              FutureBuilder(
-                future: ref
-                    .read(friendIdListNotifierProvider.notifier)
-                    .getFriends(user.userId),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const SizedBox();
-                  }
-                  final friends = snapshot.data!;
-                  final users = friends
-                      .where((item) => !user.topFriends.contains(item.userId))
-                      .toList();
-                  if (users.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          user.topFriends.isNotEmpty
-                              ? "TOP10に全てのフレンドがいます"
-                              : "フレンドはいません。",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  List<Widget> stack = [];
-                  for (int i = 0; i < min(displayCount, users.length); i++) {
-                    stack.add(
-                      Positioned(
-                        left: i * (imageRadius * 3 / 2),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              width: stroke,
-                              color: Color.alphaBlend(
-                                Colors.black.withOpacity(0.05),
-                                canvasTheme.boxBgColor,
-                              ),
+                const Gap(8),
+                FutureBuilder(
+                  future: ref
+                      .read(friendIdListNotifierProvider.notifier)
+                      .getFriends(user.userId),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox();
+                    }
+                    final friends = snapshot.data!;
+                    final users = friends
+                        .where((item) => !user.topFriends.contains(item.userId))
+                        .toList();
+                    if (users.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            user.topFriends.isNotEmpty
+                                ? "TOP10に全てのフレンドがいます"
+                                : "フレンドはいません。",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: canvasTheme.boxSecondaryTextColor,
+                              fontWeight: FontWeight.w600,
                             ),
-                          ),
-                          child: UserIcon.circleIcon(users[i],
-                              radius: imageRadius),
-                        ),
-                      ),
-                    );
-                  }
-                  return GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => UsersFriendsScreen(
-                            user: user,
-                            friends: friends,
                           ),
                         ),
                       );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.black.withOpacity(0.05),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          SizedBox(
-                            width: (imageRadius * 2 + stroke) +
-                                (min(displayCount, users.length) - 1) *
-                                    (imageRadius * 3 / 2),
-                            height: imageRadius * 2,
-                            child: Stack(
-                              alignment: Alignment.centerLeft,
-                              children: stack,
+                    }
+
+                    List<Widget> stack = [];
+                    for (int i = 0; i < min(displayCount, users.length); i++) {
+                      stack.add(
+                        Positioned(
+                          left: i * (imageRadius * 3 / 2),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                width: stroke,
+                                color: Color.alphaBlend(
+                                  Colors.black.withOpacity(0.05),
+                                  canvasTheme.boxBgColor,
+                                ),
+                              ),
+                            ),
+                            child: UserIcon.circleIcon(users[i],
+                                radius: imageRadius),
+                          ),
+                        ),
+                      );
+                    }
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UsersFriendsScreen(
+                              user: user,
+                              friends: friends,
                             ),
                           ),
-                          const Expanded(child: SizedBox()),
-                          Text(
-                            friends.length.toString(),
-                            style: TextStyle(
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.black.withOpacity(0.05),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            SizedBox(
+                              width: (imageRadius * 2 + stroke) +
+                                  (min(displayCount, users.length) - 1) *
+                                      (imageRadius * 3 / 2),
+                              height: imageRadius * 2,
+                              child: Stack(
+                                alignment: Alignment.centerLeft,
+                                children: stack,
+                              ),
+                            ),
+                            const Expanded(child: SizedBox()),
+                            Text(
+                              friends.length.toString(),
+                              style: TextStyle(
+                                color: canvasTheme.boxSecondaryTextColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const Gap(4),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
                               color: canvasTheme.boxSecondaryTextColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const Gap(4),
-                          Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            color: canvasTheme.boxSecondaryTextColor,
-                            size: 20,
-                          )
-                        ],
+                              size: 20,
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-        const Gap(12),
-      ],
+          const Gap(12),
+        ],
+      ),
     );
   }
 
@@ -1453,7 +1529,7 @@ class NotFriendScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              Gap(12),
+              const Gap(12),
               Text(
                 user.name,
                 style: TextStyle(

@@ -19,7 +19,7 @@ class ImageDatasource {
   ImageDatasource(this._auth, this._firestore);
 
   addImage(String imageUrl, {String type = "default"}) {
-    final id = Uuid().v4();
+    final id = const Uuid().v4();
     _firestore
         .collection("users")
         .doc(_auth.currentUser!.uid)
@@ -29,5 +29,16 @@ class ImageDatasource {
       "imageUrl": imageUrl,
       "createdAt": Timestamp.now(),
     });
+  }
+
+ Future<QuerySnapshot<Map<String,dynamic>>> getImages({String? userId}) async{
+    userId ?? _auth.currentUser!.uid;
+    return await _firestore
+        .collection("users")
+        .doc(userId)
+        .collection("images")
+        .orderBy("createdAt", descending: true)
+        .limit(10)
+        .get();
   }
 }

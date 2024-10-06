@@ -1,5 +1,6 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/core/values.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/subscription_bottomsheet.dart';
 import 'package:app/presentation/components/core/sticky_tabbar.dart';
@@ -288,7 +289,7 @@ class TimelinePage extends ConsumerWidget {
                                       _scaffoldKey.currentState?.openDrawer();
                                     },
                                     child: Text(
-                                      "APPNAME",
+                                     appName,
                                       style: textStyle.appbarText(),
                                     ),
                                   ),

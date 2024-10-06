@@ -1,4 +1,5 @@
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
@@ -15,6 +16,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     const imageHeight = 80.0;
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final notifier = ref.read(myAccountNotifierProvider.notifier);
     final asyncValue = ref.watch(myAccountNotifierProvider);
     final canvasTheme = ref.watch(canvasThemeProvider);
@@ -45,19 +47,93 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          me.name,
-                          style: TextStyle(
-                            fontSize: 24,
-                            color: canvasTheme.profileTextColor,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                me.name,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  color: canvasTheme.profileTextColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.qr_code_rounded,
+                              color: canvasTheme.profileTextColor,
+                            ),
+                            const Gap(12),
+                            Icon(
+                              Icons.confirmation_num_outlined,
+                              color: canvasTheme.profileTextColor,
+                            ),
+                            const Gap(12),
+                            Icon(
+                              Icons.palette_outlined,
+                              color: canvasTheme.profileTextColor,
+                            ),
+                            const Gap(12),
+                            Icon(
+                              Icons.settings_outlined,
+                              color: canvasTheme.profileTextColor,
+                            ),
+                          ],
                         ),
                         Text(
                           "${me.createdAt.toDateStr}〜",
-                          style: TextStyle(
-                            color: canvasTheme.profileSecondaryTextColor,
+                          style: textStyle.w600(
                             fontSize: 14,
+                            color: canvasTheme.profileSecondaryTextColor,
+                          ),
+                        ),
+                        const Gap(8),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {},
+                              child: SizedBox(
+                                height: 32,
+                                width: 32,
+                                child: Image.asset(
+                                  Images.lineIcon,
+                                  color: canvasTheme.profileLinksColor,
+                                ),
+                              ),
+                            ),
+                            const Gap(12),
+                            SizedBox(
+                              height: 26,
+                              width: 26,
+                              child: Image.asset(
+                                Images.instagramIcon,
+                                color: canvasTheme.profileLinksColor,
+                              ),
+                            ),
+                            const Gap(12),
+                            GestureDetector(
+                              onTap: () {
+                                // shareByTwitter("");
+                              },
+                              child: SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: Image.asset(
+                                  Images.xIcon,
+                                  color: canvasTheme.profileLinksColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Gap(12),
+                        Text(
+                          me.aboutMe,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: textStyle.w600(
+                            fontSize: 14,
+                            color: canvasTheme.profileAboutMeColor,
                           ),
                         ),
                       ],
@@ -142,6 +218,58 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                                   color: canvasTheme.profileSecondaryTextColor),
                             ),
                           ],
+                        ),
+                        Divider(
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                "アイコン",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                ProfileBottomSheet(ref).openColorSheet(
+                                    context, canvasTheme, "profileLinksColor");
+                              },
+                              child: RainbowRing(
+                                color: canvasTheme.profileLinksColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Divider(
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                "ひとこと",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                ProfileBottomSheet(ref).openColorSheet(context,
+                                    canvasTheme, "profileAboutMeColor");
+                              },
+                              child: RainbowRing(
+                                color: canvasTheme.profileAboutMeColor,
+                              ),
+                            ),
+                          ],
                         )
                       ],
                     ),
@@ -175,7 +303,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "自己紹介",
+                            "ひとこと",
                             style: TextStyle(
                               fontSize: 16,
                               color: canvasTheme.boxTextColor,

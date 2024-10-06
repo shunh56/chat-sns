@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:app/core/utils/theme.dart';
+import 'package:app/core/values.dart';
 import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
@@ -85,8 +86,8 @@ class InviteCodeScreen extends ConsumerWidget {
                           ),
                           child: Column(
                             children: [
-                              const Text(
-                                "APPNAME",
+                              Text(
+                                appName,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 24,
@@ -216,7 +217,7 @@ class InviteCodeScreen extends ConsumerWidget {
                           child: Column(
                             children: [
                               Text(
-                                "APPNAME",
+                                appName,
                                 style: TextStyle(
                                   color: me.canvasTheme.boxSecondaryTextColor,
                                   fontSize: 24,

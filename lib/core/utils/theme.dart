@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class Images {
-  // static const goodButton = 'assets/images/good_button.png';
+  static const instagramIcon = 'assets/images/icons/instagram.png';
+  static const xIcon = 'assets/images/icons/x.png';
+  static const lineIcon = 'assets/images/icons/line.png';
 }
 
 class ThemeColor {

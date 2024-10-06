@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>App</string>
+	<string>BLANK</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -26,6 +26,20 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>twitter</string>
+		<string>whatsapp</string>
+		<string>tg</string>
+
+		<string>https</string>
+		<string>http</string>
+		
+		<string>instagram</string>
+		<string>instagram-stories</string>
+		<string>facebook</string>
+		<string>facebook-stories</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>このアプリでは、ユーザーがアプリ内で画像をシェアするための写真を撮影する機能と、QRコードを読み取って他のユーザーと簡単に接続できる機能を提供しています。カメラへのアクセスを許可してください。</string>
 	<key>NSMicrophoneUsageDescription</key>

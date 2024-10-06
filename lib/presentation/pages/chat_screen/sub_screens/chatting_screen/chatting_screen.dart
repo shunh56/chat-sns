@@ -13,6 +13,7 @@ import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/c
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/left_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/right_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/server_message.dart';
+import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/chats/message_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
@@ -366,7 +367,9 @@ class BottomTextField extends HookConsumerWidget {
                     onTap: () async {
                       final text = ref.read(inputTextProvider);
                       ref.read(dmUsecaseProvider).sendMessage(text, user);
-
+                      ref
+                          .read(pushNotificationNotifierProvider)
+                          .sendDm(user, text);
                       controller.clear();
                       ref.read(inputTextProvider.notifier).state = "";
                     },

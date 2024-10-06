@@ -576,7 +576,7 @@ class UserRequestButton extends ConsumerWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => FriendRequestScreen(),
+                  builder: (_) => const FriendRequestScreen(),
                 ),
               );
             },

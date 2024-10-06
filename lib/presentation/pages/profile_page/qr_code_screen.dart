@@ -47,7 +47,8 @@ class QrCodeScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 48),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: me.canvasTheme.boxBgColor,

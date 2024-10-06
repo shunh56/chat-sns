@@ -1,4 +1,5 @@
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/share_widget.dart';
 import 'package:app/presentation/phase_01/friend_request_screen.dart';
 import 'package:app/presentation/phase_01/friends_friends_screen.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
@@ -25,7 +26,7 @@ class SearchScreen extends ConsumerWidget {
             centerTitle: false,
             title: const Text("友達"),
           ),
-          Gap(4),
+          const Gap(4),
           Padding(
             padding: EdgeInsets.symmetric(
                 horizontal: themeSize.horizontalPadding - 4),
@@ -122,7 +123,7 @@ class SearchScreen extends ConsumerWidget {
           ),
           Gap(themeSize.verticalSpaceMedium),
           friendRequestedListView(ref),
-          friendsFriendListView(ref),
+          friendsFriendListView(context, ref),
         ],
       ),
     );
@@ -173,7 +174,8 @@ class SearchScreen extends ConsumerWidget {
     );
   }
 
-  Widget friendsFriendListView(WidgetRef ref) {
+  Widget friendsFriendListView(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
     final asyncValue = ref.watch(friendsFriendListNotifierProvider);
     final requesteds =
         ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
@@ -187,6 +189,19 @@ class SearchScreen extends ConsumerWidget {
             .where((user) => (!requesteds.contains(user.userId) &&
                 !deletes.contains(user.userId)))
             .toList();
+        if (users.isEmpty) {
+          return Column(
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(
+                  vertical: themeSize.verticalPaddingLarge,
+                ),
+                height: themeSize.screenHeight * 0.6,
+                child: const ShareWidget(),
+              ),
+            ],
+          );
+        }
         return ListView(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
