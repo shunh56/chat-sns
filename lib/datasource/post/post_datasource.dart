@@ -7,17 +7,17 @@ import 'package:uuid/uuid.dart';
 
 final postDatasourceProvider = Provider(
   (ref) => PostDatasource(
-    ref,
+
     ref.watch(authProvider),
     ref.watch(firestoreProvider),
   ),
 );
 
 class PostDatasource {
-  final Ref _ref;
+  
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  PostDatasource(this._ref, this._auth, this._firestore);
+  PostDatasource( this._auth, this._firestore);
   final collectionName = "posts";
 
   Future<QuerySnapshot<Map<String, dynamic>>> getPosts() async {

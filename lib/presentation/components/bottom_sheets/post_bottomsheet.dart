@@ -65,7 +65,7 @@ class PostBottomModelSheet {
                     );
                   },
                   child: Padding(
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 12,
                     ),
@@ -74,11 +74,11 @@ class PostBottomModelSheet {
                       children: [
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.chat_bubble_outline_rounded,
                               color: ThemeColor.icon,
                             ),
-                            Gap(12),
+                            const Gap(12),
                             Text(
                               "つぶやき",
                               style: textStyle.w600(
@@ -87,7 +87,7 @@ class PostBottomModelSheet {
                             ),
                           ],
                         ),
-                        Gap(4),
+                        const Gap(4),
                         Text(
                           "短いテキストメッセージを友達にシェア。気軽に日常の出来事や考えをフレンドにリアルタイムで共有できる。",
                           style: textStyle.w400(
@@ -107,26 +107,26 @@ class PostBottomModelSheet {
                     showUpcomingSnackbar();
                   },
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.graphic_eq_rounded,
                               color: ThemeColor.icon,
                             ),
-                            Gap(12),
+                            const Gap(12),
                             Text(
                               "ボイスチャット",
                               style: textStyle.w600(
                                 fontSize: 14,
                               ),
                             ),
-                            Gap(12),
+                            const Gap(12),
                             Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 4,
                               ),
@@ -144,7 +144,7 @@ class PostBottomModelSheet {
                             ),
                           ],
                         ),
-                        Gap(4),
+                        const Gap(4),
                         Text(
                           "リアルタイムの音声会話。フレンドや新しい人々と通話をすることができます。",
                           style: textStyle.w400(
@@ -572,7 +572,7 @@ class PostBottomModelSheet {
                                 );
                           },
                           child: Padding(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 24,
                               vertical: 12,
                             ),
@@ -585,7 +585,7 @@ class PostBottomModelSheet {
                                     fontSize: 14,
                                   ),
                                 ),
-                                Icon(
+                                const Icon(
                                   Icons.person_outline_rounded,
                                   color: ThemeColor.icon,
                                 ),
@@ -605,7 +605,7 @@ class PostBottomModelSheet {
                             openReplies(post);
                           },
                           child: Padding(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 24,
                               vertical: 12,
                             ),
@@ -618,7 +618,7 @@ class PostBottomModelSheet {
                                     fontSize: 14,
                                   ),
                                 ),
-                                Icon(
+                                const Icon(
                                   Icons.chat_bubble_outline,
                                   color: ThemeColor.icon,
                                 ),
@@ -688,7 +688,7 @@ class PostBottomModelSheet {
                               );
                             },
                             child: Padding(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 24,
                                 vertical: 12,
                               ),
@@ -703,7 +703,7 @@ class PostBottomModelSheet {
                                       color: ThemeColor.error,
                                     ),
                                   ),
-                                  Icon(
+                                  const Icon(
                                     Icons.warning_amber_rounded,
                                     color: ThemeColor.error,
                                   ),
@@ -724,7 +724,7 @@ class PostBottomModelSheet {
                                   .blockUserBottomSheet(user);
                             },
                             child: Padding(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 24,
                                 vertical: 12,
                               ),
@@ -739,7 +739,7 @@ class PostBottomModelSheet {
                                       color: ThemeColor.error,
                                     ),
                                   ),
-                                  Icon(
+                                  const Icon(
                                     Icons.block_outlined,
                                     color: ThemeColor.error,
                                   ),
@@ -813,7 +813,7 @@ class PostBottomModelSheet {
                                 );
                           },
                           child: Padding(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 24,
                               vertical: 12,
                             ),
@@ -826,7 +826,7 @@ class PostBottomModelSheet {
                                     fontSize: 14,
                                   ),
                                 ),
-                                Icon(
+                                const Icon(
                                   Icons.person_outline_rounded,
                                   color: ThemeColor.icon,
                                 ),
@@ -848,7 +848,7 @@ class PostBottomModelSheet {
                                     replace: true);
                           },
                           child: Padding(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 24,
                               vertical: 12,
                             ),
@@ -861,7 +861,7 @@ class PostBottomModelSheet {
                                     fontSize: 14,
                                   ),
                                 ),
-                                Icon(
+                                const Icon(
                                   Icons.chat_bubble_outline,
                                   color: ThemeColor.icon,
                                 ),
@@ -931,7 +931,7 @@ class PostBottomModelSheet {
                               );
                             },
                             child: Padding(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 24,
                                 vertical: 12,
                               ),
@@ -946,7 +946,7 @@ class PostBottomModelSheet {
                                       color: ThemeColor.error,
                                     ),
                                   ),
-                                  Icon(
+                                  const Icon(
                                     Icons.warning_amber_rounded,
                                     color: ThemeColor.error,
                                   ),
@@ -966,7 +966,7 @@ class PostBottomModelSheet {
                                   .blockUserBottomSheet(user);
                             },
                             child: Padding(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 24,
                                 vertical: 12,
                               ),
@@ -981,7 +981,7 @@ class PostBottomModelSheet {
                                       color: ThemeColor.error,
                                     ),
                                   ),
-                                  Icon(
+                                  const Icon(
                                     Icons.block_outlined,
                                     color: ThemeColor.error,
                                   ),

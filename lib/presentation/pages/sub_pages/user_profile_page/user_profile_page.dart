@@ -4,8 +4,6 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/presentation/components/icons.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
@@ -16,7 +14,6 @@ import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/images/images.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,7 +119,7 @@ class UserProfileScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  Gap(12),
+                  const Gap(12),
                   /*GestureDetector(
                     onTap: () {
                       HapticFeedback.lightImpact();

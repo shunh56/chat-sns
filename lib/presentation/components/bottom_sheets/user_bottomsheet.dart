@@ -53,7 +53,7 @@ class UserBottomModelSheet {
                   const Gap(24),
 
                   UserIcon.tileIcon(user, width: 72),
-                  Gap(12),
+                  const Gap(12),
 
                   Text(
                     "${user.name}をブロックしますか？",
@@ -62,7 +62,7 @@ class UserBottomModelSheet {
                     ),
                   ),
 
-                  Gap(12),
+                  const Gap(12),
                   Padding(
                     padding: EdgeInsets.symmetric(
                         horizontal: themeSize.horizontalPaddingLarge),
@@ -75,7 +75,7 @@ class UserBottomModelSheet {
                             color: ThemeColor.subText,
                           ),
                         ),
-                        Gap(12),
+                        const Gap(12),
                         Text(
                           "・ブロックしたことは相手に通知されません。",
                           style: textStyle.w400(
@@ -86,13 +86,13 @@ class UserBottomModelSheet {
                     ),
                   ),
 
-                  Gap(24),
+                  const Gap(24),
                   Divider(
                     height: 0,
                     thickness: 0.4,
                     color: Colors.white.withOpacity(0.3),
                   ),
-                  Gap(12),
+                  const Gap(12),
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: themeSize.horizontalPadding,
@@ -119,7 +119,7 @@ class UserBottomModelSheet {
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
-                          padding: EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(10),
                           child: Center(
                             child: Text(
                               "ブロック",

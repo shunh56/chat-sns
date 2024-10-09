@@ -38,7 +38,7 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                     fontSize: 20,
                   ),
                 ),
-                Gap(24),
+                const Gap(24),
                 if (Platform.isIOS)
                   Padding(
                     padding: EdgeInsets.only(
@@ -63,7 +63,7 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                         },
                         borderRadius: BorderRadius.circular(borderRadius),
                         child: Container(
-                          padding: EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(12),
                           child: Row(
                             children: [
                               Expanded(
@@ -92,7 +92,7 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              Expanded(
+                              const Expanded(
                                 flex: 1,
                                 child: SizedBox(),
                               ),
@@ -121,7 +121,7 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                       },
                       borderRadius: BorderRadius.circular(borderRadius),
                       child: Container(
-                        padding: EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(12),
                         child: Row(
                           children: [
                             Expanded(
@@ -150,7 +150,7 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Expanded(
+                            const Expanded(
                               flex: 1,
                               child: SizedBox(),
                             ),
@@ -160,8 +160,8 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                Gap(24),
-                Row(
+                const Gap(24),
+                const Row(
                   children: [
                     Expanded(
                       child: Divider(
@@ -179,7 +179,7 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                Gap(24),
+                const Gap(24),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: themeSize.horizontalPadding,
@@ -192,16 +192,16 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => SignUpPage(),
+                            builder: (_) => const SignUpPage(),
                           ),
                         );
                       },
                       borderRadius: BorderRadius.circular(borderRadius),
                       child: Container(
-                        padding: EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         child: Row(
                           children: [
-                            Expanded(
+                            const Expanded(
                               flex: 1,
                               child: Align(
                                 alignment: Alignment.centerLeft,
@@ -227,7 +227,7 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Expanded(
+                            const Expanded(
                               flex: 1,
                               child: SizedBox(),
                             ),

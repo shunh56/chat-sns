@@ -60,7 +60,7 @@ class BlocksScreen extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          "@" + user.username,
+                          "@${user.username}",
                           style: textStyle.w600(
                             color: ThemeColor.subText,
                           ),

@@ -23,7 +23,7 @@ class ReportForm {
   toJson() {
     return {
       //
-      "id": Uuid().v4(),
+      "id": const Uuid().v4(),
       "createdAt": Timestamp.now(),
       //
       "reason": reason,

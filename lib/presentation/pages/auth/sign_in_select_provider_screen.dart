@@ -4,9 +4,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
 import 'package:app/presentation/components/core/shader.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/auth/signin_page.dart';
-import 'package:app/presentation/pages/auth/signup_page.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,7 +37,7 @@ class SignInSelectProviderScreen extends ConsumerWidget {
                     fontSize: 20,
                   ),
                 ),
-                Gap(24),
+                const Gap(24),
                 if (Platform.isIOS)
                   Padding(
                     padding: EdgeInsets.only(
@@ -63,7 +61,7 @@ class SignInSelectProviderScreen extends ConsumerWidget {
                         },
                         borderRadius: BorderRadius.circular(borderRadius),
                         child: Container(
-                          padding: EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(12),
                           child: Row(
                             children: [
                               Expanded(
@@ -92,7 +90,7 @@ class SignInSelectProviderScreen extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              Expanded(
+                              const Expanded(
                                 flex: 1,
                                 child: SizedBox(),
                               ),
@@ -122,7 +120,7 @@ class SignInSelectProviderScreen extends ConsumerWidget {
                       },
                       borderRadius: BorderRadius.circular(borderRadius),
                       child: Container(
-                        padding: EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(12),
                         child: Row(
                           children: [
                             Expanded(
@@ -151,7 +149,7 @@ class SignInSelectProviderScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Expanded(
+                            const Expanded(
                               flex: 1,
                               child: SizedBox(),
                             ),
@@ -161,8 +159,8 @@ class SignInSelectProviderScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                Gap(24),
-                Row(
+                const Gap(24),
+                const Row(
                   children: [
                     Expanded(
                       child: Divider(
@@ -180,7 +178,7 @@ class SignInSelectProviderScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                Gap(24),
+                const Gap(24),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: themeSize.horizontalPadding,
@@ -193,16 +191,16 @@ class SignInSelectProviderScreen extends ConsumerWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => SignInPage(),
+                            builder: (_) => const SignInPage(),
                           ),
                         );
                       },
                       borderRadius: BorderRadius.circular(borderRadius),
                       child: Container(
-                        padding: EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         child: Row(
                           children: [
-                            Expanded(
+                            const Expanded(
                               flex: 1,
                               child: Align(
                                 alignment: Alignment.centerLeft,
@@ -228,7 +226,7 @@ class SignInSelectProviderScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Expanded(
+                            const Expanded(
                               flex: 1,
                               child: SizedBox(),
                             ),

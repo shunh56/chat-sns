@@ -355,7 +355,7 @@ class SubsctiptionBottomSheet {
                               ),
                               Text(
                                 "サブスクライブすると、$appNameの売買規約に同意したとみなされます。",
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: ThemeColor.beige,
                                   fontSize: 10,
                                 ),

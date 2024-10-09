@@ -9,7 +9,6 @@ import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/muted_list.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';

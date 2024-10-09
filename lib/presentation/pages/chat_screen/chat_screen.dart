@@ -3,7 +3,6 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
-import 'package:app/presentation/components/share_widget.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
@@ -34,7 +33,7 @@ class ChatScreen extends ConsumerWidget {
               margin: EdgeInsets.symmetric(
                 horizontal: themeSize.horizontalPadding,
               ),
-              padding: EdgeInsets.symmetric(vertical: 48),
+              padding: const EdgeInsets.symmetric(vertical: 48),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
                 color: ThemeColor.stroke,
@@ -53,7 +52,7 @@ class ChatScreen extends ConsumerWidget {
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.only(bottom: 120),
+          padding: const EdgeInsets.only(bottom: 120),
           itemCount: list.length,
           itemBuilder: (context, index) {
             final overview = list[index];

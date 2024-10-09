@@ -4,7 +4,6 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/report_form.dart';
 import 'package:app/usecase/report_usecase.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +52,7 @@ class ReportUserScreen extends ConsumerWidget {
               Row(
                 children: [
                   UserIcon.tileIcon(user),
-                  Gap(8),
+                  const Gap(8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -64,7 +63,7 @@ class ReportUserScreen extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        "@" + user.username,
+                        "@${user.username}",
                         style: textStyle.w600(
                           fontSize: 14,
                           color: ThemeColor.subText,
@@ -74,12 +73,12 @@ class ReportUserScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              Gap(32),
+              const Gap(32),
               Text(
                 "報告内容を入力してください",
                 style: textStyle.w600(),
               ),
-              Gap(16),
+              const Gap(16),
               Text(
                 "報告理由",
                 style: textStyle.w600(),
@@ -88,7 +87,7 @@ class ReportUserScreen extends ConsumerWidget {
                 "下記から該当する報告理由を選択してください",
                 style: textStyle.w600(),
               ),
-              Gap(24),
+              const Gap(24),
               GestureDetector(
                 onTap: () {
                   HapticFeedback.mediumImpact();
@@ -112,8 +111,8 @@ class ReportUserScreen extends ConsumerWidget {
                                 style: textStyle.w600(),
                               ),
                             ),
-                            Gap(12),
-                            Divider(
+                            const Gap(12),
+                            const Divider(
                               thickness: 1,
                               color: ThemeColor.stroke,
                             ),
@@ -133,7 +132,7 @@ class ReportUserScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Divider(
+                            const Divider(
                               thickness: 1,
                               color: ThemeColor.stroke,
                             ),
@@ -153,7 +152,7 @@ class ReportUserScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Divider(
+                            const Divider(
                               thickness: 1,
                               color: ThemeColor.stroke,
                             ),
@@ -174,7 +173,7 @@ class ReportUserScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Divider(
+                            const Divider(
                               thickness: 1,
                               color: ThemeColor.stroke,
                             ),
@@ -195,7 +194,7 @@ class ReportUserScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Divider(
+                            const Divider(
                               thickness: 1,
                               color: ThemeColor.stroke,
                             ),
@@ -216,7 +215,7 @@ class ReportUserScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Divider(
+                            const Divider(
                               thickness: 1,
                               color: ThemeColor.stroke,
                             ),
@@ -237,7 +236,7 @@ class ReportUserScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Divider(
+                            const Divider(
                               thickness: 1,
                               color: ThemeColor.stroke,
                             ),
@@ -258,7 +257,7 @@ class ReportUserScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Divider(
+                            const Divider(
                               thickness: 1,
                               color: ThemeColor.stroke,
                             ),
@@ -304,12 +303,12 @@ class ReportUserScreen extends ConsumerWidget {
                         ),
                 ),
               ),
-              Gap(32),
+              const Gap(32),
               Text(
                 "詳細",
                 style: textStyle.w600(),
               ),
-              Gap(8),
+              const Gap(8),
               TextField(
                 minLines: 4,
                 maxLines: 10,

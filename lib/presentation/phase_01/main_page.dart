@@ -112,7 +112,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
                     user.name,
                     style: textStyle.w600(fontSize: 14),
                   ),
-                  Gap(16),
+                  const Gap(16),
                   Text(
                     "とフレンドになりました!",
                     style: textStyle.w600(),

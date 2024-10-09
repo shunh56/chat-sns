@@ -10,7 +10,6 @@ import 'package:app/core/values.dart';
 import 'package:app/firebase_options.dart';
 import 'package:app/presentation/pages/auth/sign_in_select_provider_screen.dart';
 import 'package:app/presentation/pages/auth/sign_up_select_provider_screen.dart';
-import 'package:app/presentation/pages/auth/signin_page.dart';
 import 'package:app/presentation/pages/onboarding_page/awaiting_screen.dart';
 import 'package:app/presentation/pages/onboarding_page/input_invite_code_screen.dart';
 import 'package:app/presentation/pages/onboarding_page/onboarding_page.dart';
@@ -534,7 +533,7 @@ class WelcomePage extends ConsumerWidget {
             ),
             const Expanded(child: SizedBox()),
             Text(
-              'Welcome to\n${appName}',
+              'Welcome to\n$appName',
               style: Theme.of(context).textTheme.displayMedium!.copyWith(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
@@ -552,13 +551,13 @@ class WelcomePage extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SignUpSelectProviderScreen(),
+                        builder: (_) => const SignUpSelectProviderScreen(),
                       ),
                     );
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     child: Center(
                       child: Container(
                         child: Text(
@@ -575,7 +574,7 @@ class WelcomePage extends ConsumerWidget {
                 ),
               ),
             ),
-            Gap(16),
+            const Gap(16),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: themeSize.horizontalPadding,
@@ -588,13 +587,13 @@ class WelcomePage extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => SignInSelectProviderScreen(),
+                        builder: (_) => const SignInSelectProviderScreen(),
                       ),
                     );
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     child: Center(
                       child: Container(
                         child: Text(

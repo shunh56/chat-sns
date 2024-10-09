@@ -88,7 +88,7 @@ class InviteCodeScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 appName,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 24,
                                 ),

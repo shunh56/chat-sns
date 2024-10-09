@@ -1,7 +1,6 @@
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/share_widget.dart';
 import 'package:app/presentation/phase_01/friend_request_screen.dart';
-import 'package:app/presentation/phase_01/friends_friends_screen.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
