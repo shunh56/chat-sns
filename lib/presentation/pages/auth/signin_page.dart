@@ -214,13 +214,11 @@ class SignInPage extends ConsumerWidget {
                     child: InkWell(
                       onTap: () async {
                         primaryFocus?.unfocus();
-
                         final status =
                             await ref.watch(authNotifierProvider).signIn();
                         ref.read(errorTextProvider.notifier).state = status;
                         ref.read(loginProcessProvider.notifier).state = false;
                         if (status == "success") {
-                          // ignore: use_build_context_synchronously
                           Navigator.popUntil(context, (route) => route.isFirst);
                         }
                       },

@@ -243,6 +243,31 @@ class CachedImage {
     );
   }
 
+  static imageView(String imageUrl, {int ms = 300}) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fadeInDuration: Duration(milliseconds: ms),
+      imageBuilder: (context, imageProvider) => Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: imageProvider,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+      errorWidget: (context, url, error) => Container(
+        decoration: const BoxDecoration(
+          color: ThemeColor.beige,
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.error_outline_rounded,
+            color: ThemeColor.button,
+          ),
+        ),
+      ),
+    );
+  }
   /*static imageWithNoHash(String imageUrl, {int ms = 300}) {
     return CachedNetworkImage(
       imageUrl: imageUrl,

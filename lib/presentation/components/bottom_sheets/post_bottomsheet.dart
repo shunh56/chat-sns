@@ -1,9 +1,17 @@
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
+import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
+import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
+import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/pages/timeline_page/widget/reply_widget.dart';
+import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/presentation/providers/provider/posts/replies.dart';
 import 'package:app/usecase/voice_chat_usecase.dart';
@@ -23,159 +31,182 @@ class PostBottomModelSheet {
       ),
       context: context,
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.only(
-            top: 12,
-            bottom: MediaQuery.of(context).viewPadding.bottom + 12,
-            left: 12,
-            right: 12,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              //ios design
-              Container(
-                height: 4,
-                width: MediaQuery.sizeOf(context).width / 8,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(100),
+        return Consumer(builder: (context, ref, chlid) {
+          final themeSize = ref.watch(themeSizeProvider(context));
+          final textStyle = ThemeTextStyle(themeSize: themeSize);
+          return Container(
+            padding: EdgeInsets.only(
+              top: 12,
+              bottom: MediaQuery.of(context).viewPadding.bottom + 12,
+              left: 12,
+              right: 12,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                //ios design
+                Container(
+                  height: 4,
+                  width: MediaQuery.sizeOf(context).width / 8,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
                 ),
-              ),
-              const Gap(12),
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () async {
-                  Navigator.pushReplacement(
-                    context,
-                    PageTransitionMethods.slideUp(
-                      const CreatePostScreen(),
+                const Gap(12),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () async {
+                    Navigator.pushReplacement(
+                      context,
+                      PageTransitionMethods.slideUp(
+                        const CreatePostScreen(),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
                     ),
-                  );
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.chat_bubble_outline_rounded,
-                            color: ThemeColor.icon,
-                          ),
-                          Gap(12),
-                          Text(
-                            "つぶやき",
-                            style: TextStyle(
-                              color: ThemeColor.text,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              color: ThemeColor.icon,
                             ),
-                          ),
-                        ],
-                      ),
-                      Gap(4),
-                      Text(
-                        "短いテキストメッセージを友達にシェア。気軽に日常の出来事や考えをフレンドにリアルタイムで共有できる。",
-                        style: TextStyle(
-                          color: ThemeColor.text,
-                          fontSize: 10,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () async {
-                  Navigator.pop(context);
-                  openVoiceChatMenu();
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.graphic_eq_rounded,
-                            color: ThemeColor.icon,
-                          ),
-                          Gap(12),
-                          Text(
-                            "ボイスチャット",
-                            style: TextStyle(
-                              color: ThemeColor.text,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                            Gap(12),
+                            Text(
+                              "つぶやき",
+                              style: textStyle.w600(
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      Gap(4),
-                      Text(
-                        "リアルタイムの音声会話。フレンドや新しい人々と通話をすることができます。",
-                        style: TextStyle(
-                          color: ThemeColor.text,
-                          fontSize: 10,
+                          ],
                         ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-/*
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    PageTransitionMethods.slideUp(
-                      const CreateBlogScreen(),
+                        Gap(4),
+                        Text(
+                          "短いテキストメッセージを友達にシェア。気軽に日常の出来事や考えをフレンドにリアルタイムで共有できる。",
+                          style: textStyle.w400(
+                            fontSize: 10,
+                            color: ThemeColor.subText,
+                          ),
+                        )
+                      ],
                     ),
-                  );
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.post_add_rounded,
-                            color: ThemeColor.icon,
-                          ),
-                          Gap(12),
-                          Text(
-                            "ブログ",
-                            style: TextStyle(
-                              color: ThemeColor.text,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Gap(4),
-                      Text(
-                        "全ユーザーに公開される投稿形式。タイトルと文章を含み、詳細な内容や考えをまとめて公開することができます。",
-                        style: TextStyle(
-                          color: ThemeColor.text,
-                          fontSize: 10,
-                        ),
-                      )
-                    ],
                   ),
                 ),
-              ),
-          */
-            ],
-          ),
-        );
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () async {
+                    Navigator.pop(context);
+                    //openVoiceChatMenu();
+                    showUpcomingSnackbar();
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.graphic_eq_rounded,
+                              color: ThemeColor.icon,
+                            ),
+                            Gap(12),
+                            Text(
+                              "ボイスチャット",
+                              style: textStyle.w600(
+                                fontSize: 14,
+                              ),
+                            ),
+                            Gap(12),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: ThemeColor.stroke,
+                                ),
+                                color: ThemeColor.white.withOpacity(0.1),
+                              ),
+                              child: Text(
+                                "PRO",
+                                style: textStyle.w600(),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Gap(4),
+                        Text(
+                          "リアルタイムの音声会話。フレンドや新しい人々と通話をすることができます。",
+                          style: textStyle.w400(
+                            fontSize: 10,
+                            color: ThemeColor.subText,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                /*
+                  GestureDetector(
+                  behavior:HitTestBehavior.opaque,
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        PageTransitionMethods.slideUp(
+                          const CreateBlogScreen(),
+                        ),
+                      );
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.post_add_rounded,
+                                color: ThemeColor.icon,
+                              ),
+                              Gap(12),
+                              Text(
+                                "ブログ",
+                                style: TextStyle(
+                                  color: ThemeColor.text,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Gap(4),
+                          Text(
+                            "全ユーザーに公開される投稿形式。タイトルと文章を含み、詳細な内容や考えをまとめて公開することができます。",
+                            style: TextStyle(
+                              color: ThemeColor.text,
+                              fontSize: 10,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+              */
+              ],
+            ),
+          );
+        });
       },
     );
   }
@@ -261,6 +292,7 @@ class PostBottomModelSheet {
                     children: [
                       ref.watch(inputTextProvider).isNotEmpty
                           ? GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () async {
                                 String text = ref.read(inputTextProvider);
 
@@ -453,6 +485,7 @@ class PostBottomModelSheet {
                         ),
                         ref.watch(inputTextProvider).isNotEmpty
                             ? GestureDetector(
+                                behavior: HitTestBehavior.opaque,
                                 onTap: () async {
                                   String text = ref.read(inputTextProvider);
                                   ref
@@ -476,6 +509,489 @@ class PostBottomModelSheet {
                       ],
                     ),
                   ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  openPostAction(Post post, UserAccount user) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: ThemeColor.background,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(36),
+      ),
+      context: context,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final themeSize = ref.watch(themeSizeProvider(context));
+            final textStyle = ThemeTextStyle(themeSize: themeSize);
+
+            return Container(
+              width: themeSize.screenWidth,
+              padding: EdgeInsets.only(
+                top: 12,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                left: themeSize.horizontalPadding,
+                right: themeSize.horizontalPadding,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  //ios design
+                  Container(
+                    height: 4,
+                    width: MediaQuery.sizeOf(context).width / 8,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  const Gap(24),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      color: ThemeColor.stroke,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            ref
+                                .read(navigationRouterProvider(context))
+                                .goToProfile(
+                                  user,
+                                  replace: true,
+                                );
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "プロフィール",
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.person_outline_rounded,
+                                  color: ThemeColor.icon,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Divider(
+                          height: 0,
+                          thickness: 0.4,
+                          color: Colors.white.withOpacity(0.3),
+                        ),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            Navigator.pop(context);
+                            openReplies(post);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "コメント",
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chat_bubble_outline,
+                                  color: ThemeColor.icon,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  //TODO
+                  /*    const Gap(12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: ThemeColor.stroke,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                        behavior:HitTestBehavior.opaque,
+                          onTap: () {},
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "ミュート",
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.visibility_off_outlined,
+                                  color: ThemeColor.icon,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+ */
+                  const Gap(12),
+                  if (user.userId != ref.watch(authProvider).currentUser!.uid)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: ThemeColor.stroke,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ReportUserScreen(user),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "報告",
+                                    style: textStyle.w600(
+                                      fontSize: 14,
+                                      color: ThemeColor.error,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: ThemeColor.error,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Divider(
+                            height: 0,
+                            thickness: 0.4,
+                            color: Colors.white.withOpacity(0.3),
+                          ),
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              Navigator.pop(context);
+                              UserBottomModelSheet(context)
+                                  .blockUserBottomSheet(user);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "ブロック",
+                                    style: textStyle.w600(
+                                      fontSize: 14,
+                                      color: ThemeColor.error,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.block_outlined,
+                                    color: ThemeColor.error,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  openCurrentStatusPostAction(CurrentStatusPost post, UserAccount user) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: ThemeColor.background,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(36),
+      ),
+      context: context,
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final themeSize = ref.watch(themeSizeProvider(context));
+            final textStyle = ThemeTextStyle(themeSize: themeSize);
+
+            return Container(
+              width: themeSize.screenWidth,
+              padding: EdgeInsets.only(
+                top: 12,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                left: themeSize.horizontalPadding,
+                right: themeSize.horizontalPadding,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  //ios design
+                  Container(
+                    height: 4,
+                    width: MediaQuery.sizeOf(context).width / 8,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  const Gap(24),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      color: ThemeColor.stroke,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            ref
+                                .read(navigationRouterProvider(context))
+                                .goToProfile(
+                                  user,
+                                  replace: true,
+                                );
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "プロフィール",
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.person_outline_rounded,
+                                  color: ThemeColor.icon,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Divider(
+                          height: 0,
+                          thickness: 0.4,
+                          color: Colors.white.withOpacity(0.3),
+                        ),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            ref
+                                .read(navigationRouterProvider(context))
+                                .goToCurrentStatusPost(post, user,
+                                    replace: true);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "メッセージを送る",
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chat_bubble_outline,
+                                  color: ThemeColor.icon,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  //TODO
+                  /*    const Gap(12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: ThemeColor.stroke,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                        behavior:HitTestBehavior.opaque,
+                          onTap: () {},
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "ミュート",
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.visibility_off_outlined,
+                                  color: ThemeColor.icon,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+ */
+                  const Gap(12),
+                  if (user.userId != ref.watch(authProvider).currentUser!.uid)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: ThemeColor.stroke,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ReportUserScreen(user),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "報告",
+                                    style: textStyle.w600(
+                                      fontSize: 14,
+                                      color: ThemeColor.error,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: ThemeColor.error,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Divider(
+                            height: 0,
+                            thickness: 0.4,
+                            color: Colors.white.withOpacity(0.3),
+                          ),
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              UserBottomModelSheet(context)
+                                  .blockUserBottomSheet(user);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "ブロック",
+                                    style: textStyle.w600(
+                                      fontSize: 14,
+                                      color: ThemeColor.error,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.block_outlined,
+                                    color: ThemeColor.error,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             );

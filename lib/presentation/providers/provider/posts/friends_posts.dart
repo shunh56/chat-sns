@@ -38,11 +38,13 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   final PostUsecase postUsecase;
   final CurrentStatusPostUsecase currentStatusPostUsecase;
 
+  //TODO フレンドが変更されるたびに全てのPostを取得し直している
+  // blockしたらすぐに反映されているから悪くはないが、グリッチしてしまう。
   Future<void> initialize() async {
     List<PostBase> posts = [];
+
     asyncValue.maybeWhen(
       data: (infos) async {
-        DebugPrint("fetching friends posts");
         List<Future<List<PostBase>>> futures = [];
         futures.add(getMyPosts());
         futures.add(getMyCurrentStatusPosts());

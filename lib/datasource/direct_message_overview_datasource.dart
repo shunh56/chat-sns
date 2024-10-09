@@ -32,18 +32,28 @@ class DirectMessageOverviewDatasource {
     });
   }
 
-  closeChat(String otherUserId) {
+  closeChat(String otherUserId) async {
     String roomId = DMKeyConverter.getKey(_auth.currentUser!.uid, otherUserId);
-    _firestore.collection("direct_messages").doc(roomId).update({
-      "users.${_auth.currentUser!.uid}": false,
-      "users.$otherUserId": false,
-    });
+    final docExists =
+        (await _firestore.collection("direct_messages").doc(roomId).get())
+            .exists;
+    if (docExists) {
+      _firestore.collection("direct_messages").doc(roomId).update({
+        "users.${_auth.currentUser!.uid}": false,
+        "users.$otherUserId": false,
+      });
+    }
   }
 
-  leaveChat(String otherUserId) {
+  leaveChat(String otherUserId) async {
     String roomId = DMKeyConverter.getKey(_auth.currentUser!.uid, otherUserId);
-    _firestore.collection("direct_messages").doc(roomId).update({
-      "users.${_auth.currentUser!.uid}": false,
-    });
+    final docExists =
+        (await _firestore.collection("direct_messages").doc(roomId).get())
+            .exists;
+    if (docExists) {
+      _firestore.collection("direct_messages").doc(roomId).update({
+        "users.${_auth.currentUser!.uid}": false,
+      });
+    }
   }
 }

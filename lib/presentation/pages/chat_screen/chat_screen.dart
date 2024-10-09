@@ -3,6 +3,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/components/share_widget.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
@@ -27,12 +28,32 @@ class ChatScreen extends ConsumerWidget {
     final listView = asyncValue.when(
       data: (list) {
         if (list.isEmpty) {
-          return const Center(child: Text("no chats"));
+          return Padding(
+            padding: EdgeInsets.only(top: themeSize.screenHeight * 0.25),
+            child: Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: themeSize.horizontalPadding,
+              ),
+              padding: EdgeInsets.symmetric(vertical: 48),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                color: ThemeColor.stroke,
+              ),
+              child: Center(
+                child: Text(
+                  "No friends? Start Talking!",
+                  style: textStyle.w600(
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ),
+          );
         }
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.only(bottom: 120),
           itemCount: list.length,
           itemBuilder: (context, index) {
             final overview = list[index];

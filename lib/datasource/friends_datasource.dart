@@ -49,9 +49,8 @@ class FriendsDatasource {
   }
 
   void admitFriendRequested(String userId) {
+    check(userId);
     addFriend(userId);
-    deleteRequest(userId);
-    deleteRequested(userId);
   }
 
   void addFriend(String userId) {
@@ -59,6 +58,7 @@ class FriendsDatasource {
       debugPrint("invitecode user and user is SAME!");
       throw Exception("Cannot add yourself as friend!");
     }
+    check(userId);
     _firestore
         .collection("users")
         .doc(_auth.currentUser!.uid)
@@ -147,6 +147,7 @@ class FriendsDatasource {
   }
 
   void deleteFriend(String userId) {
+    check(userId);
     _firestore
         .collection("users")
         .doc(_auth.currentUser!.uid)
@@ -159,6 +160,11 @@ class FriendsDatasource {
         .collection(collectionName)
         .doc(_auth.currentUser!.uid)
         .delete();
+  }
+
+  check(String userId) {
+    deleteRequest(userId);
+    deleteRequested(userId);
   }
 
   Future<QuerySnapshot<Map<String, dynamic>>> fetchDeletes() async {

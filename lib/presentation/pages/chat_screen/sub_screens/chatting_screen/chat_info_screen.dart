@@ -2,8 +2,10 @@ import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
+import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
@@ -113,6 +115,12 @@ class ChatInfoScreen extends ConsumerWidget {
                     ),
                     onPressed: () {
                       HapticFeedback.lightImpact();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ReportUserScreen(user),
+                        ),
+                      );
                     },
                   ),
                   FocusedMenuItem(
@@ -122,18 +130,11 @@ class ChatInfoScreen extends ConsumerWidget {
                     ),
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      ref
-                          .read(blocksListNotifierProvider.notifier)
-                          .blockUser(user);
-                      ref
-                          .read(dmOverviewListNotifierProvider.notifier)
-                          .closeChat(user);
-                      int count = 0;
-                      Navigator.popUntil(context, (route) {
-                        count += 1;
-                        return count == 3;
-                      });
-                      showMessage("ユーザーをブロックしました。");
+
+                      UserBottomModelSheet(context).blockUserBottomSheet(
+                        user,
+                        count: 3,
+                      );
                     },
                   ),
                 ],

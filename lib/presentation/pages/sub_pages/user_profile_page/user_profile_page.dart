@@ -3,12 +3,16 @@ import 'dart:math';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/icons.dart';
+import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
 import 'package:app/presentation/navigation/navigator.dart';
+import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/users_friends_screen.dart';
+import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/images/images.dart';
@@ -16,6 +20,7 @@ import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:gap/gap.dart';
@@ -24,6 +29,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserProfileScreen extends ConsumerWidget {
   const UserProfileScreen({super.key, required this.user});
@@ -31,291 +37,391 @@ class UserProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final canvasTheme = user.canvasTheme;
     final friendInfos =
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
     final friendIds = friendInfos.map((item) => item.userId);
+    bool popped = false;
 
     if (!friendInfos.map((item) => item.userId).contains(user.userId)) {
-      // TODO return not friend screen
       return NotFriendScreen(user: user);
     }
     return Scaffold(
       backgroundColor: canvasTheme.bgColor,
-      body: /* NotificationListener<ScrollNotification>(
+      body: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
-          debugPrint(notification.runtimeType.toString());
           if (notification is ScrollUpdateNotification) {
             if (notification.dragDetails != null &&
                 notification.dragDetails!.primaryDelta != null &&
-                notification.dragDetails!.primaryDelta! > 100 &&
+                notification.dragDetails!.primaryDelta! > 90 &&
                 !popped) {
               popped = true;
-              Navigator.pop(context);
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              }
               return true;
             }
           }
           return false;
         },
-        child:*/
-          ListView(
-        padding: const EdgeInsets.only(
-          bottom: 120,
-        ),
-        children: [
-          AppBar(
-            forceMaterialTransparency: true,
-            elevation: 0,
-            systemOverlayStyle: SystemUiOverlayStyle(
-              //android
-              statusBarColor: canvasTheme.bgColor,
-              statusBarIconBrightness: Brightness.dark, // => black text
-            ),
-            iconTheme: IconThemeData(
-              color: canvasTheme.profileTextColor,
-            ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user.name,
-                  style: TextStyle(
-                    color: user.canvasTheme.profileTextColor,
-                    fontSize: 24,
+        child: ListView(
+          padding: const EdgeInsets.only(
+            top: kToolbarHeight,
+            bottom: 120,
+          ),
+          children: [
+            Padding(
+              padding: EdgeInsets.only(
+                left: themeSize.horizontalPadding,
+                right: themeSize.horizontalPadding,
+                bottom: 12,
+              ),
+              child: Row(
+                children: [
+                  UserIcon.tileIcon(
+                    user,
+                    width: 60,
                   ),
-                ),
-                Text(
-                  "${user.username}・${user.createdAt.toDateStr}〜",
-                  style: TextStyle(
-                    color: user.canvasTheme.profileSecondaryTextColor,
-                    fontSize: 14,
+                  const Gap(8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name,
+                          style: textStyle.w600(
+                            fontSize: 24,
+                            color: canvasTheme.profileTextColor,
+                          ),
+                        ),
+                        Text(
+                          "${user.createdAt.toDateStr}〜",
+                          style: textStyle.w600(
+                            fontSize: 14,
+                            color: canvasTheme.profileSecondaryTextColor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            actions: [
-              if (friendIds.contains(user.userId))
-                Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: GestureDetector(
+                  GestureDetector(
                     onTap: () {
                       HapticFeedback.lightImpact();
                       ref
                           .read(navigationRouterProvider(context))
                           .goToChat(user);
                     },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.chat_bubble_outline,
-                        color: Colors.white,
+                    child: SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: SvgPicture.asset(
+                        "assets/images/icons/chat.svg",
+                        // ignore: deprecated_member_use
+                        color: canvasTheme.profileTextColor,
                       ),
                     ),
                   ),
+                  Gap(12),
+                  /*GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                    },
+                    child: Icon(
+                      shareIcon,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const Gap(12), */
+                  FocusedMenuHolder(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                    },
+                    menuWidth: 120,
+                    blurSize: 0,
+                    animateMenuItems: false,
+                    openWithTap: true,
+                    menuBoxDecoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    menuItems: <FocusedMenuItem>[
+                      FocusedMenuItem(
+                        backgroundColor: ThemeColor.background,
+                        title: const Text(
+                          "フレンド解除",
+                        ),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          ref
+                              .read(friendIdListNotifierProvider.notifier)
+                              .deleteFriend(user);
+                          ref
+                              .read(dmOverviewListNotifierProvider.notifier)
+                              .leaveChat(user);
+                        },
+                      ),
+                      FocusedMenuItem(
+                        backgroundColor: ThemeColor.background,
+                        title: const Text(
+                          "報告",
+                        ),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ReportUserScreen(user),
+                            ),
+                          );
+                        },
+                      ),
+                      FocusedMenuItem(
+                        backgroundColor: ThemeColor.background,
+                        title: const Text(
+                          "ブロック",
+                        ),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          UserBottomModelSheet(context)
+                              .blockUserBottomSheet(user);
+                        },
+                      ),
+                    ],
+                    child: Icon(
+                      Icons.more_horiz,
+                      color: canvasTheme.profileTextColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (user.links.isShown)
+              Padding(
+                padding: EdgeInsets.only(
+                  left: themeSize.horizontalPadding,
+                  right: themeSize.horizontalPadding,
+                  bottom: 12,
                 ),
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    shareIcon,
-                    color: Colors.white,
-                  ),
+                child: Row(
+                  children: [
+                    /* if (me.links.line.isShown && me.links.line.path != null)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: GestureDetector(
+                              onTap: () {
+                                launchUrl(Uri.parse(me.links.line.url!));
+                              },
+                              child: SizedBox(
+                                height: 32,
+                                width: 32,
+                                child: Image.asset(
+                                  me.links.line.assetString,
+                                  color: canvasTheme.profileLinksColor,
+                                ),
+                              ),
+                            ),
+                          ), */
+                    if (user.links.instagram.isShown &&
+                        user.links.instagram.path != null)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: GestureDetector(
+                          onTap: () async {
+                            HapticFeedback.lightImpact();
+                            launchUrl(
+                              Uri.parse(
+                                user.links.instagram.url!,
+                              ),
+                              mode: LaunchMode.externalApplication,
+                            );
+                            //showMessage("${me.links.instagram.url}");
+                          },
+                          child: SizedBox(
+                            height: 26,
+                            width: 26,
+                            child: Image.asset(
+                              user.links.instagram.assetString,
+                              color: canvasTheme.profileLinksColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (user.links.x.isShown && user.links.x.path != null)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            launchUrl(
+                              Uri.parse(user.links.x.url!),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          },
+                          child: SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: Image.asset(
+                              user.links.x.assetString,
+                              color: canvasTheme.profileLinksColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              const Gap(12),
-              (friendInfos.map((item) => item.userId).contains(user.userId))
-                  ? FocusedMenuHolder(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                      },
-                      menuWidth: 120,
-                      blurSize: 0,
-                      animateMenuItems: false,
-                      openWithTap: true,
-                      menuBoxDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      menuItems: <FocusedMenuItem>[
-                        FocusedMenuItem(
-                          backgroundColor: ThemeColor.background,
-                          title: const Text(
-                            "フレンド解除",
-                          ),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            ref
-                                .read(friendIdListNotifierProvider.notifier)
-                                .deleteFriend(user);
-                            ref
-                                .read(dmOverviewListNotifierProvider.notifier)
-                                .leaveChat(user);
-                          },
-                        ),
-                        FocusedMenuItem(
-                          backgroundColor: ThemeColor.background,
-                          title: const Text(
-                            "報告",
-                          ),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                          },
-                        ),
-                        FocusedMenuItem(
-                          backgroundColor: ThemeColor.background,
-                          title: const Text(
-                            "ブロック",
-                          ),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            ref
-                                .read(blocksListNotifierProvider.notifier)
-                                .blockUser(user);
-                            ref
-                                .read(dmOverviewListNotifierProvider.notifier)
-                                .closeChat(user);
-                            Navigator.pop(context);
-                            showMessage("ユーザーをブロックしました。");
-                          },
-                        ),
-                      ],
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.more_horiz,
-                          color: Colors.white,
-                        ),
-                      ),
-                    )
-                  : FocusedMenuHolder(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                      },
-                      menuWidth: 120,
-                      blurSize: 0,
-                      animateMenuItems: false,
-                      openWithTap: true,
-                      menuBoxDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      menuItems: <FocusedMenuItem>[
-                        FocusedMenuItem(
-                          backgroundColor: ThemeColor.background,
-                          title: const Text(
-                            "フレンド申請",
-                          ),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            ref
-                                .read(friendRequestIdListNotifierProvider
-                                    .notifier)
-                                .sendFriendRequest(user);
-                          },
-                        ),
-                        FocusedMenuItem(
-                          backgroundColor: ThemeColor.background,
-                          title: const Text(
-                            "報告",
-                          ),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                          },
-                        ),
-                        FocusedMenuItem(
-                          backgroundColor: ThemeColor.background,
-                          title: const Text(
-                            "ブロック",
-                          ),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            ref
-                                .read(blocksListNotifierProvider.notifier)
-                                .blockUser(user);
-                            ref
-                                .read(dmOverviewListNotifierProvider.notifier)
-                                .closeChat(user);
-                            Navigator.pop(context);
-                            showMessage("ユーザーをブロックしました。");
-                          },
-                        ),
-                      ],
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.more_horiz,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-            ],
-          ),
-          const Gap(24),
-          _buildIconAndBio(context, ref, canvasTheme, user),
-          _buildImages(context, ref, user),
-          _buildAboutMe(context, ref, canvasTheme, user),
-          _buildCurrentStatus(context, ref, canvasTheme, user),
-          _buildTopFriends(context, ref, canvasTheme, user),
-          _buildFriends(context, ref, canvasTheme, user),
-          // _buildWishList(context, ref, canvasTheme, user),
-          // _buildWantToDoList(context, ref, canvasTheme, user),
-          // _buildActivities(context, ref, canvasTheme, user),
-        ],
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: themeSize.horizontalPadding,
+              ),
+              child: Text(
+                user.aboutMe,
+                style: textStyle.w600(
+                  fontSize: 14,
+                  color: canvasTheme.profileAboutMeColor,
+                ),
+              ),
+            ),
+            const Gap(24),
+            _buildImages(context, ref, user),
+            _buildCurrentStatus(context, ref, canvasTheme, user),
+            _buildTopFriends(context, ref, canvasTheme, user),
+            _buildFriends(context, ref, canvasTheme, user),
+          ],
+        ),
       ),
-      // ),
     );
   }
 
   Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
     final asyncValue = ref.watch(userImagesNotiferProvider(me.userId));
     final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
+
     const imageHeight = 96.0;
 
     return asyncValue.when(
       data: (imageUrls) {
         if (imageUrls.isEmpty) return const SizedBox();
-        return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: themeSize.horizontalPadding,
-          ),
-          child: Column(
-            children: [
-              box(
-                me.canvasTheme,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Photos",
-                      style: textStyle.w600(
-                        fontSize: 18,
-                        color: me.canvasTheme.profileTextColor,
-                      ),
-                    ),
-                  ],
-                ),
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: themeSize.horizontalPadding,
               ),
-              const Gap(12),
-            ],
-          ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "最近の写真",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: me.canvasTheme.profileAboutMeColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Gap(4),
+            SizedBox(
+              height: imageHeight * 1.2 + 32 + 24,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: imageUrls.length,
+                padding: EdgeInsets.symmetric(
+                  horizontal: themeSize.horizontalPadding - 4,
+                ),
+                itemBuilder: (context, index) {
+                  final userImage = imageUrls[index];
+                  return Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(top: 32),
+                        height: imageHeight * 1.2,
+                        width: imageHeight,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 12,
+                              offset: const Offset(0, 8),
+                              color: Colors.black.withOpacity(0.3),
+                            )
+                          ],
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.only(
+                          top: 8,
+                          left: 8,
+                          right: 8,
+                          bottom: 24,
+                        ),
+                        color: Colors.white,
+                        child: SizedBox(
+                          height: imageHeight * 1.2,
+                          width: imageHeight,
+                          child: CachedImage.profileBoardImage(
+                            userImage.imageUrl,
+                          ),
+                        ),
+                      ),
+                      if (userImage.isNew)
+                        const Positioned(
+                          bottom: 24,
+                          right: 8,
+                          child: GradientText(
+                            text: "NEW",
+                          ),
+                        ),
+                    ],
+                  );
+                  /* return Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                    height: imageHeight,
+                    width: imageHeight,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          height: imageHeight - 4,
+                          width: imageHeight - 24,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 2,
+                                spreadRadius: 4,
+                                color: Colors.black.withOpacity(0.5),
+                                offset: Offset(0, 4),
+                              )
+                            ],
+                          ),
+                        ),
+                        Opacity(
+                          opacity: 1, //0.3,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              height: imageHeight,
+                              width: imageHeight,
+                              child: CachedImage.profileBoardImage(
+                                imageUrl,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ); */
+                },
+              ),
+            ),
+          ],
         );
       },
       error: (e, s) => Text("error : $e, $s"),
@@ -910,7 +1016,7 @@ class UserProfileScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "TOP 10 Friends",
+                  "TOP フレンズ",
                   style: TextStyle(
                     fontSize: 16,
                     color: canvasTheme.boxTextColor,
@@ -1431,6 +1537,12 @@ class NotFriendScreen extends ConsumerWidget {
                 ),
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReportUserScreen(user),
+                    ),
+                  );
                 },
               ),
               FocusedMenuItem(
@@ -1440,12 +1552,8 @@ class NotFriendScreen extends ConsumerWidget {
                 ),
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  ref.read(blocksListNotifierProvider.notifier).blockUser(user);
-                  ref
-                      .read(dmOverviewListNotifierProvider.notifier)
-                      .closeChat(user);
-                  Navigator.pop(context);
-                  showMessage("ユーザーをブロックしました。");
+
+                  UserBottomModelSheet(context).blockUserBottomSheet(user);
                 },
               ),
             ],

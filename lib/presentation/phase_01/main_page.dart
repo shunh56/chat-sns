@@ -1,7 +1,12 @@
+import 'dart:async';
+
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/core/shader.dart';
+import 'package:app/presentation/components/user_icon.dart';
+import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/chat_screen/chat_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
@@ -9,6 +14,7 @@ import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/phase_01/search_screen.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
@@ -16,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:gap/gap.dart';
 
 class Phase01MainPage extends ConsumerStatefulWidget {
   const Phase01MainPage({
@@ -53,6 +60,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
   }
 
   bool showed = false;
+  List<FriendInfo> _previousFriends = [];
 
   @override
   void initState() {
@@ -60,6 +68,67 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
     _setupVoIPListener();
     WidgetsBinding.instance.addObserver(this);
     ref.read(myAccountNotifierProvider.notifier).onOpen();
+  }
+
+  Future<void> showNewFriendDialog(UserAccount user) async {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    Timer timer = Timer(const Duration(milliseconds: 2400), () {
+      Navigator.of(context).pop();
+    });
+    return showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      pageBuilder: (ctx, a1, a2) {
+        return Container();
+      },
+      barrierLabel: "CLOSE",
+      transitionBuilder: (ctx, a1, a2, child) {
+        var curve = Curves.easeInOutCubic.transform(a1.value);
+        return Transform.scale(
+          scale: curve,
+          child: AlertDialog(
+            backgroundColor: Colors.transparent,
+            contentPadding: const EdgeInsets.all(0),
+            content: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: ThemeColor.accent,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      ref
+                          .read(navigationRouterProvider(context))
+                          .goToProfile(user);
+                    },
+                    child: UserIcon.tileIcon(user),
+                  ),
+                  Text(
+                    user.name,
+                    style: textStyle.w600(fontSize: 14),
+                  ),
+                  Gap(16),
+                  Text(
+                    "とフレンドになりました!",
+                    style: textStyle.w600(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    ).then((value) {
+      if (timer.isActive) {
+        timer.cancel();
+      }
+    });
   }
 
   // VoIP応答時の処理
@@ -137,6 +206,22 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(friendIdListNotifierProvider, (prev, next) {
+      next.whenData((friendInfos) {
+        List<FriendInfo> newFriends = friendInfos
+            .where((friend) =>
+                !_previousFriends.any((prev) => prev.userId == friend.userId))
+            .toList();
+        if (newFriends.isNotEmpty && _previousFriends.isNotEmpty) {
+          final user = ref
+              .read(allUsersNotifierProvider)
+              .asData!
+              .value[newFriends.first.userId]!;
+          showNewFriendDialog(user);
+        }
+        _previousFriends = friendInfos;
+      });
+    });
     /* 
  checkFriendsCurrentStatusPosts() {
       final asyncValue = ref.watch(friendsCurrentStatusPostsNotiferProvider);

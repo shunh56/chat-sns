@@ -100,3 +100,12 @@ functions:
 Android : 
 Namespace not specified
 => https://minpro.net/namespace-not-specified
+
+
+
+
+
+
+firebase functions:config:get
+firebase functions:config:set any.path="this will store value in map"
+firebase functions:config:unset any.path

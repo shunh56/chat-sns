@@ -26,6 +26,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:overscroll_pop/overscroll_pop.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final canvasThemeProvider =
@@ -62,24 +63,13 @@ class ProfileScreen extends ConsumerWidget {
         final canvasTheme = me.canvasTheme;
 
         return Scaffold(
-          /* appBar: AppBar(
-            toolbarHeight: 0,
-            backgroundColor: canvasTheme.bgColor,
-            forceMaterialTransparency: true,
-            elevation: 0,
-            systemOverlayStyle: SystemUiOverlayStyle(
-              //android
-              statusBarColor: canvasTheme.bgColor,
-              statusBarIconBrightness: Brightness.dark, // => black text
-            ),
-          ), */
           backgroundColor: canvasTheme.bgColor,
           body: NotificationListener(
             onNotification: (notification) {
               if (notification is ScrollUpdateNotification) {
                 if (notification.dragDetails != null &&
                     notification.dragDetails!.primaryDelta != null &&
-                    notification.dragDetails!.primaryDelta! > 100 &&
+                    notification.dragDetails!.primaryDelta! > 90 &&
                     !popped) {
                   popped = true;
                   if (Navigator.canPop(context)) {
@@ -279,17 +269,10 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const Gap(24),
-
-                // _buildIconAndBio(context, ref, canvasTheme, me),
-                // _buildAboutMe(context, ref, canvasTheme, me),
                 _buildImages(context, ref, me),
                 _buildCurrentStatus(context, ref, canvasTheme, me),
                 _buildTopFriends(context, ref, canvasTheme, me),
                 _buildFriends(context, ref, canvasTheme, me),
-
-                // _buildWishList(context, ref, canvasTheme, me),
-                // _buildWantToDoList(context, ref, canvasTheme, me),
-                // _buildActivities(context, ref, canvasTheme, me),
               ],
             ),
           ),
@@ -986,7 +969,7 @@ class ProfileScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "TOP 10 Friends",
+                  "TOP フレンズ",
                   style: TextStyle(
                     fontSize: 16,
                     color: canvasTheme.boxTextColor,
@@ -1128,11 +1111,11 @@ class ProfileScreen extends ConsumerWidget {
                 asyncValue.when(
                   data: (friendInfos) {
                     final friendIds = friendInfos.map((item) => item.userId);
-                    final others = friendIds
+
+                    final userIds = friendIds
                         .where((userId) => !me.topFriends.contains(userId))
                         .toList();
 
-                    final userIds = others.length < 5 ? friendIds : others;
                     final users = ref
                         .watch(allUsersNotifierProvider)
                         .asData!
@@ -1344,10 +1327,10 @@ class ProfileScreen extends ConsumerWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Icon(
+                  /* Icon(
                     Icons.add_rounded,
                     color: me.canvasTheme.profileSecondaryTextColor,
-                  ),
+                  ), */
                 ],
               ),
             ),
@@ -1410,50 +1393,81 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 itemBuilder: (context, index) {
                   final userImage = imageUrls[index];
-                  return Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 32),
-                        height: imageHeight * 1.2,
-                        width: imageHeight,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 12,
-                              offset: const Offset(0, 8),
-                              color: Colors.black.withOpacity(0.3),
-                            )
-                          ],
+                  return GestureDetector(
+                    onTap: () {
+                      /*pushPage(
+                        context,
+                        VerticalScrollview(
+                          scrollToPopOption: ScrollToPopOption.start,
+                          dragToPopDirection: DragToPopDirection.toBottom,
+                          child: ImagesView(
+                            imageUrls:
+                                imageUrls.map((item) => item.imageUrl).toList(),
+                            initialIndex: index,
+                          ),
                         ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          left: 8,
-                          right: 8,
-                          bottom: 24,
+                      ); */
+                      Navigator.push(
+                        context,
+                        PageTransitionMethods.fadeIn(
+                          VerticalScrollview(
+                            scrollToPopOption: ScrollToPopOption.both,
+                            dragToPopDirection: DragToPopDirection.toBottom,
+                            child: ImagesView(
+                              imageUrls: imageUrls
+                                  .map((item) => item.imageUrl)
+                                  .toList(),
+                              initialIndex: index,
+                            ),
+                          ),
                         ),
-                        color: Colors.white,
-                        child: SizedBox(
+                      );
+                    },
+                    child: Stack(
+                      alignment: Alignment.topCenter,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 32),
                           height: imageHeight * 1.2,
                           width: imageHeight,
-                          child: CachedImage.profileBoardImage(
-                            userImage.imageUrl,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 12,
+                                offset: const Offset(0, 8),
+                                color: Colors.black.withOpacity(0.3),
+                              )
+                            ],
                           ),
                         ),
-                      ),
-                      if (userImage.isNew)
-                        const Positioned(
-                          bottom: 24,
-                          right: 8,
-                          child: GradientText(
-                            text: "NEW",
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          padding: const EdgeInsets.only(
+                            top: 8,
+                            left: 8,
+                            right: 8,
+                            bottom: 24,
+                          ),
+                          color: Colors.white,
+                          child: SizedBox(
+                            height: imageHeight * 1.2,
+                            width: imageHeight,
+                            child: CachedImage.profileBoardImage(
+                              userImage.imageUrl,
+                            ),
                           ),
                         ),
-                    ],
+                        if (userImage.isNew)
+                          const Positioned(
+                            bottom: 24,
+                            right: 8,
+                            child: GradientText(
+                              text: "NEW",
+                            ),
+                          ),
+                      ],
+                    ),
                   );
                   /* return Container(
                     margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -1757,6 +1771,65 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class ImagesView extends ConsumerWidget {
+  const ImagesView({
+    super.key,
+    required this.imageUrls,
+    required this.initialIndex,
+  });
+  final List<String> imageUrls;
+  final int initialIndex;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final width = MediaQuery.sizeOf(context).width - 48;
+
+    return PageView.builder(
+      itemCount: imageUrls.length,
+      controller: PageController(initialPage: initialIndex),
+      itemBuilder: (context, index) {
+        return Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: SizedBox(
+              width: width,
+              height: width * 1.2,
+              child: InteractiveViewer(
+                minScale: 1,
+                maxScale: 1.6,
+                child: CachedImage.imageView(
+                  imageUrls[index],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class VerticalScrollview extends StatelessWidget {
+  final ScrollToPopOption scrollToPopOption;
+  final DragToPopDirection? dragToPopDirection;
+  final Widget child;
+  const VerticalScrollview({
+    super.key,
+    this.scrollToPopOption = ScrollToPopOption.start,
+    this.dragToPopDirection,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OverscrollPop(
+      scrollToPopOption: scrollToPopOption,
+      dragToPopDirection: dragToPopDirection,
+      child: child,
     );
   }
 }

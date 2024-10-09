@@ -13,6 +13,7 @@ import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/c
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/left_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/right_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/server_message.dart';
+import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/chats/message_list.dart';
@@ -421,7 +422,12 @@ class BottomTextField extends HookConsumerWidget {
                     child: GestureDetector(
                       onTap: () {
                         HapticFeedback.lightImpact();
-                        showUpcomingSnackbar();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ReportUserScreen(user),
+                          ),
+                        );
                       },
                       child: Container(
                         decoration: BoxDecoration(

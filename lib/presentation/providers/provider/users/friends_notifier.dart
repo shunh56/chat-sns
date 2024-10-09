@@ -5,6 +5,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/usecase/friends_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -42,6 +43,9 @@ class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
       await _ref
           .read(allUsersNotifierProvider.notifier)
           .getUserAccounts(friendInfos.map((item) => item.userId).toList());
+      _ref
+          .read(myAccountNotifierProvider.notifier)
+          .checkTopFriends(friendInfos.map((item) => item.userId).toList());
       if (mounted) {
         state = AsyncValue.data(friendInfos);
       }
@@ -197,6 +201,7 @@ final friendsFriendListNotifierProvider = StateNotifierProvider.autoDispose<
   return FriendsFriendListNotifier(
     ref,
     ref.watch(friendIdListNotifierProvider),
+    ref.watch(blocksListNotifierProvider),
     ref.watch(friendsUsecaseProvider),
   )..initialize();
 });
@@ -206,10 +211,12 @@ class FriendsFriendListNotifier
   FriendsFriendListNotifier(
     this._ref,
     this.asyncValue,
+    this.asyncBlocks,
     this.usecase,
   ) : super(const AsyncValue<List<UserAccount>>.loading());
   final Ref _ref;
   final AsyncValue<List<FriendInfo>> asyncValue;
+  final AsyncValue<List<String>> asyncBlocks;
   final FriendsUsecase usecase;
 
   //TODO グリッチが起きてしまう
@@ -255,7 +262,9 @@ class FriendsFriendListNotifier
           }
         }
         _ref.read(friendsFriendMapProvider.notifier).state = map;
+
         userIds.removeWhere((userId) => filterIds.contains(userId));
+
         final users = _ref
             .read(allUsersNotifierProvider)
             .asData
@@ -264,7 +273,14 @@ class FriendsFriendListNotifier
             .where((item) => userIds.contains(item.value.userId))
             .map((item) => item.value)
             .toSet();
-        state = AsyncValue.data(users!.toList());
+
+        asyncBlocks.maybeWhen(
+          data: (blocks) {
+            users?.removeWhere((user) => blocks.contains(user.userId));
+            state = AsyncValue.data(users!.toList());
+          },
+          orElse: () {},
+        );
       },
       orElse: () {},
     );

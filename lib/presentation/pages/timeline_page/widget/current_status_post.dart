@@ -5,6 +5,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
@@ -113,12 +114,6 @@ class CurrentStatusPostWidgets {
           );
         },
         child: Container(
-          padding: const EdgeInsets.only(
-            top: 12,
-            left: 12,
-            right: 12,
-            bottom: 12,
-          ),
           decoration: BoxDecoration(
             color: ThemeColor.accent,
             borderRadius: BorderRadius.circular(12),
@@ -130,339 +125,338 @@ class CurrentStatusPostWidgets {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      ref
-                          .read(navigationRouterProvider(context))
-                          .goToProfile(user);
-                    },
-                    child: UserIcon.postIcon(user),
-                  ),
-                  const Gap(8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // name time
-                        Row(
-                          children: [
-                            Text(
-                              user.name,
-                              style: textStyle.w600(fontSize: 16),
-                            ),
-                            const Gap(4),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: SizedBox(
-                                height: 12,
-                                width: 12,
-                                child: SvgPicture.asset(
-                                  "assets/images/icons/edit.svg",
-                                  color: ThemeColor.white,
+              Padding(
+                padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        ref
+                            .read(navigationRouterProvider(context))
+                            .goToProfile(user);
+                      },
+                      child: UserIcon.postIcon(user),
+                    ),
+                    const Gap(8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // name time
+                          Row(
+                            children: [
+                              Text(
+                                user.name,
+                                style: textStyle.w600(fontSize: 16),
+                              ),
+                              const Gap(4),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: SizedBox(
+                                  height: 12,
+                                  width: 12,
+                                  child: SvgPicture.asset(
+                                    "assets/images/icons/edit.svg",
+                                    color: ThemeColor.white,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const Gap(4),
-                            Text(
-                              "・${post.createdAt.xxAgo}",
-                              style: textStyle.w600(
-                                fontSize: 12,
-                                color: ThemeColor.subText,
+                              const Gap(4),
+                              Text(
+                                "・${post.createdAt.xxAgo}",
+                                style: textStyle.w600(
+                                  fontSize: 12,
+                                  color: ThemeColor.subText,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        // list
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (post.after.tags
-                                    .where((tag) =>
-                                        !post.before.tags.contains(tag))
-                                    .isNotEmpty ||
-                                post.after.tags.length !=
-                                    post.before.tags.length)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(top: 8),
-                                      child: Text(
-                                        "タグ : ",
-                                        style: textStyle.w600(),
+                            ],
+                          ),
+                          // list
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (post.after.tags
+                                      .where((tag) =>
+                                          !post.before.tags.contains(tag))
+                                      .isNotEmpty ||
+                                  post.after.tags.length !=
+                                      post.before.tags.length)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8),
+                                        child: Text(
+                                          "タグ : ",
+                                          style: textStyle.w600(),
+                                        ),
                                       ),
-                                    ),
-                                    const Gap(8),
-                                    Expanded(
-                                      child: Wrap(
-                                        children: post.after.tags
-                                            .map(
-                                              (tag) => Container(
-                                                margin:
-                                                    const EdgeInsets.all(
-                                                        4),
-                                                padding: const EdgeInsets
-                                                    .symmetric(
-                                                  horizontal: 12,
-                                                  vertical: 4,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius
-                                                          .circular(100),
-                                                  color: Colors.white
-                                                      .withOpacity(0.1),
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets
-                                                          .only(
-                                                          bottom: 2),
-                                                  child: Text(
-                                                    tag,
-                                                    style:
-                                                        textStyle.w600(),
+                                      const Gap(8),
+                                      Expanded(
+                                        child: Wrap(
+                                          children: post.after.tags
+                                              .map(
+                                                (tag) => Container(
+                                                  margin:
+                                                      const EdgeInsets.all(4),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 4,
                                                   ),
-                                                ),
-                                              ),
-                                            )
-                                            .toList(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (post.after.doing != post.before.doing &&
-                                post.after.doing.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "してること",
-                                      style: textStyle.w600(),
-                                    ),
-                                    const Gap(8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(8),
-                                        color: Colors.white,
-                                      ),
-                                      child: Text(
-                                        post.after.doing,
-                                        style: textStyle.w600(
-                                          color: ThemeColor.background,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (post.after.eating != post.before.eating &&
-                                post.after.eating.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "食べてる : ",
-                                      style: textStyle.w600(),
-                                    ),
-                                    const Gap(8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(8),
-                                        color: Colors.white,
-                                      ),
-                                      child: Text(
-                                        post.after.eating,
-                                        style: textStyle.w600(
-                                          color: ThemeColor.background,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (post.after.mood != post.before.mood &&
-                                post.after.mood.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "気分 : ",
-                                      style: textStyle.w600(),
-                                    ),
-                                    const Gap(8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(8),
-                                        color: Colors.white,
-                                      ),
-                                      child: Text(
-                                        post.after.mood,
-                                        style: textStyle.w600(
-                                          color: ThemeColor.background,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (post.after.nowAt != post.before.nowAt &&
-                                post.after.nowAt.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "場所 : ",
-                                      style: textStyle.w600(),
-                                    ),
-                                    const Gap(8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(8),
-                                        color: Colors.white,
-                                      ),
-                                      child: Text(
-                                        post.after.nowAt,
-                                        style: textStyle.w600(
-                                          color: ThemeColor.background,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (post.after.nextAt != post.before.nextAt &&
-                                post.after.nextAt.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "次の場所 : ",
-                                      style: textStyle.w600(),
-                                    ),
-                                    const Gap(8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(8),
-                                        color: Colors.white,
-                                      ),
-                                      child: Text(
-                                        post.after.nextAt,
-                                        style: textStyle.w600(
-                                          color: ThemeColor.background,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (post.after.nowWith
-                                .where((id) =>
-                                    !post.before.nowWith.contains(id))
-                                .isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "一緒にいる人 : ",
-                                      style: textStyle.w600(),
-                                    ),
-                                    const Gap(8),
-                                    Expanded(
-                                      child: FutureBuilder(
-                                        future: ref
-                                            .read(allUsersNotifierProvider
-                                                .notifier)
-                                            .getUserAccounts(
-                                                post.after.nowWith),
-                                        builder: (context, snapshot) {
-                                          if (!snapshot.hasData) {
-                                            return const SizedBox();
-                                          }
-                                          final users = snapshot.data!;
-                                    
-                                          return Wrap(
-                                            children: users
-                                                .map(
-                                                  (user) => Container(
-                                                    margin:
-                                                        const EdgeInsets
-                                                            .all(4),
-                                                    child: Column(
-                                                      children: [
-                                                        ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      9),
-                                                          child: SizedBox(
-                                                            height: 32,
-                                                            width: 32,
-                                                            child: UserIcon
-                                                                .tileIcon(
-                                                              user,
-                                                              width: 32,
-                                                              ontapped:
-                                                                  () {
-                                                                ref
-                                                                    .read(navigationRouterProvider(
-                                                                        context))
-                                                                    .goToProfile(
-                                                                        user);
-                                                              },
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            100),
+                                                    color: Colors.white
+                                                        .withOpacity(0.1),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            bottom: 2),
+                                                    child: Text(
+                                                      tag,
+                                                      style: textStyle.w600(),
                                                     ),
                                                   ),
-                                                )
-                                                .toList(),
-                                          );
-                                        },
+                                                ),
+                                              )
+                                              .toList(),
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                          ],
-                        ),
-                      ],
+                              if (post.after.doing != post.before.doing &&
+                                  post.after.doing.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "してること",
+                                        style: textStyle.w600(),
+                                      ),
+                                      const Gap(8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          color: Colors.white,
+                                        ),
+                                        child: Text(
+                                          post.after.doing,
+                                          style: textStyle.w600(
+                                            color: ThemeColor.background,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              if (post.after.eating != post.before.eating &&
+                                  post.after.eating.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "食べてる : ",
+                                        style: textStyle.w600(),
+                                      ),
+                                      const Gap(8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          color: Colors.white,
+                                        ),
+                                        child: Text(
+                                          post.after.eating,
+                                          style: textStyle.w600(
+                                            color: ThemeColor.background,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              if (post.after.mood != post.before.mood &&
+                                  post.after.mood.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "気分 : ",
+                                        style: textStyle.w600(),
+                                      ),
+                                      const Gap(8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          color: Colors.white,
+                                        ),
+                                        child: Text(
+                                          post.after.mood,
+                                          style: textStyle.w600(
+                                            color: ThemeColor.background,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              if (post.after.nowAt != post.before.nowAt &&
+                                  post.after.nowAt.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "場所 : ",
+                                        style: textStyle.w600(),
+                                      ),
+                                      const Gap(8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          color: Colors.white,
+                                        ),
+                                        child: Text(
+                                          post.after.nowAt,
+                                          style: textStyle.w600(
+                                            color: ThemeColor.background,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              if (post.after.nextAt != post.before.nextAt &&
+                                  post.after.nextAt.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "次の場所 : ",
+                                        style: textStyle.w600(),
+                                      ),
+                                      const Gap(8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          color: Colors.white,
+                                        ),
+                                        child: Text(
+                                          post.after.nextAt,
+                                          style: textStyle.w600(
+                                            color: ThemeColor.background,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              if (post.after.nowWith
+                                  .where(
+                                      (id) => !post.before.nowWith.contains(id))
+                                  .isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "一緒にいる人 : ",
+                                        style: textStyle.w600(),
+                                      ),
+                                      const Gap(8),
+                                      Expanded(
+                                        child: FutureBuilder(
+                                          future: ref
+                                              .read(allUsersNotifierProvider
+                                                  .notifier)
+                                              .getUserAccounts(
+                                                  post.after.nowWith),
+                                          builder: (context, snapshot) {
+                                            if (!snapshot.hasData) {
+                                              return const SizedBox();
+                                            }
+                                            final users = snapshot.data!;
+
+                                            return Wrap(
+                                              children: users
+                                                  .map(
+                                                    (user) => Container(
+                                                      margin:
+                                                          const EdgeInsets.all(
+                                                              4),
+                                                      child: Column(
+                                                        children: [
+                                                          ClipRRect(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        9),
+                                                            child: SizedBox(
+                                                              height: 32,
+                                                              width: 32,
+                                                              child: UserIcon
+                                                                  .tileIcon(
+                                                                user,
+                                                                width: 32,
+                                                                ontapped: () {
+                                                                  ref
+                                                                      .read(navigationRouterProvider(
+                                                                          context))
+                                                                      .goToProfile(
+                                                                          user);
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  )
+                                                  .toList(),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               _buildPostBottomSection(context, post),
+              const Gap(8),
             ],
           ),
         ),
@@ -515,10 +509,17 @@ class CurrentStatusPostWidgets {
               ],
             ),
           const Gap(12),
-          const Icon(
-            Icons.more_horiz_rounded,
-            color: ThemeColor.subText,
-            size: 20,
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              PostBottomModelSheet(context)
+                  .openCurrentStatusPostAction(post, user);
+            },
+            child: const Icon(
+              Icons.more_horiz_rounded,
+              color: ThemeColor.subText,
+              size: 20,
+            ),
           )
         ],
       ),

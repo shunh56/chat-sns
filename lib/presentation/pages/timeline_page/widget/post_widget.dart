@@ -344,10 +344,16 @@ class PostWidget extends ConsumerWidget {
               ],
             ),
           const Gap(12),
-          const Icon(
-            Icons.more_horiz_rounded,
-            color: ThemeColor.subText,
-            size: 20,
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              PostBottomModelSheet(context).openPostAction(post, user);
+            },
+            child: const Icon(
+              Icons.more_horiz_rounded,
+              color: ThemeColor.subText,
+              size: 20,
+            ),
           )
         ],
       ),

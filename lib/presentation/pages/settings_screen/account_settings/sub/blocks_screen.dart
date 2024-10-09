@@ -1,3 +1,4 @@
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
@@ -13,14 +14,13 @@ class BlocksScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final blocks = ref.watch(blocksListNotifierProvider).asData?.value ?? [];
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "ブロックしたユーザー",
-          style: TextStyle(
-            fontSize: 16,
-          ),
+          style: textStyle.appbarText(japanese: true),
         ),
       ),
       body: FutureBuilder(
@@ -45,12 +45,28 @@ class BlocksScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final user = users[index];
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Row(
                   children: [
                     UserIcon.circleIcon(user, radius: 24),
                     const Gap(12),
-                    Text(user.username),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name,
+                          style: textStyle.w600(
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          "@" + user.username,
+                          style: textStyle.w600(
+                            color: ThemeColor.subText,
+                          ),
+                        ),
+                      ],
+                    ),
                     const Expanded(child: SizedBox()),
                     GestureDetector(
                       onTap: () {
@@ -68,11 +84,10 @@ class BlocksScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(8),
                           color: Colors.blue,
                         ),
-                        child: const Text(
+                        child: Text(
                           "ブロックを解除",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                          style: textStyle.w600(
+                            color: ThemeColor.white,
                           ),
                         ),
                       ),

@@ -19,112 +19,114 @@ class SearchScreen extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
 
     return Scaffold(
-      body: ListView(
-        //crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppBar(
-            centerTitle: false,
-            title: const Text("友達"),
-          ),
-          const Gap(4),
-          Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: themeSize.horizontalPadding - 4),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const FriendsScreen(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 6,
-                      horizontal: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      color: Colors.white.withOpacity(0.1),
-                    ),
-                    child: const Text(
-                      "友達",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const Gap(8),
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const FriendsFriendsScreen(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 6,
-                      horizontal: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      color: Colors.white.withOpacity(0.1),
-                    ),
-                    child: const Text(
-                      "おすすめ",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const Gap(8),
-                GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const FriendRequestScreen(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 6,
-                      horizontal: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      color: Colors.white.withOpacity(0.1),
-                    ),
-                    child: const Text(
-                      "リクエスト済み",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+      body: Container(
+        child: ListView(
+          //crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppBar(
+              centerTitle: false,
+              title: const Text("友達"),
             ),
-          ),
-          Gap(themeSize.verticalSpaceMedium),
-          friendRequestedListView(ref),
-          friendsFriendListView(context, ref),
-        ],
+            const Gap(4),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: themeSize.horizontalPadding - 4),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const FriendsScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                      child: const Text(
+                        "友達",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(8),
+                  /*   GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const FriendsFriendsScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                      child: const Text(
+                        "おすすめ",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Gap(8), */
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const FriendRequestScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                      child: const Text(
+                        "リクエスト済み",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Gap(themeSize.verticalSpaceMedium),
+            friendRequestedListView(ref),
+            friendsFriendListView(context, ref),
+          ],
+        ),
       ),
     );
   }
@@ -152,9 +154,7 @@ class SearchScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const Gap(6),
             ListView.builder(
-              //padding: EdgeInsets.symmetric(horizontal: 12),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: requestedIds.length,
@@ -218,7 +218,6 @@ class SearchScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const Gap(6),
             users.isEmpty
                 ? const Text("")
                 : ListView.builder(

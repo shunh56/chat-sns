@@ -148,11 +148,20 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     state = AsyncValue.data(updatedUser);
   }
 
+  checkTopFriends(List<String> friendIds) {
+    final me = state.asData!.value;
+    final topFriends = me.topFriends;
+    topFriends.removeWhere((userId) => !friendIds.contains(userId));
+    final updatedUser = me.copyWith(topFriends: topFriends);
+    usecase.updateUser(updatedUser);
+    state = AsyncValue.data(updatedUser);
+  }
+
   removeTopFriends(UserAccount user) {
-    final user = state.asData!.value;
-    final topFriends = user.topFriends;
+    final me = state.asData!.value;
+    final topFriends = me.topFriends;
     topFriends.removeWhere((userId) => userId == user.userId);
-    final updatedUser = user.copyWith(topFriends: topFriends);
+    final updatedUser = me.copyWith(topFriends: topFriends);
     usecase.updateUser(updatedUser);
     state = AsyncValue.data(updatedUser);
   }

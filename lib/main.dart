@@ -3,10 +3,13 @@ import 'dart:async';
 
 // Flutter imports:
 import 'package:app/core/utils/debug_print.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/core/values.dart';
 import 'package:app/firebase_options.dart';
+import 'package:app/presentation/pages/auth/sign_in_select_provider_screen.dart';
+import 'package:app/presentation/pages/auth/sign_up_select_provider_screen.dart';
 import 'package:app/presentation/pages/auth/signin_page.dart';
 import 'package:app/presentation/pages/onboarding_page/awaiting_screen.dart';
 import 'package:app/presentation/pages/onboarding_page/input_invite_code_screen.dart';
@@ -513,6 +516,7 @@ class WelcomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Scaffold(
       body: Container(
         margin:
@@ -536,27 +540,73 @@ class WelcomePage extends ConsumerWidget {
                   ),
             ),
             const Expanded(child: SizedBox()),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SignInPage(),
-                  ),
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: ThemeColor.highlight,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Center(
-                  child: Text(
-                    "はじめる",
-                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                          color: ThemeColor.background,
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: themeSize.horizontalPadding,
+              ),
+              child: Material(
+                color: ThemeColor.white,
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SignUpSelectProviderScreen(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    child: Center(
+                      child: Container(
+                        child: Text(
+                          "登録",
+                          textAlign: TextAlign.center,
+                          style: textStyle.w600(
+                            fontSize: 14,
+                            color: ThemeColor.background,
+                          ),
                         ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Gap(16),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: themeSize.horizontalPadding,
+              ),
+              child: Material(
+                color: ThemeColor.white,
+                borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SignInSelectProviderScreen(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    child: Center(
+                      child: Container(
+                        child: Text(
+                          "ログイン",
+                          textAlign: TextAlign.center,
+                          style: textStyle.w600(
+                            fontSize: 14,
+                            color: ThemeColor.background,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

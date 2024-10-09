@@ -24,7 +24,7 @@ class NavigationRouter {
   final BuildContext context;
   NavigationRouter(this.ref, this.context);
 
-  goToProfile(UserAccount user) {
+  goToProfile(UserAccount user, {bool replace = false}) {
     final myId = ref.watch(authProvider).currentUser!.uid;
     if (user.userId == myId) {
       Navigator.push(
@@ -34,10 +34,17 @@ class NavigationRouter {
         ),
       );
     } else {
-      Navigator.push(
-        context,
-        PageTransitionMethods.slideUp(UserProfileScreen(user: user)),
-      );
+      if (replace) {
+        Navigator.pushReplacement(
+          context,
+          PageTransitionMethods.slideUp(UserProfileScreen(user: user)),
+        );
+      } else {
+        Navigator.push(
+          context,
+          PageTransitionMethods.slideUp(UserProfileScreen(user: user)),
+        );
+      }
     }
   }
 
@@ -50,16 +57,29 @@ class NavigationRouter {
     );
   }
 
-  goToCurrentStatusPost(CurrentStatusPost post, UserAccount user) {
-    Navigator.push(
-      context,
-      PageTransitionMethods.slideUp(
-        CurrentStatusPostScreen(
-          post: post,
-          user: user,
+  goToCurrentStatusPost(CurrentStatusPost post, UserAccount user,
+      {bool replace = false}) {
+    if (replace) {
+      Navigator.pushReplacement(
+        context,
+        PageTransitionMethods.slideUp(
+          CurrentStatusPostScreen(
+            post: post,
+            user: user,
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      Navigator.push(
+        context,
+        PageTransitionMethods.slideUp(
+          CurrentStatusPostScreen(
+            post: post,
+            user: user,
+          ),
+        ),
+      );
+    }
   }
 
   goToPost(Post post, UserAccount user) {

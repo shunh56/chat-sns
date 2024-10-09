@@ -35,8 +35,6 @@ class BlockRepository {
   Future<void> blockUser(String userId) async {
     _blockDatasource.blockUser(userId);
     _friendsDatasource.deleteFriend(userId);
-    _friendsDatasource.deleteRequest(userId);
-    _friendsDatasource.deleteRequested(userId);
     return;
   }
 
