@@ -231,17 +231,22 @@ class FriendsFriendListNotifier
         final friendIds = friendInfos.map((item) => item.userId).toList();
         final filterIds =
             friendIds + [_ref.read(authProvider).currentUser!.uid];
+
         //futures
         List<Future<List<UserAccount>>> futures = [];
         for (String userId in friendIds) {
           final user =
-              _ref.read(allUsersNotifierProvider).asData?.value[userId];
-          if (user != null) {
+              _ref.read(allUsersNotifierProvider).asData!.value[userId]!;
+          if (user.topFriends.length > 5) {
             futures.add(
               _ref
                   .read(allUsersNotifierProvider.notifier)
                   .getUserAccounts(user.topFriends),
             );
+          } else {
+            futures.add(_ref
+                .read(friendIdListNotifierProvider.notifier)
+                .getFriends(userId));
           }
         }
         await Future.wait(futures);
@@ -250,6 +255,7 @@ class FriendsFriendListNotifier
         for (int i = 0; i < friendIds.length; i++) {
           final userId = friendIds[i];
           final list = await futures[i];
+          DebugPrint("friend of $userId : ${list.map(((user) => user.name))}");
           for (var user in list) {
             if (!user.privacy.privateMode) {
               userIds.add(user.userId);

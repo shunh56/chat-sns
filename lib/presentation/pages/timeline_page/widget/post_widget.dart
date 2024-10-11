@@ -39,7 +39,8 @@ class PostWidget extends ConsumerWidget {
   final UserAccount user;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id]!;
+    final post = postRef;
+    //final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id]!;
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 

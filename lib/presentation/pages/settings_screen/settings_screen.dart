@@ -1,4 +1,5 @@
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/pages/profile_page/invite_code_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/account_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/current_status_posts_screen.dart';
@@ -56,7 +57,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 page: const AccountScreen(),
               ),
-              _buildBottomTile(
+              _buildTile(
                 context,
                 _tileContent(
                   Icons.people_outline_rounded,
@@ -64,10 +65,14 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 page: const FriendRequestedsScreen(),
               ),
-              /* _buildBottomTile(
+              _buildBottomTile(
                 context,
-                _tileContent(Icons.qr_code_rounded, "QRコードをスキャン"),
-              ), */
+                _tileContent(
+                  Icons.confirmation_num_outlined,
+                  "招待コード",
+                ),
+                page: const InviteCodeScreen(),
+              ),
             ],
           ),
           const Gap(32),

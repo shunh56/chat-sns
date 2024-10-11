@@ -33,6 +33,7 @@ class BasicButton extends ConsumerWidget {
               text,
               style: textStyle.w600(
                 fontSize: 18,
+                color: ThemeColor.white,
               ),
             ),
           ),

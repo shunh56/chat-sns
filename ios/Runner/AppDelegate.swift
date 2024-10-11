@@ -4,6 +4,7 @@ import AVFAudio
 import PushKit
 import Flutter
 import flutter_callkit_incoming
+import google_mobile_ads
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate, PKPushRegistryDelegate, CallkitIncomingAppDelegate {
@@ -13,6 +14,11 @@ import flutter_callkit_incoming
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         GeneratedPluginRegistrant.register(with: self)
+        
+        //admob native ad
+        let listTileFactory = ListTileNativeAdFactory()
+        FLTGoogleMobileAdsPlugin.registerNativeAdFactory(
+            self, factoryId: "listTile", nativeAdFactory: listTileFactory)
         
         // Setup VOIP
         let mainQueue = DispatchQueue.main

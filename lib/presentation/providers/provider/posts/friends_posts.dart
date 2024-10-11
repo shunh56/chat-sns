@@ -1,6 +1,7 @@
 // Flutter imports:
 
 // Package imports:
+import 'package:app/datasource/post/algolia_post_datasource.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/posts/timeline_post.dart';
@@ -9,6 +10,7 @@ import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart'
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/usecase/posts/algolia_post_usecase.dart';
 import 'package:app/usecase/posts/current_status_post_usecase.dart';
 import 'package:app/usecase/posts/post_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +22,7 @@ final friendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
     ref.watch(friendIdListNotifierProvider),
     ref.watch(postUsecaseProvider),
     ref.watch(currentStatusPostUsecaseProvider),
+    ref.watch(algoliaPostUsecaseProvider),
   )..initialize();
 });
 
@@ -30,25 +33,36 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
     this.asyncValue,
     this.postUsecase,
     this.currentStatusPostUsecase,
+    this._algoliaPostUsecase,
   ) : super(const AsyncValue.loading());
 
   final Ref ref;
   final AsyncValue<List<FriendInfo>> asyncValue;
   final PostUsecase postUsecase;
   final CurrentStatusPostUsecase currentStatusPostUsecase;
+  final AlgoliaPostUsecase _algoliaPostUsecase;
 
   //TODO フレンドが変更されるたびに全てのPostを取得し直している
   // blockしたらすぐに反映されているから悪くはないが、グリッチしてしまう。
   Future<void> initialize() async {
+    final myId = ref.read(authProvider).currentUser!.uid;
     List<PostBase> posts = [];
 
     asyncValue.maybeWhen(
       data: (infos) async {
+        final friendIds = infos.map((info) => info.userId).toList();
         List<Future<List<PostBase>>> futures = [];
-        futures.add(getMyPosts());
         futures.add(getMyCurrentStatusPosts());
+
+        if (friendIds.length > 30) {
+          futures
+              .add(_algoliaPostUsecase.getUserIdsPosts([...friendIds, myId]));
+        } else {
+          for (String userId in infos.map((item) => item.userId)) {
+            futures.add(postUsecase.getPostFromUserId(userId));
+          }
+        }
         for (String userId in infos.map((item) => item.userId)) {
-          futures.add(postUsecase.getPostFromUserId(userId));
           futures.add(currentStatusPostUsecase.getUsersPosts(userId));
         }
         await Future.wait(futures);
@@ -75,14 +89,33 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   }
 
   Future<void> refresh() async {
+    if (ref.read(friendIdListNotifierProvider).asData!.value.length > 30) {
+      final list = await fetch();
+      state = AsyncValue.data(list);
+    }
+  }
+
+  Future<void> load() async {
+    if (ref.read(friendIdListNotifierProvider).asData!.value.length > 30) {
+      final cache = state.asData?.value ?? [];
+      final list = await fetch(page: (cache.length) ~/ hitsPerPage);
+      state = AsyncValue.data([...cache, ...list]);
+    }
+  }
+
+  Future<List<PostBase>> fetch({int page = 0}) async {
+    final myId = ref.read(authProvider).currentUser!.uid;
     List<PostBase> posts = [];
-    final friendIds =
-        ref.read(friendIdListNotifierProvider).asData?.value ?? [];
+    final infos = ref.read(friendIdListNotifierProvider).asData?.value ?? [];
+    final friendIds = infos.map((info) => info.userId).toList();
+
     List<Future<List<PostBase>>> futures = [];
-    futures.add(getMyPosts());
     futures.add(getMyCurrentStatusPosts());
-    for (String userId in friendIds.map((item) => item.userId)) {
-      futures.add(postUsecase.getPostFromUserId(userId));
+    if (friendIds.length > 30) {
+      futures.add(_algoliaPostUsecase
+          .getUserIdsPosts([...friendIds, myId], page: page));
+    }
+    for (String userId in friendIds) {
       futures.add(currentStatusPostUsecase.getUsersPosts(userId));
     }
     await Future.wait(futures);
@@ -100,9 +133,7 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
       posts.addAll(list);
     }
     posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    if (mounted) {
-      state = AsyncValue.data(posts);
-    }
+    return posts;
   }
 
   Future<List<PostBase>> getMyPosts() async {
@@ -170,6 +201,7 @@ final friendFriendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
     ref,
     ref.watch(friendsFriendListNotifierProvider),
     ref.watch(postUsecaseProvider),
+    ref.watch(algoliaPostUsecaseProvider),
   )..initialize();
 });
 
@@ -178,11 +210,13 @@ class FriendFriendsPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
     this.ref,
     this.asyncValue,
     this.usecase,
+    this._algoliaPostUsecase,
   ) : super(const AsyncValue.loading());
 
   final Ref ref;
   final AsyncValue<List<UserAccount>> asyncValue;
   final PostUsecase usecase;
+  final AlgoliaPostUsecase _algoliaPostUsecase;
 
   Future<void> initialize() async {
     List<Post> posts = [];
@@ -191,10 +225,11 @@ class FriendFriendsPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
         users.removeWhere((user) =>
             (user.privacy.contentRange == PublicityRange.onlyFriends));
         List<Future<List<Post>>> futures = [];
-        for (String userId in users.map((user) => user.userId)) {
-          futures.add(usecase.getPostFromUserId(userId));
-        }
+        final userIds = users.map((user) => user.userId).toList();
+        futures.add(_algoliaPostUsecase.getUserIdsPosts(userIds));
+
         await Future.wait(futures);
+
         for (var future in futures) {
           posts.addAll(await future);
         }

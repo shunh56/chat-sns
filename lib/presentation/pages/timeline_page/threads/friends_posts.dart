@@ -1,14 +1,15 @@
+
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/admob/native_ad.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_section.dart';
 import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
-import 'package:app/presentation/providers/provider/chats/voice_chats_list.dart';
 import 'package:app/presentation/providers/provider/posts/friends_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -19,6 +20,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:uuid/uuid.dart';
+
+final refreshController = Provider((ref) => RefreshController());
 
 //keepAlive => stateful widget
 class FriendsPostsThread extends ConsumerStatefulWidget {
@@ -52,52 +57,76 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
     );
     return postList.when(
       data: (list) {
-        return RefreshIndicator(
-          onRefresh: () async {
+        return // SmartRefresher(
+            //controller: ref.watch(refreshController),
+            //enablePullDown: true,
+            //enablePullUp: true,
+            // header: customRefreshHeader,
+            //footer: customRefreshFooter,
+            /* onRefresh: () async {
             List<Future> futures = [];
             futures
                 .add(ref.read(friendsPostsNotiferProvider.notifier).refresh());
             futures.add(
                 ref.read(voiceChatListNotifierProvider.notifier).refresh());
             await Future.wait(futures);
+            ref.read(refreshController).refreshCompleted();
             return;
-          },
-          child: ListView(
-            children: [
-              const VoiceChatSection(),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: card,
-              ),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 120),
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  final post = list[index];
-                  final user = ref
-                      .read(allUsersNotifierProvider)
-                      .asData!
-                      .value[post.userId]!;
-                  if (post is Post) {
-                    Post item = post;
-                    return GestureDetector(
-                      onTap: () {
-                        item = item.copyWith(likeCount: post.likeCount + 1);
-                      },
-                      child: PostWidget(postRef: item, user: user),
-                    );
-                  }
-                  if (post is CurrentStatusPost) {
-                    return CurrentStatusPostWidgets(context, ref, post, user)
-                        .timelinePost();
-                  }
-                  return const SizedBox();
-                },
-              ),
-            ],
-          ),
+          }, */
+            /* onLoading: () async {
+            if (list.length >= hitsPerPage * 4) {
+              showMessage("NO MORE SCROLLS");
+              return;
+            }
+            await ref.read(friendsPostsNotiferProvider.notifier).load();
+            ref.read(refreshController).loadComplete();
+            return;
+          }, */
+            // child:
+            ListView(
+          children: [
+            const VoiceChatSection(),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: card,
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 120),
+              itemCount: list.length,
+              itemBuilder: (context, index) {
+                final post = list[index];
+                final user = ref
+                    .read(allUsersNotifierProvider)
+                    .asData!
+                    .value[post.userId]!;
+                if (post is Post) {
+                  Post item = post;
+                  return Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          item = item.copyWith(likeCount: post.likeCount + 1);
+                        },
+                        child: PostWidget(postRef: item, user: user),
+                      ),
+                      if (index != 0 && index % 10 == 0)
+                        NativeAdWidget(
+                          id: const Uuid().v4(),
+                        ),
+                    ],
+                  );
+                }
+                if (post is CurrentStatusPost) {
+                  return CurrentStatusPostWidgets(context, ref, post, user)
+                      .timelinePost();
+                }
+                return const SizedBox();
+              },
+            ),
+          ],
+          //),
         );
       },
       error: (e, s) {

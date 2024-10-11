@@ -1,0 +1,24 @@
+import 'dart:io';
+
+class AdHelperTest {
+  static String get bannerAdUnitId {
+    if (Platform.isAndroid) {
+      return 'ca-app-pub-3940256099942544/6300978111';
+    } else if (Platform.isIOS) {
+      return 'ca-app-pub-3940256099942544/2934735716';
+    }
+    throw UnsupportedError("Unsupported platform");
+  }
+
+  static String get nativeAdUnitId {
+    if (Platform.isAndroid) {
+      return 'ca-app-pub-3940256099942544/2247696110';
+    } else if (Platform.isIOS) {
+      // prod
+      //return 'ca-app-pub-4197827097509562~9429453488';
+      //test
+      return 'ca-app-pub-3940256099942544/3986624511';
+    }
+    throw UnsupportedError("Unsupported platform");
+  }
+}

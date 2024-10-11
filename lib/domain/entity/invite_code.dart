@@ -16,7 +16,6 @@ class InviteCode {
   final List<String> slot;
   final List<Map<String, dynamic>> logs;
   final int maxCount;
-  late InviteCodeStatus status;
 
   InviteCode({
     required this.code,

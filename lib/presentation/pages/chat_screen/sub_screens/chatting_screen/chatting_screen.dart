@@ -8,7 +8,6 @@ import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chat_info_screen.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/left_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/right_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/server_message.dart';
@@ -118,14 +117,15 @@ class ChattingScreen extends ConsumerWidget {
                           child: GestureDetector(
                             onTap: () {
                               HapticFeedback.lightImpact();
-                              Navigator.push(
+                              ref.read(navigationRouterProvider(context)).goToProfile(user);
+                              /*Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => ChatInfoScreen(
                                     userId: user.userId,
                                   ),
                                 ),
-                              );
+                              ); */
                             },
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

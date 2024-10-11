@@ -34,6 +34,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 //import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:uuid/uuid.dart';
 
 @pragma('vm:entry-point')
@@ -80,6 +81,7 @@ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 configureSystem() {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
     SystemUiOverlay.top,
     SystemUiOverlay.bottom,

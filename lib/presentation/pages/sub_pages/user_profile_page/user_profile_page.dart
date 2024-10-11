@@ -12,7 +12,6 @@ import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/users_friends_screen.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
-import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/images/images.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +50,7 @@ class UserProfileScreen extends ConsumerWidget {
           if (notification is ScrollUpdateNotification) {
             if (notification.dragDetails != null &&
                 notification.dragDetails!.primaryDelta != null &&
-                notification.dragDetails!.primaryDelta! > 90 &&
+                notification.dragDetails!.primaryDelta! > 85 &&
                 !popped) {
               popped = true;
               if (Navigator.canPop(context)) {
@@ -149,12 +148,8 @@ class UserProfileScreen extends ConsumerWidget {
                         ),
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          ref
-                              .read(friendIdListNotifierProvider.notifier)
-                              .deleteFriend(user);
-                          ref
-                              .read(dmOverviewListNotifierProvider.notifier)
-                              .leaveChat(user);
+                          UserBottomModelSheet(context)
+                              .quitFriendBottomSheet(user);
                         },
                       ),
                       FocusedMenuItem(

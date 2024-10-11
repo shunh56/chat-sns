@@ -7,7 +7,6 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
-import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/muted_list.dart';
@@ -94,17 +93,10 @@ class ChatInfoScreen extends ConsumerWidget {
                     ),
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      ref
-                          .read(friendIdListNotifierProvider.notifier)
-                          .deleteFriend(user);
-                      ref
-                          .read(dmOverviewListNotifierProvider.notifier)
-                          .leaveChat(user);
-                      int count = 0;
-                      Navigator.popUntil(context, (route) {
-                        count += 1;
-                        return count == 3;
-                      });
+                      UserBottomModelSheet(context).quitFriendBottomSheet(
+                        user,
+                        count: 3,
+                      );
                     },
                   ),
                   FocusedMenuItem(

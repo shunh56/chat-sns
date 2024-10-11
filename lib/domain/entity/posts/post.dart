@@ -1,4 +1,5 @@
 import 'package:app/domain/entity/posts/timeline_post.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Post extends PostBase {
   final String text;
@@ -41,6 +42,29 @@ class Post extends PostBase {
       isPublic: json["isPublic"] ?? false,
     );
   }
+  factory Post.fromAlgoliaJson(Map<String, dynamic> json) {
+    return Post(
+      text: json["text"],
+      mediaUrls: List<String>.from(json["mediaUrls"]),
+      aspectRatios: List<double>.from((json["aspectRatios"] as List)
+          .map((val) => val * 10 / 10.0)
+          .toList()),
+      //
+      id: json["id"],
+      userId: json["userId"],
+      createdAt: Timestamp.fromMillisecondsSinceEpoch(json['createdAt']),
+      updatedAt: json["updatedAt"] != null
+          ? Timestamp.fromMillisecondsSinceEpoch(json['updatedAt'])
+          : Timestamp.fromMillisecondsSinceEpoch(json['createdAt']),
+      likeCount: json["likeCount"] ?? 0,
+      replyCount: json["replyCount"],
+      isDeletedByUser: json["isDeletedByUser"],
+      isDeletedByAdmin: json["isDeletedByAdmin"],
+      isDeletedByModerator: json["isDeletedByModerator"],
+      isPublic: json["isPublic"] ?? false,
+    );
+  }
+
   Post copyWith({
     int? likeCount,
     int? replyCount,

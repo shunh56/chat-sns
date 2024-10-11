@@ -206,6 +206,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
 
   @override
   Widget build(BuildContext context) {
+    //return NativeInlinePage();
     ref.listen(friendIdListNotifierProvider, (prev, next) {
       next.whenData((friendInfos) {
         List<FriendInfo> newFriends = friendInfos

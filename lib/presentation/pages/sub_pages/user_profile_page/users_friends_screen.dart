@@ -139,6 +139,7 @@ class UsersFriendsScreen extends ConsumerWidget {
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: controller,

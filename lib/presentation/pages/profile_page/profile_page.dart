@@ -12,7 +12,6 @@ import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_canvas_theme_screem.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_top_friends.dart';
-import 'package:app/presentation/pages/profile_page/invite_code_screen.dart';
 import 'package:app/presentation/pages/profile_page/qr_code_screen.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
@@ -69,7 +68,7 @@ class ProfileScreen extends ConsumerWidget {
               if (notification is ScrollUpdateNotification) {
                 if (notification.dragDetails != null &&
                     notification.dragDetails!.primaryDelta != null &&
-                    notification.dragDetails!.primaryDelta! > 90 &&
+                    notification.dragDetails!.primaryDelta! > 85 &&
                     !popped) {
                   popped = true;
                   if (Navigator.canPop(context)) {
@@ -130,22 +129,6 @@ class ProfileScreen extends ConsumerWidget {
                         },
                         child: Icon(
                           Icons.qr_code_rounded,
-                          color: canvasTheme.profileTextColor,
-                        ),
-                      ),
-                      const Gap(12),
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const InviteCodeScreen(),
-                            ),
-                          );
-                        },
-                        child: Icon(
-                          Icons.confirmation_num_outlined,
                           color: canvasTheme.profileTextColor,
                         ),
                       ),
