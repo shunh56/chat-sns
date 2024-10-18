@@ -297,15 +297,14 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
         children: const [
           TimelinePage(),
           ChatScreen(),
-          //ThreadsScreen(),
-          // PlaygroundScreen(),
-          //SearchPage(),
-          //PovScreen(),
-
-          //InboxScreen(),
           Scaffold(),
           SearchScreen(),
           ProfileScreen(),
+
+          //ThreadsScreen(),
+          // PlaygroundScreen(),
+          //PovScreen(),
+          //InboxScreen(),
         ],
       ),
       bottomNavigationBar: ShaderWidget(

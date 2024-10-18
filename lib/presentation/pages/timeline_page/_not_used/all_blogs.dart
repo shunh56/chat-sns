@@ -1,4 +1,4 @@
-import 'package:app/presentation/pages/timeline_page/widget/blog_widget.dart';
+/*import 'package:app/presentation/pages/timeline_page/widget/blog_widget.dart';
 import 'package:app/presentation/providers/provider/posts/all_blogs.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
@@ -69,3 +69,4 @@ class _AllBlogsThreadState extends ConsumerState<AllBlogsThread>
     );
   }
 }
+ */

@@ -1,9 +1,8 @@
 import 'package:algolia/algolia.dart';
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/presentation/providers/provider/firebase/algolia.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const hitsPerPage = 100;
+const hitsPerPage = 30;
 
 final algoliaPostDatasourceProvider = Provider(
   (ref) => AlgoliaPostDatasource(
@@ -18,7 +17,6 @@ class AlgoliaPostDatasource {
   Future<List<AlgoliaObjectSnapshot>> fetchFriendsPosts(
       List<String> followingUserIds,
       {int page = 0}) async {
-    DebugPrint("userIds : $followingUserIds");
     AlgoliaQuery query = _algolia.instance
         .index('fetch_friends_posts')
         .setHitsPerPage(hitsPerPage)

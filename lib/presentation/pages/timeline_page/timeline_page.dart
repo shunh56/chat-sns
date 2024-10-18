@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
@@ -27,6 +28,7 @@ class TimelinePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    DebugPrint("Timeline Screen");
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(myAccountNotifierProvider);
@@ -210,7 +212,7 @@ class TimelinePage extends ConsumerWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => ChattingScreen(user: user),
+                              builder: (_) => ChattingScreen(userId: user.userId),
                             ),
                           );
                         },

@@ -2,9 +2,9 @@ import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.dart';
+import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,7 +14,6 @@ class EditCanvasThemeScreen extends ConsumerWidget {
   const EditCanvasThemeScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const imageHeight = 80.0;
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final notifier = ref.read(myAccountNotifierProvider.notifier);
@@ -546,73 +545,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                     ),
                     child: Column(
                       children: [
-                        Container(
-                          padding: EdgeInsets.all(canvasTheme.iconStrokeWidth),
-                          decoration: BoxDecoration(
-                            gradient: !canvasTheme.iconHideBorder
-                                ? LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      canvasTheme.iconGradientStartColor,
-                                      canvasTheme.iconGradientEndColor,
-                                    ],
-                                  )
-                                : null,
-                            borderRadius: BorderRadius.circular(
-                              canvasTheme.iconRadius + 12,
-                            ),
-                          ),
-                          child: Container(
-                            padding: EdgeInsets.all(
-                                12 - canvasTheme.iconStrokeWidth),
-                            decoration: BoxDecoration(
-                              color: canvasTheme.bgColor,
-                              borderRadius: BorderRadius.circular(
-                                canvasTheme.iconRadius +
-                                    12 -
-                                    canvasTheme.iconStrokeWidth,
-                              ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.circular(canvasTheme.iconRadius),
-                              child: Container(
-                                color: ThemeColor.accent,
-                                height: imageHeight,
-                                width: imageHeight,
-                                child: me.imageUrl != null
-                                    ? CachedNetworkImage(
-                                        imageUrl: me.imageUrl!,
-                                        fadeInDuration:
-                                            const Duration(milliseconds: 120),
-                                        imageBuilder:
-                                            (context, imageProvider) =>
-                                                Container(
-                                          height: imageHeight,
-                                          width: imageHeight,
-                                          decoration: BoxDecoration(
-                                            color: Colors.transparent,
-                                            image: DecorationImage(
-                                              image: imageProvider,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                        placeholder: (context, url) =>
-                                            const SizedBox(),
-                                        errorWidget: (context, url, error) =>
-                                            const SizedBox(),
-                                      )
-                                    : const Icon(
-                                        Icons.person_outline,
-                                        size: imageHeight * 0.8,
-                                        color: ThemeColor.stroke,
-                                      ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        UserIcon.canvasIcon(me, canvasTheme: canvasTheme),
                         const Gap(8),
                         Text(
                           !canvasTheme.iconHideLevel ? "LEVEL 1" : "",

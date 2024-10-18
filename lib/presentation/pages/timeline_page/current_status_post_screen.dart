@@ -52,8 +52,7 @@ class CurrentStatusPostScreen extends ConsumerWidget {
               ],
             ),
           ),
-          if (user.userId != ref.read(authProvider).currentUser!.uid &&
-              DateTime.now().difference(post.createdAt.toDate()).inHours < 24)
+          if (user.userId != ref.read(authProvider).currentUser!.uid)
             Container(
               width: MediaQuery.sizeOf(context).width,
               padding: EdgeInsets.only(
@@ -536,8 +535,7 @@ class CurrentStatusPostScreen extends ConsumerWidget {
               children: [
                 const Gap(12),
                 GradientText(
-                  text:post.likeCount.toString(),
-                
+                  text: post.likeCount.toString(),
                 ),
               ],
             ),

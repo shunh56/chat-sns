@@ -32,7 +32,7 @@ class InviteCodeDatasource {
           "userId": _auth.currentUser!.uid,
           "slot": [],
           "logs": [],
-          "maxCount": 3,
+          "maxCount": 5,
         };
         _firestore.collection(collectionName).doc(code).set(map);
         return map;

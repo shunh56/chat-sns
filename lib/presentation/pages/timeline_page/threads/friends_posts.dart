@@ -1,9 +1,7 @@
-
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/admob/native_ad.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
@@ -20,10 +18,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:uuid/uuid.dart';
 
-final refreshController = Provider((ref) => RefreshController());
+//final refreshController = Provider((ref) => RefreshController());
 
 //keepAlive => stateful widget
 class FriendsPostsThread extends ConsumerStatefulWidget {
@@ -42,7 +38,6 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
     final postList = ref.watch(friendsPostsNotiferProvider);
     final asyncValue = ref.watch(myAccountNotifierProvider);
     final card = asyncValue.when(
@@ -83,57 +78,71 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
             return;
           }, */
             // child:
-            ListView(
-          children: [
-            const VoiceChatSection(),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: card,
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 120),
-              itemCount: list.length,
-              itemBuilder: (context, index) {
-                final post = list[index];
-                final user = ref
-                    .read(allUsersNotifierProvider)
-                    .asData!
-                    .value[post.userId]!;
-                if (post is Post) {
-                  Post item = post;
-                  return Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          item = item.copyWith(likeCount: post.likeCount + 1);
-                        },
-                        child: PostWidget(postRef: item, user: user),
-                      ),
-                      if (index != 0 && index % 10 == 0)
-                        NativeAdWidget(
-                          id: const Uuid().v4(),
+            RefreshIndicator(
+          color: ThemeColor.text,
+          backgroundColor: ThemeColor.stroke,
+          onRefresh: () async {
+            return await ref
+                .read(friendsPostsNotiferProvider.notifier)
+                .refresh();
+          },
+          child: ListView(
+            children: [
+              const VoiceChatSection(),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: card,
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 120),
+                itemCount: list.length,
+                itemBuilder: (context, index) {
+                  final post = list[index];
+
+                  if (post is Post) {
+                    Post item = post;
+                    return Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            item = item.copyWith(likeCount: post.likeCount + 1);
+                          },
+                          child: PostWidget(postRef: post, userId: post.userId),
                         ),
-                    ],
-                  );
-                }
-                if (post is CurrentStatusPost) {
-                  return CurrentStatusPostWidgets(context, ref, post, user)
-                      .timelinePost();
-                }
-                return const SizedBox();
-              },
-            ),
-          ],
-          //),
+                        /* if (index != 0 && index % 10 == 0)
+                          NativeAdWidget(
+                            id: const Uuid().v4(),
+                          ), */
+                      ],
+                    );
+                  }
+                  if (post is CurrentStatusPost) {
+                    final user = ref
+                        .read(allUsersNotifierProvider)
+                        .asData!
+                        .value[post.userId]!;
+                    return CurrentStatusPostWidgets(context, ref, post, user)
+                        .timelinePost();
+                  }
+                  return const SizedBox();
+                },
+              ),
+            ],
+            //),
+          ),
         );
       },
       error: (e, s) {
         return const SizedBox();
       },
       loading: () {
-        return const SizedBox();
+        return const Center(
+          child: CircularProgressIndicator(
+            color: ThemeColor.text,
+          ),
+        );
       },
     );
   }

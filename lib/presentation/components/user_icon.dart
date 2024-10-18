@@ -259,23 +259,29 @@ class UserIcon {
           child: SizedBox(
             height: imageHeight,
             width: imageHeight,
-            child: CachedNetworkImage(
-              imageUrl: user.imageUrl!,
-              fadeInDuration: const Duration(milliseconds: 120),
-              imageBuilder: (context, imageProvider) => Container(
-                height: imageHeight,
-                width: imageHeight,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                    image: imageProvider,
-                    fit: BoxFit.cover,
+            child: user.imageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: user.imageUrl!,
+                    fadeInDuration: const Duration(milliseconds: 120),
+                    imageBuilder: (context, imageProvider) => Container(
+                      height: imageHeight,
+                      width: imageHeight,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    placeholder: (context, url) => const SizedBox(),
+                    errorWidget: (context, url, error) => const SizedBox(),
+                  )
+                : Icon(
+                    Icons.person_outline,
+                    size: imageHeight * 0.8,
+                    color: ThemeColor.stroke,
                   ),
-                ),
-              ),
-              placeholder: (context, url) => const SizedBox(),
-              errorWidget: (context, url, error) => const SizedBox(),
-            ),
           ),
         ),
       ),
@@ -313,6 +319,69 @@ class UserIcon {
                 size: radius * 2 * 0.8,
                 color: ThemeColor.accent,
               ),
+      ),
+    );
+  }
+
+  static Widget canvasIcon(UserAccount user, {CanvasTheme? canvasTheme}) {
+    const imageHeight = 80.0;
+    canvasTheme ??= user.canvasTheme;
+    return Container(
+      padding: EdgeInsets.all(canvasTheme.iconStrokeWidth),
+      decoration: BoxDecoration(
+        gradient: !canvasTheme.iconHideBorder
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  canvasTheme.iconGradientStartColor,
+                  canvasTheme.iconGradientEndColor,
+                ],
+              )
+            : null,
+        borderRadius: BorderRadius.circular(
+          canvasTheme.iconRadius + 12,
+        ),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(12 - canvasTheme.iconStrokeWidth),
+        decoration: BoxDecoration(
+          color: canvasTheme.bgColor,
+          borderRadius: BorderRadius.circular(
+            canvasTheme.iconRadius + 12 - canvasTheme.iconStrokeWidth,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(canvasTheme.iconRadius),
+          child: Container(
+            color: ThemeColor.accent,
+            height: imageHeight,
+            width: imageHeight,
+            child: user.imageUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: user.imageUrl!,
+                    fadeInDuration: const Duration(milliseconds: 120),
+                    imageBuilder: (context, imageProvider) => Container(
+                      height: imageHeight,
+                      width: imageHeight,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    placeholder: (context, url) => const SizedBox(),
+                    errorWidget: (context, url, error) => const SizedBox(),
+                  )
+                : const Icon(
+                    Icons.person_outline,
+                    size: imageHeight * 0.8,
+                    color: ThemeColor.stroke,
+                  ),
+          ),
+        ),
       ),
     );
   }

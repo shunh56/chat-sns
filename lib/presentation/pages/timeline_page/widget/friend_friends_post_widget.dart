@@ -29,7 +29,10 @@ class FriendFriendsPostWidget extends ConsumerWidget {
   final UserAccount user;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id]!;
+    final post = ref.read(allPostsNotifierProvider).asData!.value[postRef.id]!;
+    if (user.privacy.contentRange == PublicityRange.onlyFriends) {
+      return const SizedBox();
+    }
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final notifier = ref.read(isHeartVisibleProvider.notifier);
@@ -89,15 +92,20 @@ class FriendFriendsPostWidget extends ConsumerWidget {
       });
     }
 
-    final mutualIds = ref.read(friendsFriendMapProvider)[user.userId]!;
+    final mutualIds =
+        ref.watch(friendFriendsMapNotifierProvider)[user.userId] ?? {};
+    final myFriendIds =
+        (ref.watch(friendIdListNotifierProvider).asData?.value ?? [])
+            .map((info) => info.userId)
+            .toList();
     final mutualFriends = ref
         .read(allUsersNotifierProvider)
         .asData!
         .value
-        .entries
-        .where((e) => mutualIds.contains(e.value.userId))
-        .map((e) => e.value)
+        .values
+        .where((e) => mutualIds.contains(e.userId))
         .toList();
+    mutualFriends.removeWhere((e) => !myFriendIds.contains(e.userId));
     final shorten = mutualFriends.length > 2;
     final shortenCount = mutualFriends.length - 2;
     return Padding(
@@ -407,10 +415,16 @@ class FriendFriendsPostWidget extends ConsumerWidget {
               ],
             ),
           const Gap(12),
-          const Icon(
-            Icons.more_horiz_rounded,
-            color: ThemeColor.subText,
-            size: 20,
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              PostBottomModelSheet(context).openPostAction(post, user);
+            },
+            child: const Icon(
+              Icons.more_horiz_rounded,
+              color: ThemeColor.subText,
+              size: 20,
+            ),
           )
         ],
       ),

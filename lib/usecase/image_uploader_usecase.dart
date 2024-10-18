@@ -48,7 +48,7 @@ class ImageUploadUsecase {
     UploadTask uploadTask = ref.putFile(imageFile);
     TaskSnapshot snap = await uploadTask;
     String downloadUrl = await snap.ref.getDownloadURL();
-    _repository.addImage(downloadUrl);
+
     return downloadUrl;
   }
 

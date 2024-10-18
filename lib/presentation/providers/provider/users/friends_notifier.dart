@@ -1,15 +1,17 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:app/core/utils/debug_print.dart';
+import 'package:app/datasource/local/hive/friendsMap.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/usecase/friends_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 
 class FriendInfo {
   final Timestamp createdAt;
@@ -39,15 +41,15 @@ class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
 
   void initialize() async {
     Stream<List<FriendInfo>> stream = usecase.streamFriends();
-    _subscription = stream.listen((friendInfos) async {
+    _subscription = stream.listen((infos) async {
+      final friendIds = infos.map((info) => info.userId).toList();
+      updateFriendFriends(_ref.read(authProvider).currentUser!.uid, friendIds);
       await _ref
           .read(allUsersNotifierProvider.notifier)
-          .getUserAccounts(friendInfos.map((item) => item.userId).toList());
-      _ref
-          .read(myAccountNotifierProvider.notifier)
-          .checkTopFriends(friendInfos.map((item) => item.userId).toList());
+          .getUserAccounts(friendIds, update: true);
+      _ref.read(myAccountNotifierProvider.notifier).checkTopFriends(friendIds);
       if (mounted) {
-        state = AsyncValue.data(friendInfos);
+        state = AsyncValue.data(infos);
       }
     });
   }
@@ -62,11 +64,19 @@ class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
   }
 
   Future<List<UserAccount>> getFriends(String userId) async {
-    final list = await usecase.getFriends(userId);
-
+    final userIds = await usecase.getFriends(userId);
+    updateFriendFriends(userId, userIds);
     return await _ref
         .read(allUsersNotifierProvider.notifier)
-        .getUserAccounts(list);
+        .getUserAccounts(userIds);
+  }
+
+  updateFriendFriends(String userId, List<String> userIds) {
+    HiveBoxes.box().put(userId, userIds);
+
+    _ref
+        .read(friendFriendsMapNotifierProvider.notifier)
+        .addFriendFriends(userId, userIds);
   }
 }
 
@@ -143,7 +153,7 @@ class FriendRequestIdListNotifier
   sendFriendRequest(UserAccount user) async {
     try {
       await usecase.sendFriendRequest(user);
-      showMessage("フレンド申請を送りました！");
+      //showMessage("フレンド申請を送りました！");
     } catch (e) {
       showErrorSnackbar(error: e);
     }
@@ -196,102 +206,88 @@ class FriendRequestedIdListNotifier
   }
 }
 
-final friendsFriendListNotifierProvider = StateNotifierProvider.autoDispose<
-    FriendsFriendListNotifier, AsyncValue<List<UserAccount>>>((ref) {
-  return FriendsFriendListNotifier(
-    ref,
-    ref.watch(friendIdListNotifierProvider),
-    ref.watch(blocksListNotifierProvider),
-    ref.watch(friendsUsecaseProvider),
-  )..initialize();
+final friendFriendsMapNotifierProvider = StateNotifierProvider.autoDispose<
+    FriendFriendsMapNotifier, Map<String, Set<String>>>((ref) {
+  return FriendFriendsMapNotifier(ref)..initialize();
 });
 
-class FriendsFriendListNotifier
-    extends StateNotifier<AsyncValue<List<UserAccount>>> {
-  FriendsFriendListNotifier(
+class FriendFriendsMapNotifier extends StateNotifier<Map<String, Set<String>>> {
+  FriendFriendsMapNotifier(
     this._ref,
-    this.asyncValue,
-    this.asyncBlocks,
-    this.usecase,
-  ) : super(const AsyncValue<List<UserAccount>>.loading());
+  ) : super(const {});
+
   final Ref _ref;
-  final AsyncValue<List<FriendInfo>> asyncValue;
-  final AsyncValue<List<String>> asyncBlocks;
-  final FriendsUsecase usecase;
+  final Box<List<String>> box = HiveBoxes.box();
 
-  //TODO グリッチが起きてしまう
   void initialize() async {
-    Set<String> userIds = {};
-    final friendIds = asyncValue;
-    friendIds.maybeWhen(
-      data: (friendInfos) async {
-        userIds = {};
-        final map =
-            Map<String, Set<String>>.from(_ref.read(friendsFriendMapProvider));
-        final friendIds = friendInfos.map((item) => item.userId).toList();
-        final filterIds =
-            friendIds + [_ref.read(authProvider).currentUser!.uid];
+    final map = Map<String, Set<String>>.from(state);
+    final keys = box.keys;
+    for (var userId in keys) {
+      final userIds = box.get(userId) ?? [];
+      map[userId] = userIds.toSet();
+      state = map;
+    }
+  }
 
-        //futures
-        List<Future<List<UserAccount>>> futures = [];
-        for (String userId in friendIds) {
-          final user =
-              _ref.read(allUsersNotifierProvider).asData!.value[userId]!;
-          if (user.topFriends.length > 5) {
-            futures.add(
-              _ref
-                  .read(allUsersNotifierProvider.notifier)
-                  .getUserAccounts(user.topFriends),
-            );
-          } else {
-            futures.add(_ref
-                .read(friendIdListNotifierProvider.notifier)
-                .getFriends(userId));
-          }
-        }
-        await Future.wait(futures);
+  addFriendFriends(String userId, List<String> userIds) {
+    final map = Map<String, Set<String>>.from(state);
+    map[userId] = userIds.toSet();
 
-        //
-        for (int i = 0; i < friendIds.length; i++) {
-          final userId = friendIds[i];
-          final list = await futures[i];
-          DebugPrint("friend of $userId : ${list.map(((user) => user.name))}");
-          for (var user in list) {
-            if (!user.privacy.privateMode) {
-              userIds.add(user.userId);
-              if (map[user.userId] == null) {
-                map[user.userId] = {userId};
-              } else {
-                map[user.userId]!.add(userId);
-              }
-            }
-          }
-        }
-        _ref.read(friendsFriendMapProvider.notifier).state = map;
-
-        userIds.removeWhere((userId) => filterIds.contains(userId));
-
-        final users = _ref
-            .read(allUsersNotifierProvider)
-            .asData
-            ?.value
-            .entries
-            .where((item) => userIds.contains(item.value.userId))
-            .map((item) => item.value)
-            .toSet();
-
-        asyncBlocks.maybeWhen(
-          data: (blocks) {
-            users?.removeWhere((user) => blocks.contains(user.userId));
-            state = AsyncValue.data(users!.toList());
-          },
-          orElse: () {},
-        );
-      },
-      orElse: () {},
-    );
+    state = map;
   }
 }
 
-final friendsFriendMapProvider =
-    StateProvider<Map<String, Set<String>>>((ref) => {});
+final relationNotifier = Provider(
+  (ref) => RelationNotifier(ref),
+);
+
+class RelationNotifier {
+  final Ref ref;
+  RelationNotifier(this.ref);
+
+  Map<String, Set<String>> _getMap() {
+    final map = Map<String, Set<String>>.from(
+        ref.read(friendFriendsMapNotifierProvider));
+    return map;
+  }
+
+  Map<String, int> getDistanceMap({String? userId}) {
+    final map = _getMap();
+    Map<String, int> dist = {};
+    final q = Queue<String>();
+    final start = userId ?? ref.read(authProvider).currentUser!.uid;
+    dist[start] = 0;
+    q.add(start);
+    while (q.isNotEmpty) {
+      String v = q.removeFirst();
+      for (String nv in map[v] ?? {}) {
+        if (dist[nv] == null) {
+          dist[nv] = dist[v]! + 1;
+          q.add(nv);
+        }
+      }
+    }
+    return dist;
+  }
+
+  List<String> getMaybeFriends() {
+    final dist = getDistanceMap();
+    final list = dist.entries
+        .where((item) => item.value == 2)
+        .map((item) => item.key)
+        .toList();
+    list.removeWhere((userId) => getMutualIds(userId).isEmpty);
+    final map = _getMap();
+    list.sort((a, b) => (map[a] ?? {}).length.compareTo((map[b] ?? {}).length));
+    return list;
+  }
+
+  List<String> getMutualIds(String userId) {
+    final dist01 = getDistanceMap();
+    final dist02 = getDistanceMap(userId: userId);
+    return dist01.entries
+        .where((item) => item.value == 1 && dist02[item.key] == 1)
+        .map((item) => item.key)
+        .toList();
+  }
+}

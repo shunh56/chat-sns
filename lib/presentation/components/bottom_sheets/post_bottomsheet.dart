@@ -757,6 +757,8 @@ class PostBottomModelSheet {
         );
       },
     );
+ 
+ 
   }
 
   openCurrentStatusPostAction(CurrentStatusPost post, UserAccount user) {

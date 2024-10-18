@@ -1,3 +1,4 @@
+import 'package:app/core/values.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,24 +8,22 @@ import 'package:uuid/uuid.dart';
 
 final postDatasourceProvider = Provider(
   (ref) => PostDatasource(
-
     ref.watch(authProvider),
     ref.watch(firestoreProvider),
   ),
 );
 
 class PostDatasource {
-  
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  PostDatasource( this._auth, this._firestore);
+  PostDatasource(this._auth, this._firestore);
   final collectionName = "posts";
 
   Future<QuerySnapshot<Map<String, dynamic>>> getPosts() async {
     return await _firestore
         .collection(collectionName)
         .orderBy("createdAt", descending: true)
-        .limit(30)
+        .limit(QUERY_LIMIT)
         .get();
   }
 
@@ -33,7 +32,7 @@ class PostDatasource {
         .collection(collectionName)
         .where("isPublic", isEqualTo: true)
         .orderBy("createdAt", descending: true)
-        .limit(30)
+        .limit(QUERY_LIMIT)
         .get();
   }
 
@@ -41,8 +40,29 @@ class PostDatasource {
     return await _firestore
         .collection(collectionName)
         .orderBy("likeCount", descending: true)
-        .limit(30)
+        .limit(QUERY_LIMIT)
         .get();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getPostFromUserIds(
+      List<String> userIds,
+      {bool onlyPublic = false}) async {
+    if (onlyPublic) {
+      return await _firestore
+          .collection(collectionName)
+          .where("isPublic", isEqualTo: true)
+          .where("userId", whereIn: userIds)
+          .orderBy("createdAt", descending: true)
+          .limit(QUERY_LIMIT)
+          .get();
+    } else {
+      return await _firestore
+          .collection(collectionName)
+          .where("userId", whereIn: userIds)
+          .orderBy("createdAt", descending: true)
+          .limit(QUERY_LIMIT)
+          .get();
+    }
   }
 
   Future<QuerySnapshot<Map<String, dynamic>>> getPostFromUserId(

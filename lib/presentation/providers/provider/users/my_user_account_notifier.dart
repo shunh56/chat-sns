@@ -1,7 +1,6 @@
 // Package imports:
 import 'dart:io';
 
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/pages/onboarding_page/onboarding_page.dart';
@@ -32,7 +31,6 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
   final UserUsecase usecase;
 
   Future<void> initialize() async {
-    DebugPrint("initializing myAccount");
     UserAccount? userAccount =
         await usecase.getUserByUid(ref.watch(authProvider).currentUser!.uid);
     if (mounted) {
@@ -46,12 +44,11 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
         usecase.createUser(UserAccount.nullUser());
       }
     }
-    /*if (!userAccount.isDummy()) {
-      ref
-          .read(allUsersNotifierProvider)
-          .saveUser(userAccount, ConnectionType.me);
-      _checkInitialUpdates(userAccount);
-    } */
+  }
+
+  void update(UserAccount user) {
+    usecase.updateUser(user);
+    ref.read(allUsersNotifierProvider.notifier).addUserAccounts([user]);
   }
 
   onOpen() async {
@@ -69,7 +66,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     );
 
     state = AsyncValue.data(updatedUser);
-    usecase.updateUser(updatedUser);
+    update(updatedUser);
   }
 
   onClosed() {
@@ -79,7 +76,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
       lastOpenedAt: Timestamp.now(),
     );
     state = AsyncValue.data(updatedUser);
-    usecase.updateUser(updatedUser);
+    update(updatedUser);
   }
 
   //usedCodeにしようするコードを書き換える => ホームに行けるようになる
@@ -87,15 +84,24 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     final user = state.asData!.value;
     final updatedUser = user.copyWith(usedCode: code.code);
     state = AsyncValue.data(updatedUser);
-    usecase.updateUser(updatedUser);
+    update(updatedUser);
+  }
+
+  waitInLine() {
+    final user = state.asData!.value;
+    final updatedUser = user.copyWith(usedCode: "WAITING");
+    state = AsyncValue.data(updatedUser);
+    update(updatedUser);
   }
 
   createUser(
     String username,
     String name,
     File? iconImage,
+    String doing,
   ) async {
     ref.read(creatingProcessProvider.notifier).state = true;
+    await Future.delayed(const Duration(seconds: 1));
     final user = state.asData!.value;
     if (user.validCode) {
       final code = await ref
@@ -121,22 +127,34 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
       imageUrl: imageUrl,
     );
     state = AsyncValue.data(updatedUser);
-    usecase.updateUser(updatedUser);
+    update(updatedUser);
+    updateCurrentStatus(updatedUser.currentStatus.copyWith(doing: doing));
+    final otherIds = ref.read(selectedOtherIdsProvider);
+    if (otherIds.isNotEmpty) {
+      for (String userId in otherIds) {
+        final otherUser =
+            ref.read(allUsersNotifierProvider).asData!.value[userId]!;
+        ref
+            .read(friendRequestIdListNotifierProvider.notifier)
+            .sendFriendRequest(otherUser);
+      }
+    }
   }
 
   changeColor(CanvasTheme canvasTheme) {
     final user = state.asData!.value;
     final updatedUser = user.copyWith(canvasTheme: canvasTheme);
     state = AsyncValue.data(updatedUser);
-    usecase.updateUser(updatedUser);
+    update(updatedUser);
   }
 
   updateBio(Bio bio, String aboutMe, Links links, {String? imageUrl}) async {
     final user = state.asData!.value;
     final updatedUser = user.copyWith(
         bio: bio, aboutMe: aboutMe, imageUrl: imageUrl, links: links);
-    usecase.updateUser(updatedUser);
+
     state = AsyncValue.data(updatedUser);
+    update(updatedUser);
   }
 
   updateTopFriends(
@@ -144,8 +162,9 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
   ) async {
     final user = state.asData!.value;
     final updatedUser = user.copyWith(topFriends: topFriends);
-    usecase.updateUser(updatedUser);
+
     state = AsyncValue.data(updatedUser);
+    update(updatedUser);
   }
 
   checkTopFriends(List<String> friendIds) {
@@ -153,8 +172,9 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     final topFriends = me.topFriends;
     topFriends.removeWhere((userId) => !friendIds.contains(userId));
     final updatedUser = me.copyWith(topFriends: topFriends);
-    usecase.updateUser(updatedUser);
+
     state = AsyncValue.data(updatedUser);
+    update(updatedUser);
   }
 
   removeTopFriends(UserAccount user) {
@@ -162,8 +182,9 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     final topFriends = me.topFriends;
     topFriends.removeWhere((userId) => userId == user.userId);
     final updatedUser = me.copyWith(topFriends: topFriends);
-    usecase.updateUser(updatedUser);
+
     state = AsyncValue.data(updatedUser);
+    update(updatedUser);
   }
 
   updateCurrentStatus(CurrentStatus currentStatus) async {
@@ -171,27 +192,51 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     final before = user.currentStatus;
     if (before != currentStatus) {
       final updatedUser = user.copyWith(currentStatus: currentStatus);
-      usecase.updateUser(updatedUser);
+
+      state = AsyncValue.data(updatedUser);
       ref
           .read(currentStatusPostUsecaseProvider)
           .addPost(before.toJson(), currentStatus.toJson());
-      state = AsyncValue.data(updatedUser);
+      update(updatedUser);
     }
   }
 
   updatePrivacy(Privacy privacy) {
     final user = state.asData!.value;
     final updatedUser = user.copyWith(privacy: privacy);
-    usecase.updateUser(updatedUser);
     state = AsyncValue.data(updatedUser);
+    update(updatedUser);
   }
 
   updateNotificationData(NotificationData notificationData) {
     final user = state.asData!.value;
     final updatedUser = user.copyWith(notificationData: notificationData);
-    usecase.updateUser(updatedUser);
+
     state = AsyncValue.data(updatedUser);
+    update(updatedUser);
   }
+
+  deleteAccount() {
+    final user = state.asData!.value;
+    final updatedUser = user.copyWith(
+      accountStatus: AccountStatus.deleted,
+      isOnline: false,
+      lastOpenedAt: Timestamp.now(),
+    );
+    state = AsyncValue.data(updatedUser);
+    update(updatedUser);
+  }
+
+  rebootAccount() {
+    final user = state.asData!.value;
+    final updatedUser = user.copyWith(
+      accountStatus: AccountStatus.normal,
+      lastOpenedAt: Timestamp.now(),
+    );
+    state = AsyncValue.data(updatedUser);
+    update(updatedUser);
+  }
+
 /*
   _checkInitialUpdates(UserAccount userAccount) {
     //update deviceInfo

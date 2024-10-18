@@ -1,4 +1,5 @@
 // Flutter imports:
+import 'package:app/core/utils/debug_print.dart';
 import 'package:flutter/material.dart';
 
 class PageTransitionMethods {
@@ -15,18 +16,22 @@ class PageTransitionMethods {
 
   //slide up
   static Route slideUp(Widget page) {
+    DebugPrint("SLIDE UP");
     return PageRouteBuilder(
+      opaque: false,
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionDuration: const Duration(milliseconds: 400),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0, 1.0);
         const end = Offset.zero;
         const curve = Curves.fastOutSlowIn;
-        var tween =
+        final tween =
             Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        final Widget cachedChild = child;
+
         return SlideTransition(
           position: animation.drive(tween),
-          child: child,
+          child: cachedChild,
         );
       },
     );

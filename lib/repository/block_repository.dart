@@ -26,7 +26,7 @@ class BlockRepository {
   }
 
   Stream<List<String>> streamBlockeds() {
-    final stream = _blockDatasource.streamBlockedsDocument();
+    final stream = _blockDatasource.streamBlockeds();
     return stream.map((event) {
       return event.docs.map((e) => e.id).toList();
     });

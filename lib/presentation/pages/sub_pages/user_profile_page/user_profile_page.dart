@@ -28,7 +28,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserProfileScreen extends ConsumerWidget {
-  const UserProfileScreen({super.key, required this.user});
+  const UserProfileScreen({
+    super.key,
+    required this.user,
+  });
   final UserAccount user;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,7 +40,7 @@ class UserProfileScreen extends ConsumerWidget {
     final canvasTheme = user.canvasTheme;
     final friendInfos =
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
-    final friendIds = friendInfos.map((item) => item.userId);
+
     bool popped = false;
 
     if (!friendInfos.map((item) => item.userId).contains(user.userId)) {
@@ -71,15 +74,113 @@ class UserProfileScreen extends ConsumerWidget {
               padding: EdgeInsets.only(
                 left: themeSize.horizontalPadding,
                 right: themeSize.horizontalPadding,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  UserIcon.canvasIcon(user),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            ref
+                                .read(navigationRouterProvider(context))
+                                .goToChat(user);
+                          },
+                          child: SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: SvgPicture.asset(
+                              "assets/images/icons/chat.svg",
+                              // ignore: deprecated_member_use
+                              color: canvasTheme.profileTextColor,
+                            ),
+                          ),
+                        ),
+                        const Gap(12),
+                        /*GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                      },
+                      child: Icon(
+                        shareIcon,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Gap(12), */
+                        FocusedMenuHolder(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                          },
+                          menuWidth: 120,
+                          blurSize: 0,
+                          animateMenuItems: false,
+                          openWithTap: true,
+                          menuBoxDecoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          menuItems: <FocusedMenuItem>[
+                            FocusedMenuItem(
+                              backgroundColor: ThemeColor.background,
+                              title: const Text(
+                                "フレンド解除",
+                              ),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                UserBottomModelSheet(context)
+                                    .quitFriendBottomSheet(user);
+                              },
+                            ),
+                            FocusedMenuItem(
+                              backgroundColor: ThemeColor.background,
+                              title: const Text(
+                                "報告",
+                              ),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ReportUserScreen(user),
+                                  ),
+                                );
+                              },
+                            ),
+                            FocusedMenuItem(
+                              backgroundColor: ThemeColor.background,
+                              title: const Text(
+                                "ブロック",
+                              ),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                UserBottomModelSheet(context)
+                                    .blockUserBottomSheet(user);
+                              },
+                            ),
+                          ],
+                          child: Icon(
+                            Icons.more_horiz,
+                            color: canvasTheme.profileTextColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                left: themeSize.horizontalPadding,
+                right: themeSize.horizontalPadding,
                 bottom: 12,
               ),
               child: Row(
                 children: [
-                  UserIcon.tileIcon(
-                    user,
-                    width: 60,
-                  ),
-                  const Gap(8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,167 +202,77 @@ class UserProfileScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      ref
-                          .read(navigationRouterProvider(context))
-                          .goToChat(user);
-                    },
-                    child: SizedBox(
-                      height: 22,
-                      width: 22,
-                      child: SvgPicture.asset(
-                        "assets/images/icons/chat.svg",
-                        // ignore: deprecated_member_use
-                        color: canvasTheme.profileTextColor,
-                      ),
-                    ),
-                  ),
-                  const Gap(12),
-                  /*GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                    },
-                    child: Icon(
-                      shareIcon,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const Gap(12), */
-                  FocusedMenuHolder(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                    },
-                    menuWidth: 120,
-                    blurSize: 0,
-                    animateMenuItems: false,
-                    openWithTap: true,
-                    menuBoxDecoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    menuItems: <FocusedMenuItem>[
-                      FocusedMenuItem(
-                        backgroundColor: ThemeColor.background,
-                        title: const Text(
-                          "フレンド解除",
-                        ),
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          UserBottomModelSheet(context)
-                              .quitFriendBottomSheet(user);
-                        },
-                      ),
-                      FocusedMenuItem(
-                        backgroundColor: ThemeColor.background,
-                        title: const Text(
-                          "報告",
-                        ),
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ReportUserScreen(user),
+                  if (user.links.isShown)
+                    Row(
+                      children: [
+                        /* if (me.links.line.isShown && me.links.line.path != null)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: GestureDetector(
+                            onTap: () {
+                              launchUrl(Uri.parse(me.links.line.url!));
+                            },
+                            child: SizedBox(
+                              height: 32,
+                              width: 32,
+                              child: Image.asset(
+                                me.links.line.assetString,
+                                color: canvasTheme.profileLinksColor,
+                              ),
                             ),
-                          );
-                        },
-                      ),
-                      FocusedMenuItem(
-                        backgroundColor: ThemeColor.background,
-                        title: const Text(
-                          "ブロック",
-                        ),
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          UserBottomModelSheet(context)
-                              .blockUserBottomSheet(user);
-                        },
-                      ),
-                    ],
-                    child: Icon(
-                      Icons.more_horiz,
-                      color: canvasTheme.profileTextColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (user.links.isShown)
-              Padding(
-                padding: EdgeInsets.only(
-                  left: themeSize.horizontalPadding,
-                  right: themeSize.horizontalPadding,
-                  bottom: 12,
-                ),
-                child: Row(
-                  children: [
-                    /* if (me.links.line.isShown && me.links.line.path != null)
+                          ),
+                        ), */
+                        if (user.links.instagram.isShown &&
+                            user.links.instagram.path != null)
                           Padding(
-                            padding: const EdgeInsets.only(right: 12),
+                            padding: const EdgeInsets.only(left: 12),
                             child: GestureDetector(
-                              onTap: () {
-                                launchUrl(Uri.parse(me.links.line.url!));
+                              onTap: () async {
+                                HapticFeedback.lightImpact();
+                                launchUrl(
+                                  Uri.parse(
+                                    user.links.instagram.url!,
+                                  ),
+                                  mode: LaunchMode.externalApplication,
+                                );
+                                //showMessage("${me.links.instagram.url}");
                               },
                               child: SizedBox(
-                                height: 32,
-                                width: 32,
+                                height: 26,
+                                width: 26,
                                 child: Image.asset(
-                                  me.links.line.assetString,
+                                  user.links.instagram.assetString,
                                   color: canvasTheme.profileLinksColor,
                                 ),
                               ),
                             ),
-                          ), */
-                    if (user.links.instagram.isShown &&
-                        user.links.instagram.path != null)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: GestureDetector(
-                          onTap: () async {
-                            HapticFeedback.lightImpact();
-                            launchUrl(
-                              Uri.parse(
-                                user.links.instagram.url!,
+                          ),
+                        if (user.links.x.isShown && user.links.x.path != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 12),
+                            child: GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                launchUrl(
+                                  Uri.parse(user.links.x.url!),
+                                  mode: LaunchMode.externalApplication,
+                                );
+                              },
+                              child: SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: Image.asset(
+                                  user.links.x.assetString,
+                                  color: canvasTheme.profileLinksColor,
+                                ),
                               ),
-                              mode: LaunchMode.externalApplication,
-                            );
-                            //showMessage("${me.links.instagram.url}");
-                          },
-                          child: SizedBox(
-                            height: 26,
-                            width: 26,
-                            child: Image.asset(
-                              user.links.instagram.assetString,
-                              color: canvasTheme.profileLinksColor,
                             ),
                           ),
-                        ),
-                      ),
-                    if (user.links.x.isShown && user.links.x.path != null)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            launchUrl(
-                              Uri.parse(user.links.x.url!),
-                              mode: LaunchMode.externalApplication,
-                            );
-                          },
-                          child: SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: Image.asset(
-                              user.links.x.assetString,
-                              color: canvasTheme.profileLinksColor,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                      ],
+                    ),
+                ],
               ),
+            ),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: themeSize.horizontalPadding,
@@ -331,21 +342,6 @@ class UserProfileScreen extends ConsumerWidget {
                     alignment: Alignment.topCenter,
                     children: [
                       Container(
-                        margin: const EdgeInsets.only(top: 32),
-                        height: imageHeight * 1.2,
-                        width: imageHeight,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 12,
-                              offset: const Offset(0, 8),
-                              color: Colors.black.withOpacity(0.3),
-                            )
-                          ],
-                        ),
-                      ),
-                      Container(
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         padding: const EdgeInsets.only(
                           top: 8,
@@ -353,7 +349,16 @@ class UserProfileScreen extends ConsumerWidget {
                           right: 8,
                           bottom: 24,
                         ),
-                        color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 2,
+                              offset: const Offset(4, 4),
+                              color: Colors.black.withOpacity(0.5),
+                            )
+                          ],
+                        ),
                         child: SizedBox(
                           height: imageHeight * 1.2,
                           width: imageHeight,
@@ -1488,18 +1493,7 @@ class NotFriendScreen extends ConsumerWidget {
     final friendInfos =
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
     final friendIds = friendInfos.map((item) => item.userId);
-    bool popped = false;
 
-    final mutualIds = ref.watch(friendsFriendMapProvider)[user.userId] ?? {};
-    final mutualFriends = ref
-        .read(allUsersNotifierProvider)
-        .asData!
-        .value
-        .entries
-        .where((e) => mutualIds.contains(e.value.userId))
-        .map((e) => e.value)
-        .toList();
-    final shorten = mutualFriends.length > 2;
     const imageHeight = 108.0;
 
     return Scaffold(
@@ -1638,120 +1632,116 @@ class NotFriendScreen extends ConsumerWidget {
                 ),
               ),
               const Gap(4),
-              SizedBox(
-                height: 24,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Wrap(
-                      children: (shorten
-                              ? mutualFriends.sublist(0, 2)
-                              : mutualFriends)
-                          .map(
-                            (user) => Container(
-                              margin: const EdgeInsets.all(2),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: Container(
-                                  color: ThemeColor.stroke,
-                                  height: 20,
-                                  width: 20,
-                                  child: user.imageUrl != null
-                                      ? CachedNetworkImage(
-                                          imageUrl: user.imageUrl!,
-                                          fadeInDuration:
-                                              const Duration(milliseconds: 120),
-                                          imageBuilder:
-                                              (context, imageProvider) =>
-                                                  Container(
-                                            height: 20,
-                                            width: 20,
-                                            decoration: BoxDecoration(
-                                              color: Colors.transparent,
-                                              image: DecorationImage(
-                                                image: imageProvider,
-                                                fit: BoxFit.cover,
-                                              ),
+              FutureBuilder(
+                  future: ref
+                      .read(friendIdListNotifierProvider.notifier)
+                      .getFriends(user.userId),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox();
+                    }
+                    final users = snapshot.data!;
+                    users.removeWhere((e) => !friendIds.contains(e.userId));
+                    final shorten = users.length > 2;
+                    final privateMode = user.privacy.privateMode;
+                    final range = user.privacy.requestRange;
+                    final buttonShown = !privateMode &&
+                        ((range == PublicityRange.public) ||
+                            (range == PublicityRange.friendOfFriend &&
+                                users.isNotEmpty));
+                    return FadeTransitionWidget(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 24,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Wrap(
+                                  children: (shorten
+                                          ? users.sublist(0, 2)
+                                          : users)
+                                      .map(
+                                        (user) => Container(
+                                          margin: const EdgeInsets.all(2),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(100),
+                                            child: Container(
+                                              color: ThemeColor.stroke,
+                                              height: 20,
+                                              width: 20,
+                                              child: user.imageUrl != null
+                                                  ? CachedNetworkImage(
+                                                      imageUrl: user.imageUrl!,
+                                                      fadeInDuration:
+                                                          const Duration(
+                                                              milliseconds:
+                                                                  120),
+                                                      imageBuilder: (context,
+                                                              imageProvider) =>
+                                                          Container(
+                                                        height: 20,
+                                                        width: 20,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .transparent,
+                                                          image:
+                                                              DecorationImage(
+                                                            image:
+                                                                imageProvider,
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      placeholder:
+                                                          (context, url) =>
+                                                              const SizedBox(),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          const SizedBox(),
+                                                    )
+                                                  : const Icon(
+                                                      Icons.person_outline,
+                                                      size: 20 * 0.8,
+                                                      color: ThemeColor.accent,
+                                                    ),
                                             ),
                                           ),
-                                          placeholder: (context, url) =>
-                                              const SizedBox(),
-                                          errorWidget: (context, url, error) =>
-                                              const SizedBox(),
-                                        )
-                                      : const Icon(
-                                          Icons.person_outline,
-                                          size: 20 * 0.8,
-                                          color: ThemeColor.accent,
                                         ),
+                                      )
+                                      .toList(),
                                 ),
-                              ),
+                                const Gap(4),
+                                Text(
+                                  "共通の友達${users.length}人",
+                                  style: textStyle.w600(
+                                    fontSize: 12,
+                                    color: user
+                                        .canvasTheme.profileSecondaryTextColor,
+                                  ),
+                                ),
+                              ],
                             ),
-                          )
-                          .toList(),
-                    ),
-                    const Gap(4),
-                    Text(
-                      "共通の友達${mutualIds.length}人",
-                      style: textStyle.w600(
-                        fontSize: 12,
-                        color: user.canvasTheme.profileSecondaryTextColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Gap(24),
-
-              //フレンドリクエスト受付中なら
-              (!user.privacy.privateMode &&
-                      user.privacy.requestRange == PublicityRange.public)
-                  ? Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: themeSize.horizontalPaddingLarge,
-                      ),
-                      child: UserRequestButton(
-                        user: user,
-                      ),
-                    )
-                  //受付中じゃない場合
-                  : (user.privacy.privateMode ||
-                          user.privacy.requestRange ==
-                              PublicityRange.onlyFriends)
-                      ? const SizedBox()
-                      //フレンドがいるかどうか判別
-                      // privateMode = false で requestRange == friendOfFriendの場合
-                      : mutualIds.isNotEmpty
-                          ? Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: themeSize.horizontalPaddingLarge,
-                              ),
-                              child: UserRequestButton(
-                                user: user,
-                              ),
-                            )
-                          : FutureBuilder(
-                              future: ref
-                                  .read(friendIdListNotifierProvider.notifier)
-                                  .getFriends(user.userId),
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) return const SizedBox();
-                                final userFriendIds =
-                                    snapshot.data!.map((user) => user.userId);
-                                final requestable = (friendIds.any((userId) =>
-                                    userFriendIds.contains(userId)));
-                                if (!requestable) return const SizedBox();
-                                return Padding(
+                          ),
+                          const Gap(24),
+                          buttonShown
+                              ? Padding(
                                   padding: EdgeInsets.symmetric(
                                     horizontal:
                                         themeSize.horizontalPaddingLarge,
                                   ),
                                   child: UserRequestButton(
                                     user: user,
+                                    hasNoMutualFriends: users.isEmpty,
                                   ),
-                                );
-                              },
-                            ),
+                                )
+                              : const SizedBox(),
+                        ],
+                      ),
+                    );
+                  }),
               Gap(themeSize.screenHeight * 0.3),
             ],
           ),
@@ -1760,475 +1750,3 @@ class NotFriendScreen extends ConsumerWidget {
     );
   }
 }
-
-/*class BottomSection extends HookConsumerWidget {
-  final UserAccount user;
-  final controller = TextEditingController();
-  BottomSection({super.key, required this.user});
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final friendInfos =
-        ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
-    final friendIds = friendInfos.map((item) => item.userId);
-    final requestIds =
-        ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];
-    final requestedIds =
-        ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
-    final text = useState('');
-    if (user.userId == ref.watch(authProvider).currentUser!.uid) {
-      return Container(
-        padding: const EdgeInsets.only(
-          bottom: 24,
-        ),
-        child: const Text(
-          "THIS IS ME",
-          style: TextStyle(
-            color: ThemeColor.beige,
-          ),
-        ),
-      );
-    }
-    if (friendIds.contains(user.userId)) {
-      return Container(
-        margin: const EdgeInsets.only(
-          left: 24,
-          right: 24,
-          bottom: 24,
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: ThemeColor.beige,
-          ),
-        ),
-        child: GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ChattingScreen(user: user),
-              ),
-            );
-          },
-          child: const Center(
-            child: Text(
-              "チャットへ",
-              style: TextStyle(
-                color: ThemeColor.beige,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    if (requestIds.contains(user.userId)) {
-      return Container(
-        padding: const EdgeInsets.only(
-          left: 24,
-          right: 24,
-          bottom: 24,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  ref
-                      .read(friendRequestIdListNotifierProvider.notifier)
-                      .cancelFriendRequest(user.userId);
-                  showMessage("リクエストを取り消しました。");
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: ThemeColor.beige,
-                    ),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "リクエスト済み",
-                      style: TextStyle(
-                        color: ThemeColor.beige,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const Gap(12),
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChattingScreen(user: user),
-                    ),
-                  );
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: ThemeColor.beige,
-                    ),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "チャットへ",
-                      style: TextStyle(
-                        color: ThemeColor.beige,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    if (requestedIds.contains(user.userId)) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24),
-        padding: const EdgeInsets.only(
-          left: 24,
-          right: 24,
-          bottom: 24,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: ThemeColor.beige,
-          ),
-        ),
-        child: GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ChattingScreen(user: user),
-              ),
-            );
-          },
-          child: const Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Text(
-                "リクエストが届いています",
-                style: TextStyle(
-                  color: ThemeColor.beige,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    return Container(
-      width: MediaQuery.sizeOf(context).width,
-      padding: const EdgeInsets.only(
-        left: 24,
-        right: 24,
-        bottom: 24,
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: TextInputType.text,
-        maxLength: 30,
-        style: const TextStyle(
-          fontSize: 14,
-          color: ThemeColor.text,
-        ),
-        onChanged: (value) {
-          text.value = value;
-        },
-        cursorColor: ThemeColor.highlight,
-        decoration: InputDecoration(
-          hintText: "チャットを送る",
-          filled: true,
-          isDense: true,
-          fillColor: ThemeColor.background,
-          border: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          hintStyle: const TextStyle(
-            fontSize: 14,
-            color: ThemeColor.highlight,
-            fontWeight: FontWeight.w400,
-          ),
-          counterText: "",
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-          suffixIcon: text.value.isNotEmpty
-              ? GestureDetector(
-                  onTap: () async {
-                    try {
-                      await ref
-                          .read(friendRequestIdListNotifierProvider.notifier)
-                          .sendFriendRequest(user);
-                    
-                    } catch (e) {
-                      showMessage("チャットは最初の一回のみ送信できます。");
-                    }
-                    text.value = '';
-                    controller.clear();
-                  },
-                  child: const Icon(
-                    Icons.send,
-                    color: ThemeColor.highlight,
-                  ),
-                )
-              : const SizedBox(),
-        ),
-      ),
-    );
-    /*return Container(
-      margin: EdgeInsets.symmetric(horizontal: 24),
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: ThemeColor.beige,
-        ),
-      ),
-      child: GestureDetector(
-        onTap: () {
-          ref
-              .read(friendRequestIdListNotifierProvider.notifier)
-              .sendFriendRequest(user.userId, "I sent you a friend request!");
-      
-        },
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text(
-              "チャットを送信",
-              style: TextStyle(
-                color: ThemeColor.beige,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ); */
-  }
-}
-
-class NotFriendScreen extends ConsumerWidget {
-  const NotFriendScreen({super.key, required this.user});
-  final UserAccount user;
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final imageHeight = themeSize.screenWidth * 0.25;
-    final canvasTheme = CanvasTheme.defaultCanvasTheme();
-
-    return Scaffold(
-      body: SizedBox(
-        width: double.infinity,
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Gap(themeSize.screenHeight * 0.25),
-              Container(
-                padding: EdgeInsets.all(canvasTheme.iconStrokeWidth),
-                decoration: BoxDecoration(
-                  gradient: !canvasTheme.iconHideBorder
-                      ? LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            canvasTheme.iconGradientStartColor,
-                            canvasTheme.iconGradientEndColor,
-                          ],
-                        )
-                      : null,
-                  borderRadius: BorderRadius.circular(
-                    canvasTheme.iconRadius + 12,
-                  ),
-                ),
-                child: Container(
-                  padding: EdgeInsets.all(12 - canvasTheme.iconStrokeWidth),
-                  decoration: BoxDecoration(
-                    color: ThemeColor.background,
-                    borderRadius: BorderRadius.circular(
-                      canvasTheme.iconRadius + 12 - canvasTheme.iconStrokeWidth,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(canvasTheme.iconRadius),
-                    child: SizedBox(
-                      height: imageHeight,
-                      width: imageHeight,
-                      child: CachedNetworkImage(
-                        imageUrl: user.imageUrl!,
-                        fadeInDuration: const Duration(milliseconds: 120),
-                        imageBuilder: (context, imageProvider) => Container(
-                          height: imageHeight,
-                          width: imageHeight,
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                              image: imageProvider,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        placeholder: (context, url) => const SizedBox(),
-                        errorWidget: (context, url, error) => const SizedBox(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const Gap(12),
-              Text(
-                user.username,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-              Text(
-                "${user.createdAt.toDateStr}〜",
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 14,
-                ),
-              ),
-              const Gap(24),
-              _buildButton(ref),
-              const Expanded(child: SizedBox()),
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.white.withOpacity(0.3),
-                  ),
-                  child: SizedBox(
-                    height: 32,
-                    width: 32,
-                    child: Icon(
-                      Icons.close_rounded,
-                      color: Colors.black.withOpacity(0.7),
-                      size: 32,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButton(WidgetRef ref) {
-    final requests =
-        ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];
-    final requesteds =
-        ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
-    if (requesteds.contains(user.userId)) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Material(
-          color: Colors.pink,
-          child: InkWell(
-            splashColor: Colors.black.withOpacity(0.3),
-            highlightColor: Colors.transparent,
-            onTap: () {
-              ref
-                  .read(friendRequestedIdListNotifierProvider.notifier)
-                  .admitFriendRequested(user.userId);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: const Text(
-                "リクエストを承認する",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    if (requests.contains(user.userId)) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Material(
-          color: Colors.cyan,
-          child: InkWell(
-            splashColor: Colors.black.withOpacity(0.3),
-            highlightColor: Colors.transparent,
-            onTap: () {
-              ref
-                  .read(friendRequestIdListNotifierProvider.notifier)
-                  .cancelFriendRequest(user.userId);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: const Text(
-                "リクエスト済み",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Material(
-        color: Colors.pink,
-        child: InkWell(
-          splashColor: Colors.black.withOpacity(0.3),
-          highlightColor: Colors.transparent,
-          onTap: () {
-            ref
-                .read(friendRequestIdListNotifierProvider.notifier)
-                .sendFriendRequest(user);
-            
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            child: const Text(
-              "フレンド申請を送る",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
- */

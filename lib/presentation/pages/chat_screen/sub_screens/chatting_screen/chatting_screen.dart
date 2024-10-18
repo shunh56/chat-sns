@@ -16,6 +16,7 @@ import 'package:app/presentation/providers/notifier/push_notification_notifier.d
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/chats/message_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/usecase/direct_message_usecase.dart';
 import 'package:flutter/material.dart';
@@ -33,19 +34,19 @@ final controllerProvider =
     Provider.autoDispose((ref) => TextEditingController());
 
 class ChattingScreen extends ConsumerWidget {
-  const ChattingScreen({super.key, required this.user});
-  final UserAccount user;
+  const ChattingScreen({super.key, required this.userId});
+  final String userId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
 
     final topPadding = MediaQuery.of(context).viewPadding.top;
-
+    final user = ref.read(allUsersNotifierProvider).asData!.value[userId]!;
     return GestureDetector(
       onTap: () {
         primaryFocus?.unfocus();
-        //FocusManager.instance.primaryFocus?.unfocus();
+
         // ref.read(currentScreenProvider.notifier).state = null;
       },
       onHorizontalDragEnd: (DragEndDetails details) {
@@ -117,7 +118,9 @@ class ChattingScreen extends ConsumerWidget {
                           child: GestureDetector(
                             onTap: () {
                               HapticFeedback.lightImpact();
-                              ref.read(navigationRouterProvider(context)).goToProfile(user);
+                              ref
+                                  .read(navigationRouterProvider(context))
+                                  .goToProfile(user);
                               /*Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -211,7 +214,8 @@ class ChattingScreen extends ConsumerWidget {
   Widget _buildMessages(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final topPadding = MediaQuery.of(context).viewPadding.top;
-    final messageList = ref.watch(messageListNotifierProvider(user.userId));
+    final messageList = ref.watch(messageListNotifierProvider(userId));
+    final user = ref.read(allUsersNotifierProvider).asData!.value[userId]!;
 
     return messageList.when(
       data: (data) {
@@ -274,7 +278,8 @@ class ChattingScreen extends ConsumerWidget {
 
             if (message.senderId != ref.watch(authProvider).currentUser!.uid) {
               if (message is CurrentStatusMessage) {
-                return LeftCurrentStatusMessage(message: message, user: user);
+                return LeftCurrentStatusMessage(
+                    message: message, userId: userId);
               }
               return LeftMessage(message: message, user: user);
             } else {
@@ -322,6 +327,68 @@ class BottomTextField extends HookConsumerWidget {
     final requestedIds =
         ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom + 12;
+
+    if (user.accountStatus == AccountStatus.deleted) {
+      return Container(
+        width: MediaQuery.sizeOf(context).width,
+        padding: EdgeInsets.only(
+          top: 12,
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.of(context).viewPadding.bottom,
+        ),
+        decoration: BoxDecoration(
+          color: ThemeColor.highlight.withOpacity(0.3),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "メッセージができません。",
+              style: TextStyle(
+                color: ThemeColor.text,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            const Gap(12),
+            Text(
+              "このユーザーはアカウントを削除したため、現在このユーザーとチャットをすることはできません。",
+              style: TextStyle(
+                color: ThemeColor.text.withOpacity(0.7),
+                fontSize: 12,
+              ),
+            ),
+            const Gap(16),
+            GestureDetector(
+              onTap: () {
+                ref
+                    .read(dmOverviewListNotifierProvider.notifier)
+                    .leaveChat(user);
+                Navigator.pop(context);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: ThemeColor.highlight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: const Center(
+                  child: Text(
+                    "閉じる",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    }
     if (friendIds.map((item) => item.userId).contains(user.userId)) {
       return Container(
         width: MediaQuery.sizeOf(context).width,

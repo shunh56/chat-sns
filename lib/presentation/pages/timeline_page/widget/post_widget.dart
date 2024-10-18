@@ -13,6 +13,7 @@ import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/sub_pages/post_images_screen.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,13 +34,16 @@ class PostWidget extends ConsumerWidget {
   const PostWidget({
     super.key,
     required this.postRef,
-    required this.user,
+    required this.userId,
   });
   final Post postRef;
-  final UserAccount user;
+  final String userId;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final post = postRef;
+    final user = ref.read(allUsersNotifierProvider).asData!.value[post.userId];
+    if (user == null) return const SizedBox();
+    if (user.accountStatus != AccountStatus.normal) return const SizedBox();
     //final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id]!;
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
@@ -193,7 +197,7 @@ class PostWidget extends ConsumerWidget {
                 ),
               ),
               _buildImages(context, post),
-              _buildPostBottomSection(context, ref, post),
+              _buildPostBottomSection(context, ref, post, user),
               const Gap(8),
             ],
           ),
@@ -303,7 +307,8 @@ class PostWidget extends ConsumerWidget {
     }
   }
 
-  _buildPostBottomSection(BuildContext context, WidgetRef ref, Post post) {
+  _buildPostBottomSection(
+      BuildContext context, WidgetRef ref, Post post, UserAccount user) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Padding(

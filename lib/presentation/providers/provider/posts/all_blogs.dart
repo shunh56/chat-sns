@@ -1,4 +1,4 @@
-// Flutter imports:
+/*// Flutter imports:
 
 // Package imports:
 import 'package:app/domain/entity/posts/blog.dart';
@@ -43,3 +43,4 @@ class AllBlogsNotifier extends StateNotifier<AsyncValue<List<Blog>>> {
     state = AsyncValue.data(posts);
   }
 }
+ */

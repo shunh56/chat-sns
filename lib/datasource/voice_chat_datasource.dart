@@ -45,15 +45,29 @@ class VoiceChatDatasource {
   }
 
   //READ
-
-  Future<QuerySnapshot<Map<String, dynamic>>> fetchFriendsVoiceChats(
+  Future<List<DocumentSnapshot<Map<String, dynamic>>>> fetchFriendsVoiceChats(
       List<String> userIds) async {
     final myId = _auth.currentUser!.uid;
-    return await _firestore
-        .collection(collectionName)
-        .where("joinedUsers", arrayContainsAny: [...userIds, myId])
-        .where("endAt", isGreaterThan: Timestamp.now())
-        .get();
+    final List<String> allUserIds = [...userIds, myId];
+
+    final List<DocumentSnapshot<Map<String, dynamic>>> results = [];
+    // 30個ずつにリストを分割
+    final chunks = <List<String>>[];
+    for (var i = 0; i < allUserIds.length; i += 30) {
+      chunks.add(allUserIds.sublist(
+          i, i + 30 > allUserIds.length ? allUserIds.length : i + 30));
+    }
+    // 各分割されたリストでクエリを実行し、結果を結合
+    for (var chunk in chunks) {
+      final querySnapshot = await _firestore
+          .collection(collectionName)
+          .where("joinedUsers", arrayContainsAny: chunk)
+          .where("endAt", isGreaterThan: Timestamp.now())
+          .get();
+
+      results.addAll(querySnapshot.docs);
+    }
+    return results;
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> fetchVoiceChat(

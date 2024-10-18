@@ -1,3 +1,4 @@
+import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/provider/posts/public_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
@@ -40,7 +41,7 @@ class _PublicPostsThreadState extends ConsumerState<PublicPostsThread>
                   .asData!
                   .value[post.userId]!;
 
-              return PostWidget(postRef: post, user: user);
+              return PostWidget(postRef: post, userId: post.userId);
             },
           ),
         );
@@ -49,7 +50,11 @@ class _PublicPostsThreadState extends ConsumerState<PublicPostsThread>
         return const SizedBox();
       },
       loading: () {
-        return const SizedBox();
+        return const Center(
+          child: CircularProgressIndicator(
+            color: ThemeColor.text,
+          ),
+        );
       },
     );
   }

@@ -7,12 +7,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UserImage {
+  final String id;
   final String imageUrl;
   final Timestamp createdAt;
-  UserImage(this.imageUrl, this.createdAt);
+  UserImage(this.id, this.imageUrl, this.createdAt);
 
   factory UserImage.fromJson(Map<String, dynamic> json) {
     return UserImage(
+      json["id"],
       json["imageUrl"],
       json["createdAt"],
     );
@@ -46,12 +48,14 @@ class UserImagesNotifier extends StateNotifier<AsyncValue<List<UserImage>>> {
 
   addImages(List<String> imageUrls) {
     final list = state.asData?.value ?? [];
-    final adding = imageUrls.map(
-      (imageUrl) => UserImage(
-        imageUrl,
-        Timestamp.now(),
-      ),
-    );
+    final adding = usecase.addImages(imageUrls);
     state = AsyncValue.data([...adding, ...list]);
+  }
+
+  removeImage(UserImage image) {
+    final list = List<UserImage>.from(state.asData?.value ?? []);
+    list.removeWhere((e) => e.id == image.id);
+    state = AsyncValue.data(list);
+    return usecase.removeImage(image);
   }
 }

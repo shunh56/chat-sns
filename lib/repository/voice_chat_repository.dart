@@ -29,7 +29,7 @@ class VoiceChatRepository {
 
   Future<List<VoiceChat>> getFriendsVoiceChats(List<String> userIds) async {
     final res = await _datasource.fetchFriendsVoiceChats(userIds);
-    return res.docs.map((doc) => VoiceChat.fromJson(doc.data())).toList();
+    return res.map((doc) => VoiceChat.fromJson(doc.data()!)).toList();
   }
 
   Future<VoiceChat> getVoiceChat(String id) async {

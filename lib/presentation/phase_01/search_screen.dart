@@ -1,5 +1,9 @@
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/core/shader.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/share_widget.dart';
+import 'package:app/presentation/components/user_icon.dart';
+import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/phase_01/friend_request_screen.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
@@ -67,7 +71,7 @@ class SearchScreen extends ConsumerWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const FriendsFriendsScreen(),
+                          builder: (_) => const userIdsScreen(),
                         ),
                       );
                     },
@@ -132,9 +136,11 @@ class SearchScreen extends ConsumerWidget {
 
   Widget friendRequestedListView(WidgetRef ref) {
     final asyncValue = ref.watch(friendRequestedIdListNotifierProvider);
+    bool subscribed = false;
     return asyncValue.when(
-      data: (requestedIds) {
-        if (requestedIds.isEmpty) {
+      data: (value) {
+        final userIds = List<String>.from(value);
+        if (userIds.isEmpty) {
           return const SizedBox();
         }
         return ListView(
@@ -153,16 +159,36 @@ class SearchScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: requestedIds.length,
-              itemBuilder: (context, index) {
-                final userId = requestedIds[index];
-                final user =
-                    ref.read(allUsersNotifierProvider).asData!.value[userId]!;
-                return UserRequestWidget(user: user);
-              },
+            Gap(12),
+            SizedBox(
+              height: 100 + 8,
+              child: ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                itemCount: userIds.length,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                ),
+                itemBuilder: (context, index) {
+                  final userId = userIds[index];
+                  final user =
+                      ref.read(allUsersNotifierProvider).asData!.value[userId]!;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: GestureDetector(
+                      onTap: () {
+                        ref
+                            .read(navigationRouterProvider(context))
+                            .goToProfile(user);
+                      },
+                      child: UserIcon.tileIcon(
+                        user,
+                        width: 100,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
             const Gap(12),
           ],
@@ -175,19 +201,31 @@ class SearchScreen extends ConsumerWidget {
 
   Widget friendsFriendListView(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
-    final asyncValue = ref.watch(friendsFriendListNotifierProvider);
-    final requesteds =
-        ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
+    final asyncValue = ref.watch(friendIdListNotifierProvider);
     final deletes =
         ref.watch(deletesIdListNotifierProvider).asData?.value ?? [];
-
+    final requesteds =
+        ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
+    final filters = deletes + requesteds;
     return asyncValue.when(
-      data: (list) {
-        //リクエストが来ていないユーザー
-        final users = list
-            .where((user) => (!requesteds.contains(user.userId) &&
-                !deletes.contains(user.userId)))
+      data: (_) {
+        final userIds = ref.read(relationNotifier).getMaybeFriends();
+        final users = ref
+            .read(allUsersNotifierProvider)
+            .asData!
+            .value
+            .values
+            .where((item) => userIds.contains(item.userId))
             .toList();
+        //フレンドリクエストが来ているユーザーは消す
+        users.removeWhere((user) => filters.contains(user.userId));
+        final requests =
+            ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];
+        users.sort((a, b) {
+          if (requests.contains(a.userId)) return -1;
+          if (requests.contains(b.userId)) return 1;
+          return 0;
+        });
         if (users.isEmpty) {
           return Column(
             children: [
@@ -220,7 +258,6 @@ class SearchScreen extends ConsumerWidget {
             users.isEmpty
                 ? const Text("")
                 : ListView.builder(
-                    //padding: EdgeInsets.symmetric(horizontal: 12),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: users.length,

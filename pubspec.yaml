@@ -140,9 +140,11 @@ dependencies:
   flutter_image_compress: ^2.3.0
   device_info_plus: ^10.1.0
   #hive_generator: ^2.0.1
-  package_info_plus: any
+  package_info_plus: ^8.0.2
   flutter_blurhash: ^0.8.2
   blurhash_dart: ^1.2.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
   image: any
   path_provider: any
@@ -168,6 +170,7 @@ dependencies:
   algolia: ^1.1.2
   http: ^0.13.6
   pull_to_refresh: ^2.0.0
+  twitter_login: ^4.4.2
 
 dependency_overrides:
   intl: ^0.17.0
@@ -183,6 +186,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^1.0.0
   build_runner:
+  hive_generator: ^2.0.1
 
 flutter_launcher_icons:
   android: "launcher_icon"

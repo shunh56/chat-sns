@@ -58,6 +58,7 @@ class InviteCode {
       maxCount: 0,
     );
   }
+
   InviteCodeStatus get getStatus {
     InviteCodeStatus temp = InviteCodeStatus.unknownError;
     final myId = FirebaseAuth.instance.currentUser!.uid;

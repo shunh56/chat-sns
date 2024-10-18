@@ -282,3 +282,53 @@ exports.sendMulticast = functions
       );
     }
   });
+
+/*const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+admin.initializeApp();
+
+exports.sendMulticastNotification = functions.https.onCall((data, context) => {
+    const payload = {
+        notification: {
+            title: data.title || "Default Title", // 通知のタイトル
+            body: data.body || "Default Body", // 通知の内容
+            sound: "default", // 通知音の設定
+        },
+        data: {
+            key1: data.key1 || "", // カスタムデータフィールド1
+            key2: data.key2 || "", // カスタムデータフィールド2
+        },
+        android: {
+            priority: "high", // Androidの優先度
+            notification: {
+                clickAction: data.clickAction || "FLUTTER_NOTIFICATION_CLICK", // クリックアクション
+                color: "#FF0000", // 通知の色
+            },
+        },
+        apns: {
+            payload: {
+                aps: {
+                    sound: "default", // iOSの通知音
+                    badge: 1, // iOSのバッジ数
+                },
+            },
+        },
+    };
+
+    const multicastMessage = {
+        tokens: data.tokens, // 複数のデバイストークン
+        ...payload,
+    };
+
+    return admin.messaging().sendEachForMulticast(multicastMessage)
+        .then((response) => {
+            const successCount = response.successCount;
+            const failureCount = response.failureCount;
+            console.log(`Successfully sent ${successCount} messages, ${failureCount} messages failed.`);
+            return { successCount, failureCount };
+        })
+        .catch((error) => {
+            console.log("Error sending message:", error);
+            return { success: false };
+        });
+}); */

@@ -110,7 +110,7 @@ class RightMessage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      message.text ,
+                      message.text,
                       style: const TextStyle(
                         fontSize: 15,
                         color: ThemeColor.white,
@@ -169,13 +169,15 @@ class RightCurrentStatusMessage extends ConsumerWidget {
         ?.value[message.postId];
     late Widget content;
     if (post != null) {
-      content = CurrentStatusPostWidgets(context, ref, post, user).dmWidget();
+      content = CurrentStatusPostWidgets(context, ref, post, user)
+          .dmWidget(user);
     } else {
       final postAsyncValue =
           ref.watch(currentStatusPostProvider(message.postId));
       content = postAsyncValue.maybeWhen(
         data: (post) {
-          return CurrentStatusPostWidgets(context, ref, post, user).dmWidget();
+          return CurrentStatusPostWidgets(context, ref, post, user)
+              .dmWidget(user);
         },
         orElse: () => const SizedBox(),
       );

@@ -1,6 +1,6 @@
+import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/provider/posts/popular_posts.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,6 +13,8 @@ class PopularPostsThread extends ConsumerWidget {
     return postList.when(
       data: (list) {
         return RefreshIndicator(
+          color: ThemeColor.text,
+          backgroundColor: ThemeColor.stroke,
           onRefresh: () async {
             return await ref
                 .read(popularPostsNotiferProvider.notifier)
@@ -25,12 +27,7 @@ class PopularPostsThread extends ConsumerWidget {
             itemCount: list.length,
             itemBuilder: (context, index) {
               final post = list[index];
-              final user = ref
-                  .read(allUsersNotifierProvider)
-                  .asData!
-                  .value[post.userId]!;
-
-              return PostWidget(postRef: post, user: user);
+              return PostWidget(postRef: post, userId: post.userId);
             },
           ),
         );

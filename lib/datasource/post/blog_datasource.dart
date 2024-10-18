@@ -1,3 +1,4 @@
+import 'package:app/core/values.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -22,7 +23,7 @@ class BlogDatasource {
     return await _firestore
         .collection(collectionName)
         .orderBy("createdAt", descending: true)
-        .limit(30)
+        .limit(QUERY_LIMIT)
         .get();
   }
 
@@ -30,7 +31,7 @@ class BlogDatasource {
     return await _firestore
         .collection(collectionName)
         .orderBy("likeCount", descending: true)
-        .limit(30)
+        .limit(QUERY_LIMIT)
         .get();
   }
 

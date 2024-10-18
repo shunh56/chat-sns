@@ -8,6 +8,7 @@ import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/right_message.dart';
 import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -101,10 +102,10 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
   const LeftCurrentStatusMessage({
     super.key,
     required this.message,
-    required this.user,
+    required this.userId,
   });
   final CurrentStatusMessage message;
-  final UserAccount user;
+  final String userId;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return _buildCurrentStatusReply(context, ref);
@@ -115,15 +116,18 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
         .watch(allCurrentStatusPostsNotifierProvider)
         .asData
         ?.value[message.postId];
+    final user = ref.read(allUsersNotifierProvider).asData!.value[userId]!;
     late Widget content;
     if (post != null) {
-      content = CurrentStatusPostWidgets(context, ref, post, user).dmWidget();
+      content =
+          CurrentStatusPostWidgets(context, ref, post, user).dmWidget(user);
     } else {
       final postAsyncValue =
           ref.watch(currentStatusPostProvider(message.postId));
       content = postAsyncValue.maybeWhen(
         data: (post) {
-          return CurrentStatusPostWidgets(context, ref, post, user).dmWidget();
+          return CurrentStatusPostWidgets(context, ref, post, user)
+              .dmWidget(user);
         },
         orElse: () => const SizedBox(),
       );

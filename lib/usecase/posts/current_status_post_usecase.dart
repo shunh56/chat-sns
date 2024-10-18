@@ -25,6 +25,10 @@ class CurrentStatusPostUsecase {
     return await _repository.getUsersPosts(userId);
   }
 
+  Future<List<CurrentStatusPost>> getPostFromUserIds(List<String> userIds) async {
+    return await _repository.getPostFromUserIds(userIds);
+  }
+
   addPost(Map<String, dynamic> before, Map<String, dynamic> after) {
     return _repository.addPost(before, after);
   }

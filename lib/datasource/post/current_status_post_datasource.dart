@@ -1,3 +1,4 @@
+import 'package:app/core/values.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -48,11 +49,11 @@ class CurrentStatusPostDatasource {
     return list;
   }
 
-  Future<List<DocumentSnapshot<Map<String, dynamic>>>> getUsersPosts(
+  Future<QuerySnapshot<Map<String, dynamic>>> getUsersPosts(
       String userId) async {
     final twentyFourHoursAgo =
         Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1)));
-    final q = await _firestore
+    return await _firestore
         .collection("users")
         .doc(userId)
         .collection(collectionName)
@@ -60,17 +61,16 @@ class CurrentStatusPostDatasource {
         .orderBy("createdAt", descending: true)
         .limit(20)
         .get();
+  }
 
-    List<Future<DocumentSnapshot<Map<String, dynamic>>>> futures = [];
-    List<DocumentSnapshot<Map<String, dynamic>>> list = [];
-    for (var doc in q.docs) {
-      futures.add(getPost(doc.id));
-    }
-    await Future.wait(futures);
-    for (var element in futures) {
-      list.add(await element);
-    }
-    return list;
+  Future<QuerySnapshot<Map<String, dynamic>>> getPostFromUserIds(
+      List<String> userIds) async {
+    return await _firestore
+        .collection(collectionName)
+        .where("userId", whereIn: userIds)
+        .orderBy("createdAt", descending: true)
+        .limit(QUERY_LIMIT)
+        .get();
   }
 
   addPost(Map<String, dynamic> before, Map<String, dynamic> after) {

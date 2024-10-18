@@ -32,7 +32,7 @@ class BlockDatasource {
         .get();
   }
 
-  Stream<QuerySnapshot> streamBlockedsDocument() {
+  Stream<QuerySnapshot> streamBlockeds() {
     return _firestore
         .collection("users")
         .doc(_auth.currentUser!.uid)

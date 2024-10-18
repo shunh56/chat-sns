@@ -3,7 +3,6 @@ import 'package:app/presentation/providers/provider/firebase/firebase_firestore.
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
 
 final imageDatasourceProvider = Provider(
   (ref) => ImageDatasource(
@@ -18,20 +17,18 @@ class ImageDatasource {
 
   ImageDatasource(this._auth, this._firestore);
 
-  addImage(String imageUrl, {String type = "default"}) {
-    final id = const Uuid().v4();
+  addImage(Map<String, dynamic> json) {
     _firestore
         .collection("users")
         .doc(_auth.currentUser!.uid)
         .collection("images")
-        .doc(id)
-        .set({
-      "imageUrl": imageUrl,
-      "createdAt": Timestamp.now(),
-    });
+        .doc(json["id"])
+        .set(json);
+    return json;
   }
 
- Future<QuerySnapshot<Map<String,dynamic>>> getImages({String? userId}) async{
+  Future<QuerySnapshot<Map<String, dynamic>>> getImages(
+      {String? userId}) async {
     userId ?? _auth.currentUser!.uid;
     return await _firestore
         .collection("users")
@@ -40,5 +37,14 @@ class ImageDatasource {
         .orderBy("createdAt", descending: true)
         .limit(10)
         .get();
+  }
+
+  void removeImage(String id) {
+    _firestore
+        .collection("users")
+        .doc(_auth.currentUser!.uid)
+        .collection("images")
+        .doc(id)
+        .delete();
   }
 }

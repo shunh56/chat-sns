@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:twitter_login/twitter_login.dart';
 
 final authNotifierProvider = Provider(
   (ref) => AuthNotifier(
@@ -50,34 +51,33 @@ class AuthNotifier {
   }
 
   Future<String> signInWithGoogle() async {
-    //debugPrint('signInWithGoogle()');
     _ref.read(loginProcessProvider.notifier).state = true;
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn(
         scopes: ['profile', 'email'],
       ).signIn();
-
       if (googleUser == null) {
+        DebugPrint("canceled");
+        _ref.read(loginProcessProvider.notifier).state = false;
         return "provider_error";
       }
-
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
-
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       final UserCredential user = await _auth.signInWithCredential(credential);
-
       if (user.user != null) {
         await Future.delayed(const Duration(seconds: 2));
         return "success";
       } else {
+        _ref.read(loginProcessProvider.notifier).state = false;
         return "unknown_error";
       }
     } catch (e) {
+      _ref.read(loginProcessProvider.notifier).state = false;
       DebugPrint("auth error : $e");
       showErrorSnackbar(error: e);
       return "unknown_error";
@@ -85,7 +85,6 @@ class AuthNotifier {
   }
 
   Future<String> signInWithApple() async {
-    //debugPrint('signInWithApple()');
     _ref.read(loginProcessProvider.notifier).state = true;
     try {
       final AuthorizationCredentialAppleID appleCredential =
@@ -95,7 +94,6 @@ class AuthNotifier {
           AppleIDAuthorizationScopes.fullName,
         ],
       );
-    
 
       final OAuthCredential credential = OAuthProvider('apple.com').credential(
         idToken: appleCredential.identityToken,
@@ -115,11 +113,82 @@ class AuthNotifier {
         await Future.delayed(const Duration(seconds: 2));
         return "success";
       } else {
-        showMessage("エラーが発生しました。");
-        return "user credential not found";
+        _ref.read(loginProcessProvider.notifier).state = false;
+        return "unknown_error";
+      }
+    } on SignInWithAppleAuthorizationException catch (e) {
+      _ref.read(loginProcessProvider.notifier).state = false;
+      DebugPrint("Apple Auth Error : $e");
+      return "apple_error";
+    } catch (e) {
+      _ref.read(loginProcessProvider.notifier).state = false;
+      DebugPrint("error : $e");
+      showErrorSnackbar(error: e);
+      return "unknown_error";
+    }
+  }
+
+  Future<String> signInWithTwitter() async {
+    _ref.read(loginProcessProvider.notifier).state = true;
+    try {
+      final twitterLogin = TwitterLogin(
+        apiKey: 'DaYfVx0PIBQNkx0eoPkAy7Djy',
+        apiSecretKey: '7OUt0Q5MdT2VRGhsYTVLHmG9ojZ5haXMtWa58SJo0EZbkonR9j',
+        redirectURI: 'twitterauth://',
+        //redirectURI: 'https://chat-sns-project.firebaseapp.com/__/auth/handler',
+
+        // apiKey: 'ZkxJOFkwNUFzZmhXWk5XRGh3eHQ6MTpjaQ', //clientId,
+        // apiSecretKey:
+        //     '_nv4dTVcHm7sVjP_Nr4MTaMpTza_nE_yc0jJ80FnItPl7YbSDW', //clientSecret
+
+        //apiKey: 'XULhWK4he0GOCeUChOSzJVD3a',
+        //apiSecretKey: '3bQmRlnJB7tOFhezeCbTbcI0bNRUzhRc7EC8PmXVbf9aHQYBZN',
+
+        // apiKey: '1104908866695782401-2JjKlWTG8TF9ECGLJtl65Gx8f9DWxI',
+        // apiSecretKey: '2fsYTLpUGzadkKGYRJgHRWwMeOdmmImcEKSSYkBA54DNv',
+      );
+
+      final authResult = await twitterLogin.login();
+
+      if (authResult.status == TwitterLoginStatus.loggedIn) {
+        final accessToken = authResult.authToken;
+        final secret = authResult.authTokenSecret;
+        DebugPrint("accesstoken : $accessToken");
+        DebugPrint("secret : $secret");
+        if (accessToken == null || secret == null) {
+          print("Token or secret is null");
+          return "token_error";
+        }
+
+        final credential = TwitterAuthProvider.credential(
+          accessToken: accessToken,
+          secret: secret,
+        );
+
+        final userCredential =
+            await FirebaseAuth.instance.signInWithCredential(credential);
+
+        if (userCredential.user != null) {
+          return "success";
+        } else {
+          return "unknown_error";
+        }
+      } else if (authResult.status == TwitterLoginStatus.cancelledByUser) {
+        _ref.read(loginProcessProvider.notifier).state = false;
+        print("User cancelled the login process");
+        return "cancelled_by_user";
+      } else if (authResult.status == TwitterLoginStatus.error) {
+        _ref.read(loginProcessProvider.notifier).state = false;
+        print("Error message: ${authResult.errorMessage}");
+        return "error: ${authResult.errorMessage}";
+      } else {
+        _ref.read(loginProcessProvider.notifier).state = false;
+        print("Unknown error occurred during login");
+        return "unknown_error";
       }
     } catch (e) {
-      showMessage("エラーが発生しました。");
+      _ref.read(loginProcessProvider.notifier).state = false;
+      print("Twitter login error: $e");
       return "unknown_error";
     }
   }
@@ -155,84 +224,4 @@ class AuthNotifier {
       return "unknown_error";
     }
   }
-
-  /* Future<String> signInWithGoogle() async {
-    _ref.read(loginProcessProvider.notifier).state = true;
-    try {
-      UserCredential? user = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
-      if (user.user != null) {
-        await Future.delayed(const Duration(seconds: 2));
-        return "success";
-      } else {
-        return "unknown_error";
-      }
-    } catch (e) {
-      //DebugPrint("auth error : $e");
-      showErrorSnackbar(error: e);
-      return "unknown_error";
-    }
-  }
-
-  Future<String> signUpWithGoogle() async {
-    _ref.read(signupProcessProvider.notifier).state = true;
-
-    try {
-      UserCredential? user = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      if (user.user != null) {
-        await Future.delayed(const Duration(seconds: 2));
-        return "success";
-      } else {
-        showMessage("エラーが発生しました。");
-        return "unknown_error";
-      }
-    } catch (e) {
-      showMessage("エラーが発生しました。");
-      return "unknown_error";
-    }
-  }
-
-  Future<String> signInWithApple() async {
-    _ref.read(loginProcessProvider.notifier).state = true;
-    try {
-      UserCredential? user = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
-      if (user.user != null) {
-        await Future.delayed(const Duration(seconds: 2));
-        return "success";
-      } else {
-        return "unknown_error";
-      }
-    } catch (e) {
-      //DebugPrint("auth error : $e");
-      showErrorSnackbar(error: e);
-      return "unknown_error";
-    }
-  }
-
-  Future<String> signUpWithApple() async {
-    _ref.read(signupProcessProvider.notifier).state = true;
-
-    try {
-      UserCredential? user = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      if (user.user != null) {
-        await Future.delayed(const Duration(seconds: 2));
-        return "success";
-      } else {
-        showMessage("エラーが発生しました。");
-        return "unknown_error";
-      }
-    } catch (e) {
-      showMessage("エラーが発生しました。");
-      return "unknown_error";
-    }
-  }
-
- */
 }

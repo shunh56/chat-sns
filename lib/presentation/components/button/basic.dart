@@ -4,21 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BasicButton extends ConsumerWidget {
-  const BasicButton(
-      {super.key,
-      required this.text,
-      required this.ontap,
-      this.borderRadius = 12.0});
+  const BasicButton({
+    super.key,
+    required this.text,
+    required this.ontap,
+    this.borderRadius = 12.0,
+    this.enableSkip = false,
+  });
   final String text;
   final VoidCallback? ontap;
   final double borderRadius;
+  final bool enableSkip;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Material(
-      color: ontap == null ? ThemeColor.stroke : Colors.blue,
+      color: enableSkip
+          ? ThemeColor.stroke
+          : ontap == null
+              ? ThemeColor.stroke
+              : Colors.blue,
       borderRadius: BorderRadius.circular(borderRadius),
       child: InkWell(
         onTap: ontap,

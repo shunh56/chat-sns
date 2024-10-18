@@ -5,6 +5,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.dart';
+import 'package:app/presentation/components/bottom_sheets/user_image_bottomsheet.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
@@ -56,11 +57,9 @@ class ProfileScreen extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(myAccountNotifierProvider);
     bool popped = false;
-
     return asyncValue.when(
       data: (me) {
         final canvasTheme = me.canvasTheme;
-
         return Scaffold(
           backgroundColor: canvasTheme.bgColor,
           body: NotificationListener(
@@ -89,15 +88,75 @@ class ProfileScreen extends ConsumerWidget {
                   padding: EdgeInsets.only(
                     left: themeSize.horizontalPadding,
                     right: themeSize.horizontalPadding,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      UserIcon.canvasIcon(me),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.push(
+                                  context,
+                                  PageTransitionMethods.slideUp(
+                                      const QrCodeScreen()),
+                                );
+                              },
+                              child: Icon(
+                                Icons.qr_code_rounded,
+                                color: canvasTheme.profileTextColor,
+                              ),
+                            ),
+                            const Gap(12),
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                ref.read(canvasThemeProvider.notifier).state =
+                                    canvasTheme;
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const EditCanvasThemeScreen(),
+                                  ),
+                                );
+                              },
+                              child: Icon(
+                                Icons.palette_outlined,
+                                color: canvasTheme.profileTextColor,
+                              ),
+                            ),
+                            const Gap(12),
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                ProfileBottomSheet(ref)
+                                    .openBottomSheet(context, me);
+                              },
+                              child: Icon(
+                                Icons.settings_outlined,
+                                color: canvasTheme.profileTextColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: themeSize.horizontalPadding,
+                    right: themeSize.horizontalPadding,
                     bottom: 12,
                   ),
                   child: Row(
                     children: [
-                      UserIcon.tileIcon(
-                        me,
-                        width: 60,
-                      ),
-                      const Gap(8),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,126 +178,77 @@ class ProfileScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          Navigator.push(
-                            context,
-                            PageTransitionMethods.slideUp(const QrCodeScreen()),
-                          );
-                        },
-                        child: Icon(
-                          Icons.qr_code_rounded,
-                          color: canvasTheme.profileTextColor,
-                        ),
-                      ),
-                      const Gap(12),
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          ref.read(canvasThemeProvider.notifier).state =
-                              canvasTheme;
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const EditCanvasThemeScreen(),
+                      if (me.links.isShown)
+                        Row(
+                          children: [
+                            /* if (me.links.line.isShown && me.links.line.path != null)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: GestureDetector(
+                            onTap: () {
+                              launchUrl(Uri.parse(me.links.line.url!));
+                            },
+                            child: SizedBox(
+                              height: 32,
+                              width: 32,
+                              child: Image.asset(
+                                me.links.line.assetString,
+                                color: canvasTheme.profileLinksColor,
+                              ),
                             ),
-                          );
-                        },
-                        child: Icon(
-                          Icons.palette_outlined,
-                          color: canvasTheme.profileTextColor,
+                          ),
+                        ), */
+                            if (me.links.instagram.isShown &&
+                                me.links.instagram.path != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    HapticFeedback.lightImpact();
+                                    launchUrl(
+                                      Uri.parse(
+                                        me.links.instagram.url!,
+                                      ),
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                    //showMessage("${me.links.instagram.url}");
+                                  },
+                                  child: SizedBox(
+                                    height: 26,
+                                    width: 26,
+                                    child: Image.asset(
+                                      me.links.instagram.assetString,
+                                      color: canvasTheme.profileLinksColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (me.links.x.isShown && me.links.x.path != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    launchUrl(
+                                      Uri.parse(me.links.x.url!),
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  },
+                                  child: SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: Image.asset(
+                                      me.links.x.assetString,
+                                      color: canvasTheme.profileLinksColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                      ),
-                      const Gap(12),
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          ProfileBottomSheet(ref).openBottomSheet(context, me);
-                        },
-                        child: Icon(
-                          Icons.settings_outlined,
-                          color: canvasTheme.profileTextColor,
-                        ),
-                      ),
                     ],
                   ),
                 ),
-                if (me.links.isShown)
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: themeSize.horizontalPadding,
-                      right: themeSize.horizontalPadding,
-                      bottom: 12,
-                    ),
-                    child: Row(
-                      children: [
-                        /* if (me.links.line.isShown && me.links.line.path != null)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: GestureDetector(
-                              onTap: () {
-                                launchUrl(Uri.parse(me.links.line.url!));
-                              },
-                              child: SizedBox(
-                                height: 32,
-                                width: 32,
-                                child: Image.asset(
-                                  me.links.line.assetString,
-                                  color: canvasTheme.profileLinksColor,
-                                ),
-                              ),
-                            ),
-                          ), */
-                        if (me.links.instagram.isShown &&
-                            me.links.instagram.path != null)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: GestureDetector(
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                launchUrl(
-                                  Uri.parse(
-                                    me.links.instagram.url!,
-                                  ),
-                                  mode: LaunchMode.externalApplication,
-                                );
-                                //showMessage("${me.links.instagram.url}");
-                              },
-                              child: SizedBox(
-                                height: 26,
-                                width: 26,
-                                child: Image.asset(
-                                  me.links.instagram.assetString,
-                                  color: canvasTheme.profileLinksColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (me.links.x.isShown && me.links.x.path != null)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: GestureDetector(
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                launchUrl(
-                                  Uri.parse(me.links.x.url!),
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              },
-                              child: SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: Image.asset(
-                                  me.links.x.assetString,
-                                  color: canvasTheme.profileLinksColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: themeSize.horizontalPadding,
@@ -838,75 +848,69 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         Expanded(
                           flex: 5,
-                          child: FutureBuilder(
-                            future: ref
-                                .read(allUsersNotifierProvider.notifier)
-                                .getUserAccounts(me.currentStatus.nowWith),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return const SizedBox();
-                              }
-                              final users = snapshot.data!;
-                              return SizedBox(
-                                height: 48,
-                                child: ListView(
-                                  scrollDirection: Axis.horizontal,
-                                  children: users
-                                      .map(
-                                        (user) => Container(
-                                          margin:
-                                              const EdgeInsets.only(right: 8),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            child: Container(
-                                              color: ThemeColor.accent,
-                                              height: 48,
-                                              width: 48,
-                                              child: user.imageUrl != null
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: user.imageUrl!,
-                                                      fadeInDuration:
-                                                          const Duration(
-                                                              milliseconds:
-                                                                  120),
-                                                      imageBuilder: (context,
-                                                              imageProvider) =>
-                                                          Container(
-                                                        height: 48,
-                                                        width: 48,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .transparent,
-                                                          image:
-                                                              DecorationImage(
-                                                            image:
-                                                                imageProvider,
-                                                            fit: BoxFit.cover,
-                                                          ),
+                          child: SizedBox(
+                            height: 48,
+                            child: FutureBuilder(
+                                future: ref
+                                    .read(allUsersNotifierProvider.notifier)
+                                    .getUserAccounts(me.currentStatus.nowWith),
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) {
+                                    return const SizedBox();
+                                  }
+                                  final users = snapshot.data!;
+                                  return ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: users.length,
+                                    itemBuilder: (context, index) {
+                                      final user = users[index];
+                                      return Container(
+                                        margin: const EdgeInsets.only(right: 8),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: Container(
+                                            color: ThemeColor.accent,
+                                            height: 48,
+                                            width: 48,
+                                            child: user.imageUrl != null
+                                                ? CachedNetworkImage(
+                                                    imageUrl: user.imageUrl!,
+                                                    fadeInDuration:
+                                                        const Duration(
+                                                            milliseconds: 120),
+                                                    imageBuilder: (context,
+                                                            imageProvider) =>
+                                                        Container(
+                                                      height: 48,
+                                                      width: 48,
+                                                      decoration: BoxDecoration(
+                                                        color:
+                                                            Colors.transparent,
+                                                        image: DecorationImage(
+                                                          image: imageProvider,
+                                                          fit: BoxFit.cover,
                                                         ),
                                                       ),
-                                                      placeholder:
-                                                          (context, url) =>
-                                                              const SizedBox(),
-                                                      errorWidget: (context,
-                                                              url, error) =>
-                                                          const SizedBox(),
-                                                    )
-                                                  : const Icon(
-                                                      Icons.person_outline,
-                                                      size: 48 * 0.8,
-                                                      color: ThemeColor.stroke,
                                                     ),
-                                            ),
+                                                    placeholder:
+                                                        (context, url) =>
+                                                            const SizedBox(),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            const SizedBox(),
+                                                  )
+                                                : const Icon(
+                                                    Icons.person_outline,
+                                                    size: 48 * 0.8,
+                                                    color: ThemeColor.stroke,
+                                                  ),
                                           ),
                                         ),
-                                      )
-                                      .toList(),
-                                ),
-                              );
-                            },
+                                      );
+                                    },
+                                  );
+                                }),
                           ),
                         )
                       ],
@@ -927,13 +931,13 @@ class ProfileScreen extends ConsumerWidget {
   Widget _buildTopFriends(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount me) {
     final themeSize = ref.watch(themeSizeProvider(context));
-    final users = ref
-        .watch(allUsersNotifierProvider)
+
+    final users = List<UserAccount>.from(ref
+        .read(allUsersNotifierProvider)
         .asData!
         .value
         .values
-        .where((user) => me.topFriends.contains(user.userId))
-        .toList();
+        .where((user) => me.topFriends.contains(user.userId)));
     final imageWidth = (themeSize.screenWidth -
                 2 * themeSize.horizontalPadding -
                 canvasTheme.boxWidth * 2 -
@@ -1100,16 +1104,19 @@ class ProfileScreen extends ConsumerWidget {
                         .toList();
 
                     final users = ref
-                        .watch(allUsersNotifierProvider)
+                        .read(allUsersNotifierProvider)
                         .asData!
                         .value
                         .values
                         .where((user) => userIds.contains(user.userId))
                         .toList();
+
                     if (users.isEmpty) {
                       return Center(
                         child: Text(
-                          "No Friends",
+                          me.topFriends.isNotEmpty
+                              ? "TOP10に全てのフレンドがいます"
+                              : "フレンドはいません。",
                           style: TextStyle(
                             fontSize: 16,
                             color: canvasTheme.boxSecondaryTextColor,
@@ -1311,13 +1318,14 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
                   /* Icon(
-                    Icons.add_rounded,
-                    color: me.canvasTheme.profileSecondaryTextColor,
+                    Icons.arrow_forward_ios,
+                    color: me.canvasTheme.profileAboutMeColor,
+                    size: 18,
                   ), */
                 ],
               ),
             ),
-            const Gap(4),
+            const Gap(8),
             /* Container(
                 color: Colors.cyan,
                 height: sqrt((imageHeight + 16) * (imageHeight + 16) +
@@ -1377,6 +1385,10 @@ class ProfileScreen extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final userImage = imageUrls[index];
                   return GestureDetector(
+                    onLongPress: () {
+                      HapticFeedback.lightImpact();
+                      UserImageBottomSheet(context).showImageMenu(userImage);
+                    },
                     onTap: () {
                       /*pushPage(
                         context,
@@ -1409,7 +1421,7 @@ class ProfileScreen extends ConsumerWidget {
                     child: Stack(
                       alignment: Alignment.topCenter,
                       children: [
-                        Container(
+                        /*    Container(
                           margin: const EdgeInsets.only(top: 32),
                           height: imageHeight * 1.2,
                           width: imageHeight,
@@ -1433,6 +1445,33 @@ class ProfileScreen extends ConsumerWidget {
                             bottom: 24,
                           ),
                           color: Colors.white,
+                          child: SizedBox(
+                            height: imageHeight * 1.2,
+                            width: imageHeight,
+                            child: CachedImage.profileBoardImage(
+                              userImage.imageUrl,
+                            ),
+                          ),
+                        ),
+                        */
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          padding: const EdgeInsets.only(
+                            top: 8,
+                            left: 8,
+                            right: 8,
+                            bottom: 24,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 2,
+                                offset: const Offset(4, 4),
+                                color: Colors.black.withOpacity(0.5),
+                              )
+                            ],
+                          ),
                           child: SizedBox(
                             height: imageHeight * 1.2,
                             width: imageHeight,

@@ -23,48 +23,6 @@ class VoiceChatSection extends ConsumerWidget {
         return vcAsyncValue.when(
           data: (vcList) {
             if (vcList.isEmpty) return const SizedBox();
-            /*   vcList = [
-              VoiceChat(
-                id: "id_01",
-                createdAt: Timestamp.now(),
-                endAt: Timestamp.now(),
-                title: "title",
-                joinedUsers: [
-                  "vBBBlfPJaOaZKUjQIApcIwucIVB3",
-                ],
-                adminUsers: ["vBBBlfPJaOaZKUjQIApcIwucIVB3"],
-                maxCount: 4,
-              ),
-              VoiceChat(
-                id: "id_02",
-                createdAt: Timestamp.now(),
-                endAt: Timestamp.now(),
-                title: "title",
-                joinedUsers: [
-                  "vBBBlfPJaOaZKUjQIApcIwucIVB3",
-                  "AJNL9L1qGVhlDAmiqFaH7nikSOX2",
-                ],
-                adminUsers: ["vBBBlfPJaOaZKUjQIApcIwucIVB3"],
-                maxCount: 4,
-              ),
-              VoiceChat(
-                id: "id_03",
-                createdAt: Timestamp.now(),
-                endAt: Timestamp.now(),
-                title: "title",
-                joinedUsers: [
-                  "vBBBlfPJaOaZKUjQIApcIwucIVB3",
-                  "AJNL9L1qGVhlDAmiqFaH7nikSOX2",
-                  "Bp9DWVP8PGXEZmcdx5LZrqL5apw2",
-                  "vBBBlfPJaOaZKUjQIApcIwucIVB3",
-                  "AJNL9L1qGVhlDAmiqFaH7nikSOX2",
-                  "Bp9DWVP8PGXEZmcdx5LZrqL5apw2",
-                  "vBBBlfPJaOaZKUjQIApcIwucIVB3",
-                ],
-                adminUsers: ["vBBBlfPJaOaZKUjQIApcIwucIVB3"],
-                maxCount: 4,
-              ),
-            ]; */
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: SizedBox(

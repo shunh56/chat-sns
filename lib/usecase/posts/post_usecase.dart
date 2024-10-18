@@ -31,6 +31,12 @@ class PostUsecase {
     return await _repository.getPopularPosts();
   }
 
+  Future<List<Post>> getPostFromUserIds(List<String> userIds,
+      {bool onlyPublic = false}) async {
+    return await _repository.getPostFromUserIds(userIds,
+        onlyPublic: onlyPublic);
+  }
+
   Future<List<Post>> getPostFromUserId(String userId) async {
     return await _repository.getPostFromUserId(userId);
   }
@@ -51,6 +57,7 @@ class PostUsecase {
             userImagesNotiferProvider(_ref.read(authProvider).currentUser!.uid)
                 .notifier)
         .addImages(imageUrls);
+
     final aspectRatios = uploader.getAspectRatios(state.images);
     return _repository.uploadPost(state, imageUrls, aspectRatios);
   }

@@ -1,9 +1,8 @@
-import 'dart:io';
+/*import 'dart:io';
 
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
-import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/pages/auth/signin_page.dart';
 import 'package:app/presentation/pages/auth/signup_page.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
@@ -54,7 +53,6 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
                           final status = await ref
                               .watch(authNotifierProvider)
                               .signInWithApple();
-                          ref.read(errorTextProvider.notifier).state = status;
                           ref.read(loginProcessProvider.notifier).state = false;
                           if (status == "success") {
                             Navigator.popUntil(
@@ -240,42 +238,9 @@ class SignUpSelectProviderScreen extends ConsumerWidget {
               ],
             ),
           ),
-          AnimatedOpacity(
-            opacity: ref.watch(loginProcessProvider) ? 1 : 0,
-            duration: const Duration(milliseconds: 400),
-            child: Visibility(
-              visible: ref.watch(loginProcessProvider),
-              child: ShaderWidget(
-                child: Container(
-                  width: MediaQuery.sizeOf(context).width,
-                  height: MediaQuery.sizeOf(context).height,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                  ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "サインアップ中",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Gap(12),
-                      CircularProgressIndicator(
-                        strokeWidth: 1.2,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 }
+ */

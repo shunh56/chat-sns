@@ -1,4 +1,3 @@
-
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
@@ -70,26 +69,34 @@ class InviteCodeScreen extends ConsumerWidget {
                     ),
                     Row(
                       children: [
-                        Text(
-                          inviteCode.getStatus == InviteCodeStatus.valid
-                              ? inviteCode.code
-                              : "",
-                          style: textStyle.w600(
-                            fontSize: 16,
+                        Opacity(
+                          opacity:
+                              inviteCode.getStatus == InviteCodeStatus.valid
+                                  ? 1
+                                  : 0.3,
+                          child: Text(
+                            inviteCode.code,
+                            style: textStyle.w600(
+                              fontSize: 16,
+                            ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Clipboard.setData(
-                                ClipboardData(text: inviteCode.code));
-                            showMessage("招待コードをコピーしました");
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(4),
-                            child: Icon(
-                              Icons.copy_rounded,
-                              color: Colors.white,
-                              size: 18,
+                        Visibility(
+                          visible:
+                              inviteCode.getStatus == InviteCodeStatus.valid,
+                          child: GestureDetector(
+                            onTap: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: inviteCode.code));
+                              showMessage("招待コードをコピーしました");
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.copy_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ),
                           ),
                         )
@@ -138,8 +145,8 @@ class InviteCodeScreen extends ConsumerWidget {
                       );
                     case (InviteCodeStatus.overLimit):
                       return Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: ThemeColor.stroke,
                           borderRadius: BorderRadius.circular(12),
@@ -153,8 +160,8 @@ class InviteCodeScreen extends ConsumerWidget {
                       );
                     case (InviteCodeStatus.unknownError):
                       return Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: ThemeColor.error,
                           borderRadius: BorderRadius.circular(12),

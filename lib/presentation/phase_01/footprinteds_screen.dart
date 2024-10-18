@@ -1,4 +1,4 @@
-import 'package:app/core/extenstions/timestamp_extenstion.dart';
+/**import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
@@ -142,7 +142,7 @@ class FootprintedsScreen extends ConsumerWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => ChattingScreen(user: user),
+                                builder: (_) => ChattingScreen(userId: user.userId),
                               ),
                             );
                           },
@@ -214,3 +214,4 @@ class FootprintedsScreen extends ConsumerWidget {
     );
   }
 }
+ */

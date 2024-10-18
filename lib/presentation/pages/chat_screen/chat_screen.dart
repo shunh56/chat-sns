@@ -1,4 +1,5 @@
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
@@ -20,6 +21,7 @@ class ChatScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    DebugPrint("Chat Screen");
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(dmOverviewListNotifierProvider);
@@ -76,7 +78,7 @@ class ChatScreen extends ConsumerWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ChattingScreen(user: user),
+                    builder: (_) => ChattingScreen(userId: user.userId),
                   ),
                 );
               },
@@ -203,7 +205,7 @@ class ChatScreen extends ConsumerWidget {
       data: (friendInfos) {
         final friendIds = friendInfos.map((item) => item.userId).toList();
         List<UserAccount> users = ref
-            .watch(allUsersNotifierProvider)
+            .read(allUsersNotifierProvider)
             .asData!
             .value
             .values

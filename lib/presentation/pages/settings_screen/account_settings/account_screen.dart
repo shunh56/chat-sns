@@ -1,5 +1,6 @@
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/sub/blocks_screen.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/sub/mutes_screen.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
@@ -19,6 +20,7 @@ class AccountScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final ascyncValue = ref.watch(myAccountNotifierProvider);
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
 
     final accountInfo = ascyncValue.when(
       data: (me) {
@@ -186,13 +188,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 child: InkWell(
                   onTap: () async {
-                    HapticFeedback.lightImpact();
-                    await ref
-                        .read(myAccountNotifierProvider.notifier)
-                        .onClosed();
-                    Navigator.popUntil(context, (route) => route.isFirst);
-                    await Future.delayed(const Duration(milliseconds: 30));
-                    ref.watch(authProvider).signOut();
+                    UserBottomModelSheet(context).signoutBottomSheet(me);
                   },
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(8),
@@ -223,7 +219,7 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 child: InkWell(
                   onTap: () {
-                    HapticFeedback.lightImpact();
+                    UserBottomModelSheet(context).deleteAccountBottomSheet(me);
                   },
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(8),

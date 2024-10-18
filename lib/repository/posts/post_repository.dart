@@ -2,6 +2,7 @@ import 'package:app/datasource/post/post_datasource.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/reply.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final postRepositoryProvider = Provider(
@@ -27,6 +28,26 @@ class PostRepository {
   Future<List<Post>> getPopularPosts() async {
     final query = await _datasource.fetchPopularPosts();
     return query.docs.map((e) => Post.fromJson(e.data())).toList();
+  }
+
+  Future<List<Post>> getPostFromUserIds(List<String> userIds,
+      {bool onlyPublic = false}) async {
+    List<QuerySnapshot<Map<String, dynamic>>> allRes = [];
+    // 30個ずつのチャンクに分ける
+    for (int i = 0; i < userIds.length; i += 30) {
+      // リストを30個のチャンクに分割
+      final chunk =
+          userIds.sublist(i, i + 30 > userIds.length ? userIds.length : i + 30);
+      // チャンクに対してFirestoreクエリを実行
+      final res =
+          await _datasource.getPostFromUserIds(chunk, onlyPublic: onlyPublic);
+      // クエリ結果を結合
+      allRes.add(res);
+    }
+
+    return allRes
+        .expand((q) => q.docs.map((e) => Post.fromJson(e.data())).toList())
+        .toList();
   }
 
   Future<List<Post>> getPostFromUserId(String userId) async {

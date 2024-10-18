@@ -11,6 +11,7 @@ import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +33,12 @@ class CurrentStatusPostWidgets {
         .asData!
         .value[postRef.id]!;
     if (post.noNewChange) return const SizedBox();
+    final blocks = ref.watch(blocksListNotifierProvider).asData?.value ?? [];
+    final blockeds =
+        ref.watch(blockedsListNotifierProvider).asData?.value ?? [];
+    final filterUserIds = blocks + blockeds;
+    if (filterUserIds.contains(user.userId)) return const SizedBox();
+    if (user.accountStatus != AccountStatus.normal) return const SizedBox();
 
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
@@ -455,7 +462,7 @@ class CurrentStatusPostWidgets {
                   ],
                 ),
               ),
-              _buildPostBottomSection(context, post),
+              _buildPostBottomSection(context, post, user),
               const Gap(8),
             ],
           ),
@@ -467,6 +474,7 @@ class CurrentStatusPostWidgets {
   _buildPostBottomSection(
     BuildContext context,
     CurrentStatusPost post,
+    UserAccount user,
   ) {
     return Padding(
       padding: const EdgeInsets.only(
@@ -526,7 +534,7 @@ class CurrentStatusPostWidgets {
     );
   }
 
-  Widget dmWidget() {
+  Widget dmWidget(UserAccount user) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final post = ref
         .watch(allCurrentStatusPostsNotifierProvider)
@@ -540,7 +548,7 @@ class CurrentStatusPostWidgets {
             .goToCurrentStatusPost(post, user);
       },
       child: Container(
-        width: themeSize.screenWidth * 0.55,
+        width: themeSize.screenWidth * 0.6,
         padding: const EdgeInsets.only(
           top: 12,
           left: 12,
@@ -630,19 +638,21 @@ class CurrentStatusPostWidgets {
                       ),
                     ),
                     const Gap(8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
-                      ),
-                      child: Text(
-                        post.after.doing,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: ThemeColor.background,
-                          fontWeight: FontWeight.w400,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                        ),
+                        child: Text(
+                          post.after.doing,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: ThemeColor.background,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
                     ),
@@ -664,19 +674,21 @@ class CurrentStatusPostWidgets {
                       ),
                     ),
                     const Gap(8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
-                      ),
-                      child: Text(
-                        post.after.eating,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: ThemeColor.background,
-                          fontWeight: FontWeight.w400,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                        ),
+                        child: Text(
+                          post.after.eating,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: ThemeColor.background,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
                     ),
@@ -698,19 +710,21 @@ class CurrentStatusPostWidgets {
                       ),
                     ),
                     const Gap(8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
-                      ),
-                      child: Text(
-                        post.after.mood,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: ThemeColor.background,
-                          fontWeight: FontWeight.w400,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                        ),
+                        child: Text(
+                          post.after.mood,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: ThemeColor.background,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
                     ),
@@ -732,19 +746,21 @@ class CurrentStatusPostWidgets {
                       ),
                     ),
                     const Gap(8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
-                      ),
-                      child: Text(
-                        post.after.nowAt,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: ThemeColor.background,
-                          fontWeight: FontWeight.w400,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                        ),
+                        child: Text(
+                          post.after.nowAt,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: ThemeColor.background,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
                     ),

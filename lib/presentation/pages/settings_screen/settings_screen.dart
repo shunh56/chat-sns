@@ -1,4 +1,5 @@
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/pages/profile_page/invite_code_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/account_screen.dart';
@@ -11,7 +12,6 @@ import 'package:app/presentation/pages/settings_screen/privacy_settings/contents
 import 'package:app/presentation/pages/settings_screen/privacy_settings/friend_requests_screen.dart';
 import 'package:app/presentation/pages/settings_screen/privacy_settings/private_mode_screen.dart';
 import 'package:app/presentation/phase_01/friend_requesteds_screen.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -201,11 +201,7 @@ class SettingsScreen extends ConsumerWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: () async {
-                HapticFeedback.lightImpact();
-                await ref.read(myAccountNotifierProvider.notifier).onClosed();
-                Navigator.popUntil(context, (route) => route.isFirst);
-                await Future.delayed(const Duration(milliseconds: 30));
-                ref.watch(authProvider).signOut();
+                UserBottomModelSheet(context).signoutBottomSheet(me);
               },
               child: _tileContent(Icons.logout_rounded, "サインアウト",
                   showArrow: false),

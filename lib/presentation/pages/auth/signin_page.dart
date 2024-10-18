@@ -1,4 +1,5 @@
 import 'package:app/core/debugParams/tester_accounts.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/pages/auth/signup_page.dart';
@@ -18,6 +19,8 @@ class SignInPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: GestureDetector(
@@ -29,185 +32,166 @@ class SignInPage extends ConsumerWidget {
           children: [
             Padding(
               padding: EdgeInsets.only(
-                top: MediaQuery.of(context).viewPadding.top + 40 + 120,
-                left: 24,
-                right: 24,
+                top: themeSize.screenHeight * 0.25,
+                left: themeSize.horizontalPadding,
+                right: themeSize.horizontalPadding,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     "ログイン",
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                          color: ThemeColor.headline,
-                        ),
+                    style: textStyle.w600(fontSize: 24),
                   ),
                   const Gap(24),
-                  Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          color: ThemeColor.stroke,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      color: ThemeColor.stroke,
+                    ),
+                    child: TextFormField(
+                      cursorColor: ThemeColor.text,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      onChanged: (text) {
+                        ref.read(emailInputTextProvider.notifier).state = text;
+                      },
+                      style: textStyle.w600(
+                        color: ThemeColor.text,
+                        fontSize: 14,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 16,
                         ),
-                        child: TextFormField(
-                          cursorColor: ThemeColor.highlight,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          onChanged: (text) {
-                            ref.read(emailInputTextProvider.notifier).state =
-                                text;
-                          },
-                          style: const TextStyle(
-                            color: ThemeColor.text,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            focusedErrorBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 16,
+                        hintStyle: textStyle.w400(
+                          color: ThemeColor.subText,
+                          fontSize: 14,
+                        ),
+                        hintText: "email",
+                      ),
+                    ),
+                  ),
+                  //email
+                  SizedBox(
+                    height: 48,
+                    child: ref.watch(errorTextProvider).length > 5 &&
+                            ref.watch(errorTextProvider).substring(0, 5) ==
+                                "email"
+                        ? Text(
+                            "不正なメールアドレスです。",
+                            style: textStyle.w600(color: ThemeColor.error),
+                          )
+                        : const SizedBox(),
+                  ),
+                  //password
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      color: ThemeColor.stroke,
+                    ),
+                    child: TextFormField(
+                      cursorColor: ThemeColor.text,
+                      onChanged: (text) {
+                        ref.read(passwordInputTextProvider.notifier).state =
+                            text;
+                      },
+                      obscureText: !ref.watch(passwordVisibleProvider),
+                      style: textStyle.w600(
+                        color: ThemeColor.text,
+                        fontSize: 14,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        hintStyle: textStyle.w400(
+                          color: ThemeColor.subText,
+                          fontSize: 14,
+                        ),
+                        hintText: "password",
+                        suffixIcon: Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: GestureDetector(
+                            onTap: () {
+                              ref.read(passwordVisibleProvider.notifier).state =
+                                  !ref.read(passwordVisibleProvider);
+                            },
+                            child: Icon(
+                              ref.watch(passwordVisibleProvider)
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: ThemeColor.subText,
                             ),
-                            hintStyle: TextStyle(
-                              color: ThemeColor.highlight,
-                              fontWeight: FontWeight.w400,
-                              fontSize: 14,
-                            ),
-                            hintText: "email",
                           ),
                         ),
                       ),
-                      //email
-                      ref.watch(errorTextProvider).length > 5 &&
-                              ref.watch(errorTextProvider).substring(0, 5) ==
-                                  "email"
-                          ? Text(
-                              "不正なメールアドレスです。",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall!
-                                  .copyWith(color: ThemeColor.error),
-                            )
-                          : const SizedBox(),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      //password
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          color: ThemeColor.stroke,
-                        ),
-                        child: TextFormField(
-                          cursorColor: ThemeColor.highlight,
-                          onChanged: (text) {
-                            ref.read(passwordInputTextProvider.notifier).state =
-                                text;
-                          },
-                          obscureText: !ref.watch(passwordVisibleProvider),
-                          style: const TextStyle(
-                            color: ThemeColor.text,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            focusedErrorBorder: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 16,
-                            ),
-                            hintStyle: const TextStyle(
-                              color: ThemeColor.highlight,
-                              fontWeight: FontWeight.w400,
-                              fontSize: 14,
-                            ),
-                            hintText: "password",
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.only(right: 4),
-                              child: GestureDetector(
-                                onTap: () {
-                                  // Update the state i.e. toogle the state of passwordVisible variable
+                    ),
+                  ),
+                  SizedBox(
+                    height: 24,
+                    child: ref.watch(errorTextProvider).length > 8 &&
+                            ref.watch(errorTextProvider).substring(0, 8) ==
+                                "password"
+                        ? Text(
+                            "パスワードが短すぎます",
+                            style: textStyle.w600(color: ThemeColor.error),
+                          )
+                        : const SizedBox(),
+                  ),
 
-                                  ref
-                                          .read(passwordVisibleProvider.notifier)
-                                          .state =
-                                      !ref.read(passwordVisibleProvider);
-                                },
-                                child: Icon(
-                                  // Based on passwordVisible state choose the icon
-                                  ref.watch(passwordVisibleProvider)
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: ThemeColor.icon,
-                                ),
+                  SizedBox(
+                    height: 24,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          "パスワードを忘れた方は",
+                          style:
+                              Theme.of(context).textTheme.labelSmall!.copyWith(
+                                    color: ThemeColor.highlight,
+                                  ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            /*Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ForgotPassword(),
+                                settings:
+                                    const RouteSettings(name: "forgot_password"),
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      ref.watch(errorTextProvider).length > 8 &&
-                              ref.watch(errorTextProvider).substring(0, 8) ==
-                                  "password"
-                          ? Text(
-                              "パスワードが短すぎます",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall!
-                                  .copyWith(color: ThemeColor.error),
-                            )
-                          : const SizedBox(),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 12,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        "パスワードを忘れた方は",
-                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                            ); */
+                          },
+                          child: const Text(
+                            "こちら",
+                            style: TextStyle(
                               color: ThemeColor.highlight,
+                              fontSize: 12,
+                              decoration: TextDecoration.underline,
+                              decorationColor: ThemeColor.text,
+                              decorationThickness: 1,
                             ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          /*Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ForgotPassword(),
-                              settings:
-                                  const RouteSettings(name: "forgot_password"),
-                            ),
-                          ); */
-                        },
-                        child: const Text(
-                          "こちら",
-                          style: TextStyle(
-                            color: ThemeColor.highlight,
-                            fontSize: 12,
-                            decoration: TextDecoration.underline,
-                            decorationColor: ThemeColor.text,
-                            decorationThickness: 1,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(
-                    height: 30,
-                  ),
+                  const Gap(32),
                   Material(
                     color: ThemeColor.highlight,
                     borderRadius: BorderRadius.circular(12),
@@ -243,9 +227,7 @@ class SignInPage extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    height: 32,
-                  ),
+                  const Gap(24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -279,10 +261,12 @@ class SignInPage extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  const Gap(12),
                   true
                       ? Expanded(
                           child: ListView.builder(
                             itemCount: testerAccount.length,
+                            padding: EdgeInsets.zero,
                             itemBuilder: (context, index) {
                               return ListTile(
                                 onTap: () async {

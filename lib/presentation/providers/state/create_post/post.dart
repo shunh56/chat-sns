@@ -58,4 +58,4 @@ final postStateProvider = Provider.autoDispose(
   },
 );
 
-final isPublicProvider = StateProvider((ref) => false);
+final isPublicProvider = StateProvider.autoDispose((ref) => false);

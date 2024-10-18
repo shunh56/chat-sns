@@ -8,6 +8,7 @@ import 'package:app/presentation/pages/sub_pages/user_profile_page/user_profile_
 import 'package:app/presentation/pages/timeline_page/current_status_post_screen.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_screen.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,8 +25,11 @@ class NavigationRouter {
   final BuildContext context;
   NavigationRouter(this.ref, this.context);
 
-  goToProfile(UserAccount user, {bool replace = false}) {
+  goToProfile(UserAccount user, {bool replace = false}) async {
     final myId = ref.watch(authProvider).currentUser!.uid;
+    await ref
+        .read(allUsersNotifierProvider.notifier)
+        .updateUserAccount(user.userId);
     if (user.userId == myId) {
       Navigator.push(
         context,
@@ -35,15 +39,11 @@ class NavigationRouter {
       );
     } else {
       if (replace) {
-        Navigator.pushReplacement(
-          context,
-          PageTransitionMethods.slideUp(UserProfileScreen(user: user)),
-        );
+        Navigator.pushReplacement(context,
+            PageTransitionMethods.slideUp(UserProfileScreen(user: user)));
       } else {
-        Navigator.push(
-          context,
-          PageTransitionMethods.slideUp(UserProfileScreen(user: user)),
-        );
+        Navigator.push(context,
+            PageTransitionMethods.slideUp(UserProfileScreen(user: user)));
       }
     }
   }
@@ -52,7 +52,7 @@ class NavigationRouter {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ChattingScreen(user: user),
+        builder: (_) => ChattingScreen(userId: user.userId),
       ),
     );
   }

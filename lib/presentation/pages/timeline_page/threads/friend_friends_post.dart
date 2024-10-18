@@ -1,3 +1,4 @@
+import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/share_widget.dart';
 import 'package:app/presentation/pages/timeline_page/widget/friend_friends_post_widget.dart';
 import 'package:app/presentation/providers/provider/posts/friends_posts.dart';
@@ -33,6 +34,8 @@ class _FriendFriendsPostsThreadState
           );
         }
         return RefreshIndicator(
+          color: ThemeColor.text,
+          backgroundColor: ThemeColor.stroke,
           onRefresh: () async {
             return await ref
                 .read(friendFriendsPostsNotiferProvider.notifier)
@@ -57,7 +60,11 @@ class _FriendFriendsPostsThreadState
         return const SizedBox();
       },
       loading: () {
-        return const SizedBox();
+        return const Center(
+          child: CircularProgressIndicator(
+            color: ThemeColor.text,
+          ),
+        );
       },
     );
   }
