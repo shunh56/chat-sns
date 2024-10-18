@@ -404,7 +404,7 @@ class MyApp extends ConsumerWidget {
           ),
           systemOverlayStyle: const SystemUiOverlayStyle(
             //android
-            statusBarColor: ThemeColor.background,
+            statusBarColor: Colors.transparent, // ThemeColor.background,
             statusBarIconBrightness: Brightness.dark, // => black text
             //ios
             statusBarBrightness: Brightness.light, // black text

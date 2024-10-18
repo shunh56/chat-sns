@@ -15,6 +15,21 @@
         android:name="${applicationName}"
         android:launchMode="singleInstance"
         android:icon="@mipmap/launcher_icon">
+
+
+       
+
+     <!-- prod? -->
+	 <!-- <string>ca-app-pub-4197827097509562~9429453488</string>  -->
+	<!-- test -->
+
+
+    <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~1458002511"/>
+
+
+
        <!--  <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.com.shekarmudaliyar.social_share"

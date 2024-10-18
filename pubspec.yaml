@@ -1,6 +1,4 @@
 name: app
-#ios => com.nomiboo.prod
-#android => com.nomiboo.app
 description: A new Flutter project.
 publish_to: "none" 
 

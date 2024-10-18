@@ -101,7 +101,8 @@ Android :
 Namespace not specified
 => https://minpro.net/namespace-not-specified
 
-
+Your project requires a newer version of the Kotlin Gradle plugin.                
+=> https://arc.net/l/quote/sgwrbpwf
 
 
 
