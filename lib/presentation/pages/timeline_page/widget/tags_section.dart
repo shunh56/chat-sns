@@ -13,7 +13,7 @@ class TagSelector extends ConsumerWidget {
     return TabBar(
       isScrollable: true,
       onTap: (val) {
-        HapticFeedback.lightImpact();
+        
       },
       indicator: UnderlineTabIndicator(
         borderSide: const BorderSide(

@@ -15,6 +15,11 @@ class PostRepository {
   final PostDatasource _datasource;
   PostRepository(this._datasource);
 
+  Future<Post> getPost(String postId) async {
+    final res = await _datasource.getPost(postId);
+    return Post.fromJson(res.data()!);
+  }
+
   Future<List<Post>> getPosts() async {
     final query = await _datasource.getPosts();
     return query.docs.map((e) => Post.fromJson(e.data())).toList();

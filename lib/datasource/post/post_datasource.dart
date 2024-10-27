@@ -19,6 +19,11 @@ class PostDatasource {
   PostDatasource(this._auth, this._firestore);
   final collectionName = "posts";
 
+  Future<DocumentSnapshot<Map<String, dynamic>>> getPost(
+      String postId) async {
+    return await _firestore.collection(collectionName).doc(postId).get();
+  }
+
   Future<QuerySnapshot<Map<String, dynamic>>> getPosts() async {
     return await _firestore
         .collection(collectionName)
@@ -81,6 +86,7 @@ class PostDatasource {
         .doc(postId)
         .collection("replies")
         .orderBy("createdAt", descending: true)
+        .limit(QUERY_LIMIT)
         .snapshots();
   }
 

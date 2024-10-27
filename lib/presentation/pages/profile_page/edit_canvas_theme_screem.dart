@@ -161,7 +161,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(
+                                ProfileBottomSheet(context).openColorSheet(
                                     context, canvasTheme, "bgColor");
                               },
                               child: RainbowRing(color: canvasTheme.bgColor),
@@ -185,7 +185,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(
+                                ProfileBottomSheet(context).openColorSheet(
                                     context, canvasTheme, "profileTextColor");
                               },
                               child: RainbowRing(
@@ -210,8 +210,10 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(context,
-                                    canvasTheme, "profileSecondaryTextColor");
+                                ProfileBottomSheet(context).openColorSheet(
+                                    context,
+                                    canvasTheme,
+                                    "profileSecondaryTextColor");
                               },
                               child: RainbowRing(
                                   color: canvasTheme.profileSecondaryTextColor),
@@ -235,7 +237,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(
+                                ProfileBottomSheet(context).openColorSheet(
                                     context, canvasTheme, "profileLinksColor");
                               },
                               child: RainbowRing(
@@ -261,8 +263,10 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(context,
-                                    canvasTheme, "profileAboutMeColor");
+                                ProfileBottomSheet(context).openColorSheet(
+                                    context,
+                                    canvasTheme,
+                                    "profileAboutMeColor");
                               },
                               child: RainbowRing(
                                 color: canvasTheme.profileAboutMeColor,
@@ -346,7 +350,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(
+                                ProfileBottomSheet(context).openColorSheet(
                                     context, canvasTheme, "boxBgColor");
                               },
                               child: RainbowRing(color: canvasTheme.boxBgColor),
@@ -370,7 +374,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(
+                                ProfileBottomSheet(context).openColorSheet(
                                     context, canvasTheme, "boxTextColor");
                               },
                               child:
@@ -395,8 +399,10 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(context,
-                                    canvasTheme, "boxSecondaryTextColor");
+                                ProfileBottomSheet(context).openColorSheet(
+                                    context,
+                                    canvasTheme,
+                                    "boxSecondaryTextColor");
                               },
                               child: RainbowRing(
                                   color: canvasTheme.boxSecondaryTextColor),
@@ -545,7 +551,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                     ),
                     child: Column(
                       children: [
-                        UserIcon.canvasIcon(me, canvasTheme: canvasTheme),
+                          UserIconCanvasIcon(user:me, theme: canvasTheme),
                         const Gap(8),
                         Text(
                           !canvasTheme.iconHideLevel ? "LEVEL 1" : "",
@@ -581,8 +587,10 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(context,
-                                    canvasTheme, "iconGradientStartColor");
+                                ProfileBottomSheet(context).openColorSheet(
+                                    context,
+                                    canvasTheme,
+                                    "iconGradientStartColor");
                               },
                               child: RainbowRing(
                                   color: canvasTheme.iconGradientStartColor),
@@ -606,8 +614,10 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                ProfileBottomSheet(ref).openColorSheet(context,
-                                    canvasTheme, "iconGradientEndColor");
+                                ProfileBottomSheet(context).openColorSheet(
+                                    context,
+                                    canvasTheme,
+                                    "iconGradientEndColor");
                               },
                               child: RainbowRing(
                                 color: canvasTheme.iconGradientEndColor,

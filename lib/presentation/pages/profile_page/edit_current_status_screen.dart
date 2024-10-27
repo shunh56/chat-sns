@@ -1,3 +1,4 @@
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/pages/profile_page/edit_now_with_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_tags_screen.dart';
@@ -16,6 +17,7 @@ class EditCurrentStatusScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
 
     final notifier = ref.read(myAccountNotifierProvider.notifier);
     // final canvasTheme = ref.read(canvasThemeProvider);
@@ -41,14 +43,14 @@ class EditCurrentStatusScreen extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.only(top: 36, bottom: 120),
             children: [
-              const Text(
+              /* const Text(
                 "タグ",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                 ),
               ),
-              const Gap(6),
+              const Gap(6), 
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -83,7 +85,6 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                   const Gap(6),
                   GestureDetector(
                     onTap: () {
-                      HapticFeedback.lightImpact();
                       ref.read(selectedtagsStateProvider.notifier).state =
                           currentStatus.tags;
                       Navigator.push(
@@ -111,24 +112,20 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              const Gap(24),
-
+              const Gap(16),
+*/
               //doing
-              const Text(
+              Text(
                 "なにしてる？",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: textStyle.w600(fontSize: 16),
               ),
               const Gap(6),
               TextFormField(
                 initialValue: currentStatus.doing,
                 keyboardType: TextInputType.multiline,
                 maxLength: 20,
-                style: const TextStyle(
+                style: textStyle.w600(
                   fontSize: 16,
-                  color: ThemeColor.text,
                 ),
                 onChanged: (value) {
                   currentStatusNotifier.state =
@@ -143,10 +140,9 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  hintStyle: const TextStyle(
-                    fontSize: 16,
-                    color: ThemeColor.beige,
-                    fontWeight: FontWeight.w400,
+                  hintStyle: textStyle.w400(
+                    color: ThemeColor.subText,
+                    fontSize: 14,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 12,
@@ -154,24 +150,20 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const Gap(24),
+              const Gap(16),
 
               //eating
-              const Text(
+              Text(
                 "なに食べてる？",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: textStyle.w600(fontSize: 16),
               ),
               const Gap(6),
               TextFormField(
                 initialValue: currentStatus.eating,
                 keyboardType: TextInputType.multiline,
                 maxLength: 20,
-                style: const TextStyle(
+                style: textStyle.w600(
                   fontSize: 16,
-                  color: ThemeColor.text,
                 ),
                 onChanged: (value) {
                   currentStatusNotifier.state =
@@ -186,10 +178,9 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  hintStyle: const TextStyle(
-                    fontSize: 16,
-                    color: ThemeColor.beige,
-                    fontWeight: FontWeight.w400,
+                  hintStyle: textStyle.w400(
+                    color: ThemeColor.subText,
+                    fontSize: 14,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 12,
@@ -197,23 +188,19 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const Gap(24),
+              const Gap(16),
               //mood
-              const Text(
+              Text(
                 "今の気分は？",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: textStyle.w600(fontSize: 16),
               ),
               const Gap(6),
               TextFormField(
                 initialValue: currentStatus.mood,
                 keyboardType: TextInputType.multiline,
                 maxLength: 20,
-                style: const TextStyle(
+                style: textStyle.w600(
                   fontSize: 16,
-                  color: ThemeColor.text,
                 ),
                 onChanged: (value) {
                   currentStatusNotifier.state =
@@ -228,10 +215,9 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  hintStyle: const TextStyle(
-                    fontSize: 16,
-                    color: ThemeColor.beige,
-                    fontWeight: FontWeight.w400,
+                  hintStyle: textStyle.w400(
+                    color: ThemeColor.subText,
+                    fontSize: 14,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 12,
@@ -239,23 +225,19 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const Gap(24),
+              const Gap(16),
               //nowAt
-              const Text(
+              Text(
                 "どこにいる？",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: textStyle.w600(fontSize: 16),
               ),
               const Gap(6),
               TextFormField(
                 initialValue: currentStatus.nowAt,
                 keyboardType: TextInputType.multiline,
                 maxLength: 20,
-                style: const TextStyle(
+                style: textStyle.w600(
                   fontSize: 16,
-                  color: ThemeColor.text,
                 ),
                 onChanged: (value) {
                   currentStatusNotifier.state =
@@ -270,10 +252,9 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  hintStyle: const TextStyle(
-                    fontSize: 16,
-                    color: ThemeColor.beige,
-                    fontWeight: FontWeight.w400,
+                  hintStyle: textStyle.w400(
+                    color: ThemeColor.subText,
+                    fontSize: 14,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 12,
@@ -281,24 +262,20 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const Gap(24),
+              const Gap(16),
 
               //nextAt
-              const Text(
+              Text(
                 "どこに行く？",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: textStyle.w600(fontSize: 16),
               ),
               const Gap(6),
               TextFormField(
                 initialValue: currentStatus.nextAt,
                 keyboardType: TextInputType.multiline,
                 maxLength: 20,
-                style: const TextStyle(
+                style: textStyle.w600(
                   fontSize: 16,
-                  color: ThemeColor.text,
                 ),
                 onChanged: (value) {
                   currentStatusNotifier.state =
@@ -313,10 +290,9 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  hintStyle: const TextStyle(
-                    fontSize: 16,
-                    color: ThemeColor.beige,
-                    fontWeight: FontWeight.w400,
+                  hintStyle: textStyle.w400(
+                    color: ThemeColor.subText,
+                    fontSize: 14,
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 12,
@@ -324,15 +300,12 @@ class EditCurrentStatusScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const Gap(24),
+              const Gap(16),
 
               //nowWith
-              const Text(
+              Text(
                 "誰といる？",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: textStyle.w600(fontSize: 16),
               ),
               const Gap(8),
               nowWithUsers.isEmpty

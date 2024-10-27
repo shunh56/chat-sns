@@ -27,7 +27,7 @@ class PostContentMenu extends ConsumerWidget {
         children: [
           GestureDetector(
             onTap: () async {
-              HapticFeedback.lightImpact();
+              
 
               bool isGranted = await PhotoPermissionsHandler().isGranted;
               if (!isGranted) {
@@ -61,7 +61,7 @@ class PostContentMenu extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 2),
             child: GestureDetector(
               onTap: () async {
-                HapticFeedback.lightImpact();
+                
 
                 bool isGranted = await CameraPermissionsHandler().isGranted;
                 if (!isGranted) {

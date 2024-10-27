@@ -93,14 +93,13 @@ class ProfileScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      UserIcon.canvasIcon(me),
+                      UserIconCanvasIcon(user: me),
                       Padding(
                         padding: const EdgeInsets.only(top: 12),
                         child: Row(
                           children: [
                             GestureDetector(
                               onTap: () {
-                                HapticFeedback.lightImpact();
                                 Navigator.push(
                                   context,
                                   PageTransitionMethods.slideUp(
@@ -115,7 +114,6 @@ class ProfileScreen extends ConsumerWidget {
                             const Gap(12),
                             GestureDetector(
                               onTap: () {
-                                HapticFeedback.lightImpact();
                                 ref.read(canvasThemeProvider.notifier).state =
                                     canvasTheme;
                                 Navigator.push(
@@ -134,9 +132,7 @@ class ProfileScreen extends ConsumerWidget {
                             const Gap(12),
                             GestureDetector(
                               onTap: () {
-                                HapticFeedback.lightImpact();
-                                ProfileBottomSheet(ref)
-                                    .openBottomSheet(context, me);
+                                ProfileBottomSheet(context).openBottomSheet(me);
                               },
                               child: Icon(
                                 Icons.settings_outlined,
@@ -204,7 +200,6 @@ class ProfileScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.only(left: 12),
                                 child: GestureDetector(
                                   onTap: () async {
-                                    HapticFeedback.lightImpact();
                                     launchUrl(
                                       Uri.parse(
                                         me.links.instagram.url!,
@@ -228,7 +223,6 @@ class ProfileScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.only(left: 12),
                                 child: GestureDetector(
                                   onTap: () {
-                                    HapticFeedback.lightImpact();
                                     launchUrl(
                                       Uri.parse(me.links.x.url!),
                                       mode: LaunchMode.externalApplication,
@@ -262,7 +256,7 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const Gap(24),
-                _buildImages(context, ref, me),
+                //_buildImages(context, ref, me),
                 _buildCurrentStatus(context, ref, canvasTheme, me),
                 _buildTopFriends(context, ref, canvasTheme, me),
                 _buildFriends(context, ref, canvasTheme, me),
@@ -931,13 +925,8 @@ class ProfileScreen extends ConsumerWidget {
   Widget _buildTopFriends(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount me) {
     final themeSize = ref.watch(themeSizeProvider(context));
-
-    final users = List<UserAccount>.from(ref
-        .read(allUsersNotifierProvider)
-        .asData!
-        .value
-        .values
-        .where((user) => me.topFriends.contains(user.userId)));
+    final map = ref.read(allUsersNotifierProvider).asData!.value;
+    final users = me.topFriends.map((userId) => map[userId]!).toList();
     final imageWidth = (themeSize.screenWidth -
                 2 * themeSize.horizontalPadding -
                 canvasTheme.boxWidth * 2 -
@@ -988,7 +977,6 @@ class ProfileScreen extends ConsumerWidget {
                           .map(
                             (user) => GestureDetector(
                               onTap: () {
-                                HapticFeedback.lightImpact();
                                 ref
                                     .read(navigationRouterProvider(context))
                                     .goToProfile(user);
@@ -1141,9 +1129,10 @@ class ProfileScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            child: UserIcon.circleIcon(
-                              users[i],
-                              radius: imageRadius,
+                            child: UserIcon(
+                              user: users[i],
+                              width: imageRadius * 2,
+                              isCircle: true,
                             ),
                           ),
                         ),
@@ -1196,7 +1185,6 @@ class ProfileScreen extends ConsumerWidget {
               ],
             ),
             () {
-              HapticFeedback.lightImpact();
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -1386,7 +1374,6 @@ class ProfileScreen extends ConsumerWidget {
                   final userImage = imageUrls[index];
                   return GestureDetector(
                     onLongPress: () {
-                      HapticFeedback.lightImpact();
                       UserImageBottomSheet(context).showImageMenu(userImage);
                     },
                     onTap: () {
@@ -1770,7 +1757,6 @@ class ProfileScreen extends ConsumerWidget {
             visible: isEditable,
             child: GestureDetector(
               onTap: () {
-                HapticFeedback.lightImpact();
                 onPressed();
               },
               child: Container(

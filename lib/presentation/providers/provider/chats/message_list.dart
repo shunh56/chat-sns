@@ -4,6 +4,7 @@ import 'package:app/datasource/direct_message_datasource.dart';
 import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/message_overview.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/repository/direct_message_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -40,9 +41,19 @@ class MessageListNotifier extends StateNotifier<AsyncValue<List<CoreMessage>>> {
         _ref.watch(authProvider).currentUser!.uid, userId);
     final list = await _repository.getMessages(id);
     cache = list;
+    final currentStatusPosts = List<CurrentStatusMessage>.from(
+        list.where((e) => e is CurrentStatusMessage));
+    await _ref
+        .read(allCurrentStatusPostsNotifierProvider.notifier)
+        .getPosts(currentStatusPosts.map((e) => e.postId).toList());
     state = AsyncValue.data(cache);
     final stream = _repository.streamMessages(id);
-    _subscription = stream.listen((event) {
+    _subscription = stream.listen((event) async {
+      final currentStatusPosts = List<CurrentStatusMessage>.from(
+          list.where((e) => e is CurrentStatusMessage));
+      await _ref
+          .read(allCurrentStatusPostsNotifierProvider.notifier)
+          .getPosts(currentStatusPosts.map((e) => e.postId).toList());
       if (mounted) {
         if (event.isNotEmpty) {
           if (cache.isEmpty) {

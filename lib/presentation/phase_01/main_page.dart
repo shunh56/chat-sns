@@ -9,11 +9,13 @@ import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/chat_screen/chat_screen.dart';
+import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/phase_01/search_screen.dart';
+import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -23,6 +25,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+
+final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
 class Phase01MainPage extends ConsumerStatefulWidget {
   const Phase01MainPage({
@@ -99,15 +103,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      ref
-                          .read(navigationRouterProvider(context))
-                          .goToProfile(user);
-                    },
-                    child: UserIcon.tileIcon(user),
-                  ),
+                  UserIcon(user: user),
                   Text(
                     user.name,
                     style: textStyle.w600(fontSize: 14),
@@ -133,7 +129,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
 
   // VoIP応答時の処理
   void _setupVoIPListener() {
-    const platform = MethodChannel('com.shunh.exampleApp/voip');
+    const platform = MethodChannel('com.blank.sns/voip');
     platform.setMethodCallHandler(
       (MethodCall call) async {
         if (call.method == "onVoIPReceived") {
@@ -162,7 +158,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
                       Gap(12),
                       GestureDetector(
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          
                           final id = args['extra']['id'] ?? "";
                           final uuid = args['uuid'];
                           if (id.isEmpty) {
@@ -223,57 +219,12 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
         _previousFriends = friendInfos;
       });
     });
-    /* 
- checkFriendsCurrentStatusPosts() {
-      final asyncValue = ref.watch(friendsCurrentStatusPostsNotiferProvider);
-      asyncValue.when(
-        data: (posts) async {
-          await Future.delayed(const Duration(milliseconds: 30));
-          if (showed) return;
-          showed = true;
-          if (posts.isNotEmpty) {
-            showModalBottomSheet(
-              // ignore: use_build_context_synchronously
-              context: context,
-              isScrollControlled: true,
-              useRootNavigator: true,
-              backgroundColor: Colors.transparent,
-              barrierColor: Colors.transparent,
-              isDismissible: true,
-              builder: (context) {
-                return SizedBox(
-                  height: 432,
-                  child: PageView.builder(
-                    controller: PageController(viewportFraction: 0.95),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: posts.length,
-                    itemBuilder: (context, index) {
-                      final post = posts[index];
-                      final user = ref
-                          .read(allUsersNotifierProvider)
-                          .asData!
-                          .value[post.userId]!;
-
-                      return CurrentStatusPostWidgets(context, ref, post, user)
-                          .bottomSheet();
-                    },
-                  ),
-                );
-              },
-            );
-          }
-        },
-        error: (e, s) => {},
-        loading: () => {},
-      );
-    }
-    checkFriendsCurrentStatusPosts();
-    */
 
     final fab = FloatingActionButton(
       shape: const StadiumBorder(),
       onPressed: () {
         final me = ref.read(myAccountNotifierProvider).asData?.value;
+
         if (me != null) {
           navToEditCurrentStatus(context, ref, me);
         }
@@ -290,8 +241,151 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
       ),
     );
 
+    final dmAsyncValue = ref.watch(dmOverviewListNotifierProvider);
     return Scaffold(
       extendBody: true,
+      key: scaffoldKey,
+      drawer: Drawer(
+        width: 80,
+        clipBehavior: Clip.none,
+        backgroundColor: ThemeColor.accent,
+        child: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              /*   Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: GestureDetector(
+                    onTap: () {
+                      
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ChatScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(strokeWidth),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            canvasTheme.iconGradientStartColor,
+                            canvasTheme.iconGradientEndColor,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          radius + padding + strokeWidth,
+                        ),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(8 - strokeWidth),
+                        decoration: BoxDecoration(
+                          color: ThemeColor.background,
+                          borderRadius: BorderRadius.circular(
+                            radius + padding,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(radius),
+                          child: Container(
+                            height: imageHeight,
+                            width: imageHeight,
+                            color: Colors.white.withOpacity(0.1),
+                            child: Center(
+                              child: SvgPicture.asset(
+                                "assets/images/icons/chat.svg",
+                                height: imageHeight * 2 / 3,
+                                width: imageHeight * 2 / 3,
+                                color: ThemeColor.icon,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+             */
+              dmAsyncValue.when(
+                data: (list) {
+                  if (list.isEmpty) {
+                    return const SizedBox();
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    itemCount: list.length,
+                    itemBuilder: (context, index) {
+                      final overview = list[index];
+                      final user = ref
+                          .read(allUsersNotifierProvider)
+                          .asData!
+                          .value[overview.userId]!;
+
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ChattingScreen(userId: user.userId),
+                            ),
+                          );
+                        },
+                        splashColor: ThemeColor.accent,
+                        highlightColor: ThemeColor.white.withOpacity(0.1),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: GestureDetector(
+                              onTap: () {
+                                ref
+                                    .read(navigationRouterProvider(context))
+                                    .goToChat(user);
+                              },
+                              onLongPress: () {
+                                ref
+                                    .read(navigationRouterProvider(context))
+                                    .goToProfile(user);
+                              },
+                              child: Stack(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: UserIcon(user: user),
+                                  ),
+                                  if (overview.isNotSeen)
+                                    const Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: CircleAvatar(
+                                        radius: 6,
+                                        backgroundColor: Colors.cyan,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                error: (e, s) => const SizedBox(),
+                loading: () => const SizedBox(),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: IndexedStack(
         index: ref.watch(bottomNavIndexProvider),
         children: const [
@@ -300,7 +394,6 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
           Scaffold(),
           SearchScreen(),
           ProfileScreen(),
-
           //ThreadsScreen(),
           // PlaygroundScreen(),
           //PovScreen(),
@@ -328,32 +421,6 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
       ),
     );
   }
-
-  /* _buildFriendsCurrentStatusPosts(WidgetRef ref) {
-    final asyncValue = ref.watch(friendsCurrentStatusPostsNotiferProvider);
-    return asyncValue.when(
-      data: (posts) async {
-        await Future.delayed(const Duration(milliseconds: 30));
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          builder: (context) {
-            return Container(
-              height: 240,
-              color: Colors.black,
-            );
-          },
-        );
-        return Container(
-          height: 240,
-          color: Colors.black,
-        );
-      },
-      error: (e, s) => const SizedBox(),
-      loading: () => const SizedBox(),
-    );
-  } */
 }
 
 class BottomBar extends ConsumerWidget {
@@ -368,7 +435,6 @@ class BottomBar extends ConsumerWidget {
       showSelectedLabels: false,
       showUnselectedLabels: false,
       onTap: (value) {
-        HapticFeedback.lightImpact();
         if (value == 2) {
           PostBottomModelSheet(context).openPostMenu();
         }

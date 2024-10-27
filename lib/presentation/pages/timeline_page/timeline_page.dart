@@ -5,15 +5,12 @@ import 'package:app/core/values.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/subscription_bottomsheet.dart';
 import 'package:app/presentation/components/core/sticky_tabbar.dart';
-import 'package:app/presentation/components/user_icon.dart';
-import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
-import 'package:app/presentation/pages/timeline_page/threads/friend_friends_post.dart';
+import 'package:app/presentation/pages/activies_screen/activities_screen.dart';
+import 'package:app/presentation/pages/new_screen.dart';
 import 'package:app/presentation/pages/timeline_page/threads/friends_posts.dart';
 import 'package:app/presentation/pages/timeline_page/threads/public_posts.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
-import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/phase_01/main_page.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
@@ -21,14 +18,19 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+final visibleProvider = StateProvider((ref) => false);
+final angleProvider = StateProvider((ref) => 0.0);
+final sizeProvider = StateProvider((ref) => 50.0);
+final xPosProvider = StateProvider((ref) => 0.0);
+final yPosProvider = StateProvider((ref) => 0.0);
+final color01Provider = StateProvider<Color>((ref) => Colors.pink);
+final color02Provider = StateProvider<Color>((ref) => Colors.pink);
 
 class TimelinePage extends ConsumerWidget {
   const TimelinePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    DebugPrint("Timeline Screen");
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(myAccountNotifierProvider);
@@ -36,7 +38,7 @@ class TimelinePage extends ConsumerWidget {
     /*   final chatIcon = GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        HapticFeedback.lightImpact();
+        
         _scaffoldKey.currentState?.openDrawer();
       },
       child: Container(
@@ -88,7 +90,6 @@ class TimelinePage extends ConsumerWidget {
         final subscription = user.subscriptionStatus;
         return GestureDetector(
           onTap: () {
-            HapticFeedback.lightImpact();
             SubsctiptionBottomSheet(context).openBottomSheet();
           },
           child: Container(
@@ -118,158 +119,13 @@ class TimelinePage extends ConsumerWidget {
       error: (e, s) => const SizedBox(),
       loading: () => const SizedBox(),
     );
-    final isHeartVisible = ref.watch(isHeartVisibleProvider);
-    final dmAsyncValue = ref.watch(dmOverviewListNotifierProvider);
 
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: Drawer(
-        width: 80,
-        clipBehavior: Clip.none,
-        backgroundColor: ThemeColor.background,
-        child: SafeArea(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              /*   Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ChatScreen(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(strokeWidth),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            canvasTheme.iconGradientStartColor,
-                            canvasTheme.iconGradientEndColor,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(
-                          radius + padding + strokeWidth,
-                        ),
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets.all(8 - strokeWidth),
-                        decoration: BoxDecoration(
-                          color: ThemeColor.background,
-                          borderRadius: BorderRadius.circular(
-                            radius + padding,
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(radius),
-                          child: Container(
-                            height: imageHeight,
-                            width: imageHeight,
-                            color: Colors.white.withOpacity(0.1),
-                            child: Center(
-                              child: SvgPicture.asset(
-                                "assets/images/icons/chat.svg",
-                                height: imageHeight * 2 / 3,
-                                width: imageHeight * 2 / 3,
-                                color: ThemeColor.icon,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-             */
-              dmAsyncValue.when(
-                data: (list) {
-                  if (list.isEmpty) {
-                    return const SizedBox();
-                  }
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemCount: list.length,
-                    itemBuilder: (context, index) {
-                      final overview = list[index];
-                      final user = ref
-                          .read(allUsersNotifierProvider)
-                          .asData!
-                          .value[overview.userId]!;
-
-                      return InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ChattingScreen(userId: user.userId),
-                            ),
-                          );
-                        },
-                        splashColor: ThemeColor.accent,
-                        highlightColor: ThemeColor.white.withOpacity(0.1),
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: GestureDetector(
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                ref
-                                    .read(navigationRouterProvider(context))
-                                    .goToChat(user);
-                              },
-                              onLongPress: () {
-                                HapticFeedback.lightImpact();
-                                ref
-                                    .read(navigationRouterProvider(context))
-                                    .goToProfile(user);
-                              },
-                              child: Stack(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: UserIcon.tileIcon(user, width: 40),
-                                  ),
-                                  if (overview.isNotSeen)
-                                    const Positioned(
-                                      top: 4,
-                                      right: 4,
-                                      child: CircleAvatar(
-                                        radius: 6,
-                                        backgroundColor: Colors.cyan,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-                error: (e, s) => const SizedBox(),
-                loading: () => const SizedBox(),
-              ),
-            ],
-          ),
-        ),
-      ),
       body: SafeArea(
         child: Stack(
           children: [
             DefaultTabController(
-              length: 3,
+              length: 2,
               child: Scaffold(
                 body: NestedScrollView(
                   controller: ref.watch(timelineScrollController),
@@ -288,16 +144,40 @@ class TimelinePage extends ConsumerWidget {
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      _scaffoldKey.currentState?.openDrawer();
+                                      scaffoldKey.currentState?.openDrawer();
+                                    },
+                                    onDoubleTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => NewScreen(),
+                                        ),
+                                      );
                                     },
                                     child: Text(
-                                     appName,
+                                      appName,
                                       style: textStyle.appbarText(),
                                     ),
                                   ),
                                   const Expanded(child: SizedBox()),
                                   subscriptionLogo,
+                                  Gap(12),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => ActivitiesScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: Icon(
+                                      Icons.notifications_outlined,
+                                      color: ThemeColor.icon,
+                                    ),
+                                  ),
                                   /*
+
                                   GestureDetector(
                                     onTap: () {
                                       Navigator.push(
@@ -327,9 +207,7 @@ class TimelinePage extends ConsumerWidget {
                         delegate: StickyTabBarDelegete(
                           TabBar(
                             isScrollable: true,
-                            onTap: (val) {
-                              HapticFeedback.lightImpact();
-                            },
+                            onTap: (val) {},
                             padding: EdgeInsets.symmetric(
                                 horizontal: themeSize.horizontalPadding - 4),
                             indicator: BoxDecoration(
@@ -366,12 +244,12 @@ class TimelinePage extends ConsumerWidget {
                                   style: textStyle.tabText(),
                                 ),
                               ),
-                              Tab(
+                              /* Tab(
                                 child: Text(
                                   "知り合いかも",
                                   style: textStyle.tabText(),
                                 ),
-                              ),
+                              ), */
                               Tab(
                                 child: Row(
                                   children: [
@@ -396,36 +274,63 @@ class TimelinePage extends ConsumerWidget {
                   body: const TabBarView(
                     children: [
                       FriendsPostsThread(),
-                      FriendFriendsPostsThread(),
                       PublicPostsThread(),
+                      //FriendFriendsPostsThread(),
                     ],
                   ),
                 ),
               ),
             ),
             //heart animation
-            AnimatedPositioned(
-              duration: isHeartVisible
-                  ? const Duration(milliseconds: 400)
-                  : Duration.zero,
-              curve: Curves.easeInOutQuint,
-              left: ref.watch(xPosProvider),
-              top: ref.watch(yPosProvider),
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 400),
-                opacity: isHeartVisible ? 1.0 : 0.0,
-                child: AnimatedRotation(
-                  turns: ref.watch(angleProvider),
-                  duration: const Duration(milliseconds: 600),
-                  child: Icon(
-                    Icons.favorite,
-                    color: Colors.red,
-                    size: ref.watch(heartSizeProvider),
-                  ),
-                ),
-              ),
-            ),
+            const HeartAnimationArea(),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class HeartAnimationArea extends ConsumerWidget {
+  const HeartAnimationArea({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    DebugPrint("HEART ANIMATION");
+    final visible = ref.watch(visibleProvider);
+    final angle = ref.watch(angleProvider);
+    final size = ref.watch(sizeProvider);
+    final color_01 = ref.watch(color01Provider);
+    final color_02 = ref.watch(color02Provider);
+    //
+    return AnimatedPositioned(
+      duration: visible ? const Duration(milliseconds: 400) : Duration.zero,
+      curve: Curves.easeInOutQuint,
+      left: ref.watch(xPosProvider),
+      top: ref.watch(yPosProvider),
+      child: AnimatedOpacity(
+        duration: visible ? const Duration(milliseconds: 400) : Duration.zero,
+        opacity: visible ? 1.0 : 0.0,
+        child: AnimatedRotation(
+          turns: angle,
+          curve: Curves.easeOut,
+          duration: visible ? const Duration(milliseconds: 200) : Duration.zero,
+          child: ShaderMask(
+            shaderCallback: (Rect bounds) {
+              return LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  color_01,
+                  color_02,
+                ],
+              ).createShader(bounds);
+            },
+            child: Icon(
+              size: size,
+              Icons.favorite,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
     );

@@ -37,7 +37,7 @@ class PostBottomModelSheet {
           return Container(
             padding: EdgeInsets.only(
               top: 12,
-              bottom: MediaQuery.of(context).viewPadding.bottom + 12,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 36,
               left: 12,
               right: 12,
             ),
@@ -103,11 +103,12 @@ class PostBottomModelSheet {
                   behavior: HitTestBehavior.opaque,
                   onTap: () async {
                     Navigator.pop(context);
-                    //openVoiceChatMenu();
+                    openVoiceChatMenu();
                     showUpcomingSnackbar();
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -156,53 +157,7 @@ class PostBottomModelSheet {
                     ),
                   ),
                 ),
-                /*
-                  GestureDetector(
-                  behavior:HitTestBehavior.opaque,
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        PageTransitionMethods.slideUp(
-                          const CreateBlogScreen(),
-                        ),
-                      );
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.post_add_rounded,
-                                color: ThemeColor.icon,
-                              ),
-                              Gap(12),
-                              Text(
-                                "ブログ",
-                                style: TextStyle(
-                                  color: ThemeColor.text,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Gap(4),
-                          Text(
-                            "全ユーザーに公開される投稿形式。タイトルと文章を含み、詳細な内容や考えをまとめて公開することができます。",
-                            style: TextStyle(
-                              color: ThemeColor.text,
-                              fontSize: 10,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-              */
+                //blog?
               ],
             ),
           );
@@ -223,11 +178,13 @@ class PostBottomModelSheet {
       builder: (context) {
         return Consumer(
           builder: (context, ref, child) {
+            final themeSize = ref.watch(themeSizeProvider(context));
+            final textStyle = ThemeTextStyle(themeSize: themeSize);
             final controller = ref.watch(controllerProvider);
             return Container(
               padding: EdgeInsets.only(
                 top: 12,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 36,
                 left: 12,
                 right: 12,
               ),
@@ -244,11 +201,9 @@ class PostBottomModelSheet {
                     ),
                   ),
                   const Gap(24),
-                  const Text(
+                  Text(
                     "ボイスルームを作成",
-                    style: TextStyle(
-                      color: ThemeColor.text,
-                      fontWeight: FontWeight.w600,
+                    style: textStyle.w600(
                       fontSize: 14,
                     ),
                   ),
@@ -258,9 +213,8 @@ class PostBottomModelSheet {
                     keyboardType: TextInputType.multiline,
                     maxLines: 1,
                     maxLength: 20,
-                    style: const TextStyle(
+                    style: textStyle.w600(
                       fontSize: 14,
-                      color: ThemeColor.text,
                     ),
                     onChanged: (value) {
                       ref.read(inputTextProvider.notifier).state = value;
@@ -269,15 +223,14 @@ class PostBottomModelSheet {
                       hintText: "タイトル",
                       filled: true,
                       isDense: true,
-                      fillColor: ThemeColor.accent,
+                      fillColor: ThemeColor.stroke,
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      hintStyle: const TextStyle(
+                      hintStyle: textStyle.w400(
                         fontSize: 14,
-                        color: ThemeColor.beige,
-                        fontWeight: FontWeight.w400,
+                        color: ThemeColor.subText,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 12,
@@ -295,7 +248,6 @@ class PostBottomModelSheet {
                               behavior: HitTestBehavior.opaque,
                               onTap: () async {
                                 String text = ref.read(inputTextProvider);
-
                                 controller.clear();
                                 ref.read(inputTextProvider.notifier).state = "";
                                 final vc = await ref
@@ -315,11 +267,10 @@ class PostBottomModelSheet {
                                   borderRadius: BorderRadius.circular(100),
                                   color: Colors.pink,
                                 ),
-                                child: const Text(
+                                child: Text(
                                   "作成する",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                  style: textStyle.w600(
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
@@ -332,11 +283,10 @@ class PostBottomModelSheet {
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(100),
                                     color: ThemeColor.accent),
-                                child: const Text(
+                                child: Text(
                                   "作成する",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                  style: textStyle.w600(
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
@@ -356,7 +306,7 @@ class PostBottomModelSheet {
   final controllerProvider =
       Provider.autoDispose((ref) => TextEditingController());
 
-  openReplies(Post post) {
+  openReplies(UserAccount user, Post post) {
     showModalBottomSheet(
       isScrollControlled: true,
       backgroundColor: ThemeColor.background,
@@ -368,18 +318,19 @@ class PostBottomModelSheet {
         return Consumer(
           builder: (context, ref, child) {
             final themeSize = ref.watch(themeSizeProvider(context));
+            final textStyle = ThemeTextStyle(themeSize: themeSize);
             final controller = ref.watch(controllerProvider);
             final asyncValue = ref.watch(postRepliesNotifierProvider(post.id));
 
             final listView = asyncValue.when(
               data: (list) {
                 if (list.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Text(
                       "コメントはありません",
-                      style: TextStyle(
+                      style: textStyle.w600(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: ThemeColor.subText,
                       ),
                     ),
                   );
@@ -404,7 +355,7 @@ class PostBottomModelSheet {
               width: themeSize.screenWidth,
               padding: EdgeInsets.only(
                 top: 12,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 36,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -419,11 +370,9 @@ class PostBottomModelSheet {
                     ),
                   ),
                   const Gap(12),
-                  const Text(
+                  Text(
                     "コメント",
-                    style: TextStyle(
-                      color: ThemeColor.text,
-                      fontWeight: FontWeight.w600,
+                    style: textStyle.w600(
                       fontSize: 14,
                     ),
                   ),
@@ -446,9 +395,8 @@ class PostBottomModelSheet {
                             keyboardType: TextInputType.multiline,
                             minLines: 1,
                             maxLines: 6,
-                            style: const TextStyle(
+                            style: textStyle.w600(
                               fontSize: 14,
-                              color: ThemeColor.text,
                             ),
                             onChanged: (value) {
                               ref.read(inputTextProvider.notifier).state =
@@ -458,7 +406,7 @@ class PostBottomModelSheet {
                               if (value.isNotEmpty) {
                                 ref
                                     .read(allPostsNotifierProvider.notifier)
-                                    .addReply(post, value);
+                                    .addReply(user, post, value);
                                 controller.clear();
                                 ref.read(inputTextProvider.notifier).state = "";
                                 primaryFocus?.unfocus();
@@ -468,18 +416,19 @@ class PostBottomModelSheet {
                               hintText: "メッセージを入力",
                               filled: true,
                               isDense: true,
-                              fillColor: ThemeColor.accent,
+                              fillColor: ThemeColor.stroke,
                               border: OutlineInputBorder(
                                 borderSide: BorderSide.none,
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              hintStyle: const TextStyle(
+                              hintStyle: textStyle.w400(
                                 fontSize: 14,
-                                color: ThemeColor.white,
-                                fontWeight: FontWeight.w400,
+                                color: ThemeColor.subText,
                               ),
                               contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 12),
+                                vertical: 12,
+                                horizontal: 12,
+                              ),
                             ),
                           ),
                         ),
@@ -490,7 +439,7 @@ class PostBottomModelSheet {
                                   String text = ref.read(inputTextProvider);
                                   ref
                                       .read(allPostsNotifierProvider.notifier)
-                                      .addReply(post, text);
+                                      .addReply(user, post, text);
 
                                   controller.clear();
                                   ref.read(inputTextProvider.notifier).state =
@@ -518,7 +467,7 @@ class PostBottomModelSheet {
     );
   }
 
-  openPostAction(Post post, UserAccount user) {
+  openPostAction(Post post, UserAccount user, {bool hideComments = false}) {
     showModalBottomSheet(
       isScrollControlled: true,
       backgroundColor: ThemeColor.background,
@@ -536,7 +485,7 @@ class PostBottomModelSheet {
               width: themeSize.screenWidth,
               padding: EdgeInsets.only(
                 top: 12,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 36,
                 left: themeSize.horizontalPadding,
                 right: themeSize.horizontalPadding,
               ),
@@ -593,39 +542,45 @@ class PostBottomModelSheet {
                             ),
                           ),
                         ),
-                        Divider(
-                          height: 0,
-                          thickness: 0.4,
-                          color: Colors.white.withOpacity(0.3),
-                        ),
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            Navigator.pop(context);
-                            openReplies(post);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "コメント",
-                                  style: textStyle.w600(
-                                    fontSize: 14,
+                        if (!hideComments)
+                          Column(
+                            children: [
+                              Divider(
+                                height: 0,
+                                thickness: 0.4,
+                                color: Colors.white.withOpacity(0.3),
+                              ),
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  openReplies(user, post);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "コメント",
+                                        style: textStyle.w600(
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.chat_bubble_outline,
+                                        color: ThemeColor.icon,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const Icon(
-                                  Icons.chat_bubble_outline,
-                                  color: ThemeColor.icon,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                              ),
+                            ],
+                          )
                       ],
                     ),
                   ),
@@ -757,8 +712,6 @@ class PostBottomModelSheet {
         );
       },
     );
- 
- 
   }
 
   openCurrentStatusPostAction(CurrentStatusPost post, UserAccount user) {
@@ -779,7 +732,7 @@ class PostBottomModelSheet {
               width: themeSize.screenWidth,
               padding: EdgeInsets.only(
                 top: 12,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 36,
                 left: themeSize.horizontalPadding,
                 right: themeSize.horizontalPadding,
               ),
@@ -836,41 +789,48 @@ class PostBottomModelSheet {
                             ),
                           ),
                         ),
-                        Divider(
-                          height: 0,
-                          thickness: 0.4,
-                          color: Colors.white.withOpacity(0.3),
-                        ),
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            ref
-                                .read(navigationRouterProvider(context))
-                                .goToCurrentStatusPost(post, user,
-                                    replace: true);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "メッセージを送る",
-                                  style: textStyle.w600(
-                                    fontSize: 14,
+                        if (user.userId !=
+                            ref.watch(authProvider).currentUser!.uid)
+                          Column(
+                            children: [
+                              Divider(
+                                height: 0,
+                                thickness: 0.4,
+                                color: Colors.white.withOpacity(0.3),
+                              ),
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  ref
+                                      .read(navigationRouterProvider(context))
+                                      .goToCurrentStatusPost(post, user,
+                                          replace: true);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "メッセージを送る",
+                                        style: textStyle.w600(
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.chat_bubble_outline,
+                                        color: ThemeColor.icon,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const Icon(
-                                  Icons.chat_bubble_outline,
-                                  color: ThemeColor.icon,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                              ),
+                            ],
+                          )
                       ],
                     ),
                   ),

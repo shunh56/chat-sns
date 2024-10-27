@@ -258,8 +258,6 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
           },
         ),
       );
-   
-   
     } catch (err) {
       debugPrint("initialization error $err");
     }
@@ -361,9 +359,10 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
                                       alignment: Alignment.bottomCenter,
                                       children: [
                                         Center(
-                                          child: UserIcon.circleIcon(
-                                            user,
-                                            radius: 40,
+                                          child: UserIcon(
+                                            user: user,
+                                            width: 80,
+                                            isCircle: true,
                                           ),
                                         ),
                                         Positioned(
@@ -436,9 +435,10 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
                                             alignment: Alignment.bottomCenter,
                                             children: [
                                               Center(
-                                                child: UserIcon.circleIcon(
-                                                  users[i],
-                                                  radius: 32,
+                                                child: UserIcon(
+                                                  user: users[i],
+                                                  width: 64,
+                                                  isCircle: true,
                                                 ),
                                               ),
                                               Positioned(
@@ -505,10 +505,10 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
                                                       Alignment.bottomCenter,
                                                   children: [
                                                     Center(
-                                                      child:
-                                                          UserIcon.circleIcon(
-                                                        users[i + 1],
-                                                        radius: 32,
+                                                      child: UserIcon(
+                                                        user: users[i + 1],
+                                                        width: 64,
+                                                        isCircle: true,
                                                       ),
                                                     ),
                                                     Positioned(

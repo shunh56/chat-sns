@@ -15,6 +15,9 @@ import 'package:gap/gap.dart';
 
 final currentStatusPostProvider = FutureProvider.family(
   (Ref ref, String postId) async {
+    final cache =
+        ref.watch(allCurrentStatusPostsNotifierProvider).asData?.value[postId];
+    if (cache != null) return cache;
     final post =
         await ref.read(currentStatusPostUsecaseProvider).getPost(postId);
     ref.read(allCurrentStatusPostsNotifierProvider.notifier).addPosts([post]);
@@ -164,28 +167,12 @@ class RightCurrentStatusMessage extends ConsumerWidget {
     );
 
     final post = ref
-        .watch(allCurrentStatusPostsNotifierProvider)
-        .asData
-        ?.value[message.postId];
-    late Widget content;
-    if (post != null) {
-      content = CurrentStatusPostWidgets(context, ref, post, user)
-          .dmWidget(user);
-    } else {
-      final postAsyncValue =
-          ref.watch(currentStatusPostProvider(message.postId));
-      content = postAsyncValue.maybeWhen(
-        data: (post) {
-          return CurrentStatusPostWidgets(context, ref, post, user)
-              .dmWidget(user);
-        },
-        orElse: () => const SizedBox(),
-      );
-    }
-
+        .read(allCurrentStatusPostsNotifierProvider)
+        .asData!
+        .value[message.postId]!;
     return Container(
       margin: const EdgeInsets.only(
-        top: 12,
+        top: 24,
         left: 72,
         right: 12,
         bottom: 4,
@@ -200,7 +187,7 @@ class RightCurrentStatusMessage extends ConsumerWidget {
             ),
           ),
           const Gap(4),
-          content,
+          CurrentStatusDmWidget(post: post, user: user),
           const Gap(4),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -265,6 +252,97 @@ class RightCurrentStatusMessage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+
+    final postAsyncValue = ref.watch(currentStatusPostProvider(message.postId));
+
+    return postAsyncValue.maybeWhen(
+      data: (post) {
+        return Container(
+          margin: const EdgeInsets.only(
+            top: 24,
+            left: 72,
+            right: 12,
+            bottom: 4,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const Text(
+                "ステータスに返信しました。",
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+              const Gap(4),
+              CurrentStatusDmWidget(post: post, user: user),
+              const Gap(4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            //seen sign
+
+                            checkIcon,
+                            //time
+
+                            Text(
+                              message.createdAt.xxAgo,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: ThemeColor.text,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(
+                          width: 4,
+                        ),
+                        //message
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 6,
+                              horizontal: 12,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: ThemeColor.highlight,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                topRight: Radius.circular(4),
+                                bottomLeft: Radius.circular(16),
+                                bottomRight: Radius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              message.text,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: ThemeColor.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+      orElse: () => const SizedBox(),
     );
   }
 }

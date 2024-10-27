@@ -79,14 +79,13 @@ class UserProfileScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  UserIcon.canvasIcon(user),
+                  UserIconCanvasIcon(user: user),
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Row(
                       children: [
                         GestureDetector(
                           onTap: () {
-                            HapticFeedback.lightImpact();
                             ref
                                 .read(navigationRouterProvider(context))
                                 .goToChat(user);
@@ -104,7 +103,7 @@ class UserProfileScreen extends ConsumerWidget {
                         const Gap(12),
                         /*GestureDetector(
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        
                       },
                       child: Icon(
                         shareIcon,
@@ -113,9 +112,7 @@ class UserProfileScreen extends ConsumerWidget {
                     ),
                     const Gap(12), */
                         FocusedMenuHolder(
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                          },
+                          onPressed: () {},
                           menuWidth: 120,
                           blurSize: 0,
                           animateMenuItems: false,
@@ -130,7 +127,6 @@ class UserProfileScreen extends ConsumerWidget {
                                 "フレンド解除",
                               ),
                               onPressed: () {
-                                HapticFeedback.lightImpact();
                                 UserBottomModelSheet(context)
                                     .quitFriendBottomSheet(user);
                               },
@@ -141,7 +137,6 @@ class UserProfileScreen extends ConsumerWidget {
                                 "報告",
                               ),
                               onPressed: () {
-                                HapticFeedback.lightImpact();
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -156,7 +151,6 @@ class UserProfileScreen extends ConsumerWidget {
                                 "ブロック",
                               ),
                               onPressed: () {
-                                HapticFeedback.lightImpact();
                                 UserBottomModelSheet(context)
                                     .blockUserBottomSheet(user);
                               },
@@ -228,7 +222,6 @@ class UserProfileScreen extends ConsumerWidget {
                             padding: const EdgeInsets.only(left: 12),
                             child: GestureDetector(
                               onTap: () async {
-                                HapticFeedback.lightImpact();
                                 launchUrl(
                                   Uri.parse(
                                     user.links.instagram.url!,
@@ -252,7 +245,6 @@ class UserProfileScreen extends ConsumerWidget {
                             padding: const EdgeInsets.only(left: 12),
                             child: GestureDetector(
                               onTap: () {
-                                HapticFeedback.lightImpact();
                                 launchUrl(
                                   Uri.parse(user.links.x.url!),
                                   mode: LaunchMode.externalApplication,
@@ -286,7 +278,7 @@ class UserProfileScreen extends ConsumerWidget {
               ),
             ),
             const Gap(24),
-            _buildImages(context, ref, user),
+            //_buildImages(context, ref, user),
             _buildCurrentStatus(context, ref, canvasTheme, user),
             _buildTopFriends(context, ref, canvasTheme, user),
             _buildFriends(context, ref, canvasTheme, user),
@@ -1050,7 +1042,6 @@ class UserProfileScreen extends ConsumerWidget {
                           .map(
                             (user) => GestureDetector(
                               onTap: () {
-                                HapticFeedback.lightImpact();
                                 ref
                                     .read(navigationRouterProvider(context))
                                     .goToProfile(user);
@@ -1198,15 +1189,17 @@ class UserProfileScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            child: UserIcon.circleIcon(users[i],
-                                radius: imageRadius),
+                            child: UserIcon(
+                              user: users[i],
+                              width: imageRadius,
+                              isCircle: true,
+                            ),
                           ),
                         ),
                       );
                     }
                     return GestureDetector(
                       onTap: () {
-                        HapticFeedback.lightImpact();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -1505,9 +1498,7 @@ class NotFriendScreen extends ConsumerWidget {
         ),
         actions: [
           FocusedMenuHolder(
-            onPressed: () {
-              HapticFeedback.lightImpact();
-            },
+            onPressed: () {},
             menuWidth: 120,
             blurSize: 0,
             animateMenuItems: false,
@@ -1522,7 +1513,6 @@ class NotFriendScreen extends ConsumerWidget {
                   "報告",
                 ),
                 onPressed: () {
-                  HapticFeedback.lightImpact();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -1537,8 +1527,6 @@ class NotFriendScreen extends ConsumerWidget {
                   "ブロック",
                 ),
                 onPressed: () {
-                  HapticFeedback.lightImpact();
-
                   UserBottomModelSheet(context).blockUserBottomSheet(user);
                 },
               ),

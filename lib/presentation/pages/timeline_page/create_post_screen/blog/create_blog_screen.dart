@@ -96,7 +96,7 @@ class CreateBlogScreen extends ConsumerWidget {
                     right: themeSize.horizontalPadding,
                     child: GestureDetector(
                       onTap: () async {
-                        HapticFeedback.lightImpact();
+                        
                         debugPrint(
                             "title : ${ref.watch(blogStateProvider).title}");
                         debugPrint(

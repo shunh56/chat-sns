@@ -24,8 +24,12 @@ class FriendsUsecase {
     return _repository.admitFriendRequested(userId);
   }
 
-  void addFriend(String userId){
+  void addFriend(String userId) {
     return _repository.addFriend(userId);
+  }
+
+  void addEngagement(String userId) {
+    _repository.addEngagement(userId);
   }
 
   //READ
@@ -60,12 +64,11 @@ class FriendsUsecase {
     return _repository.deleteFriend(userId);
   }
 
-
-  Future<List<String>> getDeletes()async{
+  Future<List<String>> getDeletes() async {
     return _repository.getDeletes();
   }
 
-  void deleteUser(UserAccount user){
+  void deleteUser(UserAccount user) {
     return _repository.deleteUser(user.userId);
   }
 }

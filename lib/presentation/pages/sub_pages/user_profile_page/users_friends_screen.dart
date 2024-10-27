@@ -65,7 +65,6 @@ class UsersFriendsScreen extends ConsumerWidget {
                     .map(
                       (user) => GestureDetector(
                         onTap: () {
-                          HapticFeedback.lightImpact();
                           ref
                               .read(navigationRouterProvider(context))
                               .goToProfile(user);
@@ -171,7 +170,12 @@ class UsersFriendsScreen extends ConsumerWidget {
               ),
             ),
             Gap(themeSize.verticalSpaceSmall),
-            listView,
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.only(bottom: 72),
+                children: [listView],
+              ),
+            ),
           ],
         ),
       ),

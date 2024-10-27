@@ -1,0 +1,61 @@
+import 'dart:math';
+
+import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/user_icon.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final posProvider = StateProvider((ref) => 0.0);
+
+class NewScreen extends ConsumerWidget {
+  const NewScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final users =
+        ref.read(allUsersNotifierProvider).asData!.value.values.toList();
+    final len = users.length;
+    ScrollController _scrollController;
+
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      final maxScrollExtent = _scrollController.position.maxScrollExtent;
+      final currentPosition = _scrollController.position.pixels;
+      ref.read(posProvider.notifier).state = currentPosition;
+    });
+    final pos = ref.watch(posProvider);
+    const height = 100.0;
+    const focusedHeight = 180.0;
+    const padding = 8.0;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(pos.toString()),
+      ),
+      body: ListView.builder(
+        itemCount: 50,
+        controller: _scrollController,
+        itemBuilder: (context, index) {
+          final isFocused = (index * (height + padding * 2) - 240 - pos).abs() <
+              (height / 2 + padding);
+          return Container(
+            margin: EdgeInsets.symmetric(vertical: 8),
+            child: Center(
+              child: AnimatedContainer(
+                height: isFocused ? focusedHeight : height,
+                width: isFocused ? focusedHeight : height,
+                duration: const Duration(milliseconds: 160),
+                curve: Curves.easeInOutQuint,
+                child: UserIcon(
+                  user: users[index % len],
+                  width: isFocused ? focusedHeight : height,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

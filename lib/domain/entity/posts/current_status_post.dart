@@ -1,13 +1,16 @@
 import 'package:app/domain/entity/posts/timeline_post.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CurrentStatusPost extends PostBase {
   final CurrentStatus before;
   final CurrentStatus after;
+  List<String> seenUserIds;
 
   CurrentStatusPost({
     required this.before,
     required this.after,
+    required this.seenUserIds,
     //
     required super.id,
     required super.userId,
@@ -24,6 +27,7 @@ class CurrentStatusPost extends PostBase {
     return CurrentStatusPost(
       before: CurrentStatus.fromJson(json["before"]),
       after: CurrentStatus.fromJson(json["after"]),
+      seenUserIds: List<String>.from(json["seenUserIds"] ?? []),
       //
       id: json["id"],
       userId: json["userId"],
@@ -61,5 +65,13 @@ class CurrentStatusPost extends PostBase {
       return false;
     }
     return true;
+  }
+
+  bool get isHost {
+    return userId == FirebaseAuth.instance.currentUser!.uid;
+  }
+
+  bool get isSeen {
+    return seenUserIds.contains(FirebaseAuth.instance.currentUser!.uid);
   }
 }

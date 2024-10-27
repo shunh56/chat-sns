@@ -55,7 +55,8 @@ class UserBottomModelSheet {
                   ),
                   const Gap(24),
 
-                  UserIcon.tileIcon(user, width: 72),
+                 
+                  UserIcon(user: user,width: 72),
                   const Gap(12),
 
                   Text(
@@ -111,7 +112,7 @@ class UserBottomModelSheet {
                             showMessage("フレンドを0人にすることはできません。");
                             return;
                           }
-                          HapticFeedback.lightImpact();
+                          
                           int cnt = 0;
                           Navigator.popUntil(context, (route) {
                             cnt += 1;
@@ -189,7 +190,7 @@ class UserBottomModelSheet {
                   ),
                   const Gap(24),
 
-                  UserIcon.tileIcon(user, width: 72),
+              UserIcon(user: user,width: 72),
                   const Gap(12),
 
                   Text(
@@ -235,7 +236,7 @@ class UserBottomModelSheet {
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
                         onTap: () async {
-                          HapticFeedback.lightImpact();
+                          
                           int cnt = 0;
                           Navigator.popUntil(context, (route) {
                             cnt += 1;
@@ -312,7 +313,7 @@ class UserBottomModelSheet {
                   ),
                   const Gap(24),
 
-                  UserIcon.tileIcon(user, width: 72),
+                 UserIcon(user: user,width: 72),
                   const Gap(12),
 
                   Text(
@@ -351,7 +352,7 @@ class UserBottomModelSheet {
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
                         onTap: () async {
-                          HapticFeedback.lightImpact();
+                          
                           Navigator.pop(context);
                         },
                         borderRadius: BorderRadius.circular(12),
@@ -416,7 +417,7 @@ class UserBottomModelSheet {
                   ),
                   const Gap(24),
 
-                  UserIcon.tileIcon(user, width: 72),
+                  UserIcon(user: user,width: 72),
                   const Gap(12),
 
                   Text(
@@ -540,7 +541,7 @@ class UserBottomModelSheet {
                   ),
                   const Gap(24),
 
-                  UserIcon.tileIcon(user, width: 72),
+                 UserIcon(user: user,width: 72),
                   const Gap(12),
 
                   Text(

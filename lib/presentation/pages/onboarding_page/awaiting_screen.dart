@@ -49,7 +49,7 @@ class AwaitingScreen extends ConsumerWidget {
           actions: [
             GestureDetector(
               onTap: () {
-                HapticFeedback.lightImpact();
+                
                 showUpcomingSnackbar();
               },
               child: const Icon(
@@ -84,7 +84,7 @@ class AwaitingScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     onTap: () {
-                      HapticFeedback.lightImpact();
+                      
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -120,7 +120,7 @@ class AwaitingScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     onTap: () {
-                      HapticFeedback.lightImpact();
+                      
                       showUpcomingSnackbar();
                     },
                     borderRadius: BorderRadius.circular(12),

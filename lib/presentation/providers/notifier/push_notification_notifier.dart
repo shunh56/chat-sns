@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
@@ -24,7 +25,8 @@ class PushNotificationNotifier {
     UserAccount user,
     String text,
   ) {
-    _usecase.sendDm(user, "TITLE", text);
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    _usecase.sendDm(user, me.name, text);
   }
 
   sendCurrentStatusPost() {
@@ -66,7 +68,7 @@ class PushNotificationNotifier {
   sendVoiceChat() {}
   sendFriendReqeust() {}
 
-  sendMulticast() {
+  /*sendMulticast() {
     final friendIds = ref
         .read(friendIdListNotifierProvider)
         .asData!
@@ -81,5 +83,22 @@ class PushNotificationNotifier {
         .where((user) => friendIds.contains(user.userId))
         .toList();
     return _usecase.sendmulticast(friends, "TITLE", "THIS IS BODY");
+  } */
+
+  sendPostReaction(UserAccount user, String type) {
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    if (type == "postLike") {
+      _usecase.sendReaction(user, me.name, "あなたの投稿にいいねしました。");
+    }
+    if (type == "postComment") {
+      _usecase.sendReaction(user, me.name, "あなたの投稿にコメントしました。");
+    }
+  }
+
+  sendCurrentStatusPostReaction(UserAccount user, String type) {
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    if (type == "currentStatusPostLike") {
+      _usecase.sendReaction(user, me.name, "あなたのステータスにいいねしました。");
+    }
   }
 }

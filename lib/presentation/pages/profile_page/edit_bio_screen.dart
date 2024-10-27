@@ -575,7 +575,7 @@ class EditBioScreen extends ConsumerWidget {
                     children: [
                       FocusedMenuHolder(
                         onPressed: () {
-                          HapticFeedback.lightImpact();
+                          
                         },
                         menuWidth: 120,
                         blurSize: 0,
@@ -592,7 +592,7 @@ class EditBioScreen extends ConsumerWidget {
                               "---",
                             ),
                             onPressed: () {
-                              HapticFeedback.lightImpact();
+                              
                               bioStateNotifier.state =
                                   bio.copyWith(gender: "system_null");
                             },
@@ -603,7 +603,7 @@ class EditBioScreen extends ConsumerWidget {
                               "男性",
                             ),
                             onPressed: () {
-                              HapticFeedback.lightImpact();
+                              
                               bioStateNotifier.state =
                                   bio.copyWith(gender: "system_male");
                             },
@@ -614,7 +614,7 @@ class EditBioScreen extends ConsumerWidget {
                               "女性",
                             ),
                             onPressed: () {
-                              HapticFeedback.lightImpact();
+                              
                               bioStateNotifier.state =
                                   bio.copyWith(gender: "system_female");
                             },
@@ -625,7 +625,7 @@ class EditBioScreen extends ConsumerWidget {
                               "カスタム",
                             ),
                             onPressed: () {
-                              HapticFeedback.lightImpact();
+                              
                               bioStateNotifier.state =
                                   bio.copyWith(gender: "system_custom");
                             },
@@ -749,7 +749,7 @@ class EditBioScreen extends ConsumerWidget {
                     children: [
                       FocusedMenuHolder(
                         onPressed: () {
-                          HapticFeedback.lightImpact();
+                          
                         },
                         menuWidth: 120,
                         blurSize: 0,
@@ -766,7 +766,7 @@ class EditBioScreen extends ConsumerWidget {
                               "---",
                             ),
                             onPressed: () {
-                              HapticFeedback.lightImpact();
+                              
                               bioStateNotifier.state =
                                   bio.copyWith(interestedIn: "system_null");
                             },
@@ -777,7 +777,7 @@ class EditBioScreen extends ConsumerWidget {
                               "男性",
                             ),
                             onPressed: () {
-                              HapticFeedback.lightImpact();
+                              
                               bioStateNotifier.state =
                                   bio.copyWith(interestedIn: "system_male");
                             },
@@ -788,7 +788,7 @@ class EditBioScreen extends ConsumerWidget {
                               "女性",
                             ),
                             onPressed: () {
-                              HapticFeedback.lightImpact();
+                              
                               bioStateNotifier.state =
                                   bio.copyWith(interestedIn: "system_female");
                             },
@@ -799,7 +799,7 @@ class EditBioScreen extends ConsumerWidget {
                               "カスタム",
                             ),
                             onPressed: () {
-                              HapticFeedback.lightImpact();
+                              
                               bioStateNotifier.state =
                                   bio.copyWith(interestedIn: "system_custom");
                             },

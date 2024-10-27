@@ -160,7 +160,7 @@ class PovScreen extends ConsumerWidget {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          HapticFeedback.lightImpact();
+                          
                           ref
                               .read(friendsPovsNotifierProvider.notifier)
                               .refresh();

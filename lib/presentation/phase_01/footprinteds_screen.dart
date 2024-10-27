@@ -154,7 +154,7 @@ class FootprintedsScreen extends ConsumerWidget {
                               children: [
                                 GestureDetector(
                                   onTap: () {
-                                    HapticFeedback.lightImpact();
+                                    
                                     ref
                                         .read(navigationRouterProvider(context))
                                         .goToProfile(user);

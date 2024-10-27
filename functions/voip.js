@@ -8,7 +8,7 @@ const client = new ApnsClient({
   keyId: "4TLPYQK7ZY", // Your APNs Key ID
   signingKey: Buffer.from(functions.config().voip.apn_key, "base64"), //functions.config().voip.signing_key,
   //signingKey: fs.readFileSync("./AuthKey_4TLPYQK7ZY.p8"), // Path to your .p8 key file
-  defaultTopic: "com.shunh.exampleApp.voip", // Your app's bundle ID with .voip suffix for VoIP notifications
+  defaultTopic: "com.blank.sns.voip", // Your app's bundle ID with .voip suffix for VoIP notifications
   requestTimeout: 0, // Optional, default: 0 (no timeout)
   keepAlive: true, // Optional, default: 5000
   host: "api.sandbox.push.apple.com", // Use 'api.push.apple.com' for production

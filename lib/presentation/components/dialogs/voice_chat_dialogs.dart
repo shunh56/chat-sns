@@ -19,7 +19,11 @@ class VoiceChatDialogs {
       stack.add(
         Positioned(
           left: i * 28,
-          child: UserIcon.circleIcon(users[i], radius: 20),
+          child: UserIcon(
+            user: users[i],
+            width: 40,
+            isCircle: true,
+          ),
         ),
       );
     }
@@ -59,7 +63,11 @@ class VoiceChatDialogs {
                       .map(
                         (user) => Padding(
                           padding: const EdgeInsets.only(right: 8, bottom: 8),
-                          child: UserIcon.circleIcon(user, radius: 24),
+                          child: UserIcon(
+                            user: user,
+                            width: 48,
+                            isCircle: true,
+                          ),
                         ),
                       )
                       .toList(),

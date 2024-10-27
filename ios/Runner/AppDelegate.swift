@@ -89,7 +89,7 @@ import google_mobile_ads
     func onAccept(_ call: Call, _ action: CXAnswerCallAction) {
         print("LOG: onAccept")
         if let controller = window?.rootViewController as? FlutterViewController {
-            let channel = FlutterMethodChannel(name: "com.shunh.exampleApp/voip", binaryMessenger: controller.binaryMessenger)
+            let channel = FlutterMethodChannel(name: "com.blank.sns/voip", binaryMessenger: controller.binaryMessenger)
             channel.invokeMethod("onVoIPReceived", arguments: call.data.toJSON())
         }
         action.fulfill()
@@ -227,7 +227,7 @@ import flutter_callkit_incoming
         let json = ["action": "ACCEPT", "data": call.data.toJSON()] as [String: Any]
         print("LOG: onAccept")
         if let controller = window?.rootViewController as? FlutterViewController {
-                    let channel = FlutterMethodChannel(name: "com.shunh.exampleApp/voip", binaryMessenger: controller.binaryMessenger)
+                    let channel = FlutterMethodChannel(name: "com.blank.sns/voip", binaryMessenger: controller.binaryMessenger)
                     channel.invokeMethod("onVoIPReceived", arguments: call.data.toJSON())
                 }
         /*if let flutterEngine = (UIApplication.shared.delegate as? AppDelegate)?.flutterEngine {
@@ -241,7 +241,7 @@ import flutter_callkit_incoming
                 print("Received data: \(data)")
                 /*
                 if let controller = window?.rootViewController as? FlutterViewController {
-                            let channel = FlutterMethodChannel(name: "com.shunh.exampleApp/voip", binaryMessenger: controller.binaryMessenger)
+                            let channel = FlutterMethodChannel(name: "com.blank.sns/voip", binaryMessenger: controller.binaryMessenger)
                             channel.invokeMethod("onVoIPReceived", arguments: json)
                         }
                 

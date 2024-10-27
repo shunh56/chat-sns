@@ -87,7 +87,7 @@ class BottomBar extends ConsumerWidget {
       showSelectedLabels: false,
       showUnselectedLabels: false,
       onTap: (value) {
-        HapticFeedback.lightImpact();
+        
         ref.watch(bottomNavIndexProvider.notifier).changeIndex(context, value);
       },
       items: [

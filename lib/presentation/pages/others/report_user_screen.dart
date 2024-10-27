@@ -51,7 +51,7 @@ class ReportUserScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  UserIcon.tileIcon(user),
+                  UserIcon(user: user),
                   const Gap(8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

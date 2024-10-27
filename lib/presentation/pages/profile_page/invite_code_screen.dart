@@ -30,10 +30,7 @@ class InviteCodeScreen extends ConsumerWidget {
             .toList();
     final myIcon = asyncValue.when(
       data: (me) {
-        return UserIcon.tileIcon(
-          me,
-          width: themeSize.screenWidth * 0.15,
-        );
+        return UserIcon(user: me);
       },
       error: (e, s) => const SizedBox(),
       loading: () => const SizedBox(),
@@ -53,6 +50,7 @@ class InviteCodeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Gap(12),
             Row(
               children: [
                 myIcon,
@@ -179,7 +177,7 @@ class InviteCodeScreen extends ConsumerWidget {
                 }())
               ],
             ),
-            Gap(themeSize.verticalSpaceMedium),
+            Gap(24),
             Expanded(
               child: FutureBuilder(
                 future: ref
@@ -241,7 +239,7 @@ class InviteCodeScreen extends ConsumerWidget {
                                   const Gap(8),
                                   Row(
                                     children: [
-                                      UserIcon.tileIcon(user, width: 40),
+                                      UserIcon(user: user, width: 40),
                                       const Gap(12),
                                       Expanded(
                                         child: Column(
@@ -438,8 +436,8 @@ class InviteCodeScreen extends ConsumerWidget {
                           itemCount: users.length,
                           itemBuilder: (context, index) {
                             final user = users[index];
-                            return UserIcon.tileIcon(
-                              user,
+                            return UserIcon(
+                              user:user,
                               width: imageHeight,
                             );
                           },

@@ -13,6 +13,7 @@ import 'package:app/usecase/posts/current_status_post_usecase.dart';
 import 'package:app/usecase/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -53,20 +54,30 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
 
   onOpen() async {
     final user = state.asData!.value;
-    final token = await FirebaseMessaging.instance.getToken();
-    final voipToken = Platform.isIOS
-        ? await FlutterCallkitIncoming.getDevicePushTokenVoIP()
-        : null;
-    //final token = await FirebaseMessaging.instance.getAPNSToken();
-    final updatedUser = user.copyWith(
-      isOnline: true,
-      lastOpenedAt: Timestamp.now(),
-      fcmToken: token,
-      voipToken: voipToken,
-    );
+    await Future.delayed(const Duration(milliseconds: 50));
+    if (!kDebugMode) {
+      final token = await FirebaseMessaging.instance.getToken();
+      final voipToken = Platform.isIOS
+          ? await FlutterCallkitIncoming.getDevicePushTokenVoIP()
+          : null;
+      final updatedUser = user.copyWith(
+        isOnline: true,
+        lastOpenedAt: Timestamp.now(),
+        fcmToken: token,
+        voipToken: voipToken,
+      );
+      state = AsyncValue.data(updatedUser);
+      update(updatedUser);
+    } else {
+      final updatedUser = user.copyWith(
+        isOnline: true,
+        lastOpenedAt: Timestamp.now(),
+      );
+      state = AsyncValue.data(updatedUser);
+      update(updatedUser);
+    }
 
-    state = AsyncValue.data(updatedUser);
-    update(updatedUser);
+    //final token = await FirebaseMessaging.instance.getAPNSToken();
   }
 
   onClosed() {

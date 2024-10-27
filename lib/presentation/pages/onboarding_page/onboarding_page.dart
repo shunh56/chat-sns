@@ -302,7 +302,6 @@ class InputImageUrlScreen extends ConsumerWidget {
                       )
                     : GestureDetector(
                         onTap: () async {
-                          HapticFeedback.lightImpact();
                           final pickedFile = await ref
                               .read(imageProcessorNotifierProvider)
                               .getIconImage();
@@ -401,7 +400,11 @@ class AddOtherFriendsScreen extends ConsumerWidget {
                   return Column(
                     children: [
                       Center(
-                        child: UserIcon.tileIcon(user, width: 108),
+                        child: UserIcon(
+                          user: user,
+                          width: 108,
+                          navDisabled: true,
+                        ),
                       ),
                       const Gap(8),
                       Text(
@@ -423,7 +426,10 @@ class AddOtherFriendsScreen extends ConsumerWidget {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               child: Row(
                                 children: [
-                                  UserIcon.tileIcon(item, width: 60),
+                                  UserIcon(
+                                    user: item,
+                                    navDisabled: true,
+                                  ),
                                   const Gap(12),
                                   Expanded(
                                     child: Text(

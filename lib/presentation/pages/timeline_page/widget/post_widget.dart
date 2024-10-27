@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/post.dart';
@@ -12,110 +13,48 @@ import 'package:app/presentation/components/widgets/fade_transition_widget.dart'
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/sub_pages/post_images_screen.dart';
+import 'package:app/presentation/providers/notifier/heart_animation_notifier.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-
-final isHeartVisibleProvider = StateProvider(
-  (ref) => false,
-);
-final angleProvider = StateProvider((ref) => 0.0);
-final xPosProvider = StateProvider((ref) => 0.0);
-final yPosProvider = StateProvider((ref) => 0.0);
-final tyPostProvider = StateProvider((ref) => 0.0);
-final heartSizeProvider = StateProvider((ref) => 50.0);
-final isAnimatingProvider = StateProvider((ref) => false);
-final isPressedProvider = StateProvider((ref) => false);
+import 'package:url_launcher/url_launcher.dart';
 
 class PostWidget extends ConsumerWidget {
   const PostWidget({
     super.key,
     required this.postRef,
-    required this.userId,
   });
   final Post postRef;
-  final String userId;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final post = postRef;
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id];
+    if (post == null) return const SizedBox();
     final user = ref.read(allUsersNotifierProvider).asData!.value[post.userId];
     if (user == null) return const SizedBox();
     if (user.accountStatus != AccountStatus.normal) return const SizedBox();
-    //final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id]!;
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
 
-    final notifier = ref.read(isHeartVisibleProvider.notifier);
-    final isAnimating = ref.watch(isAnimatingProvider);
-
-    final angleNotifier = ref.watch(angleProvider.notifier);
-    void shake() async {
-      int count = 0;
-      while (count < 4) {
-        count++;
-        angleNotifier.state = (count % 2 == 0) ? pi / 12 : -pi / 12;
-        await Future.delayed(Duration(milliseconds: 40 + count * 30));
-      }
-      angleNotifier.state = 0;
-    }
-
-    animateSize() async {
-      while (ref.watch(heartSizeProvider) > 20.0) {
-        ref.read(heartSizeProvider.notifier).state =
-            ref.watch(heartSizeProvider) * 0.95;
-        await Future.delayed(const Duration(milliseconds: 20));
-      }
-    }
-
-    void showHeart(double x, double y, double diff) {
-      if (isAnimating) return;
-
-      ref.read(isAnimatingProvider.notifier).state = true;
-      shake();
-      notifier.state = false;
-      ref.read(xPosProvider.notifier).state = x - 24;
-      ref.read(yPosProvider.notifier).state = y - 24 - themeSize.appbarHeight;
-
-      Future.delayed(const Duration(milliseconds: 50), () {
-        notifier.state = true;
-      });
-
-      // 指定の場所に移動するアニメーション
-      Future.delayed(
-        const Duration(milliseconds: 800),
-        () {
-          ref.read(xPosProvider.notifier).state =
-              themeSize.screenWidth / 2 - 12;
-          ref.read(yPosProvider.notifier).state = -24;
-          animateSize();
-        },
-      );
-
-      // アニメーションが終了したらハートを消す
-      Future.delayed(const Duration(milliseconds: 1200), () {
-        notifier.state = false;
-        ref.read(isAnimatingProvider.notifier).state = false;
-      });
-
-      Future.delayed(const Duration(milliseconds: 1600), () {
-        ref.read(heartSizeProvider.notifier).state = 50.0;
-      });
-    }
+    final heartAnimationNotifier = ref.read(
+      heartAnimationNotifierProvider,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: GestureDetector(
         onTap: () {
-          HapticFeedback.lightImpact();
           ref.read(navigationRouterProvider(context)).goToPost(post, user);
         },
         onDoubleTapDown: (details) {
-          HapticFeedback.mediumImpact();
-          ref.read(allPostsNotifierProvider.notifier).incrementLikeCount(post);
-          showHeart(
+          ref
+              .read(allPostsNotifierProvider.notifier)
+              .incrementLikeCount(user, post);
+          heartAnimationNotifier.showHeart(
+            context,
             details.globalPosition.dx,
             details.globalPosition.dy,
             (details.globalPosition.dy - details.localPosition.dy),
@@ -127,27 +66,23 @@ class PostWidget extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: ThemeColor.stroke,
-              width: 0.4,
+              width: 0.8,
             ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+                padding: const EdgeInsets.only(
+                  top: 12,
+                  left: 12,
+                  right: 12,
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        ref
-                            .read(navigationRouterProvider(context))
-                            .goToProfile(user);
-                      },
-                      child: UserIcon.postIcon(user),
-                    ),
-                    const Gap(8),
+                    UserIconPostIcon(user: user),
+                    const Gap(12),
                     Expanded(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +95,10 @@ class PostWidget extends ConsumerWidget {
                                   children: [
                                     Text(
                                       user.name,
-                                      style: textStyle.w600(fontSize: 16),
+                                      style: textStyle.w600(
+                                        fontSize: 15,
+                                        height: 1.0,
+                                      ),
                                     ),
                                     const Gap(4),
                                     Padding(
@@ -183,10 +121,7 @@ class PostWidget extends ConsumerWidget {
                                   ],
                                 ),
                                 const Gap(4),
-                                Text(
-                                  post.text,
-                                  style: textStyle.w400(fontSize: 16),
-                                ),
+                                BuildText(text: post.text),
                               ],
                             ),
                           ),
@@ -313,55 +248,61 @@ class PostWidget extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Padding(
       padding: const EdgeInsets.only(
-        top: 8,
+        top: 4,
         right: 12,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (post.replyCount > 0)
-            GestureDetector(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                PostBottomModelSheet(context).openReplies(post);
-              },
-              child: Row(
+      child: SizedBox(
+        height: 24,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (post.replyCount > 0)
+              GestureDetector(
+                onTap: () {
+                  PostBottomModelSheet(context).openReplies(user, post);
+                },
+                child: Row(
+                  children: [
+                    Text(
+                      post.replyCount.toString(),
+                      style: textStyle.numText(fontSize: 16),
+                    ),
+                    const Gap(4),
+                    Text(
+                      "コメント",
+                      style: textStyle.w600(color: ThemeColor.subText),
+                    ),
+                  ],
+                ),
+              ),
+            if (post.likeCount > 0)
+              Row(
                 children: [
-                  Text(
-                    post.replyCount.toString(),
-                    style: textStyle.numText(fontSize: 16),
+                  const Gap(18),
+                  GradientText(
+                    text: post.likeCount.toString(),
                   ),
                   const Gap(4),
                   Text(
-                    "コメント",
-                    style: textStyle.numText(color: ThemeColor.subText),
+                    "いいね",
+                    style: textStyle.w600(color: ThemeColor.subText),
                   ),
                 ],
               ),
-            ),
-          if (post.likeCount > 0)
-            Row(
-              children: [
-                const Gap(12),
-                GradientText(
-                  text: post.likeCount.toString(),
-                ),
-              ],
-            ),
-          const Gap(12),
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              PostBottomModelSheet(context).openPostAction(post, user);
-            },
-            child: const Icon(
-              Icons.more_horiz_rounded,
-              color: ThemeColor.subText,
-              size: 20,
-            ),
-          )
-        ],
+            const Gap(18),
+            GestureDetector(
+              onTap: () {
+                PostBottomModelSheet(context).openPostAction(post, user);
+              },
+              child: const Icon(
+                Icons.more_horiz_rounded,
+                color: ThemeColor.subText,
+                size: 20,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -396,6 +337,76 @@ class GradientText extends ConsumerWidget {
         text,
         style: textStyle.w600(fontSize: 16),
       ),
+    );
+  }
+}
+
+class BuildText extends ConsumerWidget {
+  const BuildText({
+    super.key,
+    required this.text,
+  });
+  final String text;
+
+  // URLを検出する正規表現パターン
+  static final urlPattern = RegExp(
+    r'https?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?',
+    caseSensitive: false,
+  );
+
+  Future<void> _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    // 文字数制限を適用
+
+    // URLとテキストを分割
+    final spans = <TextSpan>[];
+    var start = 0;
+
+    for (final match in urlPattern.allMatches(text)) {
+      // URL前のテキスト
+      if (match.start > start) {
+        spans.add(TextSpan(
+          text: text.substring(start, match.start),
+          style: textStyle.w400(fontSize: 16),
+        ));
+      }
+
+      // URL部分
+      final url = match.group(0)!;
+      spans.add(
+        TextSpan(
+          text: url,
+          style: textStyle.w400(
+            color: Colors.blue,
+            fontSize: 16,
+            underline: true,
+          ),
+          recognizer: TapGestureRecognizer()..onTap = () => _launchURL(url),
+        ),
+      );
+
+      start = match.end;
+    }
+
+    // 残りのテキスト
+    if (start < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(start),
+        style: textStyle.w400(fontSize: 16),
+      ));
+    }
+
+    return RichText(
+      text: TextSpan(children: spans),
     );
   }
 }

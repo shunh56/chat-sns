@@ -5,6 +5,7 @@ extension TimestampExtension on Timestamp {
   /// 文字列がメールアドレスであるか判定する
   String get xxAgo {
     Timestamp now = Timestamp.now();
+
     final diff = now.seconds - seconds;
     if (diff < 60 * 60) {
       return "${diff ~/ 60}分前";

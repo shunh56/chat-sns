@@ -1,4 +1,4 @@
-package com.shunh.exampleApp
+package com.blank.sns
 
 import io.flutter.embedding.android.FlutterActivity
 

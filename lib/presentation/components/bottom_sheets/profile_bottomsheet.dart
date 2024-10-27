@@ -1,9 +1,11 @@
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/icons.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_bio_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
+import 'package:app/presentation/pages/profile_page/qr_code_screen.dart';
 import 'package:app/presentation/pages/settings_screen/settings_screen.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
@@ -11,9 +13,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 class ProfileBottomSheet {
-  ProfileBottomSheet(this.ref);
-  final WidgetRef ref;
-  openBottomSheet(BuildContext context, UserAccount user) {
+  ProfileBottomSheet(this.context);
+  final BuildContext context;
+  openBottomSheet(UserAccount user) {
     //final me = ref.read(myAccountNotifierProvider).asData!.value;
 
     showModalBottomSheet(
@@ -23,153 +25,165 @@ class ProfileBottomSheet {
       ),
       context: context,
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.only(
-            top: 12,
-            bottom: 72,
-            left: 12,
-            right: 12,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                height: 4,
-                width: MediaQuery.sizeOf(context).width / 8,
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.circular(100),
-                ),
-              ),
-              const Gap(24),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    width: 0.8,
-                    color: Colors.grey,
+        return Consumer(builder: (context, ref, child) {
+          final themeSize = ref.watch(themeSizeProvider(context));
+          final textStyle = ThemeTextStyle(themeSize: themeSize);
+          return Container(
+            padding: EdgeInsets.only(
+              top: 12,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 36,
+              left: themeSize.horizontalPadding,
+              right: themeSize.horizontalPadding,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                //ios design
+                Container(
+                  height: 4,
+                  width: MediaQuery.sizeOf(context).width / 8,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                 ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const Gap(24),
+
+                Container(
+                  decoration: BoxDecoration(
+                    color: ThemeColor.stroke,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => QrCodeScreen(),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "プロフィールをシェア",
+                            style: textStyle.w600(
+                              fontSize: 14,
+                            ),
+                          ),
+                          Icon(
+                            shareIcon,
+                            color: ThemeColor.icon,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                Gap(24),
+                Container(
+                  decoration: BoxDecoration(
+                    color: ThemeColor.stroke,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
                     children: [
-                      const Text(
-                        "共有",
-                        style: TextStyle(
-                          color: ThemeColor.text,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          final me = ref
+                              .watch(myAccountNotifierProvider)
+                              .asData!
+                              .value;
+                          ref.read(bioStateProvider.notifier).state = me.bio;
+                          ref.read(aboutMeStateProvider.notifier).state =
+                              me.aboutMe;
+                          ref.read(linksStateProvider.notifier).state =
+                              me.links;
+                          Navigator.pushReplacement(
+                            context,
+                            PageTransitionMethods.slideUp(
+                              const EditBioScreen(),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "プロフィールを編集",
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Icon(
+                                Icons.edit_rounded,
+                                color: ThemeColor.icon,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      Icon(
-                        shareIcon,
-                        size: 18,
-                        color: ThemeColor.icon,
+                      Divider(
+                        height: 0,
+                        thickness: 0.4,
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SettingsScreen(),
+                              //   settings: const RouteSettings(
+                              // name: "settings_page",
+                              //   ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "設定画面",
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const Icon(
+                                Icons.settings_outlined,
+                                color: ThemeColor.icon,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              const Gap(16),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    width: 0.8,
-                    color: Colors.grey,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        final me =
-                            ref.watch(myAccountNotifierProvider).asData!.value;
-                        ref.read(bioStateProvider.notifier).state = me.bio;
-                        ref.read(aboutMeStateProvider.notifier).state =
-                            me.aboutMe;
-                        ref.read(linksStateProvider.notifier).state = me.links;
-                        Navigator.pushReplacement(
-                          context,
-                          PageTransitionMethods.slideUp(
-                            const EditBioScreen(),
-                          ),
-                        );
-                      },
-                      child: const Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "プロフィールを編集",
-                              style: TextStyle(
-                                color: ThemeColor.text,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                            Icon(
-                              Icons.edit_outlined,
-                              color: ThemeColor.icon,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const Divider(
-                      color: Colors.grey,
-                      height: 0.8,
-                      thickness: 0.8,
-                    ),
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const SettingsScreen(),
-                            //   settings: const RouteSettings(
-                            // name: "settings_page",
-                            //   ),
-                          ),
-                        );
-                      },
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "設定画面",
-                              style: TextStyle(
-                                color: ThemeColor.text,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                            Icon(
-                              Icons.settings_outlined,
-                              color: ThemeColor.icon,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
+              ],
+            ),
+          );
+        });
       },
     );
   }
@@ -463,7 +477,6 @@ class ProfileBottomSheet {
   ];
 
   openColorSheet(BuildContext context, CanvasTheme canvasTheme, String type) {
-    final stateNotifier = ref.read(canvasThemeProvider.notifier);
     showModalBottomSheet(
       backgroundColor: ThemeColor.background,
       shape: RoundedRectangleBorder(
@@ -471,105 +484,108 @@ class ProfileBottomSheet {
       ),
       context: context,
       builder: (context) {
-        return Container(
-          padding: EdgeInsets.only(
-            top: 12,
-            bottom: MediaQuery.of(context).viewPadding.bottom,
-            left: 12,
-            right: 12,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Center(
-                child: (() {
-                  switch (type) {
-                    case ("bgColor"):
-                      return const Text("背景色");
-                    case ("profileTextColor"):
-                      return const Text("テキスト");
-                    case ("profileSecondaryTextColor"):
-                      return const Text("サブテキスト");
-                    case ("profileLinksColor"):
-                      return const Text("アイコン");
-                    case ("profileAboutMeColor"):
-                      return const Text("ひとこと");
-                    case ("boxBgColor"):
-                      return const Text("背景色");
-                    case ("boxTextColor"):
-                      return const Text("テキスト");
-                    case ("boxSecondaryTextColor"):
-                      return const Text("サブテキスト");
-                    case ("iconGradientStartColor"):
-                      return const Text("スタート");
-                    case ("iconGradientEndColor"):
-                      return const Text("エンド");
-                  }
-                  return const SizedBox();
-                })(),
-              ),
-              const Gap(16),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: GridView(
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 11,
-                      //childAspectRatio: 3,
-                    ),
-                    children: colorPalette
-                        .map(
-                          (item) => GestureDetector(
-                            onTap: () {
-                              switch (type) {
-                                case ("bgColor"):
-                                  stateNotifier.state =
-                                      canvasTheme.copyWith(bgColor: item);
-                                case ("profileTextColor"):
-                                  stateNotifier.state = canvasTheme.copyWith(
-                                      profileTextColor: item);
-                                case ("profileSecondaryTextColor"):
-                                  stateNotifier.state = canvasTheme.copyWith(
-                                      profileSecondaryTextColor: item);
-                                case ("profileLinksColor"):
-                                  stateNotifier.state = canvasTheme.copyWith(
-                                      profileLinksColor: item);
-                                case ("profileAboutMeColor"):
-                                  stateNotifier.state = canvasTheme.copyWith(
-                                      profileAboutMeColor: item);
-                                case ("boxBgColor"):
-                                  stateNotifier.state =
-                                      canvasTheme.copyWith(boxBgColor: item);
-                                case ("boxTextColor"):
-                                  stateNotifier.state =
-                                      canvasTheme.copyWith(boxTextColor: item);
-                                case ("boxSecondaryTextColor"):
-                                  stateNotifier.state = canvasTheme.copyWith(
-                                      boxSecondaryTextColor: item);
-                                case ("iconGradientStartColor"):
-                                  stateNotifier.state = canvasTheme.copyWith(
-                                      iconGradientStartColor: item);
-                                case ("iconGradientEndColor"):
-                                  stateNotifier.state = canvasTheme.copyWith(
-                                      iconGradientEndColor: item);
-                              }
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              color: item,
+        return Consumer(builder: (context, ref, child) {
+          final stateNotifier = ref.read(canvasThemeProvider.notifier);
+          return Container(
+            padding: EdgeInsets.only(
+              top: 12,
+              bottom: MediaQuery.of(context).viewPadding.bottom,
+              left: 12,
+              right: 12,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Center(
+                  child: (() {
+                    switch (type) {
+                      case ("bgColor"):
+                        return const Text("背景色");
+                      case ("profileTextColor"):
+                        return const Text("テキスト");
+                      case ("profileSecondaryTextColor"):
+                        return const Text("サブテキスト");
+                      case ("profileLinksColor"):
+                        return const Text("アイコン");
+                      case ("profileAboutMeColor"):
+                        return const Text("ひとこと");
+                      case ("boxBgColor"):
+                        return const Text("背景色");
+                      case ("boxTextColor"):
+                        return const Text("テキスト");
+                      case ("boxSecondaryTextColor"):
+                        return const Text("サブテキスト");
+                      case ("iconGradientStartColor"):
+                        return const Text("スタート");
+                      case ("iconGradientEndColor"):
+                        return const Text("エンド");
+                    }
+                    return const SizedBox();
+                  })(),
+                ),
+                const Gap(16),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: GridView(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 11,
+                        //childAspectRatio: 3,
+                      ),
+                      children: colorPalette
+                          .map(
+                            (item) => GestureDetector(
+                              onTap: () {
+                                switch (type) {
+                                  case ("bgColor"):
+                                    stateNotifier.state =
+                                        canvasTheme.copyWith(bgColor: item);
+                                  case ("profileTextColor"):
+                                    stateNotifier.state = canvasTheme.copyWith(
+                                        profileTextColor: item);
+                                  case ("profileSecondaryTextColor"):
+                                    stateNotifier.state = canvasTheme.copyWith(
+                                        profileSecondaryTextColor: item);
+                                  case ("profileLinksColor"):
+                                    stateNotifier.state = canvasTheme.copyWith(
+                                        profileLinksColor: item);
+                                  case ("profileAboutMeColor"):
+                                    stateNotifier.state = canvasTheme.copyWith(
+                                        profileAboutMeColor: item);
+                                  case ("boxBgColor"):
+                                    stateNotifier.state =
+                                        canvasTheme.copyWith(boxBgColor: item);
+                                  case ("boxTextColor"):
+                                    stateNotifier.state = canvasTheme.copyWith(
+                                        boxTextColor: item);
+                                  case ("boxSecondaryTextColor"):
+                                    stateNotifier.state = canvasTheme.copyWith(
+                                        boxSecondaryTextColor: item);
+                                  case ("iconGradientStartColor"):
+                                    stateNotifier.state = canvasTheme.copyWith(
+                                        iconGradientStartColor: item);
+                                  case ("iconGradientEndColor"):
+                                    stateNotifier.state = canvasTheme.copyWith(
+                                        iconGradientEndColor: item);
+                                }
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                color: item,
+                              ),
                             ),
-                          ),
-                        )
-                        .toList(),
+                          )
+                          .toList(),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
+              ],
+            ),
+          );
+        });
       },
     );
   }

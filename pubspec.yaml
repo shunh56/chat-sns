@@ -2,6 +2,7 @@ name: app
 description: A new Flutter project.
 publish_to: "none" 
 
+# bundle ID : com.blank.sns
 version: 1.0.0+1
 #最後のビルド番号はずっと増えていく
 #初回リリース：version: 1.0.0+1

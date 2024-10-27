@@ -47,13 +47,17 @@ class MutesScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(
                   children: [
-                    UserIcon.circleIcon(user, radius: 24),
+                  UserIcon(
+                            user: user,
+                            width: 48,
+                            isCircle: true,
+                          ),
                     const Gap(12),
                     Text(user.username),
                     const Expanded(child: SizedBox()),
                     GestureDetector(
                       onTap: () {
-                        HapticFeedback.lightImpact();
+                        
                         ref
                             .read(mutesListNotifierProvider.notifier)
                             .unMuteUser(user);
@@ -70,6 +74,7 @@ class MutesScreen extends ConsumerWidget {
                         child: const Text(
                           "ミュートを解除",
                           style: TextStyle(
+                            color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),

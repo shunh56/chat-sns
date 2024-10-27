@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
@@ -14,6 +16,7 @@ import 'package:app/presentation/providers/provider/users/friends_notifier.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 
 class ChatScreen extends ConsumerWidget {
@@ -21,7 +24,6 @@ class ChatScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    DebugPrint("Chat Screen");
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(dmOverviewListNotifierProvider);
@@ -30,22 +32,13 @@ class ChatScreen extends ConsumerWidget {
       data: (list) {
         if (list.isEmpty) {
           return Padding(
-            padding: EdgeInsets.only(top: themeSize.screenHeight * 0.25),
-            child: Container(
-              margin: EdgeInsets.symmetric(
-                horizontal: themeSize.horizontalPadding,
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 48),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                color: ThemeColor.stroke,
-              ),
-              child: Center(
-                child: Text(
-                  "No friends? Start Talking!",
-                  style: textStyle.w600(
-                    fontSize: 18,
-                  ),
+            padding: EdgeInsets.only(top: 72),
+            child: Center(
+              child: Text(
+                "トークがありません",
+                style: textStyle.w400(
+                  fontSize: 14,
+                  color: ThemeColor.subText,
                 ),
               ),
             ),
@@ -86,60 +79,54 @@ class ChatScreen extends ConsumerWidget {
               highlightColor: ThemeColor.stroke,
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Stack(
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            ref
-                                .read(navigationRouterProvider(context))
-                                .goToProfile(user);
-                          },
-                          child: UserIcon.tileIcon(user, width: 54),
-                        ),
-                        const Gap(12),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    UserIcon(user: user, width: 54),
+                    const Gap(12),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    user.name,
-                                    style: textStyle.w600(fontSize: 16),
+                              Flexible(
+                                child: Text(
+                                  user.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: textStyle.w600(
+                                    fontSize: 16,
                                   ),
-                                  Text(
-                                    "・${overview.lastMessage.createdAt.xxAgo}",
-                                    style: textStyle.w600(
-                                        color: ThemeColor.subText),
-                                  ),
-                                ],
+                                ),
                               ),
                               Text(
-                                overview.lastMessage.text,
-                                maxLines: 1,
-                                style: textStyle.w400(
-                                  fontSize: 14,
+                                "・${overview.lastMessage.createdAt.xxAgo}",
+                                style: textStyle.w600(
                                   color: ThemeColor.subText,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                          Gap(2),
+                          Text(
+                            overview.lastMessage.text,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textStyle.w400(
+                              fontSize: 15,
+                              color: ThemeColor.subText,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    Gap(24),
                     if (unseenCheck)
-                      const Positioned(
-                        top: 0,
-                        bottom: 0,
-                        right: 0,
-                        child: CircleAvatar(
-                          radius: 4,
-                          backgroundColor: Colors.cyan,
-                        ),
+                      CircleAvatar(
+                        radius: 4,
+                        backgroundColor: Colors.blue,
                       ),
                   ],
                 ),
@@ -156,17 +143,11 @@ class ChatScreen extends ConsumerWidget {
       appBar: AppBar(
         toolbarHeight: themeSize.appbarHeight,
         centerTitle: false,
-        title: const Text(
+        title: Text(
           "チャット",
-          style: TextStyle(
-            color: ThemeColor.headline,
-          ),
+          style: textStyle.appbarText(japanese: true),
         ),
         actions: [
-          /* const Icon(
-            Icons.more_horiz_rounded,
-            color: ThemeColor.icon,
-          ), */
           Gap(themeSize.horizontalPadding),
         ],
       ),
@@ -247,13 +228,11 @@ class ChatScreen extends ConsumerWidget {
                 final user = users[index];
                 return GestureDetector(
                   onTap: () {
-                    HapticFeedback.lightImpact();
                     ref
                         .read(navigationRouterProvider(context))
                         .goToProfile(user);
                   },
                   onLongPress: () {
-                    HapticFeedback.lightImpact();
                     ref.read(navigationRouterProvider(context)).goToChat(user);
                   },
                   child: Container(

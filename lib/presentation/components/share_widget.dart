@@ -76,6 +76,7 @@ Future<void> shareByTwitter(String text) async {
 
 //final key = GlobalKey();
 
+//TODO SHARE WIDGET!!
 class ShareWidget extends ConsumerWidget {
   const ShareWidget({super.key});
 
@@ -109,7 +110,7 @@ class ShareWidget extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  UserIcon.tileIcon(me, stroked: true),
+                  UserIcon(user: me),
                   const Gap(12),
                   Text(
                     "友達を招待して\nチャットを始めよう!",
@@ -137,8 +138,6 @@ class ShareWidget extends ConsumerWidget {
                       ),
                       GestureDetector(
                         onTap: () async {
-                          HapticFeedback.lightImpact();
-
                           try {
                             const image = null; // await convertWidgetToImage();
 

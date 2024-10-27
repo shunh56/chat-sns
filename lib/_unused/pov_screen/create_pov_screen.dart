@@ -78,7 +78,7 @@ class CreatePovScreen extends ConsumerWidget {
                     bottom: MediaQuery.of(context).viewInsets.bottom + 24,
                     child: GestureDetector(
                       onTap: () async {
-                        HapticFeedback.lightImpact();
+                        
                         if (state.isReadyToUpload) {
                           ref.read(povUsecaseProvider).uploadPov(state);
                           Navigator.pop(context);
@@ -87,7 +87,7 @@ class CreatePovScreen extends ConsumerWidget {
                         }
                       },
                       onLongPress: () async {
-                        HapticFeedback.lightImpact();
+                        
                         textNotifier.state = "test : ${DateTime.now()}";
                         await ref.read(povUsecaseProvider).uploadPov(state);
                        

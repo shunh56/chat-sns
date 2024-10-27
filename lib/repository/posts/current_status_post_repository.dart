@@ -26,7 +26,9 @@ class CurrentStatusPostRepository {
 
   Future<List<CurrentStatusPost>> getUsersPosts(String userId) async {
     final res = await _datasource.getUsersPosts(userId);
-    return res.docs.map((doc) => CurrentStatusPost.fromJson(doc.data())).toList();
+    return res.docs
+        .map((doc) => CurrentStatusPost.fromJson(doc.data()))
+        .toList();
   }
 
   Future<List<CurrentStatusPost>> getPostFromUserIds(
@@ -59,6 +61,10 @@ class CurrentStatusPostRepository {
 
   addReply(String id, String text) {
     return _datasource.addReply(id, text);
+  }
+
+  readPost(String id) {
+    return _datasource.readPost(id);
   }
 
   incrementLikeCountToReply(String postId, String replyId, int count) {

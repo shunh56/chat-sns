@@ -17,15 +17,16 @@ class CurrentStatusPostUsecase {
     return await _repository.getPost(postId);
   }
 
-  Future<List<CurrentStatusPost>> getUsersNewestPost(String userId) async {
+  /*Future<List<CurrentStatusPost>> getUsersNewestPost(String userId) async {
     return await _repository.getUsersNewestPost(userId);
-  }
+  } */
 
   Future<List<CurrentStatusPost>> getUsersPosts(String userId) async {
     return await _repository.getUsersPosts(userId);
   }
 
-  Future<List<CurrentStatusPost>> getPostFromUserIds(List<String> userIds) async {
+  Future<List<CurrentStatusPost>> getPostFromUserIds(
+      List<String> userIds) async {
     return await _repository.getPostFromUserIds(userIds);
   }
 
@@ -37,11 +38,11 @@ class CurrentStatusPostUsecase {
     return _repository.incrementLikeCount(id, count);
   }
 
-  addReply(String id, String text) {
-    return _repository.addReply(id, text);
+  readPost(CurrentStatusPost post) {
+    return _repository.readPost(post.id);
   }
 
-  incrementLikeCountToReply(String postId, String replyId, int count) {
-    return _repository.incrementLikeCountToReply(postId, replyId, count);
+  addReply(String id, String text) {
+    return _repository.addReply(id, text);
   }
 }

@@ -13,6 +13,7 @@ import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/sub_pages/post_images_screen.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
+import 'package:app/presentation/providers/notifier/heart_animation_notifier.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
@@ -21,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:uuid/uuid.dart';
 
 class FriendFriendsPostWidget extends ConsumerWidget {
   const FriendFriendsPostWidget(
@@ -35,63 +37,10 @@ class FriendFriendsPostWidget extends ConsumerWidget {
     }
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final notifier = ref.read(isHeartVisibleProvider.notifier);
-    final isAnimating = ref.watch(isAnimatingProvider);
 
-    final angleNotifier = ref.watch(angleProvider.notifier);
-    void shake() async {
-      int count = 0;
-      while (count < 4) {
-        count++;
-        angleNotifier.state = (count % 2 == 0) ? pi / 12 : -pi / 12;
-        await Future.delayed(Duration(milliseconds: 40 + count * 30));
-      }
-      angleNotifier.state = 0;
-    }
-
-    animateSize() async {
-      while (ref.watch(heartSizeProvider) > 20.0) {
-        ref.read(heartSizeProvider.notifier).state =
-            ref.watch(heartSizeProvider) * 0.95;
-        await Future.delayed(const Duration(milliseconds: 20));
-      }
-    }
-
-    void showHeart(double x, double y, double diff) {
-      if (isAnimating) return;
-
-      ref.read(isAnimatingProvider.notifier).state = true;
-      shake();
-      notifier.state = false;
-      ref.read(xPosProvider.notifier).state = x - 24;
-      ref.read(yPosProvider.notifier).state = y - 24 - themeSize.appbarHeight;
-
-      Future.delayed(const Duration(milliseconds: 50), () {
-        notifier.state = true;
-      });
-
-      // 指定の場所に移動するアニメーション
-      Future.delayed(
-        const Duration(milliseconds: 800),
-        () {
-          ref.read(xPosProvider.notifier).state =
-              themeSize.screenWidth / 2 - 12;
-          ref.read(yPosProvider.notifier).state = -24;
-          animateSize();
-        },
-      );
-
-      // アニメーションが終了したらハートを消す
-      Future.delayed(const Duration(milliseconds: 1200), () {
-        notifier.state = false;
-        ref.read(isAnimatingProvider.notifier).state = false;
-      });
-
-      Future.delayed(const Duration(milliseconds: 1600), () {
-        ref.read(heartSizeProvider.notifier).state = 50.0;
-      });
-    }
-
+    final heartAnimationNotifier = ref.read(
+      heartAnimationNotifierProvider,
+    );
     final mutualIds =
         ref.watch(friendFriendsMapNotifierProvider)[user.userId] ?? {};
     final myFriendIds =
@@ -112,13 +61,13 @@ class FriendFriendsPostWidget extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: GestureDetector(
         onTap: () {
-          HapticFeedback.lightImpact();
           ref.read(navigationRouterProvider(context)).goToPost(post, user);
         },
         onDoubleTapDown: (details) {
           HapticFeedback.mediumImpact();
-          ref.read(allPostsNotifierProvider.notifier).incrementLikeCount(post);
-          showHeart(
+          ref.read(allPostsNotifierProvider.notifier).incrementLikeCount(user,post);
+          heartAnimationNotifier.showHeart(
+            context,
             details.globalPosition.dx,
             details.globalPosition.dy,
             (details.globalPosition.dy - details.localPosition.dy),
@@ -204,15 +153,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        ref
-                            .read(navigationRouterProvider(context))
-                            .goToProfile(user);
-                      },
-                      child: UserIcon.postIcon(user),
-                    ),
+                    UserIconPostIcon(user: user),
                     const Gap(8),
                     Expanded(
                       child: Row(
@@ -388,8 +329,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
           if (post.replyCount > 0)
             GestureDetector(
               onTap: () {
-                HapticFeedback.lightImpact();
-                PostBottomModelSheet(context).openReplies(post);
+                PostBottomModelSheet(context).openReplies(user,post);
               },
               child: Row(
                 children: [
@@ -417,7 +357,6 @@ class FriendFriendsPostWidget extends ConsumerWidget {
           const Gap(12),
           GestureDetector(
             onTap: () {
-              HapticFeedback.lightImpact();
               PostBottomModelSheet(context).openPostAction(post, user);
             },
             child: const Icon(

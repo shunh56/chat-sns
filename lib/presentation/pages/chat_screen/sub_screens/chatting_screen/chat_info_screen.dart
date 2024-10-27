@@ -42,7 +42,6 @@ class ChatInfoScreen extends ConsumerWidget {
             isMuted
                 ? GestureDetector(
                     onTap: () {
-                      HapticFeedback.lightImpact();
                       ref
                           .read(mutesListNotifierProvider.notifier)
                           .unMuteUser(user);
@@ -58,7 +57,6 @@ class ChatInfoScreen extends ConsumerWidget {
                   )
                 : GestureDetector(
                     onTap: () {
-                      HapticFeedback.lightImpact();
                       ref
                           .read(mutesListNotifierProvider.notifier)
                           .muteUser(user);
@@ -75,9 +73,7 @@ class ChatInfoScreen extends ConsumerWidget {
             const Gap(12),
             if (queue.isNotEmpty)
               FocusedMenuHolder(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                },
+                onPressed: () {},
                 menuWidth: 120,
                 blurSize: 0,
                 animateMenuItems: false,
@@ -92,7 +88,6 @@ class ChatInfoScreen extends ConsumerWidget {
                       "フレンド解除",
                     ),
                     onPressed: () {
-                      HapticFeedback.lightImpact();
                       UserBottomModelSheet(context).quitFriendBottomSheet(
                         user,
                         count: 3,
@@ -105,7 +100,6 @@ class ChatInfoScreen extends ConsumerWidget {
                       "報告",
                     ),
                     onPressed: () {
-                      HapticFeedback.lightImpact();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -120,8 +114,6 @@ class ChatInfoScreen extends ConsumerWidget {
                       "ブロック",
                     ),
                     onPressed: () {
-                      HapticFeedback.lightImpact();
-
                       UserBottomModelSheet(context).blockUserBottomSheet(
                         user,
                         count: 3,
@@ -145,7 +137,11 @@ class ChatInfoScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     Gap(themeSize.verticalPaddingLarge),
-                    UserIcon.circleIcon(user, radius: 36),
+                    UserIcon(
+                      user: user,
+                      width: 72,
+                      isCircle: true,
+                    ),
                     const Gap(12),
                     Text(
                       user.name,
@@ -246,7 +242,12 @@ class ChatInfoScreen extends ConsumerWidget {
     final isMuted = mutes.contains(user.userId);
     return Column(
       children: [
-        UserIcon.circleIcon(user, radius: 36),
+       
+        UserIcon(
+                            user: user,
+                            width: 72,
+                            isCircle: true,
+                          ),
         const Gap(12),
         Text(
           user.name,
@@ -264,16 +265,16 @@ class ChatInfoScreen extends ConsumerWidget {
           ),
         ),
         // const Gap(24),
-        if (false)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      //TODO 通話を2人だけにするか、公開にするかどうか
-                      /* HapticFeedback.lightImpact();
+        //if (false)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    //TODO 通話を2人だけにするか、公開にするかどうか
+                    /* 
                     final functions = FirebaseFunctions.instanceFor(
                         region: "asia-northeast1");
                     final HttpsCallable callable = functions
@@ -298,139 +299,137 @@ class ChatInfoScreen extends ConsumerWidget {
                       showMessage("push notification error : $e");
                       DebugPrint("error : $e");
                     } */
-                      HapticFeedback.lightImpact();
-                      final fcmCallable = FirebaseFunctions.instanceFor(
-                              region: "asia-northeast1")
-                          .httpsCallable('pushNotification-sendCall');
 
-                      final voipCallable = FirebaseFunctions.instanceFor(
-                              region: "asia-northeast1")
-                          .httpsCallable('voip-send');
+                    final fcmCallable =
+                        FirebaseFunctions.instanceFor(region: "asia-northeast1")
+                            .httpsCallable('pushNotification-sendCall');
 
-                      final me =
-                          ref.read(myAccountNotifierProvider).asData!.value;
-                      final voipToken = user.voipToken;
-                      final fcmToken = user.fcmToken;
-                      if (voipToken == null || voipToken.isEmpty) {
-                        if (fcmToken != null) {
-                          try {
-                            DebugPrint("sending fcm notification");
-                            final result = await fcmCallable.call({
-                              'token': fcmToken,
-                              'userId': me.userId,
-                              'name': me.name,
-                              'imageUrl': me.imageUrl,
-                              'dateTime': DateTime.now().toString(),
-                            });
-                            DebugPrint("response : ${result.data}");
-                          } catch (e) {
-                            DebugPrint("error : $e");
-                          }
-                        }
-                      } else {
+                    final voipCallable =
+                        FirebaseFunctions.instanceFor(region: "asia-northeast1")
+                            .httpsCallable('voip-send');
+
+                    final me =
+                        ref.read(myAccountNotifierProvider).asData!.value;
+                    final voipToken = user.voipToken;
+                    final fcmToken = user.fcmToken;
+                    if (voipToken == null || voipToken.isEmpty) {
+                      if (fcmToken != null) {
                         try {
-                          final vc = await ref
-                              .read(voiceChatUsecaseProvider)
-                              .createVoiceChat("VOICE CALL");
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => VoiceChatScreen(id: vc.id),
-                            ),
-                          );
-                          DebugPrint("sending voip notification");
-                          final result = await voipCallable.call({
-                            'tokens': [voipToken],
+                          DebugPrint("sending fcm notification");
+                          final result = await fcmCallable.call({
+                            'token': fcmToken,
+                            'userId': me.userId,
                             'name': me.name,
-                            'id': vc.id,
+                            'imageUrl': me.imageUrl,
+                            'dateTime': DateTime.now().toString(),
                           });
-                          showMessage("voip response : ${result.data}");
                           DebugPrint("response : ${result.data}");
                         } catch (e) {
-                          showMessage("push notification error : $e");
                           DebugPrint("error : $e");
                         }
                       }
-                    },
-                    child: CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      child: const Icon(
-                        Icons.phone,
-                      ),
+                    } else {
+                      try {
+                        final vc = await ref
+                            .read(voiceChatUsecaseProvider)
+                            .createVoiceChat("VOICE CALL");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => VoiceChatScreen(id: vc.id),
+                          ),
+                        );
+                        DebugPrint("sending voip notification");
+                        final result = await voipCallable.call({
+                          'tokens': [voipToken],
+                          'name': me.name,
+                          'id': vc.id,
+                        });
+                        showMessage("voip response : ${result.data}");
+                        DebugPrint("response : ${result.data}");
+                      } catch (e) {
+                        showMessage("push notification error : $e");
+                        DebugPrint("error : $e");
+                      }
+                    }
+                  },
+                  child: CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    child: const Icon(
+                      Icons.phone,
                     ),
                   ),
-                  const Gap(4),
-                  const Text(
-                    "通話",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: ThemeColor.beige,
-                    ),
+                ),
+                const Gap(4),
+                const Text(
+                  "通話",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: ThemeColor.beige,
+                  ),
+                )
+              ],
+            ),
+            const Gap(32),
+            isMuted
+                ? Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          ref
+                              .read(mutesListNotifierProvider.notifier)
+                              .unMuteUser(user);
+                        },
+                        child: CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          child: const Icon(
+                            Icons.notifications_off_rounded,
+                          ),
+                        ),
+                      ),
+                      const Gap(4),
+                      const Text(
+                        "ミュート",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: ThemeColor.beige,
+                        ),
+                      )
+                    ],
                   )
-                ],
-              ),
-              const Gap(32),
-              isMuted
-                  ? Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            ref
-                                .read(mutesListNotifierProvider.notifier)
-                                .unMuteUser(user);
-                          },
-                          child: CircleAvatar(
-                            radius: 24,
-                            backgroundColor: Colors.white.withOpacity(0.2),
-                            child: const Icon(
-                              Icons.notifications_off_rounded,
-                            ),
+                : Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          ref
+                              .read(mutesListNotifierProvider.notifier)
+                              .muteUser(user);
+                        },
+                        child: CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          child: const Icon(
+                            Icons.notifications_rounded,
                           ),
                         ),
-                        const Gap(4),
-                        const Text(
-                          "ミュート",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: ThemeColor.beige,
-                          ),
-                        )
-                      ],
-                    )
-                  : Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            ref
-                                .read(mutesListNotifierProvider.notifier)
-                                .muteUser(user);
-                          },
-                          child: CircleAvatar(
-                            radius: 24,
-                            backgroundColor: Colors.white.withOpacity(0.2),
-                            child: const Icon(
-                              Icons.notifications_rounded,
-                            ),
-                          ),
+                      ),
+                      const Gap(4),
+                      const Text(
+                        "ミュート",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: ThemeColor.beige,
                         ),
-                        const Gap(4),
-                        const Text(
-                          "ミュート",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: ThemeColor.beige,
-                          ),
-                        )
-                      ],
-                    ),
-            ],
-          ),
+                      )
+                    ],
+                  ),
+          ],
+        ),
       ],
     );
   }

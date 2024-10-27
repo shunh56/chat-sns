@@ -279,7 +279,7 @@ class SettingsScreen extends ConsumerWidget {
               topRight: Radius.circular(8),
             ),
             onTap: () {
-              HapticFeedback.lightImpact();
+              
 
               if (page != null) {
                 if (function != null) {
@@ -311,7 +311,7 @@ class SettingsScreen extends ConsumerWidget {
           color: ThemeColor.accent,
           child: InkWell(
             onTap: () {
-              HapticFeedback.lightImpact();
+              
               if (page != null) {
                 if (function != null) {
                   function();
@@ -348,7 +348,7 @@ class SettingsScreen extends ConsumerWidget {
           bottomRight: Radius.circular(8),
         ),
         onTap: () {
-          HapticFeedback.lightImpact();
+          
           if (page != null) {
             if (function != null) {
               function();

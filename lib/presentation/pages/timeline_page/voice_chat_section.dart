@@ -77,7 +77,11 @@ class VoiceChatSection extends ConsumerWidget {
                       color: ThemeColor.accent,
                     ),
                   ),
-                  child: UserIcon.circleIcon(users[i], radius: 18),
+                  child: UserIcon(
+                    user: users[i],
+                    width: 36,
+                    isCircle: true,
+                  ),
                 ),
               ),
             );
@@ -144,83 +148,4 @@ class VoiceChatSection extends ConsumerWidget {
       },
     );
   }
-
-/*  Widget _buildOneUserCard(BuildContext context, WidgetRef ref, VoiceChat vc,
-      List<UserAccount> users) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        color: ThemeColor.accent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Container(
-        child: Center(
-          child: UserIcon.circleIcon(users[0], radius: 32),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTwoUserCard(BuildContext context, WidgetRef ref, VoiceChat vc,
-      List<UserAccount> users) {
-    return Container(
-      width: 100,
-      height: 100,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: ThemeColor.accent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            child: UserIcon.circleIcon(users[0], radius: 28),
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: UserIcon.circleIcon(users[1], radius: 28),
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFouruserCard(BuildContext context, WidgetRef ref, VoiceChat vc,
-      List<UserAccount> users) {
-    final users = ref
-        .watch(allUsersNotifierProvider)
-        .asData!
-        .value
-        .entries
-        .where((item) => vc.joinedUsers.contains(item.key))
-        .map((item) => item.value);
-    return Container(
-      width: 100,
-      height: 100,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      decoration: BoxDecoration(
-        color: ThemeColor.accent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: Wrap(
-          children: users
-              .map(
-                (user) => Container(
-                  padding: const EdgeInsets.all(2),
-                  child: UserIcon.circleIcon(user),
-                ),
-              )
-              .toList(),
-        ),
-      ),
-    );
-  }
- */
 }

@@ -177,7 +177,7 @@ showDeleteRequestDialog(
                           .read(navigationRouterProvider(context))
                           .goToProfile(user);
                     },
-                    child: UserIcon.tileIcon(user),
+                    child: UserIcon(user:user),
                   ),
                   Text(
                     user.name,

@@ -65,11 +65,13 @@ class CurrentStatusPostDatasource {
 
   Future<QuerySnapshot<Map<String, dynamic>>> getPostFromUserIds(
       List<String> userIds) async {
+    final twentyFourHoursAgo =
+        Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1)));
     return await _firestore
         .collection(collectionName)
         .where("userId", whereIn: userIds)
+        .where("createdAt", isGreaterThan: twentyFourHoursAgo)
         .orderBy("createdAt", descending: true)
-        .limit(QUERY_LIMIT)
         .get();
   }
 
@@ -125,6 +127,12 @@ class CurrentStatusPostDatasource {
         "likeCount": 0,
       },
     );
+  }
+
+  readPost(String id) {
+    _firestore.collection(collectionName).doc(id).update({
+      "seenUserIds": FieldValue.arrayUnion([_auth.currentUser!.uid]),
+    });
   }
 
   incrementLikeCountToReply(String postId, String replyId, int count) {

@@ -22,18 +22,10 @@ class EditTopFriendsScreen extends HookConsumerWidget {
     final friendInfos =
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
     final friendIds = friendInfos.map((item) => item.userId).toList();
-    /**final imageWidth =
-        (themeSize.screenWidth - 2 * themeSize.horizontalPadding - 24 - 6 * 8) /
-            5; */
     final imageWidth =
         (themeSize.screenWidth - 2 * themeSize.horizontalPadding) / 5 - 8;
-    List users = ref
-        .watch(allUsersNotifierProvider)
-        .asData!
-        .value
-        .values
-        .where((user) => friendIds.contains(user.userId))
-        .toList();
+    final users = ref.watch(allUsersNotifierProvider).asData!.value;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -84,74 +76,71 @@ class EditTopFriendsScreen extends HookConsumerWidget {
               ),
               const Gap(8),
               Wrap(
-                children: users
-                    .where((user) => topFriends.contains(user.userId))
-                    .map(
-                      (user) => GestureDetector(
-                        onTap: () {
-                          final list = topFriends
-                              .where((item) => item != user.userId)
-                              .toList();
+                children: topFriends.map((userId) {
+                  final user = users[userId]!;
+                  return GestureDetector(
+                    onTap: () {
+                      final list = topFriends
+                          .where((item) => item != user.userId)
+                          .toList();
 
-                          topFriendsNotifier.state = list;
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.all(4),
-                          width: imageWidth,
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  color: ThemeColor.accent,
-                                  height: imageWidth,
-                                  width: imageWidth,
-                                  child: user.imageUrl != null
-                                      ? CachedNetworkImage(
-                                          imageUrl: user.imageUrl!,
-                                          fadeInDuration:
-                                              const Duration(milliseconds: 120),
-                                          imageBuilder:
-                                              (context, imageProvider) =>
-                                                  Container(
-                                            height: imageWidth,
-                                            width: imageWidth,
-                                            decoration: BoxDecoration(
-                                              color: Colors.transparent,
-                                              image: DecorationImage(
-                                                image: imageProvider,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
+                      topFriendsNotifier.state = list;
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.all(4),
+                      width: imageWidth,
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              color: ThemeColor.accent,
+                              height: imageWidth,
+                              width: imageWidth,
+                              child: user.imageUrl != null
+                                  ? CachedNetworkImage(
+                                      imageUrl: user.imageUrl!,
+                                      fadeInDuration:
+                                          const Duration(milliseconds: 120),
+                                      imageBuilder: (context, imageProvider) =>
+                                          Container(
+                                        height: imageWidth,
+                                        width: imageWidth,
+                                        decoration: BoxDecoration(
+                                          color: Colors.transparent,
+                                          image: DecorationImage(
+                                            image: imageProvider,
+                                            fit: BoxFit.cover,
                                           ),
-                                          placeholder: (context, url) =>
-                                              const SizedBox(),
-                                          errorWidget: (context, url, error) =>
-                                              const SizedBox(),
-                                        )
-                                      : Icon(
-                                          Icons.person_outline,
-                                          size: imageWidth * 0.8,
-                                          color: ThemeColor.stroke,
                                         ),
-                                ),
-                              ),
-                              const Gap(4),
-                              Text(
-                                user.name,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: ThemeColor.text,
-                                ),
-                              )
-                            ],
+                                      ),
+                                      placeholder: (context, url) =>
+                                          const SizedBox(),
+                                      errorWidget: (context, url, error) =>
+                                          const SizedBox(),
+                                    )
+                                  : Icon(
+                                      Icons.person_outline,
+                                      size: imageWidth * 0.8,
+                                      color: ThemeColor.stroke,
+                                    ),
+                            ),
                           ),
-                        ),
+                          const Gap(4),
+                          Text(
+                            user.name,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: ThemeColor.text,
+                            ),
+                          )
+                        ],
                       ),
-                    )
-                    .toList(),
+                    ),
+                  );
+                }).toList(),
               ),
               const Gap(24),
               const Text(
@@ -164,8 +153,10 @@ class EditTopFriendsScreen extends HookConsumerWidget {
               ),
               const Gap(8),
               Wrap(
-                children: users
-                    .where((user) => !topFriends.contains(user.userId))
+                children: users.values
+                    .where((user) =>
+                        !topFriends.contains(user.userId) &&
+                        friendIds.contains(user.userId))
                     .map(
                       (user) => GestureDetector(
                         onTap: () {
@@ -236,6 +227,7 @@ class EditTopFriendsScreen extends HookConsumerWidget {
                     )
                     .toList(),
               ),
+              const Gap(72),
             ],
           ),
         ),

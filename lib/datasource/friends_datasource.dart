@@ -79,6 +79,17 @@ class FriendsDatasource {
     });
   }
 
+  addEngagement(String userId) {
+    return _firestore
+        .collection("users")
+        .doc(_auth.currentUser!.uid)
+        .collection(collectionName)
+        .doc(userId)
+        .update({
+      "engagementCount": FieldValue.increment(1),
+    });
+  }
+
   //READ
   Stream<QuerySnapshot<Map<String, dynamic>>> streamFriendRequesteds() {
     return _firestore

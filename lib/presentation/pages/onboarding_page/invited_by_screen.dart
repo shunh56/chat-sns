@@ -25,7 +25,7 @@ class InvitedFromScreen extends ConsumerWidget {
           child: Column(
             children: [
               Gap(themeSize.screenHeight * 0.2),
-              UserIcon.tileIcon(user, width: 120),
+             UserIcon(user: user,width: 120,navDisabled: true,),
               Gap(themeSize.verticalPaddingLarge),
               Text(
                 "${user.name}さんに",

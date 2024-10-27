@@ -1,6 +1,5 @@
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/components/core/shader.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/share_widget.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
@@ -20,6 +19,7 @@ class SearchScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
 
     return Scaffold(
       body: Container(
@@ -28,7 +28,10 @@ class SearchScreen extends ConsumerWidget {
           children: [
             AppBar(
               centerTitle: false,
-              title: const Text("友達"),
+              title: Text(
+                "友達",
+                style: textStyle.appbarText(japanese: true),
+              ),
             ),
             const Gap(4),
             Padding(
@@ -38,7 +41,6 @@ class SearchScreen extends ConsumerWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      HapticFeedback.lightImpact();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -67,7 +69,7 @@ class SearchScreen extends ConsumerWidget {
                   const Gap(8),
                   /*   GestureDetector(
                     onTap: () {
-                      HapticFeedback.lightImpact();
+                      
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -96,7 +98,6 @@ class SearchScreen extends ConsumerWidget {
                   const Gap(8), */
                   GestureDetector(
                     onTap: () {
-                      HapticFeedback.lightImpact();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -159,7 +160,7 @@ class SearchScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            Gap(12),
+            const Gap(12),
             SizedBox(
               height: 100 + 8,
               child: ListView.builder(
@@ -181,10 +182,7 @@ class SearchScreen extends ConsumerWidget {
                             .read(navigationRouterProvider(context))
                             .goToProfile(user);
                       },
-                      child: UserIcon.tileIcon(
-                        user,
-                        width: 100,
-                      ),
+                      child: UserIcon(user: user, width: 108),
                     ),
                   );
                 },

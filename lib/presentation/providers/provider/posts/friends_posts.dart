@@ -53,7 +53,7 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
         final friendIds = infos.map((info) => info.userId).toList();
         final userIds = [...friendIds, myId];
         futures.add(postUsecase.getPostFromUserIds(userIds));
-        futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
+        //futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
         await Future.wait(futures);
         for (var item in futures) {
           final list = await item;
@@ -87,7 +87,7 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
             .toList();
     final userIds = [...friendIds, myId];
     futures.add(postUsecase.getPostFromUserIds(userIds));
-    futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
+    //futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
     await Future.wait(futures);
     for (var item in futures) {
       final list = await item;
@@ -155,53 +155,101 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   }
 }
 
-/*final friendsCurrentStatusPostsNotiferProvider =
+final friendsCurrentStatusPostsNotiferProvider =
     StateNotifierProvider.autoDispose<FriendsCurrentStatusPostsNotifier,
-        AsyncValue<List<CurrentStatusPost>>>((ref) {
+        AsyncValue<Map<String, List<CurrentStatusPost>>>>((ref) {
   return FriendsCurrentStatusPostsNotifier(
     ref,
+    ref.watch(friendIdListNotifierProvider),
     ref.watch(currentStatusPostUsecaseProvider),
   )..initialize();
 });
 
 /// State
 class FriendsCurrentStatusPostsNotifier
-    extends StateNotifier<AsyncValue<List<CurrentStatusPost>>> {
+    extends StateNotifier<AsyncValue<Map<String, List<CurrentStatusPost>>>> {
   FriendsCurrentStatusPostsNotifier(
     this.ref,
-    this.usecase,
+    this.asyncValue,
+    this.currentStatusPostUsecase,
   ) : super(const AsyncValue.loading());
 
   final Ref ref;
-  final CurrentStatusPostUsecase usecase;
+  final AsyncValue<List<FriendInfo>> asyncValue;
+
+  final CurrentStatusPostUsecase currentStatusPostUsecase;
+
   bool initialized = false;
 
   Future<void> initialize() async {
+    final myId = ref.read(authProvider).currentUser!.uid;
+    Map<String, List<CurrentStatusPost>> map = {};
     List<CurrentStatusPost> posts = [];
-    while (!initialized) {
-      final friendIds = ref.read(friendIdListNotifierProvider);
-      if (friendIds.hasValue) {
-        List<Future<List<CurrentStatusPost>>> futures = [];
-        for (String userId in friendIds.asData!.value) {
-          futures.add(usecase.getUsersNewestPost(userId));
-        }
-        await Future.wait(futures);
-        for (var future in futures) {
-          posts.addAll(await future);
-        }
-        posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        DebugPrint("posts : ${posts.length}");
-        if (mounted) {
-          state = AsyncValue.data(posts);
-        }
+    asyncValue.maybeWhen(
+      data: (infos) async {
+        if (initialized) return;
         initialized = true;
+        List<Future<List<CurrentStatusPost>>> futures = [];
+        final friendIds = infos.map((info) => info.userId).toList();
+        final userIds = [...friendIds, myId];
+        futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
+        await Future.wait(futures);
+        for (var item in futures) {
+          final list = await item;
+          ref
+              .read(allCurrentStatusPostsNotifierProvider.notifier)
+              .addPosts(list);
+          posts.addAll(list);
+        }
+        posts.removeWhere((post) => post.noNewChange);
+        posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        for (var post in posts) {
+          if (map[post.userId] == null) {
+            map[post.userId] = [post];
+          } else {
+            map[post.userId]!.add(post);
+          }
+        }
+        if (mounted) {
+          state = AsyncValue.data(map);
+        }
+      },
+      orElse: () {},
+    );
+  }
+
+  Future<void> refresh() async {
+    Map<String, List<CurrentStatusPost>> map = {};
+    List<CurrentStatusPost> posts = [];
+    List<Future<List<CurrentStatusPost>>> futures = [];
+    final myId = ref.read(authProvider).currentUser!.uid;
+    final friendIds =
+        (ref.read(friendIdListNotifierProvider).asData?.value ?? [])
+            .map((info) => info.userId)
+            .toList();
+    final userIds = [...friendIds, myId];
+    futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
+    await Future.wait(futures);
+    for (var item in futures) {
+      final list = await item;
+      ref.read(allCurrentStatusPostsNotifierProvider.notifier).addPosts(list);
+      posts.addAll(list);
+    }
+    posts.removeWhere((post) => post.noNewChange);
+    posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    for (var post in posts) {
+      if (map[post.userId] == null) {
+        map[post.userId] = [post];
       } else {
-        await Future.delayed(const Duration(milliseconds: 100));
+        map[post.userId]!.add(post);
       }
+    }
+    if (mounted) {
+      state = AsyncValue.data(map);
     }
   }
 }
- */
+
 final friendFriendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
     FriendFriendsPostsNotifier, AsyncValue<List<Post>>>((ref) {
   return FriendFriendsPostsNotifier(

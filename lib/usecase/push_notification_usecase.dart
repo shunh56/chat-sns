@@ -13,6 +13,7 @@ class PushNotificationUsecase {
   final PushNotificationRepository _repository;
 
   PushNotificationUsecase(this._repository);
+
   sendDm(
     UserAccount user,
     String? title,
@@ -48,10 +49,16 @@ class PushNotificationUsecase {
     );
   }
 
-  sendVoiceChat() {}
-  sendFriendReqeust() {}
+  sendReaction(UserAccount user, String title, String body) {
+    if (user.fcmToken != null) {
+      _repository.sendReaction(user.fcmToken!, title, body);
+    }
+  }
 
-  sendmulticast(List<UserAccount> users, String? title, String body) {
+  //sendVoiceChat() {}
+  //sendFriendReqeust() {}
+
+  /*sendmulticast(List<UserAccount> users, String? title, String body) {
     final titleText = title ?? appName;
     return _repository.sendmulticast(
       users
@@ -61,5 +68,5 @@ class PushNotificationUsecase {
       titleText,
       body,
     );
-  }
+  } */
 }

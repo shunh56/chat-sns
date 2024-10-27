@@ -16,7 +16,6 @@ class AllUsersNotifier extends _$AllUsersNotifier {
   AsyncValue<Map<String, UserAccount>> build() {
     Map<String, UserAccount> allUsers = {};
     final keys = box.keys;
-    DebugPrint("FOUND ${keys.length} user data stored");
     for (String userId in keys) {
       final hiveObject = box.get(userId);
       if (hiveObject != null) {
@@ -35,25 +34,25 @@ class AllUsersNotifier extends _$AllUsersNotifier {
     List<Future<UserAccount?>> futures = [];
     if (update) {
       for (String userId in userIds) {
-        DebugPrint("getting from firestore!");
         futures.add(ref.read(userUsecaseProvider).getUserByUid(userId));
       }
     } else {
       for (String userId in userIds) {
+        final cachUser = cache[userId];
         final hiveUser = box.get(userId);
-        if (hiveUser != null) {
+        //TODO => expirment
+        if (cachUser != null) {
+          futures.add(Future.value(cachUser));
+        } else if (hiveUser != null) {
           DateTime now = DateTime.now();
           DateTime updatedAt = hiveUser.updatedAt.toDate();
           final diffInHours = now.difference(updatedAt).inHours;
           if ((diffInHours < 72)) {
-            DebugPrint("getting from HIVE!");
             futures.add(Future.value(hiveUser.toUserAccount()));
+          } else {
+            futures.add(ref.read(userUsecaseProvider).getUserByUid(userId));
           }
-        } else if (cache[userId] != null) {
-          DebugPrint("getting from CACHE!");
-          futures.add(Future.value(cache[userId]));
         } else {
-          DebugPrint("getting from firestore!");
           futures.add(ref.read(userUsecaseProvider).getUserByUid(userId));
         }
       }
@@ -92,7 +91,7 @@ class AllUsersNotifier extends _$AllUsersNotifier {
       ),
     );
     cache[user.userId] = user;
-    DebugPrint("強制アップデート");
+    DebugPrint("強制アップデート ${user.name}");
     state = AsyncValue.data(cache);
     return user;
   }
@@ -102,8 +101,16 @@ class AllUsersNotifier extends _$AllUsersNotifier {
         state.asData != null ? state.asData!.value : {};
     for (var user in users) {
       cache[user.userId] = user;
+      box.put(
+        user.userId,
+        UserAccountHive(
+          updatedAt: Timestamp.now(),
+          type: ConnectionType.others,
+          user: user,
+        ),
+      );
     }
-    DebugPrint("addUserAccounts");
+    DebugPrint("addUserAccounts ${users.map((user) => user.name)}");
     state = AsyncValue.data(cache);
   }
 

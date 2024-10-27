@@ -83,7 +83,7 @@ class AccountScreen extends ConsumerWidget {
           ),
           child: InkWell(
             onTap: () {
-              HapticFeedback.lightImpact();
+              
               /* try {
                 auth.currentUser!.updateEmail("");
               } catch (e) {
@@ -118,7 +118,7 @@ class AccountScreen extends ConsumerWidget {
           ),
           child: InkWell(
             onTap: () {
-              HapticFeedback.lightImpact();
+              
               /*  try {
                 auth.currentUser!.updatePassword("");
               } catch (e) {
@@ -343,7 +343,7 @@ class AccountScreen extends ConsumerWidget {
           ),
           child: InkWell(
             onTap: () {
-              HapticFeedback.lightImpact();
+              
               if (page != null) {
                 Navigator.push(
                   context,
@@ -399,7 +399,7 @@ class AccountScreen extends ConsumerWidget {
       ),
       child: InkWell(
         onTap: () {
-          HapticFeedback.lightImpact();
+          
           if (page != null) {
             Navigator.push(
               context,

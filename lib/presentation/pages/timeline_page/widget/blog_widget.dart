@@ -1,4 +1,3 @@
-
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/blog.dart';
@@ -35,12 +34,11 @@ class BlogWidget extends ConsumerWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    HapticFeedback.lightImpact();
                     ref
                         .read(navigationRouterProvider(context))
                         .goToProfile(user);
                   },
-                  child: UserIcon.tileIcon(user, width: 40),
+                  child: UserIcon(user: user, width: 40),
                 ),
                 const Gap(16),
                 Expanded(
@@ -168,8 +166,7 @@ class BlogWidget extends ConsumerWidget {
               children: [
                 const Gap(12),
                 GradientText(
-                  text:blog.likeCount.toString(),
-                  
+                  text: blog.likeCount.toString(),
                 ),
               ],
             ),
@@ -178,4 +175,3 @@ class BlogWidget extends ConsumerWidget {
     );
   }
 }
-

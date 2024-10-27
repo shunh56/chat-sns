@@ -1,3 +1,4 @@
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
@@ -16,6 +17,7 @@ class EditNowWithScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final currentStatus = ref.watch(currentStatusStateProvider);
     final currentStatusNotifier =
         ref.watch(currentStatusStateProvider.notifier);
@@ -34,8 +36,9 @@ class EditNowWithScreen extends HookConsumerWidget {
         .toList();
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "一緒にいる友達を編集",
+          style: textStyle.appbarText(japanese: true, isSmall: true),
         ),
         actions: [
           GestureDetector(
@@ -236,6 +239,7 @@ class EditNowWithScreen extends HookConsumerWidget {
                     )
                     .toList(),
               ),
+              Gap(72),
             ],
           ),
         ),

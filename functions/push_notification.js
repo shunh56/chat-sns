@@ -66,7 +66,7 @@ exports.sendPushNotification = functions
         headers: {
           "apns-push-type": "background",
           "apns-priority": "5", // Must be `5` when `contentAvailable` is set to true.
-          "apns-topic": "com.shunh.exampleApp", // bundle identifier
+          "apns-topic": "com.blank.sns", // bundle identifier
         },
       },
     };
@@ -113,7 +113,7 @@ exports.sendCall = functions
         headers: {
           "apns-push-type": "background",
           "apns-priority": "5", // Must be `5` when `contentAvailable` is set to true.
-          "apns-topic": "com.shunh.exampleApp", // bundle identifier
+          "apns-topic": "com.blank.sns", // bundle identifier
         },
       },
     };

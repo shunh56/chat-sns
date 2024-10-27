@@ -1,4 +1,5 @@
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/reply.dart';
 import 'package:app/presentation/components/user_icon.dart';
@@ -14,6 +15,8 @@ class ReplyWidget extends ConsumerWidget {
   final Reply reply;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final user =
         ref.read(allUsersNotifierProvider).asData!.value[reply.userId]!;
 
@@ -21,18 +24,17 @@ class ReplyWidget extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+          padding: const EdgeInsets.only(
+            top: 8,
+            left: 12,
+            right: 12,
+            bottom: 8,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  ref.read(navigationRouterProvider(context)).goToProfile(user);
-                },
-                child: UserIcon.postIcon(user),
-              ),
-              const Gap(8),
+              UserIconPostIcon(user: user),
+              const Gap(12),
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,10 +48,9 @@ class ReplyWidget extends ConsumerWidget {
                             children: [
                               Text(
                                 user.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: ThemeColor.text,
-                                  fontWeight: FontWeight.w500,
+                                style: textStyle.w600(
+                                  fontSize: 15,
+                                  height: 1.0,
                                 ),
                               ),
                               const Gap(4),

@@ -292,7 +292,7 @@ configureVoiceCall() async {
 }
 
 /*configureSwiftMethodChannel() {
-  const platform = MethodChannel('com.shunh.exampleApp/voip');
+  const platform = MethodChannel('com.blank.sns/voip');
   platform.setMethodCallHandler(_handleVoIPCall);
 }
 
@@ -526,11 +526,11 @@ class SplashScreen extends ConsumerWidget {
                                                   },
                                                   child: Container(
                                                     padding:
-                                                        EdgeInsets.symmetric(
+                                                        const EdgeInsets.symmetric(
                                                       vertical: 12,
                                                       horizontal: 24,
                                                     ),
-                                                    child: Text(
+                                                    child: const Text(
                                                       "REBOOT ACCOUNT",
                                                     ),
                                                   ),
@@ -541,7 +541,7 @@ class SplashScreen extends ConsumerWidget {
                                         ),
                                       );
                                     default:
-                                      return Phase01MainPage();
+                                      return const Phase01MainPage();
                                   }
                                 },
                                 loading: () => const LoadingPage(),

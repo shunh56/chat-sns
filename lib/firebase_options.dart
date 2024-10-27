@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCZA_7jMPI5b9MHQM7-cdywMhiCnnVLMvk',
-    appId: '1:889410445548:android:bd75359cfff78bf00185c9',
+    appId: '1:889410445548:android:53d67e153fae0a460185c9',
     messagingSenderId: '889410445548',
     projectId: 'chat-sns-project',
     storageBucket: 'chat-sns-project.appspot.com',
@@ -59,11 +59,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyC8aB27Wo9Lo6NKgV2ctOSIJVQTztqitiM',
-    appId: '1:889410445548:ios:5873236e4d91948a0185c9',
+    appId: '1:889410445548:ios:58820ac80a95a1120185c9',
     messagingSenderId: '889410445548',
     projectId: 'chat-sns-project',
     storageBucket: 'chat-sns-project.appspot.com',
-    iosBundleId: 'com.shunh.exampleApp',
+    iosClientId: '889410445548-4sqpqmv6mejnsk1pgg2tb1i6ja13iahn.apps.googleusercontent.com',
+    iosBundleId: 'com.blank.sns',
   );
 
 }

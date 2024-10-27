@@ -101,7 +101,7 @@ class SubsctiptionBottomSheet {
                           child: TabBar(
                             isScrollable: true,
                             onTap: (val) {
-                              HapticFeedback.lightImpact();
+                              
                             },
                             indicator: const BoxDecoration(
                               shape: BoxShape.circle,

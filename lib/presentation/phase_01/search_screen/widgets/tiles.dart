@@ -34,7 +34,6 @@ class UserRequestWidget extends ConsumerWidget {
     if (requesteds.contains(user.userId)) {
       return GestureDetector(
         onTap: () {
-          HapticFeedback.lightImpact();
           ref.read(navigationRouterProvider(context)).goToProfile(user);
         },
         child: Container(
@@ -42,7 +41,7 @@ class UserRequestWidget extends ConsumerWidget {
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Row(
             children: [
-              UserIcon.tileIcon(user, width: 72),
+              UserIcon(user: user,width: 72),
               const Gap(12),
               Expanded(
                 child: Column(
@@ -61,7 +60,7 @@ class UserRequestWidget extends ConsumerWidget {
                     ),
                     const Gap(4),
                     Text(
-                      "@" + user.username,
+                      "@${user.username}",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -159,10 +158,10 @@ class UserRequestWidget extends ConsumerWidget {
           children: [
             GestureDetector(
               onTap: () {
-                HapticFeedback.lightImpact();
+                
                 ref.read(navigationRouterProvider(context)).goToProfile(user);
               },
-              child: UserIcon.tileIcon(user, width: 72),
+              child:UserIcon(user: user,width: 72),
             ),
             const Gap(12),
             Expanded(
@@ -242,13 +241,7 @@ class UserRequestWidget extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              ref.read(navigationRouterProvider(context)).goToProfile(user);
-            },
-            child: UserIcon.tileIcon(user, width: 72),
-          ),
+          UserIcon(user: user,width: 72),
           const Gap(12),
           Expanded(
             child: Column(
@@ -423,7 +416,7 @@ class UserRequestButton extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final me = ref.read(myAccountNotifierProvider).asData!.value;
-    final subscribed = false; // me.subscriptionStatus
+    const subscribed = false; // me.subscriptionStatus
     final requests =
         ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];
     final requesteds =

@@ -26,6 +26,10 @@ class FriendsRepository {
     return _datasource.addFriend(userId);
   }
 
+  void addEngagement(String userId) {
+    _datasource.addEngagement(userId);
+  }
+
   //READ
   Stream<List<String>> streamFriendRequesteds() {
     final stream = _datasource.streamFriendRequesteds();
@@ -39,10 +43,16 @@ class FriendsRepository {
 
   Stream<List<FriendInfo>> streamFriends() {
     final stream = _datasource.streamFriends();
-    return stream.map((event) => event.docs.map((doc) {
-          final json = doc.data();
-          return FriendInfo(json["createdAt"], json["userId"]);
-        }).toList());
+    return stream.map((event) => event.docs.map(
+          (doc) {
+            final json = doc.data();
+            return FriendInfo(
+              createdAt: json["createdAt"],
+              userId: json["userId"],
+              engagementCount: json["engagementCount"] ?? 0,
+            );
+          },
+        ).toList());
   }
 
   Future<List<String>> getFriends(String userId) async {

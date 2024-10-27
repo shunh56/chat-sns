@@ -26,6 +26,8 @@ class _PublicPostsThreadState extends ConsumerState<PublicPostsThread>
     return postList.when(
       data: (list) {
         return RefreshIndicator(
+          color: ThemeColor.text,
+          backgroundColor: ThemeColor.stroke,
           onRefresh: () async {
             return await ref
                 .read(publicPostsNotiferProvider.notifier)
@@ -36,12 +38,8 @@ class _PublicPostsThreadState extends ConsumerState<PublicPostsThread>
             itemCount: list.length,
             itemBuilder: (context, index) {
               final post = list[index];
-              final user = ref
-                  .read(allUsersNotifierProvider)
-                  .asData!
-                  .value[post.userId]!;
 
-              return PostWidget(postRef: post, userId: post.userId);
+              return PostWidget(postRef: post);
             },
           ),
         );

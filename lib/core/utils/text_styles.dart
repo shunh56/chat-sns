@@ -64,12 +64,14 @@ class ThemeTextStyle {
   TextStyle w400({
     Color color = ThemeColor.text,
     double fontSize = 12.0,
+    bool underline = false,
   }) {
     return TextStyle(
       color: color,
       fontSize: fontSize,
       fontWeight: FontWeight.w400,
       fontFamily: primary,
+      decoration: underline ? TextDecoration.underline : null,
     );
   }
 
@@ -88,12 +90,14 @@ class ThemeTextStyle {
   TextStyle w600({
     Color color = ThemeColor.text,
     double fontSize = 12.0,
+    double? height,
   }) {
     return TextStyle(
       color: color,
       fontSize: fontSize,
       fontWeight: FontWeight.w600,
       fontFamily: primary,
+      height: height,
     );
   }
 
@@ -151,10 +155,14 @@ class ThemeTextStyle {
     );
   }
 
-  TextStyle appbarText({bool japanese = false}) {
+  TextStyle appbarText({bool japanese = false, bool isSmall = false}) {
     return TextStyle(
       color: ThemeColor.text,
-      fontSize: japanese ? 16 : 20,
+      fontSize: isSmall
+          ? 16
+          : japanese
+              ? 20
+              : 20,
       fontWeight: FontWeight.w600,
       fontFamily: japanese ? primary : null,
     );

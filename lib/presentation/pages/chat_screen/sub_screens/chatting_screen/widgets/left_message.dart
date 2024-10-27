@@ -41,7 +41,6 @@ class LeftMessage extends ConsumerWidget {
         children: [
           GestureDetector(
             onTap: () {
-              HapticFeedback.lightImpact();
               ref.read(navigationRouterProvider(context)).goToProfile(user);
             },
             child: Container(
@@ -102,10 +101,10 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
   const LeftCurrentStatusMessage({
     super.key,
     required this.message,
-    required this.userId,
+    required this.user,
   });
   final CurrentStatusMessage message;
-  final String userId;
+  final UserAccount user;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return _buildCurrentStatusReply(context, ref);
@@ -113,29 +112,12 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
 
   Widget _buildCurrentStatusReply(BuildContext context, WidgetRef ref) {
     final post = ref
-        .watch(allCurrentStatusPostsNotifierProvider)
-        .asData
-        ?.value[message.postId];
-    final user = ref.read(allUsersNotifierProvider).asData!.value[userId]!;
-    late Widget content;
-    if (post != null) {
-      content =
-          CurrentStatusPostWidgets(context, ref, post, user).dmWidget(user);
-    } else {
-      final postAsyncValue =
-          ref.watch(currentStatusPostProvider(message.postId));
-      content = postAsyncValue.maybeWhen(
-        data: (post) {
-          return CurrentStatusPostWidgets(context, ref, post, user)
-              .dmWidget(user);
-        },
-        orElse: () => const SizedBox(),
-      );
-    }
-
+        .read(allCurrentStatusPostsNotifierProvider)
+        .asData!
+        .value[message.postId]!;
     return Container(
       margin: const EdgeInsets.only(
-        top: 12,
+        top: 24,
         left: 12,
         right: 72,
         bottom: 4,
@@ -150,7 +132,10 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
             ),
           ),
           const Gap(4),
-          content,
+          CurrentStatusDmWidget(
+            post: post,
+            user: user,
+          ),
           const Gap(8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +143,6 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
             children: [
               GestureDetector(
                 onTap: () {
-                  HapticFeedback.lightImpact();
                   ref.read(navigationRouterProvider(context)).goToProfile(user);
                 },
                 child: Container(
@@ -218,6 +202,103 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
           )
         ],
       ),
+    );
+
+    final postAsyncValue = ref.watch(currentStatusPostProvider(message.postId));
+    return postAsyncValue.maybeWhen(
+      data: (post) {
+        return Container(
+          margin: const EdgeInsets.only(
+            top: 24,
+            left: 12,
+            right: 72,
+            bottom: 4,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "ステータスに返信しました。",
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+              const Gap(4),
+              CurrentStatusDmWidget(
+                post: post,
+                user: user,
+              ),
+              const Gap(8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      ref
+                          .read(navigationRouterProvider(context))
+                          .goToProfile(user);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      child: CachedImage.userIcon(
+                        user.imageUrl,
+                        user.name,
+                        14,
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 6,
+                              horizontal: 12,
+                            ),
+                            decoration: const BoxDecoration(
+                              color: ThemeColor.stroke,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(4),
+                                topRight: Radius.circular(16),
+                                bottomLeft: Radius.circular(16),
+                                bottomRight: Radius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              message.text,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: ThemeColor.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          message.createdAt.xxAgo,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: ThemeColor.text,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        );
+      },
+      orElse: () => const SizedBox(),
     );
   }
 }

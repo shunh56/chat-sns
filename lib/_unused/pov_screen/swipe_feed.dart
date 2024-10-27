@@ -1,4 +1,4 @@
-import 'dart:developer';
+/*import 'dart:developer';
 
 import 'package:app/_unused/pov_screen/buttons.dart';
 import 'package:app/_unused/pov_screen/card.dart';
@@ -54,7 +54,7 @@ class _SwipePageState extends ConsumerState<SwipePage> {
             cardBuilder: (BuildContext context, int index) {
               return GestureDetector(
                 onDoubleTap: () async {
-                  HapticFeedback.lightImpact();
+                  
                   await _shakeCard(ref);
                   controller.swipeRight();
                 },
@@ -165,3 +165,4 @@ class _SwipePageState extends ConsumerState<SwipePage> {
     }
   }
 }
+ */

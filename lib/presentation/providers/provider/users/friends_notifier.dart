@@ -16,7 +16,12 @@ import 'package:hive/hive.dart';
 class FriendInfo {
   final Timestamp createdAt;
   final String userId;
-  FriendInfo(this.createdAt, this.userId);
+  final int engagementCount;
+  FriendInfo({
+    required this.createdAt,
+    required this.userId,
+    required this.engagementCount,
+  });
 }
 
 final friendIdListNotifierProvider = StateNotifierProvider.autoDispose<
@@ -56,6 +61,10 @@ class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
 
   addFriend(String userId) {
     usecase.addFriend(userId);
+  }
+
+  void addEngagement(UserAccount user) {
+    usecase.addEngagement(user.userId);
   }
 
   void deleteFriend(UserAccount user) async {

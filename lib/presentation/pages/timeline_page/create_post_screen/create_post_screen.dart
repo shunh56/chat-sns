@@ -1,9 +1,11 @@
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/images_widget.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/post_content_menu_widget.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/post_text_input_widget.dart';
 import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
+import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/presentation/providers/state/create_post/core.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
 import 'package:app/usecase/posts/post_usecase.dart';
@@ -20,113 +22,99 @@ class CreatePostScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
-    final postUsecase = ref.read(postUsecaseProvider);
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+
     return Scaffold(
-      body: Stack(
-        children: [
-          SizedBox(
-            height: themeSize.screenHeight,
-            width: themeSize.screenWidth,
-          ),
-          Column(
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: () {
+            primaryFocus?.unfocus();
+          },
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: ListView(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: themeSize.horizontalPadding),
+                  child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: themeSize.horizontalPadding,
+                ),
+                child: Column(
                   children: [
-                    Gap(MediaQuery.of(context).viewPadding.top +
-                        themeSize.appbarHeight +
-                        12),
-                    const PostTextInputWidget(),
-                    const Gap(8),
-                    const PostImagesWidget(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            primaryFocus?.unfocus();
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            "キャンセル",
+                            style: textStyle.w400(
+                              fontSize: 14,
+                              color: ThemeColor.subText,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            final postState = ref.read(postStateProvider);
+                            final text = ref.read(inputTextProvider);
+                            if (text.isNotEmpty) {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              ref
+                                  .read(allPostsNotifierProvider.notifier)
+                                  .createPost(postState);
+                              showMessage("送信を開始しました。");
+                              Navigator.pop(context);
+                            } else {
+                              showMessage("テキストを入力してください。");
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              color: ThemeColor.highlight,
+                            ),
+                            child: Text(
+                              "送信",
+                              style: TextStyle(
+                                color:
+                                    ref.watch(postStateProvider).isReadyToUpload
+                                        ? ThemeColor.white
+                                        : Colors.white.withOpacity(0.3),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: const [
+                          Gap(24),
+                          PostTextInputWidget(),
+                          Gap(8),
+                          PostImagesWidget(),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
+              )),
               _buildPublicityLabel(ref),
               const Gap(8),
               const PostContentMenu(),
             ],
           ),
-          //bottom menu items
-
-          //top banner
-          Positioned(
-            top: 0,
-            child: Container(
-              color: ThemeColor.background,
-              height: MediaQuery.of(context).viewPadding.top +
-                  themeSize.appbarHeight,
-              width: MediaQuery.sizeOf(context).width,
-              child: Stack(
-                children: [
-                  Positioned(
-                    bottom: 12,
-                    left: themeSize.horizontalPadding,
-                    child: GestureDetector(
-                      onTap: () {
-                        primaryFocus?.unfocus();
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        "キャンセル",
-                        style: TextStyle(
-                          color: ThemeColor.highlight,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 4,
-                    right: themeSize.horizontalPadding,
-                    child: GestureDetector(
-                      onTap: () async {
-                        HapticFeedback.lightImpact();
-                        final postState = ref.read(postStateProvider);
-                        final text = ref.read(inputTextProvider);
-                        if (text.isNotEmpty) {
-                          FocusManager.instance.primaryFocus?.unfocus();
-
-                          postUsecase.uploadPost(postState);
-                          ref
-                              .read(pushNotificationNotifierProvider)
-                              .uploadPost();
-                          showMessage("送信を開始しました。");
-                          Navigator.pop(context);
-                        } else {
-                          showMessage("テキストを入力してください。");
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          color: ThemeColor.highlight,
-                        ),
-                        child: Text(
-                          "送信",
-                          style: TextStyle(
-                            color: ref.watch(postStateProvider).isReadyToUpload
-                                ? ThemeColor.white
-                                : Colors.white.withOpacity(0.3),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -135,7 +123,6 @@ class CreatePostScreen extends ConsumerWidget {
     final isPublic = ref.watch(isPublicProvider);
     return GestureDetector(
       onTap: () {
-        HapticFeedback.lightImpact();
         ref.read(isPublicProvider.notifier).state = !isPublic;
       },
       child: Container(
