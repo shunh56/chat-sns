@@ -1005,7 +1005,7 @@ class UserProfileScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "TOP フレンズ",
+                  "TOP フレンド",
                   style: TextStyle(
                     fontSize: 16,
                     color: canvasTheme.boxTextColor,
@@ -1191,7 +1191,7 @@ class UserProfileScreen extends ConsumerWidget {
                             ),
                             child: UserIcon(
                               user: users[i],
-                              width: imageRadius,
+                              width: imageRadius * 2,
                               isCircle: true,
                             ),
                           ),

@@ -551,8 +551,8 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                     ),
                     child: Column(
                       children: [
-                          UserIconCanvasIcon(user:me, theme: canvasTheme),
-                        const Gap(8),
+                        UserIconCanvasIcon(user: me, theme: canvasTheme),
+                        /*const Gap(8),
                         Text(
                           !canvasTheme.iconHideLevel ? "LEVEL 1" : "",
                           style: TextStyle(
@@ -560,7 +560,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
-                        ),
+                        ), */
                       ],
                     ),
                   ),

@@ -4,6 +4,7 @@ import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/shader.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/providers/notifier/image/image_processor.dart';
 import 'package:app/usecase/image_uploader_usecase.dart';
@@ -28,6 +29,9 @@ class EditBioScreen extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     const imageHeight = 100.0;
     final notifier = ref.read(myAccountNotifierProvider.notifier);
+
+    final name = ref.watch(nameStateProvider);
+    final nameNotifier = ref.watch(nameStateProvider.notifier);
     final bio = ref.watch(bioStateProvider);
     final bioStateNotifier = ref.watch(bioStateProvider.notifier);
 
@@ -114,8 +118,8 @@ class EditBioScreen extends ConsumerWidget {
                   ),
                   const Gap(36),
                   //username
-                  /*   Text(
-                    "username",
+                  Text(
+                    "ニックネーム",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -123,18 +127,18 @@ class EditBioScreen extends ConsumerWidget {
                   ),
                   Gap(6),
                   TextFormField(
-                    //controller: controller,
+                    initialValue: name,
                     keyboardType: TextInputType.text,
-                    maxLength: 12,
+                    maxLength: 14,
                     style: const TextStyle(
                       fontSize: 16,
                       color: ThemeColor.text,
                     ),
                     onChanged: (value) {
-                      // text.value = value;
+                      nameNotifier.state = value;
                     },
                     decoration: InputDecoration(
-                      hintText: "ユーザー名を入力",
+                      hintText: "ニックネームを入力",
                       filled: true,
                       isDense: true,
                       fillColor: Colors.white.withOpacity(0.1),
@@ -153,7 +157,7 @@ class EditBioScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  Gap(24), */
+                  Gap(24),
 
                   //bio
                   const Text(
@@ -481,7 +485,7 @@ class EditBioScreen extends ConsumerWidget {
 
                   const Gap(24),
                   //age
-                  const Text(
+                  /*    const Text(
                     "年齢",
                     style: TextStyle(
                       color: Colors.white,
@@ -574,9 +578,7 @@ class EditBioScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       FocusedMenuHolder(
-                        onPressed: () {
-                          
-                        },
+                        onPressed: () {},
                         menuWidth: 120,
                         blurSize: 0,
 
@@ -592,7 +594,6 @@ class EditBioScreen extends ConsumerWidget {
                               "---",
                             ),
                             onPressed: () {
-                              
                               bioStateNotifier.state =
                                   bio.copyWith(gender: "system_null");
                             },
@@ -603,7 +604,6 @@ class EditBioScreen extends ConsumerWidget {
                               "男性",
                             ),
                             onPressed: () {
-                              
                               bioStateNotifier.state =
                                   bio.copyWith(gender: "system_male");
                             },
@@ -614,7 +614,6 @@ class EditBioScreen extends ConsumerWidget {
                               "女性",
                             ),
                             onPressed: () {
-                              
                               bioStateNotifier.state =
                                   bio.copyWith(gender: "system_female");
                             },
@@ -625,7 +624,6 @@ class EditBioScreen extends ConsumerWidget {
                               "カスタム",
                             ),
                             onPressed: () {
-                              
                               bioStateNotifier.state =
                                   bio.copyWith(gender: "system_custom");
                             },
@@ -748,9 +746,7 @@ class EditBioScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       FocusedMenuHolder(
-                        onPressed: () {
-                          
-                        },
+                        onPressed: () {},
                         menuWidth: 120,
                         blurSize: 0,
 
@@ -766,7 +762,6 @@ class EditBioScreen extends ConsumerWidget {
                               "---",
                             ),
                             onPressed: () {
-                              
                               bioStateNotifier.state =
                                   bio.copyWith(interestedIn: "system_null");
                             },
@@ -777,7 +772,6 @@ class EditBioScreen extends ConsumerWidget {
                               "男性",
                             ),
                             onPressed: () {
-                              
                               bioStateNotifier.state =
                                   bio.copyWith(interestedIn: "system_male");
                             },
@@ -788,7 +782,6 @@ class EditBioScreen extends ConsumerWidget {
                               "女性",
                             ),
                             onPressed: () {
-                              
                               bioStateNotifier.state =
                                   bio.copyWith(interestedIn: "system_female");
                             },
@@ -799,7 +792,6 @@ class EditBioScreen extends ConsumerWidget {
                               "カスタム",
                             ),
                             onPressed: () {
-                              
                               bioStateNotifier.state =
                                   bio.copyWith(interestedIn: "system_custom");
                             },
@@ -908,6 +900,8 @@ class EditBioScreen extends ConsumerWidget {
                         ),
                     ],
                   ),
+                 
+                  */
                   const Gap(60),
                 ],
               ),
@@ -932,6 +926,10 @@ class EditBioScreen extends ConsumerWidget {
             actions: [
               GestureDetector(
                 onTap: () async {
+                  if (name.isEmpty) {
+                    showMessage("ニックネームを入力してください。");
+                    return;
+                  }
                   String? imageUrl;
                   final iconImage = ref.watch(iconImageStateProvider);
                   if (iconImage != null) {
@@ -940,7 +938,13 @@ class EditBioScreen extends ConsumerWidget {
                         .read(imageUploadUsecaseProvider)
                         .uploadIconImage(iconImage);
                   }
-                  notifier.updateBio(bio, aboutMe, links, imageUrl: imageUrl);
+                  notifier.updateBio(
+                    name: name,
+                    bio: bio,
+                    aboutMe: aboutMe,
+                    links: links,
+                    imageUrl: imageUrl,
+                  );
                   Navigator.pop(context);
                 },
                 child: Container(

@@ -47,8 +47,9 @@ class ProfileBottomSheet {
                     borderRadius: BorderRadius.circular(100),
                   ),
                 ),
-                const Gap(24),
 
+/*
+ const Gap(24),
                 Container(
                   decoration: BoxDecoration(
                     color: ThemeColor.stroke,
@@ -87,7 +88,7 @@ class ProfileBottomSheet {
                     ),
                   ),
                 ),
-
+ */
                 Gap(24),
                 Container(
                   decoration: BoxDecoration(
@@ -103,6 +104,9 @@ class ProfileBottomSheet {
                               .watch(myAccountNotifierProvider)
                               .asData!
                               .value;
+                          ref.read(nameStateProvider.notifier).state = me.name;
+                          ref.read(usernameStateProvider.notifier).state =
+                              me.username;
                           ref.read(bioStateProvider.notifier).state = me.bio;
                           ref.read(aboutMeStateProvider.notifier).state =
                               me.aboutMe;

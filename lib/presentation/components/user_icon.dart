@@ -168,7 +168,7 @@ class UserIconStoryIcon extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     const double strokeWidth = 2.4;
     const double padding = 4;
-    const double boxHeight = 72.0;
+    const double boxHeight = 80.0;
     const double imageHeight = boxHeight - padding - strokeWidth;
     double radius = imageHeight * 2 / 9;
     return Container(

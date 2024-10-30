@@ -29,7 +29,7 @@ class EditTopFriendsScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Top フレンズを編集",
+          "Top フレンドを編集",
           style: TextStyle(
             fontSize: 16,
           ),

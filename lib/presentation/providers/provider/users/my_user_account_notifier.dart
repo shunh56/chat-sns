@@ -159,10 +159,20 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     update(updatedUser);
   }
 
-  updateBio(Bio bio, String aboutMe, Links links, {String? imageUrl}) async {
+  updateBio(
+      {required String name,
+      required Bio bio,
+      required String aboutMe,
+      required Links links,
+      String? imageUrl}) async {
     final user = state.asData!.value;
     final updatedUser = user.copyWith(
-        bio: bio, aboutMe: aboutMe, imageUrl: imageUrl, links: links);
+      name: name,
+      bio: bio,
+      aboutMe: aboutMe,
+      imageUrl: imageUrl,
+      links: links,
+    );
 
     state = AsyncValue.data(updatedUser);
     update(updatedUser);

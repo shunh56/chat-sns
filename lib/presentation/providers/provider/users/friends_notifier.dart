@@ -82,7 +82,6 @@ class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
 
   updateFriendFriends(String userId, List<String> userIds) {
     HiveBoxes.box().put(userId, userIds);
-
     _ref
         .read(friendFriendsMapNotifierProvider.notifier)
         .addFriendFriends(userId, userIds);
@@ -241,7 +240,6 @@ class FriendFriendsMapNotifier extends StateNotifier<Map<String, Set<String>>> {
   addFriendFriends(String userId, List<String> userIds) {
     final map = Map<String, Set<String>>.from(state);
     map[userId] = userIds.toSet();
-
     state = map;
   }
 }

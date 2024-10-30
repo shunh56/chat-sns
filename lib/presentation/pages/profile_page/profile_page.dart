@@ -31,6 +31,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 final canvasThemeProvider =
     StateProvider((ref) => CanvasTheme.defaultCanvasTheme());
+
+final nameStateProvider = StateProvider((ref) => "");
+final usernameStateProvider = StateProvider((ref) => "");
 final bioStateProvider = StateProvider((ref) => Bio.defaultBio());
 final aboutMeStateProvider = StateProvider((ref) => "");
 
@@ -98,7 +101,7 @@ class ProfileScreen extends ConsumerWidget {
                         padding: const EdgeInsets.only(top: 12),
                         child: Row(
                           children: [
-                            GestureDetector(
+                            /* GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -110,7 +113,7 @@ class ProfileScreen extends ConsumerWidget {
                                 Icons.qr_code_rounded,
                                 color: canvasTheme.profileTextColor,
                               ),
-                            ),
+                            ), */
                             const Gap(12),
                             GestureDetector(
                               onTap: () {
@@ -269,18 +272,6 @@ class ProfileScreen extends ConsumerWidget {
       loading: () => const Scaffold(),
     );
   }
-
-  /* navToEditIconBioAboutMe(BuildContext context, WidgetRef ref, UserAccount me) {
-    ref.read(bioStateProvider.notifier).state = me.bio;
-    ref.read(aboutMeStateProvider.notifier).state = me.aboutMe;
-
-    Navigator.push(
-      context,
-      PageTransitionMethods.slideUp(
-        const EditBioScreen(),
-      ),
-    );
-  } */
 
   navToEditCurrentStatus(BuildContext context, WidgetRef ref, UserAccount me) {
     ref.read(currentStatusStateProvider.notifier).state = me.currentStatus;
@@ -945,7 +936,7 @@ class ProfileScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "TOP フレンズ",
+                  "TOP フレンド",
                   style: TextStyle(
                     fontSize: 16,
                     color: canvasTheme.boxTextColor,

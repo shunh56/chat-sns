@@ -118,14 +118,14 @@ class ChattingScreen extends ConsumerWidget {
                         Expanded(
                           child: GestureDetector(
                             onTap: () {
-                              Navigator.push(
+                              /* Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => ChatInfoScreen(
                                     userId: user.userId,
                                   ),
                                 ),
-                              );
+                              ); */
                             },
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,11 +142,11 @@ class ChattingScreen extends ConsumerWidget {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const Gap(4),
-                                    const Icon(
+                                    /*const Icon(
                                       Icons.arrow_forward_ios_rounded,
                                       size: 12,
                                       color: ThemeColor.white,
-                                    ),
+                                    ), */
                                   ],
                                 ),
                                 user.isOnline ||

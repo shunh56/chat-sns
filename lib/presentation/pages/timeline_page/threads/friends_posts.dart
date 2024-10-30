@@ -3,6 +3,7 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
@@ -599,7 +600,7 @@ class _CurrentStatusPostsSectionState
     final asyncValue = ref.watch(friendsCurrentStatusPostsNotiferProvider);
     final myId = ref.read(authProvider).currentUser!.uid;
     final me = ref.watch(myAccountNotifierProvider).asData!.value;
-    const boxHeight = 72.0;
+    const boxHeight = 86.0;
 
     return asyncValue.when(
       data: (data) {
@@ -675,12 +676,13 @@ class _CurrentStatusPostsSectionState
                                 },
                           child: Container(
                             margin: const EdgeInsets.symmetric(
-                              horizontal: 4,
+                              horizontal: 6,
                             ),
                             child: UserIconStoryIcon(
                               user: me,
-                              isSeen: (data[myId] != null &&
-                                  data[myId]!.first.isSeen),
+                              isSeen: ((data[myId] == null) ||
+                                  data[myId] != null &&
+                                      data[myId]!.first.isSeen),
                             ),
                           ),
                         ),
@@ -705,18 +707,25 @@ class _CurrentStatusPostsSectionState
                                 );
                               },
                               child: Container(
-                                padding: EdgeInsets.all(6),
+                                padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: ThemeColor.background,
                                 ),
-                                child: SizedBox(
-                                  height: 14,
-                                  width: 14,
-                                  child: SvgPicture.asset(
-                                    "assets/images/icons/edit.svg",
-                                    // ignore: deprecated_member_use
-                                    color: Colors.white,
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: Colors.blue,
+                                  ),
+                                  child: SizedBox(
+                                    height: 16,
+                                    width: 16,
+                                    child: SvgPicture.asset(
+                                      "assets/images/icons/edit.svg",
+                                      // ignore: deprecated_member_use
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -736,27 +745,33 @@ class _CurrentStatusPostsSectionState
                             .read(allUsersNotifierProvider)
                             .asData!
                             .value[userId]!;
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CurrentStatusStories(
-                                  initIndex: index,
-                                  sortedUserIds: userIds,
+                        return Container(
+                          height: boxHeight,
+                          child: Stack(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CurrentStatusStories(
+                                        initIndex: index,
+                                        sortedUserIds: userIds,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                  ),
+                                  child: UserIconStoryIcon(
+                                    user: user,
+                                    isSeen: posts.first.isSeen,
+                                  ),
                                 ),
                               ),
-                            );
-                          },
-                          child: Container(
-                            height: boxHeight,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                            ),
-                            child: UserIconStoryIcon(
-                              user: user,
-                              isSeen: posts.first.isSeen,
-                            ),
+                            ],
                           ),
                         );
                       },
@@ -796,6 +811,20 @@ class CurrentStatusStories extends ConsumerWidget {
       initialPage: initIndex + (myStories ? 1 : 0),
       viewportFraction: 0.9,
     );
+
+    readInit() async {
+      await Future.delayed(const Duration(milliseconds: 30));
+      if (!map[userIds[initIndex + (myStories ? 1 : 0)]]!
+          .first
+          .seenUserIds
+          .contains(myId)) {
+        ref
+            .read(allCurrentStatusPostsNotifierProvider.notifier)
+            .readPost(userIds[initIndex + (myStories ? 1 : 0)]);
+      }
+    }
+
+    readInit();
 
     pageController.addListener(() {
       final index = pageController.page?.toInt();
