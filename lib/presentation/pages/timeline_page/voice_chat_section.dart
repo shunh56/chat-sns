@@ -9,6 +9,7 @@ import 'package:app/presentation/providers/provider/users/all_users_notifier.dar
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 
 class VoiceChatSection extends ConsumerWidget {
   const VoiceChatSection({super.key});
@@ -26,7 +27,7 @@ class VoiceChatSection extends ConsumerWidget {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: SizedBox(
-                height: 52,
+                height: 56,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: vcList.length,
@@ -54,7 +55,7 @@ class VoiceChatSection extends ConsumerWidget {
     WidgetRef ref,
     VoiceChat vc,
   ) {
-    const displayCount = 2;
+    const displayCount = 3;
     return FutureBuilder(
       future: ref
           .read(allUsersNotifierProvider.notifier)
@@ -93,8 +94,12 @@ class VoiceChatSection extends ConsumerWidget {
             },
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              padding:
-                  const EdgeInsets.only(left: 4, top: 4, bottom: 4, right: 16),
+              padding: const EdgeInsets.only(
+                left: 4,
+                top: 6,
+                bottom: 6,
+                right: 16,
+              ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(100),
                 color: ThemeColor.accent,
@@ -107,31 +112,45 @@ class VoiceChatSection extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 48 + (min(displayCount, users.length) - 1) * 28,
-                    height: 48,
-                    child: Stack(
-                      alignment: Alignment.centerLeft,
-                      children: stack,
-                    ),
-                  ),
-                  (users.length > 2)
-                      ? Text(
-                          "+${users.length - displayCount}人が",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                  Stack(
+                    children: [
+                      SizedBox(
+                        width: 44 +
+                            (min(displayCount, users.length) - 1) * 28 +
+                            12,
+                        height: 100,
+                        child: Stack(
+                          alignment: Alignment.centerLeft,
+                          children: stack,
+                        ),
+                      ),
+                      if (users.length > displayCount)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.pink,
+                              border: Border.all(
+                                width: 2,
+                                color: ThemeColor.accent,
+                              ),
+                            ),
+                            child: Text(
+                              "+${users.length - displayCount}",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         )
-                      : const Padding(
-                          padding: EdgeInsets.only(right: 4),
-                          child: Icon(
-                            Icons.phone_outlined,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
+                    ],
+                  ),
+                  const Gap(4),
                   const Text(
                     "通話中",
                     style: TextStyle(

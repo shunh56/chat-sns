@@ -13,7 +13,6 @@ import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_canvas_theme_screem.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_top_friends.dart';
-import 'package:app/presentation/pages/profile_page/qr_code_screen.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
 import 'package:app/presentation/providers/provider/images/images.dart';
@@ -22,7 +21,6 @@ import 'package:app/presentation/providers/provider/users/friends_notifier.dart'
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';

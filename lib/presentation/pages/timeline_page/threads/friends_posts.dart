@@ -3,7 +3,6 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
@@ -14,6 +13,7 @@ import 'package:app/presentation/pages/timeline_page/voice_chat_section.dart';
 import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
 import 'package:app/presentation/pages/timeline_page/widget/current_status_story_tile.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
+import 'package:app/presentation/providers/provider/chats/voice_chats_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/provider/posts/friends_posts.dart';
@@ -67,6 +67,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
           color: ThemeColor.text,
           backgroundColor: ThemeColor.stroke,
           onRefresh: () async {
+            ref.read(voiceChatListNotifierProvider.notifier).refresh();
             ref.read(friendsPostsNotiferProvider.notifier).refresh();
             ref
                 .read(friendsCurrentStatusPostsNotiferProvider.notifier)
@@ -637,7 +638,7 @@ class _CurrentStatusPostsSectionState
                   ),
                 ),
               ),
-              Gap(8),
+              const Gap(8),
               SizedBox(
                 height: boxHeight,
                 child: ListView(
@@ -745,7 +746,7 @@ class _CurrentStatusPostsSectionState
                             .read(allUsersNotifierProvider)
                             .asData!
                             .value[userId]!;
-                        return Container(
+                        return SizedBox(
                           height: boxHeight,
                           child: Stack(
                             children: [
@@ -783,8 +784,8 @@ class _CurrentStatusPostsSectionState
           ),
         );
       },
-      loading: () => SizedBox(),
-      error: (e, s) => SizedBox(),
+      loading: () => const SizedBox(),
+      error: (e, s) => const SizedBox(),
     );
   }
 }
@@ -862,7 +863,7 @@ class CurrentStatusStories extends ConsumerWidget {
                       ),
                       children: [
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Row(
                             children: [
                               GestureDetector(

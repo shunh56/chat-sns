@@ -221,12 +221,12 @@ class SignUpPage extends ConsumerWidget {
                           );
                         },
                         child: const Text(
-                          "こちらへ",
+                          "こちら",
                           style: TextStyle(
                             color: ThemeColor.highlight,
                             fontSize: 12,
                             decoration: TextDecoration.underline,
-                            decorationColor: ThemeColor.text,
+                            decorationColor: ThemeColor.subText,
                             decorationThickness: 1,
                           ),
                         ),

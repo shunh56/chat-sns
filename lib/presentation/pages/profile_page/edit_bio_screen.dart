@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/shader.dart';
@@ -10,12 +9,8 @@ import 'package:app/presentation/providers/notifier/image/image_processor.dart';
 import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:focused_menu/focused_menu.dart';
-import 'package:focused_menu/modals.dart';
 import 'package:gap/gap.dart';
 
 final iconImageStateProvider = StateProvider.autoDispose<File?>((ref) => null);
@@ -118,14 +113,14 @@ class EditBioScreen extends ConsumerWidget {
                   ),
                   const Gap(36),
                   //username
-                  Text(
+                  const Text(
                     "ニックネーム",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                     ),
                   ),
-                  Gap(6),
+                  const Gap(6),
                   TextFormField(
                     initialValue: name,
                     keyboardType: TextInputType.text,
@@ -157,7 +152,7 @@ class EditBioScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  Gap(24),
+                  const Gap(24),
 
                   //bio
                   const Text(

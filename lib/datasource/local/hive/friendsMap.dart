@@ -21,9 +21,9 @@ class HiveBoxes {
     Hive.registerAdapter(ColorAdapter());
   }
 
-  static openBoxes() {
-    Hive.openBox<List<String>>('friendIds');
-    Hive.openBox<UserAccountHive>('userAccount');
+  static openBoxes() async {
+    await Hive.openBox<List<String>>('friendIds');
+    await Hive.openBox<UserAccountHive>('userAccount');
   }
 
   static Box<List<String>> box() {

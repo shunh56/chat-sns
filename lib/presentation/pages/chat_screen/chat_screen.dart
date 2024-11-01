@@ -1,7 +1,5 @@
-import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
@@ -14,9 +12,7 @@ import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart'
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 
 class ChatScreen extends ConsumerWidget {
@@ -32,7 +28,7 @@ class ChatScreen extends ConsumerWidget {
       data: (list) {
         if (list.isEmpty) {
           return Padding(
-            padding: EdgeInsets.only(top: 72),
+            padding: const EdgeInsets.only(top: 72),
             child: Center(
               child: Text(
                 "トークがありません",
@@ -109,7 +105,7 @@ class ChatScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          Gap(2),
+                          const Gap(2),
                           Text(
                             overview.lastMessage.text,
                             maxLines: 1,
@@ -122,9 +118,9 @@ class ChatScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    Gap(24),
+                    const Gap(24),
                     if (unseenCheck)
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 4,
                         backgroundColor: Colors.blue,
                       ),

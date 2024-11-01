@@ -3,7 +3,6 @@ import 'package:app/presentation/pages/timeline_page/create_post_screen/blog/blo
 import 'package:app/presentation/providers/state/create_post/blog.dart';
 import 'package:app/presentation/providers/state/create_post/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BlogContentMenu extends ConsumerWidget {

@@ -99,6 +99,7 @@ class PostBottomModelSheet {
                     ),
                   ),
                 ),
+                
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () async {

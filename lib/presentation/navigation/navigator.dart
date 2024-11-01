@@ -70,6 +70,7 @@ class NavigationRouter {
       context,
       MaterialPageRoute(
         builder: (_) => ChattingScreen(userId: user.userId),
+        settings: const RouteSettings(name: '/chatting_screen'), 
       ),
     );
   }

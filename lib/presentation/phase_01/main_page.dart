@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
@@ -12,6 +11,7 @@ import 'package:app/presentation/pages/chat_screen/chat_screen.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
+import 'package:app/presentation/pages/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/phase_01/search_screen.dart';
@@ -436,7 +436,13 @@ class BottomBar extends ConsumerWidget {
       showUnselectedLabels: false,
       onTap: (value) {
         if (value == 2) {
-          PostBottomModelSheet(context).openPostMenu();
+          Navigator.push(
+            context,
+            PageTransitionMethods.slideUp(
+              const CreatePostScreen(),
+            ),
+          );
+          //PostBottomModelSheet(context).openPostMenu();
         }
         ref.watch(bottomNavIndexProvider.notifier).changeIndex(context, value);
       },

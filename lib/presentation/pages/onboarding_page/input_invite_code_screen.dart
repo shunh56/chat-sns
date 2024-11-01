@@ -124,7 +124,7 @@ class InputInviteCodeScreen extends ConsumerWidget {
                   ),
                 ),
                 const Expanded(child: SizedBox()),
-                currentCode != "WAITING"
+                /*   currentCode != "WAITING"
                     ? Container(
                         margin: EdgeInsets.symmetric(
                             horizontal: themeSize.horizontalPadding),
@@ -184,7 +184,7 @@ class InputInviteCodeScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
-                      ),
+                      ), */
                 Gap(MediaQuery.of(context).viewPadding.bottom),
               ],
             ),

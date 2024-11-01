@@ -1,10 +1,7 @@
-import 'dart:math';
 
-import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final posProvider = StateProvider((ref) => 0.0);
@@ -17,12 +14,12 @@ class NewScreen extends ConsumerWidget {
     final users =
         ref.read(allUsersNotifierProvider).asData!.value.values.toList();
     final len = users.length;
-    ScrollController _scrollController;
+    ScrollController scrollController;
 
-    _scrollController = ScrollController();
-    _scrollController.addListener(() {
-      final maxScrollExtent = _scrollController.position.maxScrollExtent;
-      final currentPosition = _scrollController.position.pixels;
+    scrollController = ScrollController();
+    scrollController.addListener(() {
+      final maxScrollExtent = scrollController.position.maxScrollExtent;
+      final currentPosition = scrollController.position.pixels;
       ref.read(posProvider.notifier).state = currentPosition;
     });
     final pos = ref.watch(posProvider);
@@ -35,12 +32,12 @@ class NewScreen extends ConsumerWidget {
       ),
       body: ListView.builder(
         itemCount: 50,
-        controller: _scrollController,
+        controller: scrollController,
         itemBuilder: (context, index) {
           final isFocused = (index * (height + padding * 2) - 240 - pos).abs() <
               (height / 2 + padding);
           return Container(
-            margin: EdgeInsets.symmetric(vertical: 8),
+            margin: const EdgeInsets.symmetric(vertical: 8),
             child: Center(
               child: AnimatedContainer(
                 height: isFocused ? focusedHeight : height,

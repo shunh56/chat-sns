@@ -33,7 +33,7 @@ class VoiceChatDatasource {
       "id": id,
       "title": title,
       "joinedUsers": [],
-      "adminUsers": [],
+      "adminUsers": [_auth.currentUser!.uid],
       "userMap": {},
       "createdAt": timestamp,
       "createdBy": _auth.currentUser!.uid,

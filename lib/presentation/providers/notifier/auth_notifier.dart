@@ -224,4 +224,20 @@ class AuthNotifier {
       return "unknown_error";
     }
   }
+
+  resetPassword() {
+    String email = _ref.read(emailInputTextProvider);
+    if (!RegExp(
+            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(email)) {
+      return "email_error";
+    }
+    try {
+      _auth.sendPasswordResetEmail(email: email);
+      showMessage("リセットのメールを送信しました。");
+      return "success";
+    } catch (e) {
+      return "unkown_error";
+    }
+  }
 }

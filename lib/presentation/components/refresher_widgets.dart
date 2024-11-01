@@ -2,7 +2,6 @@
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:pull_to_refresh/pull_to_refresh.dart';

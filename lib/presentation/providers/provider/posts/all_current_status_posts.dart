@@ -87,7 +87,9 @@ class AllCurrentStatusPostsNotifier extends _$AllCurrentStatusPostsNotifier {
     List<CurrentStatusPost> posts =
         cache.values.where((post) => post.userId == userId).toList();
     for (var post in posts) {
-      cache[post.id]!.seenUserIds.add(ref.read(authProvider).currentUser!.uid);
+      final users = cache[post.id]!.seenUserIds.toSet();
+      users.add(ref.read(authProvider).currentUser!.uid);
+      cache[post.id]!.seenUserIds = users.toList();
       ref.read(currentStatusPostUsecaseProvider).readPost(post);
     }
     state = AsyncValue.data(cache);

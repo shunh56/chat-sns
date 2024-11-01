@@ -4,7 +4,6 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/onboarding_page/input_invite_code_screen.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 

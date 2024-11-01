@@ -6,7 +6,6 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
-import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/notifier/heart_animation_notifier.dart';
@@ -14,7 +13,6 @@ import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart'
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/usecase/direct_message_usecase.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -140,7 +138,7 @@ class CurrentStatusPostScreen extends ConsumerWidget {
                 ),
             ],
           ),
-          HeartAnimationArea(),
+          const HeartAnimationArea(),
         ],
       ),
     );
@@ -184,7 +182,7 @@ class CurrentStatusPostScreen extends ConsumerWidget {
                       post.createdAt.xxAgo,
                       style: textStyle.w600(fontSize: 20),
                     ),
-                    Text("ステータスを更新しました。"),
+                    const Text("ステータスを更新しました。"),
                   ],
                 ),
               ],

@@ -11,7 +11,7 @@
     -->
 
     <application
-        android:label="app"
+        android:label="BLANK"
         android:name="${applicationName}"
         android:launchMode="singleInstance"
         android:icon="@mipmap/launcher_icon">

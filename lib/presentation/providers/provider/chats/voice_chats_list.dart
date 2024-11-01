@@ -36,8 +36,9 @@ class VoiceChatListNotifier extends StateNotifier<AsyncValue<List<VoiceChat>>> {
         if (vcs.isNotEmpty) return;
         vcs = await _usecase.getFriendsVoiceChats(
             friendIds.map((item) => item.userId).toList());
+        final uniqueVcs = {for (var vc in vcs) vc.id: vc}.values.toList();
         if (mounted) {
-          state = AsyncValue.data(vcs);
+          state = AsyncValue.data(uniqueVcs);
         }
 
         return;

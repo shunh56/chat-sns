@@ -4,13 +4,10 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/images_widget.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/post_content_menu_widget.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/post_text_input_widget.dart';
-import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/presentation/providers/state/create_post/core.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
-import 'package:app/usecase/posts/post_usecase.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 

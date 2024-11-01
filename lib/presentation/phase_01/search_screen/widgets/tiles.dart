@@ -11,7 +11,6 @@ import 'package:app/presentation/providers/provider/users/friends_notifier.dart'
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
@@ -41,7 +40,7 @@ class UserRequestWidget extends ConsumerWidget {
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Row(
             children: [
-              UserIcon(user: user,width: 72),
+              UserIcon(user: user, width: 72),
               const Gap(12),
               Expanded(
                 child: Column(
@@ -158,10 +157,9 @@ class UserRequestWidget extends ConsumerWidget {
           children: [
             GestureDetector(
               onTap: () {
-                
                 ref.read(navigationRouterProvider(context)).goToProfile(user);
               },
-              child:UserIcon(user: user,width: 72),
+              child: UserIcon(user: user, width: 72),
             ),
             const Gap(12),
             Expanded(
@@ -241,7 +239,7 @@ class UserRequestWidget extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          UserIcon(user: user,width: 72),
+          UserIcon(user: user, width: 72),
           const Gap(12),
           Expanded(
             child: Column(

@@ -3,20 +3,17 @@ import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart'
 import 'package:app/presentation/pages/profile_page/invite_code_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/account_screen.dart';
-import 'package:app/presentation/pages/settings_screen/notification_settings/current_status_posts_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/direct_messages_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/friend_requests_screen.dart';
-import 'package:app/presentation/pages/settings_screen/notification_settings/posts_screen.dart';
-import 'package:app/presentation/pages/settings_screen/notification_settings/voice_chats_screen.dart';
 import 'package:app/presentation/pages/settings_screen/privacy_settings/contents_publicity_screen.dart';
 import 'package:app/presentation/pages/settings_screen/privacy_settings/friend_requests_screen.dart';
 import 'package:app/presentation/pages/settings_screen/privacy_settings/private_mode_screen.dart';
 import 'package:app/presentation/phase_01/friend_requesteds_screen.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -123,7 +120,7 @@ class SettingsScreen extends ConsumerWidget {
                       me.notificationData;
                 },
               ),
-              _buildTile(
+              /* _buildTile(
                 context,
                 _tileContent(Icons.post_add_rounded, "ステータス投稿"),
                 page: const CurrentStatusPostNotificationScreen(),
@@ -149,7 +146,7 @@ class SettingsScreen extends ConsumerWidget {
                   ref.read(notificationDataProvider.notifier).state =
                       me.notificationData;
                 },
-              ),
+              ), */
               _buildBottomTile(
                 context,
                 _tileContent(Icons.people_outline_rounded, "フレンド申請"),
@@ -162,7 +159,7 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const Gap(32),
-          _buildContainer(
+          /*  _buildContainer(
             "サブスクリプション設定",
             [
               _buildTopTile(
@@ -179,18 +176,33 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const Gap(32),
+          const Gap(32), */
           _buildContainer(
             "新着情報",
             [
               _buildTopTile(
                 context,
                 _tileContent(Icons.newspaper_rounded, "新着情報"),
+                function: () {
+                  launchUrl(
+                    Uri.parse("https://blank-pj.vercel.app"),
+                    mode: LaunchMode.externalApplication,
+                  );
+                },
               ),
               _buildBottomTile(
                 context,
-                _tileContent(Icons.info_outline_rounded, "About Us",
-                    showArrow: false),
+                _tileContent(
+                  Icons.info_outline_rounded,
+                  "About Us",
+                  showArrow: false,
+                ),
+                function: () {
+                  launchUrl(
+                    Uri.parse("https://blank-pj.vercel.app"),
+                    mode: LaunchMode.externalApplication,
+                  );
+                },
               ),
             ],
           ),
@@ -279,12 +291,10 @@ class SettingsScreen extends ConsumerWidget {
               topRight: Radius.circular(8),
             ),
             onTap: () {
-              
-
+              if (function != null) {
+                function();
+              }
               if (page != null) {
-                if (function != null) {
-                  function();
-                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => page),
@@ -311,11 +321,10 @@ class SettingsScreen extends ConsumerWidget {
           color: ThemeColor.accent,
           child: InkWell(
             onTap: () {
-              
+              if (function != null) {
+                function();
+              }
               if (page != null) {
-                if (function != null) {
-                  function();
-                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => page),
@@ -348,11 +357,10 @@ class SettingsScreen extends ConsumerWidget {
           bottomRight: Radius.circular(8),
         ),
         onTap: () {
-          
+          if (function != null) {
+            function();
+          }
           if (page != null) {
-            if (function != null) {
-              function();
-            }
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => page),

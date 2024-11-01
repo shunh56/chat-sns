@@ -42,7 +42,7 @@ class MessageListNotifier extends StateNotifier<AsyncValue<List<CoreMessage>>> {
     final list = await _repository.getMessages(id);
     cache = list;
     final currentStatusPosts = List<CurrentStatusMessage>.from(
-        list.where((e) => e is CurrentStatusMessage));
+        list.whereType<CurrentStatusMessage>());
     await _ref
         .read(allCurrentStatusPostsNotifierProvider.notifier)
         .getPosts(currentStatusPosts.map((e) => e.postId).toList());
@@ -50,7 +50,7 @@ class MessageListNotifier extends StateNotifier<AsyncValue<List<CoreMessage>>> {
     final stream = _repository.streamMessages(id);
     _subscription = stream.listen((event) async {
       final currentStatusPosts = List<CurrentStatusMessage>.from(
-          list.where((e) => e is CurrentStatusMessage));
+          list.whereType<CurrentStatusMessage>());
       await _ref
           .read(allCurrentStatusPostsNotifierProvider.notifier)
           .getPosts(currentStatusPosts.map((e) => e.postId).toList());

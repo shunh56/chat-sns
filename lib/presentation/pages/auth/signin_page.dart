@@ -2,6 +2,7 @@ import 'package:app/core/debugParams/tester_accounts.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/shader.dart';
+import 'package:app/presentation/pages/auth/forgot_password_screen.dart';
 import 'package:app/presentation/pages/auth/signup_page.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:flutter/material.dart';
@@ -168,14 +169,16 @@ class SignInPage extends ConsumerWidget {
                         ),
                         GestureDetector(
                           onTap: () {
-                            /*Navigator.push(
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const ForgotPassword(),
-                                settings:
-                                    const RouteSettings(name: "forgot_password"),
+                                builder: (context) =>
+                                    const ForgotPasswordScreen(),
+                                settings: const RouteSettings(
+                                  name: "forgot_password",
+                                ),
                               ),
-                            ); */
+                            );
                           },
                           child: const Text(
                             "こちら",
@@ -183,7 +186,7 @@ class SignInPage extends ConsumerWidget {
                               color: ThemeColor.highlight,
                               fontSize: 12,
                               decoration: TextDecoration.underline,
-                              decorationColor: ThemeColor.text,
+                              decorationColor: ThemeColor.subText,
                               decorationThickness: 1,
                             ),
                           ),
@@ -253,7 +256,7 @@ class SignInPage extends ConsumerWidget {
                             color: ThemeColor.highlight,
                             fontSize: 12,
                             decoration: TextDecoration.underline,
-                            decorationColor: ThemeColor.text,
+                            decorationColor: ThemeColor.subText,
                             decorationThickness: 1,
                             fontFamily: "Noto Sans JP",
                           ),

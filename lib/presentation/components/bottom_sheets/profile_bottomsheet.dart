@@ -1,11 +1,9 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/icons.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_bio_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
-import 'package:app/presentation/pages/profile_page/qr_code_screen.dart';
 import 'package:app/presentation/pages/settings_screen/settings_screen.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +87,7 @@ class ProfileBottomSheet {
                   ),
                 ),
  */
-                Gap(24),
+                const Gap(24),
                 Container(
                   decoration: BoxDecoration(
                     color: ThemeColor.stroke,
@@ -133,7 +131,7 @@ class ProfileBottomSheet {
                                   fontSize: 14,
                                 ),
                               ),
-                              Icon(
+                              const Icon(
                                 Icons.edit_rounded,
                                 color: ThemeColor.icon,
                               ),

@@ -22,7 +22,6 @@ import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_remote_config.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -61,18 +60,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       showIncomingCall(name, imageUrl);
     }
   }
-}
-
-//メンテナンス画面の表示
-Future<bool> maintenanceCheck() async {
-  final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
-  await remoteConfig.setConfigSettings(
-    RemoteConfigSettings(
-      fetchTimeout: const Duration(),
-      minimumFetchInterval: Duration.zero,
-    ),
-  );
-  return remoteConfig.getBool('isUnderMaintenance');
 }
 
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -363,6 +350,58 @@ void main() {
   );
 }
 
+class ScreenTracker extends StatefulWidget {
+  final Widget child;
+  final void Function(String screenName) onScreenDetected;
+
+  const ScreenTracker({
+    super.key,
+    required this.child,
+    required this.onScreenDetected,
+  });
+
+  @override
+  State<ScreenTracker> createState() => _ScreenTrackerState();
+}
+
+class _ScreenTrackerState extends State<ScreenTracker> {
+  Timer? _timer;
+  String _currentScreenName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _startTracking();
+  }
+
+  void _startTracking() {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      final context = this.context;
+      if (!context.mounted) return;
+
+      final currentRoute = ModalRoute.of(context);
+      if (currentRoute != null) {
+        final screenName = currentRoute.settings.name ?? 'Unknown';
+        if (screenName != _currentScreenName) {
+          _currentScreenName = screenName;
+          widget.onScreenDetected(screenName);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
 class MyApp extends ConsumerWidget {
   const MyApp({super.key, required this.isUnderMaintenance});
   final bool isUnderMaintenance;
@@ -448,17 +487,14 @@ class SplashScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    DebugPrint("\n");
-    DebugPrint("Splash Screen");
     final remoteConfigAsync = ref.watch(remoteConfigProvider);
+    final firebaseAuthStream = ref.watch(authChangeProvider);
 
     return remoteConfigAsync.when(
-      data: (_) {
-        final remoteConfig = ref.read(firebaseRemoteConfigProvider);
+      data: (remoteConfig) {
         if (remoteConfig.getBool('isUnderMaintenance')) {
           return const MaintenancePage();
         } else {
-          final firebaseAuthStream = ref.watch(authChangeProvider);
           return firebaseAuthStream.when(
             data: (user) {
               if (user == null) {
@@ -525,8 +561,8 @@ class SplashScreen extends ConsumerWidget {
                                                         .rebootAccount();
                                                   },
                                                   child: Container(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
                                                       vertical: 12,
                                                       horizontal: 24,
                                                     ),
@@ -596,24 +632,24 @@ class WelcomePage extends ConsumerWidget {
             margin: EdgeInsets.symmetric(
                 horizontal: themeSize.horizontalPaddingMedium),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Expanded(flex: 2, child: SizedBox()),
-                Text(
-                  'LOGO',
-                  style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                        fontSize: 80,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
+                SizedBox(
+                  height: 72,
+                  width: 72,
+                  child: Image.asset(
+                    'assets/images/icons/icon_circle_bg_white.png',
+                  ),
                 ),
-                const Expanded(child: SizedBox()),
+                const Gap(18),
                 Text(
-                  'Welcome to\n$appName',
-                  style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
+                  '新しい友達作りは\nここから始まる',
+                  textAlign: TextAlign.center,
+                  style: textStyle.w900(
+                    fontSize: 20,
+                  ),
                 ),
-                const Expanded(child: SizedBox()),
+                const Gap(36),
                 if (Platform.isIOS)
                   Padding(
                     padding: EdgeInsets.only(
@@ -875,13 +911,13 @@ class WelcomePage extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const Gap(36),
+                const Gap(48),
                 RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: "ログインを持って、",
+                        text: "ログインをすると、",
                         style: textStyle.w400(
                           fontSize: 10,
                           color: ThemeColor.subText,
@@ -911,7 +947,7 @@ class WelcomePage extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const Gap(kToolbarHeight),
+                Gap(MediaQuery.of(context).viewPadding.bottom + 12),
               ],
             ),
           ),

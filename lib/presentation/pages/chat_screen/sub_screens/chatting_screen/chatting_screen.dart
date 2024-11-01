@@ -9,7 +9,6 @@ import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chat_info_screen.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/left_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/right_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/server_message.dart';
@@ -22,7 +21,6 @@ import 'package:app/presentation/providers/provider/users/all_users_notifier.dar
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/usecase/direct_message_usecase.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:gap/gap.dart';
@@ -337,7 +335,7 @@ class BottomTextField extends ConsumerWidget {
           right: 16,
           bottom: MediaQuery.of(context).viewPadding.bottom,
         ),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: ThemeColor.accent,
         ),
         child: Column(

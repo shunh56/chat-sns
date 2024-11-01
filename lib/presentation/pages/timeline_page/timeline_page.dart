@@ -3,18 +3,16 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/bottom_sheets/subscription_bottomsheet.dart';
 import 'package:app/presentation/components/core/sticky_tabbar.dart';
 import 'package:app/presentation/pages/activies_screen/activities_screen.dart';
 import 'package:app/presentation/pages/new_screen.dart';
+import 'package:app/presentation/pages/subscription_screen.dart';
 import 'package:app/presentation/pages/timeline_page/threads/friends_posts.dart';
 import 'package:app/presentation/pages/timeline_page/threads/public_posts.dart';
-import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/main_page.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
@@ -90,7 +88,13 @@ class TimelinePage extends ConsumerWidget {
         final subscription = user.subscriptionStatus;
         return GestureDetector(
           onTap: () {
-            SubsctiptionBottomSheet(context).openBottomSheet();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SubscriptionScreen(),
+              ),
+            );
+            //SubsctiptionBottomSheet(context).openBottomSheet();
           },
           child: Container(
             padding: const EdgeInsets.symmetric(
@@ -150,7 +154,7 @@ class TimelinePage extends ConsumerWidget {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => NewScreen(),
+                                          builder: (_) => const NewScreen(),
                                         ),
                                       );
                                     },
@@ -160,18 +164,18 @@ class TimelinePage extends ConsumerWidget {
                                     ),
                                   ),
                                   const Expanded(child: SizedBox()),
-                                  subscriptionLogo,
-                                  Gap(12),
+                                  // subscriptionLogo,
+                                  const Gap(12),
                                   GestureDetector(
                                     onTap: () {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => ActivitiesScreen(),
+                                          builder: (_) => const ActivitiesScreen(),
                                         ),
                                       );
                                     },
-                                    child: Icon(
+                                    child: const Icon(
                                       Icons.notifications_outlined,
                                       color: ThemeColor.icon,
                                     ),

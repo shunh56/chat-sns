@@ -1,6 +1,5 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/components/share_widget.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/phase_01/friend_request_screen.dart';
@@ -9,7 +8,6 @@ import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
@@ -127,7 +125,7 @@ class SearchScreen extends ConsumerWidget {
               ),
             ),
             Gap(themeSize.verticalSpaceMedium),
-            friendRequestedListView(ref),
+            friendRequestedListView(context, ref),
             friendsFriendListView(context, ref),
           ],
         ),
@@ -135,140 +133,190 @@ class SearchScreen extends ConsumerWidget {
     );
   }
 
-  Widget friendRequestedListView(WidgetRef ref) {
+  Widget friendRequestedListView(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(friendRequestedIdListNotifierProvider);
-    bool subscribed = false;
-    return asyncValue.when(
-      data: (value) {
-        final userIds = List<String>.from(value);
-        if (userIds.isEmpty) {
-          return const SizedBox();
-        }
-        return ListView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            const Gap(12),
-            const Padding(
-              padding: EdgeInsets.only(left: 12),
-              child: Text(
-                "フレンドリクエスト",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: ThemeColor.text,
-                ),
-              ),
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        const Gap(12),
+        const Padding(
+          padding: EdgeInsets.only(left: 12),
+          child: Text(
+            "フレンドリクエスト",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: ThemeColor.text,
             ),
-            const Gap(12),
-            SizedBox(
-              height: 100 + 8,
-              child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemCount: userIds.length,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                ),
-                itemBuilder: (context, index) {
-                  final userId = userIds[index];
-                  final user =
-                      ref.read(allUsersNotifierProvider).asData!.value[userId]!;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: GestureDetector(
-                      onTap: () {
-                        ref
-                            .read(navigationRouterProvider(context))
-                            .goToProfile(user);
-                      },
-                      child: UserIcon(user: user, width: 108),
+          ),
+        ),
+        const Gap(12),
+        asyncValue.when(
+          data: (value) {
+            final userIds = List<String>.from(value);
+            if (userIds.isEmpty) {
+              return SizedBox(
+                height: themeSize.screenHeight * 0.1,
+                child: Center(
+                  child: Text(
+                    "フレンドリクエストはありません。",
+                    style: textStyle.w600(
+                      color: ThemeColor.subText,
                     ),
-                  );
-                },
-              ),
-            ),
-            const Gap(12),
-          ],
-        );
-      },
-      error: (e, s) => const SizedBox(),
-      loading: () => const SizedBox(),
+                  ),
+                ),
+              );
+            }
+            return ListView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: 100 + 8,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: userIds.length,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                    ),
+                    itemBuilder: (context, index) {
+                      final userId = userIds[index];
+                      final user = ref
+                          .read(allUsersNotifierProvider)
+                          .asData!
+                          .value[userId]!;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: GestureDetector(
+                          onTap: () {
+                            ref
+                                .read(navigationRouterProvider(context))
+                                .goToProfile(user);
+                          },
+                          child: UserIcon(user: user, width: 108),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const Gap(12),
+              ],
+            );
+          },
+          error: (e, s) => const SizedBox(),
+          loading: () => const SizedBox(),
+        ),
+      ],
     );
   }
 
   Widget friendsFriendListView(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(friendIdListNotifierProvider);
     final deletes =
         ref.watch(deletesIdListNotifierProvider).asData?.value ?? [];
     final requesteds =
         ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
     final filters = deletes + requesteds;
-    return asyncValue.when(
-      data: (_) {
-        final userIds = ref.read(relationNotifier).getMaybeFriends();
-        final users = ref
-            .read(allUsersNotifierProvider)
-            .asData!
-            .value
-            .values
-            .where((item) => userIds.contains(item.userId))
-            .toList();
-        //フレンドリクエストが来ているユーザーは消す
-        users.removeWhere((user) => filters.contains(user.userId));
-        final requests =
-            ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];
-        users.sort((a, b) {
-          if (requests.contains(a.userId)) return -1;
-          if (requests.contains(b.userId)) return 1;
-          return 0;
-        });
-        if (users.isEmpty) {
-          return Column(
-            children: [
-              Container(
-                margin: EdgeInsets.symmetric(
-                  vertical: themeSize.verticalPaddingLarge,
-                ),
-                height: themeSize.screenHeight * 0.6,
-                child: const ShareWidget(),
-              ),
-            ],
-          );
-        }
-        return ListView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            const Gap(12),
-            const Padding(
-              padding: EdgeInsets.only(left: 12),
-              child: Text(
-                "知り合いかも",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: ThemeColor.text,
-                ),
-              ),
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        const Gap(12),
+        const Padding(
+          padding: EdgeInsets.only(left: 12),
+          child: Text(
+            "知り合いかも",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: ThemeColor.text,
             ),
-            users.isEmpty
-                ? const Text("")
-                : ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: users.length,
-                    itemBuilder: (context, index) {
-                      final user = users[index];
-                      return UserRequestWidget(user: user);
-                    },
+          ),
+        ),
+        asyncValue.when(
+          data: (_) {
+            final userIds = ref.read(relationNotifier).getMaybeFriends();
+            final users = ref
+                .read(allUsersNotifierProvider)
+                .asData!
+                .value
+                .values
+                .where((item) => userIds.contains(item.userId))
+                .toList();
+            //フレンドリクエストが来ているユーザーは消す
+            users.removeWhere((user) => filters.contains(user.userId));
+            final requests =
+                ref.watch(friendRequestIdListNotifierProvider).asData?.value ??
+                    [];
+            users.sort((a, b) {
+              if (requests.contains(a.userId)) return -1;
+              if (requests.contains(b.userId)) return 1;
+              return 0;
+            });
+            if (users.isEmpty) {
+              return SizedBox(
+                height: themeSize.screenHeight * 0.1,
+                child: Center(
+                  child: Text(
+                    "おすすめのユーザーはいません。",
+                    style: textStyle.w600(
+                      color: ThemeColor.subText,
+                    ),
                   ),
-          ],
-        );
-      },
-      error: (e, s) => const SizedBox(),
-      loading: () => const SizedBox(),
+                ),
+              );
+              /* return Column(
+                children: [
+                  Container(
+                    margin: EdgeInsets.symmetric(
+                      vertical: themeSize.verticalPaddingLarge,
+                    ),
+                    height: themeSize.screenHeight * 0.6,
+                    child: const ShareWidget(),
+                  ),
+                ],
+              ); */
+            }
+            return ListView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                const Gap(12),
+                const Padding(
+                  padding: EdgeInsets.only(left: 12),
+                  child: Text(
+                    "知り合いかも",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: ThemeColor.text,
+                    ),
+                  ),
+                ),
+                users.isEmpty
+                    ? const Text("")
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: users.length,
+                        itemBuilder: (context, index) {
+                          final user = users[index];
+                          return UserRequestWidget(user: user);
+                        },
+                      ),
+              ],
+            );
+          },
+          error: (e, s) => const SizedBox(),
+          loading: () => const SizedBox(),
+        ),
+      ],
     );
   }
 }

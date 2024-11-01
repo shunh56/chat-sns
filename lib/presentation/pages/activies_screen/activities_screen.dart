@@ -6,13 +6,10 @@ import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/pages/timeline_page/current_status_post_screen.dart';
-import 'package:app/presentation/pages/timeline_page/widget/post_screen.dart';
 import 'package:app/presentation/providers/provider/activities_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
@@ -34,13 +31,13 @@ class ActivitiesScreen extends ConsumerWidget {
             return Column(
               children: [
                 if (index == 0)
-                  Divider(
+                  const Divider(
                     height: 1,
                     thickness: 0.8,
                     color: ThemeColor.stroke,
                   ),
                 ActivityTile(activity: activity),
-                Divider(
+                const Divider(
                   height: 0,
                   thickness: 0.8,
                   color: ThemeColor.stroke,
@@ -50,10 +47,10 @@ class ActivitiesScreen extends ConsumerWidget {
           },
         );
       },
-      loading: () => Center(
+      loading: () => const Center(
         child: CircularProgressIndicator(),
       ),
-      error: (e, s) => SizedBox(),
+      error: (e, s) => const SizedBox(),
     );
     return Scaffold(
       appBar: AppBar(
@@ -140,7 +137,7 @@ class ActivityTile extends ConsumerWidget {
                             width: 54,
                           ),
                   ),
-                  Gap(12),
+                  const Gap(12),
                   Expanded(
                     child: RichText(
                       text: TextSpan(
@@ -168,7 +165,7 @@ class ActivityTile extends ConsumerWidget {
                 ],
               ),
             ),
-            Gap(12),
+            const Gap(12),
             Text(
               activity.updatedAt.xxAgo,
               style: textStyle.w400(

@@ -9,6 +9,7 @@ import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/notifier/heart_animation_notifier.dart';
+import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,7 @@ class CurrentStatusStoryTileWidget extends ConsumerWidget {
               color: canvasTheme.profileAboutMeColor,
             ),
           ),
-          Gap(4),
+          const Gap(4),
           GestureDetector(
             onTap: () {
               ref
@@ -360,28 +361,38 @@ class CurrentStatusStoryTileWidget extends ConsumerWidget {
             ),
           ),
           //if (post.isHost)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: SizedBox(
-              height: 24,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: post.seenUserIds.length,
-                itemBuilder: (context, index) {
-                  final a = ref
-                      .read(allUsersNotifierProvider)
-                      .asData!
-                      .value[post.seenUserIds[index]]!;
-                  return Container(
-                    padding: EdgeInsets.only(right: 4),
-                    child: UserIconMiniIcon(
-                      user: a,
-                    ),
-                  );
-                },
+          if (user.userId == ref.read(authProvider).currentUser!.uid &&
+              post.seenUserIds.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: SizedBox(
+                height: 24,
+                child: FutureBuilder(
+                    future: ref
+                        .read(allUsersNotifierProvider.notifier)
+                        .getUserAccounts(post.seenUserIds),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const SizedBox();
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: post.seenUserIds.length,
+                        itemBuilder: (context, index) {
+                          final userId = post.seenUserIds[index];
+                          final e = ref
+                              .read(allUsersNotifierProvider)
+                              .asData!
+                              .value[userId]!;
+                          return Container(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: UserIconMiniIcon(
+                              user: e,
+                            ),
+                          );
+                        },
+                      );
+                    }),
               ),
             ),
-          ),
         ],
       ),
     );

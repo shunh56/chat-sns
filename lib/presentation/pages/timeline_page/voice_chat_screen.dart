@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:app/core/extenstions/int_extension.dart';
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
+import 'package:app/domain/entity/user.dart';
+import 'package:app/domain/entity/voice_chat.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/dialogs/voice_chat_dialogs.dart';
 import 'package:app/presentation/components/user_icon.dart';
@@ -22,6 +25,7 @@ import 'package:permission_handler/permission_handler.dart';
 final poppedProvider = StateProvider.autoDispose((ref) => false);
 final isLoadingProvider = StateProvider.autoDispose((ref) => true);
 final animationDoneProvider = StateProvider.autoDispose((ref) => false);
+final maxNumExceededProvider = StateProvider.autoDispose((ref) => false);
 
 final isSpeakerProvider = StateProvider.autoDispose((ref) => false);
 final speakerListProvider = StateProvider.autoDispose<List<int>>((ref) => []);
@@ -136,24 +140,13 @@ class VoiceChatFeed extends ConsumerStatefulWidget {
 }
 
 class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
+  bool joined = false;
   late RtcEngine _agoraEngine;
-
-  //final uid = 0; // 参加するユーザーID
-
-  @override
-  void initState() {
-    super.initState();
-    setupVoiceSDKEngine().onError(
-      (error, stackTrace) {
-        debugPrint("error : $error");
-        debugPrint("stackTrace : $stackTrace");
-      },
-    );
-  }
 
   @override
   void dispose() {
     super.dispose();
+    DebugPrint(_agoraEngine.runtimeType);
     _agoraEngine.leaveChannel();
   }
 
@@ -167,7 +160,17 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
     ref.read(isSpeakerProvider.notifier).state = !before;
   }
 
-  Future<void> setupVoiceSDKEngine() async {
+  Future<void> setupVoiceSDKEngine(VoiceChat vc) async {
+    joined = true;
+    await Future.delayed(const Duration(milliseconds: 30));
+    if (vc.joinedUsers.length >= vc.maxCount * 2 &&
+        !vc.joinedUsers.contains(ref.read(authProvider).currentUser!.uid)) {
+      ref.read(maxNumExceededProvider.notifier).state = true;
+      ref.read(isLoadingProvider.notifier).state = false;
+      await Future.delayed(const Duration(milliseconds: 400));
+      ref.read(animationDoneProvider.notifier).state = true;
+      return;
+    }
     final functions = FirebaseFunctions.instanceFor(region: "asia-northeast1");
     final HttpsCallable callable =
         functions.httpsCallable('agora-generateAgoraToken');
@@ -236,20 +239,13 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
             int totalVolume,
           ) {
             final speakerUids = speakers
-                .where((item) => (item.volume ?? 0) > 30)
-                .map((speaker) => speaker.uid)
+                .where((item) => (item.volume ?? 0) > 0)
+                .map((speaker) => speaker.uid!)
                 .toList();
             if (mounted) {
-              ref.read(speakerListProvider.notifier).state = speakerUids
-                  .where((uid) => uid != null)
-                  .map((uid) => uid!)
-                  .toList();
-              /* if (speakerUids.isNotEmpty) {
-                ref.read(speakerUidProvider.notifier).state =
-                    speakerUids.first ?? -1;
-              } else {
-                ref.read(speakerUidProvider.notifier).state = -1;
-              } */
+              if (speakerUids.isNotEmpty) {
+                ref.read(speakerListProvider.notifier).state = speakerUids;
+              }
             }
           },
           onError: (err, msg) => {
@@ -282,14 +278,11 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
     final themeSize = ref.watch(themeSizeProvider(context));
     final vcStream = ref.watch(vcStreamProvider(widget.id));
 
-    final isSpeaker = ref.watch(isSpeakerProvider);
-    final speakers = ref.watch(speakerListProvider);
-
     final screen = vcStream.when(
       data: (vc) {
-        final isMuted =
-            vc.userInfo[ref.read(authProvider).currentUser!.uid]?.isMuted ??
-                false;
+        if (!joined) {
+          setupVoiceSDKEngine(vc);
+        }
 
         return FutureBuilder(
           future: ref
@@ -303,338 +296,7 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
             }
             final users = snapshot.data!;
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /* Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: themeSize.horizontalPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "localUid : ${ref.watch(localUidProvider)}",
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      Text(
-                        "speakerUid : ${ref.watch(speakerUidProvider)}",
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-                const Gap(24), */
-                users.length <= 4
-                    ? Expanded(
-                        child: Column(
-                          children: users
-                              .map(
-                                (user) => Expanded(
-                                  child: Container(
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                      color: ThemeColor.accent,
-                                      border: (user.userId ==
-                                              ref
-                                                  .read(authProvider)
-                                                  .currentUser!
-                                                  .uid)
-                                          ? speakers.contains(0)
-                                              ? Border.all(
-                                                  color: Colors.cyan,
-                                                )
-                                              : null
-                                          : speakers.contains((vc
-                                                  .userInfo[user.userId]!.uid))
-                                              ? Border.all(
-                                                  color: Colors.cyan,
-                                                )
-                                              : null,
-                                    ),
-                                    child: Stack(
-                                      alignment: Alignment.bottomCenter,
-                                      children: [
-                                        Center(
-                                          child: UserIcon(
-                                            user: user,
-                                            width: 80,
-                                            isCircle: true,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          bottom: 12,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 24,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(100),
-                                              color: ThemeColor.background,
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                if (vc.userInfo[user.userId]!
-                                                    .isMuted)
-                                                  const Padding(
-                                                    padding: EdgeInsets.only(
-                                                        right: 4),
-                                                    child: Icon(
-                                                      Icons.mic_off,
-                                                      color: Colors.white,
-                                                      size: 14,
-                                                    ),
-                                                  ),
-                                                Text(user.username),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      )
-                    : Expanded(child: Column(
-                        children: (() {
-                          final List<Widget> list = [];
-                          for (int i = 0; i < users.length; i = i + 2) {
-                            list.add(
-                              Expanded(
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 4,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(16),
-                                            color: ThemeColor.accent,
-                                            border: speakers.contains((vc
-                                                    .userInfo[users[i].userId]!
-                                                    .uid))
-                                                ? Border.all(
-                                                    color: Colors.cyan,
-                                                  )
-                                                : null,
-                                          ),
-                                          child: Stack(
-                                            alignment: Alignment.bottomCenter,
-                                            children: [
-                                              Center(
-                                                child: UserIcon(
-                                                  user: users[i],
-                                                  width: 64,
-                                                  isCircle: true,
-                                                ),
-                                              ),
-                                              Positioned(
-                                                bottom: 12,
-                                                child: Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal: 24,
-                                                    vertical: 4,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            100),
-                                                    color:
-                                                        ThemeColor.background,
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      if (vc
-                                                          .userInfo[
-                                                              users[i].userId]!
-                                                          .isMuted)
-                                                        const Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  right: 4),
-                                                          child: Icon(
-                                                            Icons.mic_off,
-                                                            color: Colors.white,
-                                                            size: 14,
-                                                          ),
-                                                        ),
-                                                      Text(users[i].username),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      const Gap(8),
-                                      ((i + 1) < users.length)
-                                          ? Expanded(
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                  color: ThemeColor.accent,
-                                                  border: speakers.contains((vc
-                                                          .userInfo[users[i + 1]
-                                                              .userId]!
-                                                          .uid))
-                                                      ? Border.all(
-                                                          color: Colors.cyan,
-                                                        )
-                                                      : null,
-                                                ),
-                                                child: Stack(
-                                                  alignment:
-                                                      Alignment.bottomCenter,
-                                                  children: [
-                                                    Center(
-                                                      child: UserIcon(
-                                                        user: users[i + 1],
-                                                        width: 64,
-                                                        isCircle: true,
-                                                      ),
-                                                    ),
-                                                    Positioned(
-                                                      bottom: 12,
-                                                      child: Container(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                          horizontal: 24,
-                                                          vertical: 4,
-                                                        ),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      100),
-                                                          color: ThemeColor
-                                                              .background,
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            if (vc
-                                                                .userInfo[users[
-                                                                        i + 1]
-                                                                    .userId]!
-                                                                .isMuted)
-                                                              const Padding(
-                                                                padding: EdgeInsets
-                                                                    .only(
-                                                                        right:
-                                                                            4),
-                                                                child: Icon(
-                                                                  Icons.mic_off,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 14,
-                                                                ),
-                                                              ),
-                                                            Text(users[i + 1]
-                                                                .username),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            )
-                                          : const Expanded(
-                                              child: SizedBox(),
-                                            ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-                          return list;
-                        })(),
-                      )),
-                const Gap(4),
-                Container(
-                  margin: EdgeInsets.symmetric(
-                      horizontal: themeSize.horizontalPadding),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: ThemeColor.accent,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          changeMute(isMuted);
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white.withOpacity(0.2),
-                          child: Icon(
-                            isMuted ? Icons.mic_off_outlined : Icons.mic,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          ref.read(isSpeakerProvider.notifier).state =
-                              !isSpeaker;
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white.withOpacity(0.2),
-                          child: Icon(
-                            ref.watch(isSpeakerProvider)
-                                ? Icons.volume_up_rounded
-                                : Icons.volume_off_outlined,
-                          ),
-                        ),
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Colors.white.withOpacity(0.2),
-                        child: const Icon(
-                          Icons.chat_bubble_outline_rounded,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          VoiceChatDialogs(context).showExitVoiceChatDialog(
-                            widget.id,
-                            leave,
-                          );
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.red.withOpacity(0.7),
-                          child: const Icon(
-                            Icons.call_end,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            );
+            return _buildTiles(context, ref, vc, users);
           },
         );
       },
@@ -680,6 +342,389 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
               ),
             ),
           ),
+        if (ref.watch(maxNumExceededProvider))
+          ShaderWidget(
+            child: Container(
+              width: MediaQuery.sizeOf(context).width,
+              height: MediaQuery.sizeOf(context).height,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+              ),
+              child: Center(
+                child: Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: themeSize.horizontalPaddingLarge,
+                  ),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: ThemeColor.stroke.withOpacity(0.7),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "定員に満たしています。",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Gap(24),
+                      GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                        },
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              color: ThemeColor.subText,
+                            ),
+                            child: const Text(
+                              "退出する",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  _buildTiles(BuildContext context, WidgetRef ref, VoiceChat vc,
+      List<UserAccount> users) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final isMuted =
+        vc.userInfo[ref.read(authProvider).currentUser!.uid]?.isMuted ?? false;
+    final isSpeaker = ref.watch(isSpeakerProvider);
+    final speakers = ref.watch(speakerListProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        users.length <= 4
+            ? Expanded(
+                child: Column(
+                  children: users
+                      .map(
+                        (user) => Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              color: ThemeColor.accent,
+                              border: (user.userId ==
+                                      ref.read(authProvider).currentUser!.uid)
+                                  ? speakers.contains(0)
+                                      ? Border.all(
+                                          color: Colors.cyan,
+                                        )
+                                      : null
+                                  : speakers.contains(
+                                          (vc.userInfo[user.userId]!.uid))
+                                      ? Border.all(
+                                          color: Colors.cyan,
+                                        )
+                                      : null,
+                            ),
+                            child: Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                Center(
+                                  child: UserIcon(
+                                    user: user,
+                                    width: 80,
+                                    isCircle: true,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 12,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(100),
+                                      color: ThemeColor.background,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (vc.userInfo[user.userId]!.isMuted)
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4),
+                                            child: Icon(
+                                              Icons.mic_off,
+                                              color: Colors.white,
+                                              size: 14,
+                                            ),
+                                          ),
+                                        Text(user.name),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              )
+            : Expanded(
+                child: Column(
+                  children: (() {
+                    final List<Widget> list = [];
+                    for (int i = 0; i < users.length; i = i + 2) {
+                      list.add(
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      color: ThemeColor.accent,
+                                      border: (users[i].userId ==
+                                              ref
+                                                  .read(authProvider)
+                                                  .currentUser!
+                                                  .uid)
+                                          ? speakers.contains(0)
+                                              ? Border.all(
+                                                  color: Colors.cyan,
+                                                )
+                                              : null
+                                          : speakers.contains((vc
+                                                  .userInfo[users[i].userId]!
+                                                  .uid))
+                                              ? Border.all(
+                                                  color: Colors.cyan,
+                                                )
+                                              : null,
+                                    ),
+                                    child: Stack(
+                                      alignment: Alignment.bottomCenter,
+                                      children: [
+                                        Center(
+                                          child: UserIcon(
+                                            user: users[i],
+                                            width: 64,
+                                            isCircle: true,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          bottom: 12,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 24,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(100),
+                                              color: ThemeColor.background,
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                if (vc
+                                                    .userInfo[users[i].userId]!
+                                                    .isMuted)
+                                                  const Padding(
+                                                    padding: EdgeInsets.only(
+                                                        right: 4),
+                                                    child: Icon(
+                                                      Icons.mic_off,
+                                                      color: Colors.white,
+                                                      size: 14,
+                                                    ),
+                                                  ),
+                                                Text(users[i].name),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const Gap(8),
+                                ((i + 1) < users.length)
+                                    ? Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            color: ThemeColor.accent,
+                                            border: (users[i + 1].userId ==
+                                                    ref
+                                                        .read(authProvider)
+                                                        .currentUser!
+                                                        .uid)
+                                                ? speakers.contains(0)
+                                                    ? Border.all(
+                                                        color: Colors.cyan,
+                                                      )
+                                                    : null
+                                                : speakers.contains((vc
+                                                        .userInfo[users[i + 1]
+                                                            .userId]!
+                                                        .uid))
+                                                    ? Border.all(
+                                                        color: Colors.cyan,
+                                                      )
+                                                    : null,
+                                          ),
+                                          child: Stack(
+                                            alignment: Alignment.bottomCenter,
+                                            children: [
+                                              Center(
+                                                child: UserIcon(
+                                                  user: users[i + 1],
+                                                  width: 64,
+                                                  isCircle: true,
+                                                ),
+                                              ),
+                                              Positioned(
+                                                bottom: 12,
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal: 24,
+                                                    vertical: 4,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            100),
+                                                    color:
+                                                        ThemeColor.background,
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      if (vc
+                                                          .userInfo[users[i + 1]
+                                                              .userId]!
+                                                          .isMuted)
+                                                        const Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  right: 4),
+                                                          child: Icon(
+                                                            Icons.mic_off,
+                                                            color: Colors.white,
+                                                            size: 14,
+                                                          ),
+                                                        ),
+                                                      Text(users[i + 1].name),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    : const Expanded(
+                                        child: SizedBox(),
+                                      ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return list;
+                  })(),
+                ),
+              ),
+        const Gap(4),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: themeSize.horizontalPadding),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          decoration: BoxDecoration(
+            color: ThemeColor.accent,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  changeMute(isMuted);
+                },
+                child: CircleAvatar(
+                  backgroundColor: Colors.white.withOpacity(0.2),
+                  child: Icon(
+                    isMuted ? Icons.mic_off_outlined : Icons.mic,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  ref.read(isSpeakerProvider.notifier).state = !isSpeaker;
+                },
+                child: CircleAvatar(
+                  backgroundColor: Colors.white.withOpacity(0.2),
+                  child: Icon(
+                    ref.watch(isSpeakerProvider)
+                        ? Icons.volume_up_rounded
+                        : Icons.volume_off_outlined,
+                  ),
+                ),
+              ),
+              CircleAvatar(
+                backgroundColor: Colors.white.withOpacity(0.2),
+                child: const Icon(
+                  Icons.chat_bubble_outline_rounded,
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  VoiceChatDialogs(context).showExitVoiceChatDialog(
+                    widget.id,
+                    leave,
+                  );
+                },
+                child: CircleAvatar(
+                  backgroundColor: Colors.red.withOpacity(0.7),
+                  child: const Icon(
+                    Icons.call_end,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
       ],
     );
   }

@@ -3,7 +3,8 @@ description: A new Flutter project.
 publish_to: "none" 
 
 # bundle ID : com.blank.sns
-version: 1.0.0+1
+version: 1.0.0+2
+
 #最後のビルド番号はずっと増えていく
 #初回リリース：version: 1.0.0+1
 #バグ修正リリース：version: 1.0.1+2
@@ -171,6 +172,7 @@ dependencies:
   pull_to_refresh: ^2.0.0
   twitter_login: ^4.4.2
 
+  intl: any
 dependency_overrides:
   intl: ^0.17.0
   cloud_firestore: ^4.8.2
@@ -191,9 +193,13 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/images/icons/icon.png"
-  background_color_ios: "#080808"
-  #adaptive_icon_foreground: "assets/images/app_icons/yolo_android.png"
+  image_path: "assets/images/icons/icon_ios.png"
+  background_color_ios: "080808"
+  adaptive_icon_foreground: "assets/images/icons/icon_android.png"
+  adaptive_icon_background: "#080808"
+  #adaptive_icon_background: "assets/images/icons/icon_android.png"
+
+  
 
 flutter:
   uses-material-design: true

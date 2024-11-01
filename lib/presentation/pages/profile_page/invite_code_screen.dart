@@ -50,7 +50,7 @@ class InviteCodeScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Gap(12),
+            const Gap(12),
             Row(
               children: [
                 myIcon,
@@ -177,7 +177,7 @@ class InviteCodeScreen extends ConsumerWidget {
                 }())
               ],
             ),
-            Gap(24),
+            const Gap(24),
             Expanded(
               child: FutureBuilder(
                 future: ref

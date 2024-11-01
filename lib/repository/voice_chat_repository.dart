@@ -44,12 +44,7 @@ class VoiceChatRepository {
 
   //UPDATE
   Future<void> joinVoiceChat(String id, int localId) async {
-    final voiceChat = await getVoiceChat(id);
-    if (voiceChat.joinedUsers.length >= voiceChat.maxCount) {
-      return;
-    } else {
-      return _datasource.joinVoiceChat(id, localId);
-    }
+    return _datasource.joinVoiceChat(id, localId);
   }
 
   Future<void> changeMute(String id, bool isMuted) async {

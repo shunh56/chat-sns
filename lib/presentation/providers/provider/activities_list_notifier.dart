@@ -4,18 +4,16 @@ import 'dart:async';
 import 'package:app/domain/entity/activities.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
-import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/usecase/activities_usecase.dart';
-import 'package:app/usecase/block_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
 
-final activitiesListNotifierProvider = StateNotifierProvider.autoDispose<
-    ActivitiesListNotifier, AsyncValue<List<Activity>>>((ref) {
+final activitiesListNotifierProvider =
+    StateNotifierProvider<ActivitiesListNotifier, AsyncValue<List<Activity>>>(
+        (ref) {
   return ActivitiesListNotifier(
     ref,
     ref.watch(activitiesUsecaseProvider),
