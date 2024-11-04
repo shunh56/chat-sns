@@ -22,13 +22,13 @@ class EditBioScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    const imageHeight = 100.0;
+    const imageHeight = 120.0;
     final notifier = ref.read(myAccountNotifierProvider.notifier);
 
     final name = ref.watch(nameStateProvider);
     final nameNotifier = ref.watch(nameStateProvider.notifier);
     final bio = ref.watch(bioStateProvider);
-    final bioStateNotifier = ref.watch(bioStateProvider.notifier);
+   
 
     final links = ref.watch(linksStateProvider);
     final linksStateNotifier = ref.watch(linksStateProvider.notifier);
@@ -42,7 +42,7 @@ class EditBioScreen extends ConsumerWidget {
           padding:
               EdgeInsets.symmetric(horizontal: themeSize.horizontalPadding),
           child: ListView(
-            padding: const EdgeInsets.only(top: 72),
+            padding: const EdgeInsets.only(top: 48),
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,8 +62,8 @@ class EditBioScreen extends ConsumerWidget {
                               width: imageHeight,
                               height: imageHeight,
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    me.canvasTheme.iconRadius * 1.25),
+                                borderRadius:
+                                    BorderRadius.circular(imageHeight * 2 / 9),
                                 image: DecorationImage(
                                   image: FileImage(
                                     ref.watch(iconImageStateProvider)!,
@@ -72,9 +72,8 @@ class EditBioScreen extends ConsumerWidget {
                               ),
                             )
                           : ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                me.canvasTheme.iconRadius * 1.25,
-                              ),
+                              borderRadius:
+                                  BorderRadius.circular(imageHeight * 2 / 9),
                               child: Container(
                                 height: imageHeight,
                                 width: imageHeight,
@@ -125,9 +124,8 @@ class EditBioScreen extends ConsumerWidget {
                     initialValue: name,
                     keyboardType: TextInputType.text,
                     maxLength: 14,
-                    style: const TextStyle(
+                    style: textStyle.w600(
                       fontSize: 16,
-                      color: ThemeColor.text,
                     ),
                     onChanged: (value) {
                       nameNotifier.state = value;
@@ -141,10 +139,9 @@ class EditBioScreen extends ConsumerWidget {
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      hintStyle: const TextStyle(
-                        fontSize: 16,
-                        color: ThemeColor.beige,
-                        fontWeight: FontWeight.w400,
+                      hintStyle: textStyle.w600(
+                        fontSize: 14,
+                        color: ThemeColor.subText,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 12,
@@ -167,17 +164,16 @@ class EditBioScreen extends ConsumerWidget {
                     initialValue: aboutMe,
                     keyboardType: TextInputType.multiline,
                     minLines: 1,
-                    maxLines: 5,
+                    maxLines: 10,
                     maxLength: 120,
-                    style: const TextStyle(
+                    style: textStyle.w600(
                       fontSize: 16,
-                      color: ThemeColor.text,
                     ),
                     onChanged: (value) {
                       aboutMeStateNotifier.state = value;
                     },
                     decoration: InputDecoration(
-                      hintText: "あなたについて教えて!",
+                      hintText: "自己紹介",
                       filled: true,
                       isDense: true,
                       fillColor: Colors.white.withOpacity(0.1),
@@ -185,10 +181,9 @@ class EditBioScreen extends ConsumerWidget {
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      hintStyle: const TextStyle(
-                        fontSize: 16,
-                        color: ThemeColor.beige,
-                        fontWeight: FontWeight.w400,
+                      hintStyle: textStyle.w600(
+                        fontSize: 14,
+                        color: ThemeColor.subText,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 12,

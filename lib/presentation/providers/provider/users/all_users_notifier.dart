@@ -1,5 +1,5 @@
 import 'package:app/core/utils/debug_print.dart';
-import 'package:app/datasource/local/hive/friendsMap.dart';
+import 'package:app/datasource/local/hive/friends_map.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/usecase/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -40,7 +40,7 @@ class AllUsersNotifier extends _$AllUsersNotifier {
       for (String userId in userIds) {
         final cachUser = cache[userId];
         final hiveUser = box.get(userId);
-        //TODO => expirment
+        //TODO => このロジックだと古いユーザーは永遠に更新されない
         if (cachUser != null) {
           futures.add(Future.value(cachUser));
         } else if (hiveUser != null) {

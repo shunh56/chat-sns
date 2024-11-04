@@ -1,6 +1,7 @@
 // subscription_model.dart
 import 'dart:async';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
@@ -112,7 +113,7 @@ class SubscriptionService {
 
       return Subscription.fromFirestore(doc.docs.first.data());
     } catch (e) {
-      print('Error getting subscription: $e');
+      DebugPrint('Error getting subscription: $e');
       return null;
     }
   }
@@ -153,7 +154,7 @@ class SubscriptionService {
           .doc(subscription.id)
           .set(subscription.toMap());
     } catch (e) {
-      print('Error creating subscription: $e');
+      DebugPrint('Error creating subscription: $e');
       rethrow;
     }
   }
@@ -167,7 +168,7 @@ class SubscriptionService {
           .doc(subscription.id)
           .update(subscription.toMap());
     } catch (e) {
-      print('Error updating subscription: $e');
+      DebugPrint('Error updating subscription: $e');
       rethrow;
     }
   }
@@ -181,7 +182,7 @@ class SubscriptionService {
           .doc(subscription.id)
           .update({'isActive': false});
     } catch (e) {
-      print('Error deactivating subscription: $e');
+      DebugPrint('Error deactivating subscription: $e');
       rethrow;
     }
   }

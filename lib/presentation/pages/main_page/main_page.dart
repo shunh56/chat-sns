@@ -32,6 +32,7 @@ class MainPage extends ConsumerWidget {
       bottomNavigationBar: const BottomBar(),
       floatingActionButton: ref.watch(bottomNavIndexProvider) == 0
           ? FloatingActionButton(
+              heroTag: "create_post",
               shape: const StadiumBorder(),
               onPressed: () {
                 Navigator.push(
@@ -86,7 +87,6 @@ class BottomBar extends ConsumerWidget {
       showSelectedLabels: false,
       showUnselectedLabels: false,
       onTap: (value) {
-        
         ref.watch(bottomNavIndexProvider.notifier).changeIndex(context, value);
       },
       items: [

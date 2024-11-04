@@ -99,6 +99,7 @@ dependencies:
   flutter_riverpod:
   riverpod_generator:
   riverpod_annotation:
+  freezed_annotation:
 
   #banner_listtile: ^2.2.0
   #grouped_list: ^5.1.2
@@ -173,6 +174,7 @@ dependencies:
   twitter_login: ^4.4.2
 
   intl: any
+  shared_preferences: ^2.3.2
 dependency_overrides:
   intl: ^0.17.0
   cloud_firestore: ^4.8.2
@@ -188,6 +190,8 @@ dev_dependencies:
   flutter_lints: ^1.0.0
   build_runner:
   hive_generator: ^2.0.1
+  freezed:
+  json_serializable: ^6.5.4
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -244,3 +248,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+
+
+

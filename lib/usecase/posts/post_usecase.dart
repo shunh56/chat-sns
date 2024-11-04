@@ -37,6 +37,10 @@ class PostUsecase {
         onlyPublic: onlyPublic);
   }
 
+  Future<List<Post>> getPostsFromCommunityId(String communityId) async {
+    return await _repository.getPostsFromCommunityId(communityId);
+  }
+
   Future<List<Post>> getPostFromUserId(String userId) async {
     return await _repository.getPostFromUserId(userId);
   }

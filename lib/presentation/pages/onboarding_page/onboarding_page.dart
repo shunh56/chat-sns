@@ -24,8 +24,8 @@ final selectedOtherIdsProvider = StateProvider<List<String>>((ref) => []);
 final doingProvider = StateProvider<String>((ref) => '');
 
 final imageProvider = StateProvider<File?>((ref) => null);
-//final genderProvider = StateProvider<Gender>((ref) => Gender.male);
 
+// ignore: constant_identifier_names
 const ONBOARDING_LENGTH = 5;
 final pageIndex = StateProvider((ref) => 0);
 final pageController = Provider((ref) => PageController(initialPage: 0));
@@ -56,7 +56,7 @@ class OnboardingScreen extends ConsumerWidget {
                     margin: EdgeInsets.only(
                       right: (themeSize.screenWidth -
                               2 * themeSize.horizontalPadding) /
-                          4 *
+                          (ONBOARDING_LENGTH + 0.5) *
                           (ONBOARDING_LENGTH - ref.watch(pageIndex)),
                     ),
                     height: 6,
@@ -71,13 +71,12 @@ class OnboardingScreen extends ConsumerWidget {
                   child: PageView(
                     physics: const NeverScrollableScrollPhysics(),
                     controller: ref.watch(pageController),
-                    children: [
-                      const InputNameScreen(),
-                      const InputUsernameScreen(),
-                      const InputImageUrlScreen(),
-                      const AddOtherFriendsScreen(),
-                      const InputDoingScreen(),
-                      Container(),
+                    children: const [
+                      InputNameScreen(),
+                      InputUsernameScreen(),
+                      InputImageUrlScreen(),
+                      AddOtherFriendsScreen(),
+                      InputDoingScreen(),
                     ],
                     onPageChanged: (value) =>
                         ref.read(pageIndex.notifier).state = value,
@@ -175,6 +174,7 @@ class InputNameScreen extends ConsumerWidget {
                 ontap: name.isEmpty
                     ? null
                     : () async {
+                        primaryFocus?.unfocus();
                         ref.read(pageController).animateToPage(1,
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.easeInOut);
@@ -335,12 +335,14 @@ class InputImageUrlScreen extends ConsumerWidget {
               margin:
                   EdgeInsets.symmetric(horizontal: themeSize.horizontalPadding),
               child: BasicButton(
-                text: image != null ? "次へ" : "スキップ",
-                ontap: () {
-                  ref.read(pageController).animateToPage(3,
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeInOut);
-                },
+                text: "次へ",
+                ontap: image == null
+                    ? null
+                    : () {
+                        ref.read(pageController).animateToPage(3,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut);
+                      },
                 enableSkip: image == null,
               ),
             ),
@@ -582,10 +584,6 @@ class InputDoingScreen extends ConsumerWidget {
                         final name = ref.read(nameProvider);
                         final image = ref.read(imageProvider);
                         final doing = ref.read(doingProvider);
-                        debugPrint("username : $username");
-                        debugPrint("name : $name");
-                        debugPrint("image : ${image?.path}");
-                        debugPrint("doing : $doing");
                         ref.read(pageController).animateToPage(4,
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.easeInOut);

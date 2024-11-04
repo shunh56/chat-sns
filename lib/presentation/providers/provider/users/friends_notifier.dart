@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:app/core/utils/debug_print.dart';
-import 'package:app/datasource/local/hive/friendsMap.dart';
+import 'package:app/datasource/local/hive/friends_map.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
@@ -92,15 +92,14 @@ final deletesIdListNotifierProvider =
     StateNotifierProvider<DeletesIdListNotifier, AsyncValue<List<String>>>(
         (ref) {
   return DeletesIdListNotifier(
-    ref,
     ref.watch(friendsUsecaseProvider),
   )..initialize();
 });
 
 class DeletesIdListNotifier extends StateNotifier<AsyncValue<List<String>>> {
-  DeletesIdListNotifier(this._ref, this.usecase)
+  DeletesIdListNotifier(this.usecase)
       : super(const AsyncValue<List<String>>.loading());
-  final Ref _ref;
+
   final FriendsUsecase usecase;
   void initialize() async {
     final deleteIds = await usecase.getDeletes();
@@ -216,15 +215,12 @@ class FriendRequestedIdListNotifier
 
 final friendFriendsMapNotifierProvider = StateNotifierProvider.autoDispose<
     FriendFriendsMapNotifier, Map<String, Set<String>>>((ref) {
-  return FriendFriendsMapNotifier(ref)..initialize();
+  return FriendFriendsMapNotifier()..initialize();
 });
 
 class FriendFriendsMapNotifier extends StateNotifier<Map<String, Set<String>>> {
-  FriendFriendsMapNotifier(
-    this._ref,
-  ) : super(const {});
+  FriendFriendsMapNotifier() : super(const {});
 
-  final Ref _ref;
   final Box<List<String>> box = HiveBoxes.box();
 
   void initialize() async {

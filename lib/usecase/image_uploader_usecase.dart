@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_storage.dart';
-import 'package:app/repository/image_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,18 +11,18 @@ final imageUploadUsecaseProvider = Provider(
   (ref) => ImageUploadUsecase(
     ref.watch(storageProvider),
     ref.watch(authProvider),
-    ref.watch(imageRepositoryProvider),
+    //  ref.watch(imageRepositoryProvider),
   ),
 );
 
 class ImageUploadUsecase {
   final FirebaseStorage _storage;
   final FirebaseAuth _auth;
-  final ImageRepository _repository;
+  //final ImageRepository _repository;
   ImageUploadUsecase(
     this._storage,
     this._auth,
-    this._repository,
+    // this._repository,
   );
 
   Future<String> uploadIconImage(File imageFile) async {

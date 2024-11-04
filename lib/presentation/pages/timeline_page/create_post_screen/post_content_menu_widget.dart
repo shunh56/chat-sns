@@ -17,7 +17,7 @@ class PostContentMenu extends ConsumerWidget {
     final imageList = ref.watch(imageListNotifierProvider);
     final imageListNotifier = ref.watch(imageListNotifierProvider.notifier);
     return Container(
-      color: Colors.white.withOpacity(0.1),
+      color: ThemeColor.accent,
       padding: EdgeInsets.symmetric(
         horizontal: themeSize.horizontalPadding,
         vertical: 12,

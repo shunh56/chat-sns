@@ -5,7 +5,6 @@ import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/right_message.dart';
 import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 import 'package:flutter/material.dart';
@@ -202,7 +201,7 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
       ),
     );
 
-    final postAsyncValue = ref.watch(currentStatusPostProvider(message.postId));
+/*    final postAsyncValue = ref.watch(currentStatusPostProvider(message.postId));
     return postAsyncValue.maybeWhen(
       data: (post) {
         return Container(
@@ -297,6 +296,6 @@ class LeftCurrentStatusMessage extends ConsumerWidget {
         );
       },
       orElse: () => const SizedBox(),
-    );
+    ); */
   }
 }

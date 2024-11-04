@@ -20,8 +20,6 @@ import 'package:app/presentation/providers/provider/posts/friends_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -46,12 +44,12 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    //final themeSize = ref.watch(themeSizeProvider(context));
+    //final textStyle = ThemeTextStyle(themeSize: themeSize);
     final postList = ref.watch(friendsPostsNotiferProvider);
-    final asyncValue = ref.watch(myAccountNotifierProvider);
+    //final asyncValue = ref.watch(myAccountNotifierProvider);
 
-    final card = asyncValue.when(
+    /* final card = asyncValue.when(
       data: (me) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -60,7 +58,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
       },
       error: (e, s) => const SizedBox(),
       loading: () => const SizedBox(),
-    );
+    ); */
     return postList.when(
       data: (list) {
         return RefreshIndicator(
@@ -136,7 +134,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
     );
   }
 
-  Widget _buildCurrentStatus(
+  /*Widget _buildCurrentStatus(
       BuildContext context, WidgetRef ref, UserAccount me) {
     final canvasTheme = me.canvasTheme;
 
@@ -522,7 +520,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
         ],
       ),
     );
-  }
+  } */
 
   Widget box(CanvasTheme canvasTheme, Widget child, Function onPressed) {
     return Stack(
@@ -687,51 +685,55 @@ class _CurrentStatusPostsSectionState
                             ),
                           ),
                         ),
-                        if (data[myId] != null)
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: GestureDetector(
-                              onTap: () {
-                                final me = ref
-                                    .read(myAccountNotifierProvider)
-                                    .asData!
-                                    .value;
-                                ref
-                                    .read(currentStatusStateProvider.notifier)
-                                    .state = me.currentStatus;
-                                Navigator.push(
-                                  context,
-                                  PageTransitionMethods.slideUp(
-                                    const EditCurrentStatusScreen(),
-                                  ),
-                                );
-                              },
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              final me = ref
+                                  .read(myAccountNotifierProvider)
+                                  .asData!
+                                  .value;
+                              ref
+                                  .read(currentStatusStateProvider.notifier)
+                                  .state = me.currentStatus;
+                              Navigator.push(
+                                context,
+                                PageTransitionMethods.slideUp(
+                                  const EditCurrentStatusScreen(),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(3.2),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: ThemeColor.background,
+                              ),
                               child: Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: ThemeColor.background,
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.blue,
                                 ),
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: Colors.blue,
-                                  ),
-                                  child: SizedBox(
-                                    height: 16,
-                                    width: 16,
-                                    child: SvgPicture.asset(
-                                      "assets/images/icons/edit.svg",
-                                      // ignore: deprecated_member_use
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
+                                child: data[myId] != null
+                                    ? SizedBox(
+                                        height: 16,
+                                        width: 16,
+                                        child: SvgPicture.asset(
+                                          "assets/images/icons/edit.svg",
+                                          // ignore: deprecated_member_use
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.add_rounded,
+                                        color: Colors.white,
+                                      ),
                               ),
                             ),
                           ),
+                        ),
                       ],
                     ),
                     ListView.builder(

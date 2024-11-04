@@ -3,8 +3,8 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/presentation/components/button/basic.dart';
 import 'package:app/presentation/pages/onboarding_page/invited_by_screen.dart';
+import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/usecase/invite_code_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,8 +22,6 @@ class InputInviteCodeScreen extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final errorText = ref.watch(errorTextProvider);
     final inputText = ref.watch(inputTextProvider);
-    final currentCode =
-        ref.watch(myAccountNotifierProvider).asData!.value.usedCode;
     return GestureDetector(
       onTap: () {
         primaryFocus?.unfocus();
@@ -185,6 +183,35 @@ class InputInviteCodeScreen extends ConsumerWidget {
                           ),
                         ),
                       ), */
+                Container(
+                  margin: EdgeInsets.symmetric(
+                      horizontal: themeSize.horizontalPadding),
+                  child: Material(
+                    color: ThemeColor.stroke,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: () {
+                        ref.read(authNotifierProvider).signout();
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "ホームに戻る",
+                            style: textStyle.w600(
+                              fontSize: 18,
+                              color: ThemeColor.subText,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 Gap(MediaQuery.of(context).viewPadding.bottom),
               ],
             ),

@@ -8,12 +8,14 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/core/values.dart';
-import 'package:app/datasource/local/hive/friendsMap.dart';
+import 'package:app/datasource/local/hive/friends_map.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/firebase_options.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/pages/auth/signin_page.dart';
 import 'package:app/presentation/pages/auth/signup_page.dart';
+import 'package:app/presentation/pages/flows/onboarding/onboarding_screen.dart';
+import 'package:app/presentation/pages/flows/onboarding/shared_preferences_provider.dart';
 import 'package:app/presentation/pages/onboarding_page/awaiting_screen.dart';
 import 'package:app/presentation/pages/onboarding_page/input_invite_code_screen.dart';
 import 'package:app/presentation/pages/onboarding_page/onboarding_page.dart';
@@ -34,13 +36,14 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 //import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 @pragma('vm:entry-point')
@@ -48,7 +51,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp();
-  print("Handling a background message: ${message.messageId}");
+  DebugPrint("Handling a background message: ${message.messageId}");
   //TODO 時差は命取りなので、送信時との時間差が5秒以内であれば鳴らす
   HapticFeedback.vibrate();
   final data = message.data;
@@ -542,42 +545,22 @@ class SplashScreen extends ConsumerWidget {
                                         ),
                                       );
                                     case AccountStatus.deleted:
-                                      return Scaffold(
-                                        body: Center(
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              const Text("DELETED"),
-                                              const Gap(24),
-                                              Material(
-                                                color: ThemeColor.stroke,
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    ref
-                                                        .read(
-                                                            myAccountNotifierProvider
-                                                                .notifier)
-                                                        .rebootAccount();
-                                                  },
-                                                  child: Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      vertical: 12,
-                                                      horizontal: 24,
-                                                    ),
-                                                    child: const Text(
-                                                      "REBOOT ACCOUNT",
-                                                    ),
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      );
+                                      return const DeletedAccountScreen();
                                     default:
-                                      return const Phase01MainPage();
+                                      return ref
+                                          .watch(initialOnboardingStateProvider)
+                                          .when(
+                                            data: (onboardingState) {
+                                              if (!onboardingState
+                                                  .isCompleted) {
+                                                return const OnboardingFlowScreen();
+                                              }
+                                              return const Phase01MainPage();
+                                            },
+                                            loading: () => const LoadingPage(),
+                                            error: (e, s) =>
+                                                ErrorPage(e: e, s: s),
+                                          );
                                   }
                                 },
                                 loading: () => const LoadingPage(),
@@ -690,14 +673,12 @@ class WelcomePage extends ConsumerWidget {
                               ),
                               Expanded(
                                 flex: 4,
-                                child: Container(
-                                  child: Text(
-                                    "Appleでサインイン",
-                                    textAlign: TextAlign.center,
-                                    style: textStyle.w600(
-                                      fontSize: 14,
-                                      color: ThemeColor.text,
-                                    ),
+                                child: Text(
+                                  "Appleでサインイン",
+                                  textAlign: TextAlign.center,
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                    color: ThemeColor.text,
                                   ),
                                 ),
                               ),
@@ -749,14 +730,12 @@ class WelcomePage extends ConsumerWidget {
                             ),
                             Expanded(
                               flex: 4,
-                              child: Container(
-                                child: Text(
-                                  "Googleでサインイン",
-                                  textAlign: TextAlign.center,
-                                  style: textStyle.w600(
-                                    fontSize: 14,
-                                    color: ThemeColor.text,
-                                  ),
+                              child: Text(
+                                "Googleでサインイン",
+                                textAlign: TextAlign.center,
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                  color: ThemeColor.text,
                                 ),
                               ),
                             ),
@@ -809,14 +788,12 @@ class WelcomePage extends ConsumerWidget {
                             ),
                             Expanded(
                               flex: 4,
-                              child: Container(
-                                child: Text(
-                                  "Xでサインイン",
-                                  textAlign: TextAlign.center,
-                                  style: textStyle.w600(
-                                    fontSize: 14,
-                                    color: ThemeColor.text,
-                                  ),
+                              child: Text(
+                                "Xでサインイン",
+                                textAlign: TextAlign.center,
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                  color: ThemeColor.text,
                                 ),
                               ),
                             ),
@@ -890,14 +867,12 @@ class WelcomePage extends ConsumerWidget {
                             ),
                             Expanded(
                               flex: 4,
-                              child: Container(
-                                child: Text(
-                                  "メールアドレスでログイン",
-                                  textAlign: TextAlign.center,
-                                  style: textStyle.w600(
-                                    fontSize: 14,
-                                    color: ThemeColor.text,
-                                  ),
+                              child: Text(
+                                "メールアドレスでログイン",
+                                textAlign: TextAlign.center,
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                  color: ThemeColor.text,
                                 ),
                               ),
                             ),
@@ -1292,9 +1267,15 @@ class LoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: Text("SPLASH SCREEN"),
+        child: SizedBox(
+          height: 72,
+          width: 72,
+          child: Image.asset(
+            'assets/images/icons/icon_circle_bg_white.png',
+          ),
+        ),
       ),
     );
   }
@@ -1306,13 +1287,182 @@ class ErrorPage extends StatelessWidget {
   final StackTrace s;
   @override
   Widget build(BuildContext context) {
+    DebugPrint("error : $e, stacktrace: $s");
     return Scaffold(
-      body: Center(
-        child: Text(
-          'エラーが発生しました。再起動してください\n ${kDebugMode ? "error : $e\n stacktrace : $s" : ""}',
-          style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                color: ThemeColor.text,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'エラーが発生しました。再起動してください',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      color: ThemeColor.text,
+                    ),
               ),
+              const Gap(12),
+              Text(
+                kDebugMode ? "error : $e\n stacktrace : $s" : "",
+                style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      color: ThemeColor.text,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DeletedAccountScreen extends HookConsumerWidget {
+  const DeletedAccountScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    // アニメーションコントローラー
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 1200),
+    );
+
+    // フェードインアニメーション
+    final fadeAnimation = useAnimation(
+      Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: animationController,
+          curve: Curves.easeOut,
+        ),
+      ),
+    );
+
+    // スケールアニメーション
+    final scaleAnimation = useAnimation(
+      Tween<double>(begin: 0.95, end: 1.0).animate(
+        CurvedAnimation(
+          parent: animationController,
+          curve: Curves.easeOut,
+        ),
+      ),
+    );
+
+    // コンポーネントが表示されたときにアニメーションを開始
+    useEffect(() {
+      animationController.forward();
+      return null;
+    }, []);
+
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Opacity(
+            opacity: fadeAnimation,
+            child: Transform.scale(
+              scale: scaleAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // アイコン
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.delete_outline_rounded,
+                      size: 48,
+                      color: Colors.red,
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // 削除メッセージ
+                  Text('アカウントが削除されています', style: textStyle.w600(fontSize: 20)),
+
+                  const SizedBox(height: 12),
+
+                  // 説明文
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      'アカウントを再開するには以下のボタンをタップしてください',
+                      textAlign: TextAlign.center,
+                      style: textStyle.w600(
+                        color: ThemeColor.subText,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // 再起動ボタン
+                  Consumer(
+                    builder: (context, ref, _) => FilledButton(
+                      onPressed: () {
+                        // アニメーション付きのフィードバック
+                        HapticFeedback.mediumImpact();
+                        ref
+                            .read(myAccountNotifierProvider.notifier)
+                            .rebootAccount();
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: ThemeColor.stroke,
+                        foregroundColor: ThemeColor.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.refresh_rounded,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'アカウントを再開',
+                            style: textStyle.w600(
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // キャンセルボタン
+                  TextButton(
+                    onPressed: () {
+                      ref.read(authNotifierProvider).signout();
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.black54,
+                    ),
+                    child: Text(
+                      'キャンセル',
+                      style: textStyle.w600(
+                        fontSize: 14,
+                        color: ThemeColor.subText,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

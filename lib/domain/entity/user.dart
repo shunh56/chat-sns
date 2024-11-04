@@ -961,12 +961,12 @@ class CanvasTheme {
 
   static CanvasTheme defaultCanvasTheme() {
     return CanvasTheme(
-      bgColor: ThemeColor.background,
+      bgColor: ThemeColor.accent,
       profileTextColor: ThemeColor.text,
       profileSecondaryTextColor: ThemeColor.subText,
-      profileLinksColor: Colors.white,
-      profileAboutMeColor: Colors.white,
-      boxBgColor: ThemeColor.accent,
+      profileLinksColor: ThemeColor.highlight,
+      profileAboutMeColor: ThemeColor.text,
+      boxBgColor: ThemeColor.stroke,
       boxTextColor: ThemeColor.subText,
       boxSecondaryTextColor: ThemeColor.text,
       boxWidth: 0.4,
@@ -1234,9 +1234,9 @@ class ColorAdapter extends TypeAdapter<Color> {
   }
 
   @override
-  void write(BinaryWriter writer, Color color) {
+  void write(BinaryWriter writer, Color obj) {
     // ColorオブジェクトのARGB値を整数として書き込む
-    writer.writeInt(color.value);
+    writer.writeInt(obj.value);
   }
 }
 

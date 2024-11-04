@@ -9,12 +9,12 @@ import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/chat_screen/chat_screen.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
+import 'package:app/presentation/pages/community_screen/community_tab_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
-import 'package:app/presentation/phase_01/search_screen.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
@@ -220,11 +220,11 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
       });
     });
 
-    final fab = FloatingActionButton(
+    /* final fab = FloatingActionButton(
+      heroTag: "edit_currentStatus",
       shape: const StadiumBorder(),
       onPressed: () {
         final me = ref.read(myAccountNotifierProvider).asData?.value;
-
         if (me != null) {
           navToEditCurrentStatus(context, ref, me);
         }
@@ -239,7 +239,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
           color: Colors.white,
         ),
       ),
-    );
+    ); */
 
     final dmAsyncValue = ref.watch(dmOverviewListNotifierProvider);
     return Scaffold(
@@ -390,9 +390,11 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
         index: ref.watch(bottomNavIndexProvider),
         children: const [
           TimelinePage(),
-          ChatScreen(),
+          CommunityTabScreen(),
           Scaffold(),
-          SearchScreen(),
+          ChatScreen(),
+          //ThreadsScreen(),
+          //SearchScreen(),
           ProfileScreen(),
           //ThreadsScreen(),
           // PlaygroundScreen(),
@@ -408,7 +410,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
           child: const BottomBar(),
         ),
       ),
-      floatingActionButton: ref.watch(bottomNavIndexProvider) == 0 ? fab : null,
+      //floatingActionButton: ref.watch(bottomNavIndexProvider) == 0 ? fab : null,
     );
   }
 
@@ -448,10 +450,10 @@ class BottomBar extends ConsumerWidget {
       },
       items: [
         _bottomNavItem(context, ref, "ホーム", 0, "assets/images/icons/home.svg"),
-        _bottomNavItem(context, ref, "チャット", 1, "assets/images/icons/chat.svg"),
-        _bottomNavItem(context, ref, "投稿", 2, "assets/images/icons/send.svg"),
         _bottomNavItem(
-            context, ref, "友達", 3, "assets/images/icons/friends.svg"),
+            context, ref, "コミュニティ", 1, "assets/images/icons/friends.svg"),
+        _bottomNavItem(context, ref, "投稿", 2, "assets/images/icons/send.svg"),
+        _bottomNavItem(context, ref, "チャット", 3, "assets/images/icons/chat.svg"),
         _bottomNavItem(
             context, ref, "アカウント", 4, "assets/images/icons/profile.svg"),
       ],

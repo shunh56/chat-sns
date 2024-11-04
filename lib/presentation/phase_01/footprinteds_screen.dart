@@ -1,3 +1,4 @@
+// ignore: dangling_library_doc_comments
 /**import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/image.dart';

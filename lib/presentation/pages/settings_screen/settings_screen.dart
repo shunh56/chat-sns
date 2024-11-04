@@ -5,7 +5,6 @@ import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/account_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/direct_messages_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/friend_requests_screen.dart';
-import 'package:app/presentation/pages/settings_screen/privacy_settings/contents_publicity_screen.dart';
 import 'package:app/presentation/pages/settings_screen/privacy_settings/friend_requests_screen.dart';
 import 'package:app/presentation/pages/settings_screen/privacy_settings/private_mode_screen.dart';
 import 'package:app/presentation/phase_01/friend_requesteds_screen.dart';
@@ -89,14 +88,14 @@ class SettingsScreen extends ConsumerWidget {
                 context,
                 _tileContent(Icons.public_rounded, "プロフィールの公開範囲"),
               ),*/
-              _buildTile(
+              /*  _buildTile(
                 context,
                 _tileContent(Icons.public_rounded, "コンテンツの公開範囲"),
                 page: const ContentRangeScreen(),
                 function: () {
                   ref.read(privacyProvider.notifier).state = me.privacy;
                 },
-              ),
+              ), */
               _buildBottomTile(
                 context,
                 _tileContent(Icons.people_outline_rounded, "フレンド申請"),

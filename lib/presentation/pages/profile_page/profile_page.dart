@@ -5,7 +5,6 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.dart';
-import 'package:app/presentation/components/bottom_sheets/user_image_bottomsheet.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
@@ -13,9 +12,7 @@ import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_canvas_theme_screem.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_top_friends.dart';
-import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
-import 'package:app/presentation/providers/provider/images/images.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -951,7 +948,7 @@ class ProfileScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Center(
                           child: Text(
-                            "TOPフレンドはいません",
+                            "お気に入りのフレンドを追加しよう",
                             style: TextStyle(
                               fontSize: 16,
                               color: canvasTheme.boxSecondaryTextColor,
@@ -1189,7 +1186,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
+  /* Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
     final asyncValue = ref.watch(userImagesNotiferProvider(me.userId));
     final themeSize = ref.watch(themeSizeProvider(context));
 
@@ -1515,7 +1512,7 @@ class ProfileScreen extends ConsumerWidget {
       loading: () => const SizedBox(),
     );
   }
-
+ */
   /* Widget _buildWishList(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount me) {
     return Column(

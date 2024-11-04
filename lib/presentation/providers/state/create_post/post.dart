@@ -13,12 +13,14 @@ class PostState {
   final String text;
   final List<File> images;
   final bool isPublic;
+  final String? communityId;
   PostState({
     required this.id,
     required this.userId,
     required this.text,
     required this.images,
     required this.isPublic,
+    required this.communityId,
   });
 
   get isReadyToUpload => (text.isNotEmpty);
@@ -37,6 +39,7 @@ class PostState {
       "isDeletedByAdmin": false,
       "isDeletedByModerator": false,
       "isPublic": isPublic,
+      "communityId": communityId,
     };
   }
 }
@@ -48,14 +51,17 @@ final postStateProvider = Provider.autoDispose(
     final images = ref.watch(imageListNotifierProvider);
     final isPublic = ref.watch(isPublicProvider);
     final userId = ref.watch(authProvider).currentUser!.uid;
+    final communityId = ref.watch(communityIdProvider);
     return PostState(
       id: id,
       text: text,
       images: images,
       isPublic: isPublic,
       userId: userId,
+      communityId: communityId,
     );
   },
 );
 
 final isPublicProvider = StateProvider.autoDispose((ref) => false);
+final communityIdProvider = StateProvider.autoDispose<String?>((ref) => null);

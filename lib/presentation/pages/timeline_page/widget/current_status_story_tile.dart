@@ -4,10 +4,8 @@ import 'package:app/core/utils/theme.dart';
 
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/notifier/heart_animation_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
@@ -394,71 +392,6 @@ class CurrentStatusStoryTileWidget extends ConsumerWidget {
               ),
             ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPostBottomSection(
-    BuildContext context,
-    WidgetRef ref,
-    CurrentStatusPost post,
-    UserAccount user,
-  ) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: 0,
-        right: 12,
-      ),
-      child: SizedBox(
-        height: 24,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (post.replyCount > 0)
-              Row(
-                children: [
-                  Text(
-                    post.replyCount.toString(),
-                    style: textStyle.numText(fontSize: 16),
-                  ),
-                  const Gap(4),
-                  Text(
-                    "件の反応",
-                    style: textStyle.w600(color: ThemeColor.subText),
-                  ),
-                ],
-              ),
-            if (post.likeCount > 0)
-              Row(
-                children: [
-                  const Gap(18),
-                  GradientText(
-                    text: post.likeCount.toString(),
-                  ),
-                  const Gap(4),
-                  Text(
-                    "いいね",
-                    style: textStyle.w600(color: ThemeColor.subText),
-                  ),
-                ],
-              ),
-            const Gap(18),
-            GestureDetector(
-              onTap: () {
-                PostBottomModelSheet(context)
-                    .openCurrentStatusPostAction(post, user);
-              },
-              child: const Icon(
-                Icons.more_horiz_rounded,
-                color: ThemeColor.subText,
-                size: 20,
-              ),
-            )
-          ],
-        ),
       ),
     );
   }

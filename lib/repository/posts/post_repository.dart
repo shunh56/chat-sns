@@ -55,6 +55,11 @@ class PostRepository {
         .toList();
   }
 
+  Future<List<Post>> getPostsFromCommunityId(String communityId) async {
+    final res = await _datasource.getPostsFromCommunityId(communityId);
+    return res.docs.map((doc) => Post.fromJson(doc.data())).toList();
+  }
+
   Future<List<Post>> getPostFromUserId(String userId) async {
     final query = await _datasource.getPostFromUserId(userId);
     return query.docs.map((e) => Post.fromJson(e.data())).toList();

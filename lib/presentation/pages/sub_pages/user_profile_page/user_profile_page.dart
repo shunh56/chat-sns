@@ -4,15 +4,12 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
-import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/users_friends_screen.dart';
-import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
-import 'package:app/presentation/providers/provider/images/images.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -287,7 +284,7 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
+  /* Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
     final asyncValue = ref.watch(userImagesNotiferProvider(me.userId));
     final themeSize = ref.watch(themeSizeProvider(context));
 
@@ -671,7 +668,7 @@ class UserProfileScreen extends ConsumerWidget {
       ),
     );
   }
-
+ */
   Widget _buildCurrentStatus(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
     final themeSize = ref.watch(themeSizeProvider(context));
@@ -1026,7 +1023,7 @@ class UserProfileScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Center(
                           child: Text(
-                            "TOPフレンドはいません",
+                            "お気に入りのフレンドを追加しよう",
                             style: TextStyle(
                               fontSize: 16,
                               color: canvasTheme.boxSecondaryTextColor,
@@ -1630,6 +1627,7 @@ class NotFriendScreen extends ConsumerWidget {
                     final users = snapshot.data!;
                     users.removeWhere((e) => !friendIds.contains(e.userId));
                     final shorten = users.length > 2;
+
                     final privateMode = user.privacy.privateMode;
                     final range = user.privacy.requestRange;
                     final buttonShown = !privateMode &&

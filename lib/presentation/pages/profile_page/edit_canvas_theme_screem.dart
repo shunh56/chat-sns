@@ -58,7 +58,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                                 ),
                               ),
                             ),
-                            Icon(
+                            /*  Icon(
                               Icons.qr_code_rounded,
                               color: canvasTheme.profileTextColor,
                             ),
@@ -67,7 +67,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                               Icons.confirmation_num_outlined,
                               color: canvasTheme.profileTextColor,
                             ),
-                            const Gap(12),
+                            const Gap(12), */
                             Icon(
                               Icons.palette_outlined,
                               color: canvasTheme.profileTextColor,
@@ -142,7 +142,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: ThemeColor.beige,
+                      color: ThemeColor.stroke,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -331,7 +331,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: ThemeColor.beige,
+                      color: ThemeColor.stroke,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -568,7 +568,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: ThemeColor.beige,
+                      color: ThemeColor.stroke,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -776,7 +776,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        Divider(
+                        /* Divider(
                           color: Colors.black.withOpacity(0.5),
                         ),
                         Row(
@@ -801,7 +801,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                               },
                             ),
                           ],
-                        ),
+                        ), */
                       ],
                     ),
                   ),
@@ -893,7 +893,7 @@ class RainbowRing extends StatelessWidget {
           padding: const EdgeInsets.all(2),
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: ThemeColor.beige,
+            color: ThemeColor.stroke,
           ),
           child: CircleAvatar(
             radius: 8,

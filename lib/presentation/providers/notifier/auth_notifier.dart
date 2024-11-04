@@ -156,7 +156,7 @@ class AuthNotifier {
         DebugPrint("accesstoken : $accessToken");
         DebugPrint("secret : $secret");
         if (accessToken == null || secret == null) {
-          print("Token or secret is null");
+          DebugPrint("Token or secret is null");
           return "token_error";
         }
 
@@ -175,20 +175,20 @@ class AuthNotifier {
         }
       } else if (authResult.status == TwitterLoginStatus.cancelledByUser) {
         _ref.read(loginProcessProvider.notifier).state = false;
-        print("User cancelled the login process");
+        DebugPrint("User cancelled the login process");
         return "cancelled_by_user";
       } else if (authResult.status == TwitterLoginStatus.error) {
         _ref.read(loginProcessProvider.notifier).state = false;
-        print("Error message: ${authResult.errorMessage}");
+        DebugPrint("Error message: ${authResult.errorMessage}");
         return "error: ${authResult.errorMessage}";
       } else {
         _ref.read(loginProcessProvider.notifier).state = false;
-        print("Unknown error occurred during login");
+        DebugPrint("Unknown error occurred during login");
         return "unknown_error";
       }
     } catch (e) {
       _ref.read(loginProcessProvider.notifier).state = false;
-      print("Twitter login error: $e");
+      DebugPrint("Twitter login error: $e");
       return "unknown_error";
     }
   }
@@ -239,5 +239,9 @@ class AuthNotifier {
     } catch (e) {
       return "unkown_error";
     }
+  }
+
+  signout() {
+    _auth.signOut();
   }
 }

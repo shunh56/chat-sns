@@ -33,9 +33,9 @@ class PushNotificationDatasource {
           'body': body,
         },
       });
-      print('Notification sent successfully: ${results.data}');
+      DebugPrint('Notification sent successfully: ${results.data}');
     } catch (e) {
-      print('Error sending notification: $e');
+      DebugPrint('Error sending notification: $e');
     }
   }
 
@@ -52,9 +52,9 @@ class PushNotificationDatasource {
           'body': body,
         },
       });
-      print('Notification sent successfully: ${results.data}');
+      DebugPrint('Notification sent successfully: ${results.data}');
     } catch (e) {
-      print('Error sending notification: $e');
+      DebugPrint('Error sending notification: $e');
     }
   }
 }

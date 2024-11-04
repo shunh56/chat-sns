@@ -1,4 +1,5 @@
 // Native広告のステートを管理するプロバイダー
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/presentation/components/admob/ad_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +26,7 @@ class BannerAdNotifier extends StateNotifier<BannerAd?> {
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
-          print('Native ad failed to load: $error');
+          DebugPrint('Native ad failed to load: $error');
         },
       ),
     ).load();

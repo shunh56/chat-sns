@@ -1,6 +1,7 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
+import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/images_widget.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/post_content_menu_widget.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/post_text_input_widget.dart';
@@ -14,8 +15,9 @@ import 'package:gap/gap.dart';
 class CreatePostScreen extends ConsumerWidget {
   const CreatePostScreen({
     super.key,
+    this.community,
   });
-
+  final Community? community;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
@@ -53,8 +55,23 @@ class CreatePostScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
+                        Expanded(
+                          child: community != null
+                              ? Center(
+                                  child: Text(
+                                    community!.name,
+                                    style: textStyle.appbarText(isSmall: true),
+                                  ),
+                                )
+                              : const SizedBox(),
+                        ),
                         GestureDetector(
                           onTap: () async {
+                            if (community != null) {
+                              ref.read(communityIdProvider.notifier).state =
+                                  community!.id;
+                              ref.read(isPublicProvider.notifier).state = true;
+                            }
                             final postState = ref.read(postStateProvider);
                             final text = ref.read(inputTextProvider);
                             if (text.isNotEmpty) {
@@ -118,6 +135,7 @@ class CreatePostScreen extends ConsumerWidget {
 
   _buildPublicityLabel(WidgetRef ref) {
     final isPublic = ref.watch(isPublicProvider);
+    if (community != null) return const SizedBox();
     return GestureDetector(
       onTap: () {
         ref.read(isPublicProvider.notifier).state = !isPublic;

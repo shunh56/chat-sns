@@ -1,4 +1,4 @@
-
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/admob/ad_helper.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +59,7 @@ class NativeAdNotifier extends StateNotifier<NativeAd?> {
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
-          print('Native ad failed to load: $error');
+          DebugPrint('Native ad failed to load: $error');
         },
       ),
     ).load();

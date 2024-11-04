@@ -22,14 +22,16 @@ class FriendsScreen extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final friendInfos = ref.read(friendIdListNotifierProvider).asData!.value;
     final map = ref.read(allUsersNotifierProvider).asData!.value;
-    final friendsCount = "(${friendInfos.length})";
     friendInfos.sort((a, b) => b.engagementCount.compareTo(a.engagementCount));
     final friends = friendInfos.map((info) => map[info.userId]!).toList();
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "フレンド$friendsCount",
-          style: textStyle.appbarText(japanese: true),
+          "フレンド",
+          style: textStyle.appbarText(
+            japanese: true,
+            isSmall: true,
+          ),
         ),
       ),
       body: SearchView(

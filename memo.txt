@@ -1,4 +1,7 @@
 
+flutter pub run build_runner build --delete-conflicting-outputs
+
+
 UPATING PODS
 sudo arch -x86_64 gem install ffi
 cd ios 

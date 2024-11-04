@@ -255,7 +255,7 @@ final friendFriendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
   return FriendFriendsPostsNotifier(
     ref,
     ref.watch(postUsecaseProvider),
-    ref.watch(algoliaPostUsecaseProvider),
+    // ref.watch(algoliaPostUsecaseProvider),
   )..initialize();
 });
 
@@ -263,13 +263,13 @@ class FriendFriendsPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
   FriendFriendsPostsNotifier(
     this.ref,
     this.usecase,
-    this._algoliaPostUsecase,
+    //this._algoliaPostUsecase,
   ) : super(const AsyncValue.loading());
 
   final Ref ref;
 
   final PostUsecase usecase;
-  final AlgoliaPostUsecase _algoliaPostUsecase;
+  //final AlgoliaPostUsecase _algoliaPostUsecase;
 
   Future<void> initialize() async {
     List<Post> posts = [];

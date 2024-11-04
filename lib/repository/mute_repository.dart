@@ -1,23 +1,22 @@
 // Project imports:
 
-import 'package:app/datasource/friends_datasource.dart';
 import 'package:app/datasource/mute_datasource.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final muteRepositoryProvider = Provider(
   (ref) => MuteRepository(
     ref.watch(muteDatasourceProvider),
-    ref.watch(friendsDatasourceProvider),
+    // ref.watch(friendsDatasourceProvider),
   ),
 );
 
 class MuteRepository {
   final MuteDatasource _muteDatasource;
-  final FriendsDatasource _friendsDatasource;
+  //final FriendsDatasource _friendsDatasource;
 
   MuteRepository(
     this._muteDatasource,
-    this._friendsDatasource,
+    // this._friendsDatasource,
   );
 
   Future<List<String>> getMutes() async {

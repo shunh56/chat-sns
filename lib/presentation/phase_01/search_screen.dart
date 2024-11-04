@@ -20,115 +20,113 @@ class SearchScreen extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
     return Scaffold(
-      body: Container(
-        child: ListView(
-          //crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppBar(
-              centerTitle: false,
-              title: Text(
-                "友達",
-                style: textStyle.appbarText(japanese: true),
-              ),
+      body: ListView(
+        //crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppBar(
+            centerTitle: false,
+            title: Text(
+              "友達",
+              style: textStyle.appbarText(japanese: true),
             ),
-            const Gap(4),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: themeSize.horizontalPadding - 4),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const FriendsScreen(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 16,
+          ),
+          const Gap(4),
+          Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: themeSize.horizontalPadding - 4),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FriendsScreen(),
                       ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: Colors.white.withOpacity(0.1),
-                      ),
-                      child: const Text(
-                        "友達",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      color: Colors.white.withOpacity(0.1),
+                    ),
+                    child: const Text(
+                      "友達",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  const Gap(8),
-                  /*   GestureDetector(
-                    onTap: () {
-                      
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const userIdsScreen(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 16,
+                ),
+                const Gap(8),
+                /*   GestureDetector(
+                  onTap: () {
+                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const userIdsScreen(),
                       ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: Colors.white.withOpacity(0.1),
-                      ),
-                      child: const Text(
-                        "おすすめ",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      color: Colors.white.withOpacity(0.1),
+                    ),
+                    child: const Text(
+                      "おすすめ",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  const Gap(8), */
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const FriendRequestScreen(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 16,
+                ),
+                const Gap(8), */
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FriendRequestScreen(),
                       ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: Colors.white.withOpacity(0.1),
-                      ),
-                      child: const Text(
-                        "リクエスト済み",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      color: Colors.white.withOpacity(0.1),
+                    ),
+                    child: const Text(
+                      "リクエスト済み",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Gap(themeSize.verticalSpaceMedium),
-            friendRequestedListView(context, ref),
-            friendsFriendListView(context, ref),
-          ],
-        ),
+          ),
+          Gap(themeSize.verticalSpaceMedium),
+          friendRequestedListView(context, ref),
+          friendsFriendListView(context, ref),
+        ],
       ),
     );
   }
@@ -287,18 +285,6 @@ class SearchScreen extends ConsumerWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                const Gap(12),
-                const Padding(
-                  padding: EdgeInsets.only(left: 12),
-                  child: Text(
-                    "知り合いかも",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: ThemeColor.text,
-                    ),
-                  ),
-                ),
                 users.isEmpty
                     ? const Text("")
                     : ListView.builder(

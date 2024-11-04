@@ -1,4 +1,3 @@
-
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ class NewScreen extends ConsumerWidget {
 
     scrollController = ScrollController();
     scrollController.addListener(() {
-      final maxScrollExtent = scrollController.position.maxScrollExtent;
       final currentPosition = scrollController.position.pixels;
       ref.read(posProvider.notifier).state = currentPosition;
     });

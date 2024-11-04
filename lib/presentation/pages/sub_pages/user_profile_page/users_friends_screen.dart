@@ -2,7 +2,6 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,13 +20,7 @@ class UsersFriendsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-
-    final friendsCount = "(${friends.length})";
-    final friendInfos =
-        ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
-
     final imageWidth = (themeSize.screenWidth - 2 * 12) / 5 - 8;
-    final myFriendIds = friendInfos.map((item) => item.userId).toList();
     final controller = ref.watch(controllerProvider);
     final text = ref.watch(inputTextProvider);
 
@@ -130,8 +123,11 @@ class UsersFriendsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "フレンド$friendsCount",
-          style: textStyle.appbarText(japanese: true),
+          "${user.name}のフレンド",
+          style: textStyle.appbarText(
+            japanese: true,
+            isSmall: true,
+          ),
         ),
       ),
       body: Container(

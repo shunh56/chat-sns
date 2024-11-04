@@ -254,7 +254,7 @@ class RightCurrentStatusMessage extends ConsumerWidget {
       ),
     );
 
-    final postAsyncValue = ref.watch(currentStatusPostProvider(message.postId));
+    /* final postAsyncValue = ref.watch(currentStatusPostProvider(message.postId));
 
     return postAsyncValue.maybeWhen(
       data: (post) {
@@ -343,6 +343,6 @@ class RightCurrentStatusMessage extends ConsumerWidget {
         );
       },
       orElse: () => const SizedBox(),
-    );
+    ); */
   }
 }

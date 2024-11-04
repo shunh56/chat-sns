@@ -23,6 +23,19 @@ class ActivitiesScreen extends ConsumerWidget {
     final asyncValue = ref.watch(activitiesListNotifierProvider);
     final listView = asyncValue.when(
       data: (list) {
+        if (list.isEmpty) {
+          return SizedBox(
+            height: themeSize.screenHeight * 0.1,
+            child: Center(
+              child: Text(
+                "アクティビティはありません。",
+                style: textStyle.w600(
+                  color: ThemeColor.subText,
+                ),
+              ),
+            ),
+          );
+        }
         return ListView.builder(
           itemCount: list.length,
           padding: EdgeInsets.zero,

@@ -473,7 +473,7 @@ class CurrentStatusDmWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    //final textStyle = ThemeTextStyle(themeSize: themeSize);
     return GestureDetector(
       onTap: () {
         ref

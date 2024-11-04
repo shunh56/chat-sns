@@ -335,6 +335,15 @@ class UserRequestWidget extends ConsumerWidget {
                               splashColor: Colors.black.withOpacity(0.3),
                               highlightColor: Colors.transparent,
                               onTap: () {
+                                final me = ref
+                                    .read(myAccountNotifierProvider)
+                                    .asData!
+                                    .value;
+                                if (me.privacy.privateMode ||
+                                    user.privacy.privateMode) {
+                                  showMessage("プライベートモードのため、リクエストできません。");
+                                  return;
+                                }
                                 ref
                                     .read(friendRequestIdListNotifierProvider
                                         .notifier)
@@ -401,6 +410,7 @@ class UserRequestWidget extends ConsumerWidget {
   }
 }
 
+//user profile screen
 class UserRequestButton extends ConsumerWidget {
   const UserRequestButton({
     super.key,
@@ -413,7 +423,7 @@ class UserRequestButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    // final me = ref.read(myAccountNotifierProvider).asData!.value;
     const subscribed = false; // me.subscriptionStatus
     final requests =
         ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];

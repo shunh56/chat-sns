@@ -19,8 +19,7 @@ class PostDatasource {
   PostDatasource(this._auth, this._firestore);
   final collectionName = "posts";
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> getPost(
-      String postId) async {
+  Future<DocumentSnapshot<Map<String, dynamic>>> getPost(String postId) async {
     return await _firestore.collection(collectionName).doc(postId).get();
   }
 
@@ -70,6 +69,16 @@ class PostDatasource {
     }
   }
 
+  Future<QuerySnapshot<Map<String, dynamic>>> getPostsFromCommunityId(
+      String communityId) async {
+    return await _firestore
+        .collection(collectionName)
+        .where("communityId", isEqualTo: communityId)
+        .orderBy("createdAt", descending: true)
+        .limit(QUERY_LIMIT)
+        .get();
+  }
+
   Future<QuerySnapshot<Map<String, dynamic>>> getPostFromUserId(
       String userId) async {
     return await _firestore
@@ -90,10 +99,10 @@ class PostDatasource {
         .snapshots();
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> _getPostById(
+  /*Future<DocumentSnapshot<Map<String, dynamic>>> _getPostById(
       String postId) async {
     return await _firestore.collection(collectionName).doc(postId).get();
-  }
+  } */
 
   uploadPost(Map<String, dynamic> json) async {
     _firestore.collection(collectionName).doc(json["id"]).set(json);
