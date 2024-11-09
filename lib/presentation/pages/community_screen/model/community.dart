@@ -18,7 +18,7 @@ class Community with _$Community {
     required int monthlyActiveUsers,
     required int totalPosts,
     required int dailyPosts,
-    required int activeVoiceRooms,
+    required int topicsCount,
     required Timestamp createdAt,
     required Timestamp updatedAt,
     required List<String> rules,

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
@@ -16,6 +17,7 @@ import 'package:app/presentation/pages/timeline_page/create_post_screen/create_p
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
+import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -488,13 +490,25 @@ class BottomBar extends ConsumerWidget {
           (() {
             switch (index) {
               case (3):
+                final dms =
+                    ref.watch(dmOverviewListNotifierProvider).asData?.value ??
+                        [];
+                bool flag = false;
+                for (var dm in dms) {
+                  final q = dm.userInfoList.where((item) =>
+                      item.userId == ref.read(authProvider).currentUser!.uid);
+                  if (q.isNotEmpty) {
+                    final myInfo = q.first;
+                    if (myInfo.lastOpenedAt.compareTo(dm.updatedAt) < 0) {
+                      flag = true;
+                    }
+                  } else {
+                    flag = true;
+                  }
+                }
+
                 return Visibility(
-                  visible: (ref
-                              .watch(friendRequestedIdListNotifierProvider)
-                              .asData
-                              ?.value ??
-                          [])
-                      .isNotEmpty,
+                  visible: flag,
                   child: Positioned(
                     top: 0, // 上部の位置を調整
                     right: 0, // 右側の位置を調整

@@ -20,11 +20,12 @@ class PushNotificationUsecase {
     String body,
   ) {
     final titleText = title ?? appName;
-    if (user.fcmToken != null) {
+    if (user.notificationData.directMessage && user.fcmToken != null) {
       _repository.sendDm(user.fcmToken!, titleText, body);
     }
   }
 
+/*
   sendCurrentStatusPost(List<UserAccount> users, String body) {
     return _repository.sendmulticast(
       users
@@ -48,11 +49,15 @@ class PushNotificationUsecase {
       body,
     );
   }
-
+ */
   sendReaction(UserAccount user, String title, String body) {
     if (user.fcmToken != null) {
       _repository.sendReaction(user.fcmToken!, title, body);
     }
+  }
+
+  sendmulticast(List<String> fcmTokens, String title, String body) {
+    _repository.sendmulticast(fcmTokens, title, body);
   }
 
   //sendVoiceChat() {}

@@ -423,12 +423,15 @@ class UserRequestButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    // final me = ref.read(myAccountNotifierProvider).asData!.value;
-    const subscribed = false; // me.subscriptionStatus
+
+    const subscribed = false;
     final requests =
         ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];
     final requesteds =
         ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
+
+    final privateMode = user.privacy.privateMode;
+    final range = user.privacy.requestRange;
 
     if (requesteds.contains(user.userId)) {
       return Column(
@@ -555,7 +558,17 @@ class UserRequestButton extends ConsumerWidget {
         ),
       );
     }
-
+    if (privateMode ||
+        (range == PublicityRange.friendOfFriend && !hasNoMutualFriends) ||
+        (range == PublicityRange.onlyFriends)) {
+      return Text(
+        "このアカウントはプライベートです",
+        style: textStyle.w600(
+          fontSize: 14,
+          color: user.canvasTheme.profileSecondaryTextColor,
+        ),
+      );
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: Material(

@@ -38,4 +38,14 @@ class CommunityDatasource {
   createCommunity(Map<String, dynamic> json) {
     return _firestore.collection(collectionName).doc(json["id"]).set(json);
   }
+
+  Future<QuerySnapshot> getRecentUsers(String communityId) async {
+    return await _firestore
+        .collection(collectionName)
+        .doc(communityId)
+        .collection("members")
+        .orderBy("joinedAt", descending: true)
+        .limit(5)
+        .get();
+  }
 }

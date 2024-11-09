@@ -23,6 +23,7 @@ mixin _$Topic {
   String get id => throw _privateConstructorUsedError;
   String get communityId => throw _privateConstructorUsedError;
   String get title => throw _privateConstructorUsedError;
+  String get text => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
   Timestamp get createdAt => throw _privateConstructorUsedError;
   Timestamp get updatedAt => throw _privateConstructorUsedError; //
@@ -46,6 +47,7 @@ abstract class $TopicCopyWith<$Res> {
       {String id,
       String communityId,
       String title,
+      String text,
       String userId,
       Timestamp createdAt,
       Timestamp updatedAt,
@@ -72,6 +74,7 @@ class _$TopicCopyWithImpl<$Res, $Val extends Topic>
     Object? id = null,
     Object? communityId = null,
     Object? title = null,
+    Object? text = null,
     Object? userId = null,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -93,6 +96,10 @@ class _$TopicCopyWithImpl<$Res, $Val extends Topic>
       title: null == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      text: null == text
+          ? _value.text
+          : text // ignore: cast_nullable_to_non_nullable
               as String,
       userId: null == userId
           ? _value.userId
@@ -141,6 +148,7 @@ abstract class _$$TopicImplCopyWith<$Res> implements $TopicCopyWith<$Res> {
       {String id,
       String communityId,
       String title,
+      String text,
       String userId,
       Timestamp createdAt,
       Timestamp updatedAt,
@@ -165,6 +173,7 @@ class __$$TopicImplCopyWithImpl<$Res>
     Object? id = null,
     Object? communityId = null,
     Object? title = null,
+    Object? text = null,
     Object? userId = null,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -186,6 +195,10 @@ class __$$TopicImplCopyWithImpl<$Res>
       title: null == title
           ? _value.title
           : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      text: null == text
+          ? _value.text
+          : text // ignore: cast_nullable_to_non_nullable
               as String,
       userId: null == userId
           ? _value.userId
@@ -230,6 +243,7 @@ class _$TopicImpl implements _Topic {
       {required this.id,
       required this.communityId,
       required this.title,
+      required this.text,
       required this.userId,
       required this.createdAt,
       required this.updatedAt,
@@ -249,6 +263,8 @@ class _$TopicImpl implements _Topic {
   final String communityId;
   @override
   final String title;
+  @override
+  final String text;
   @override
   final String userId;
   @override
@@ -276,7 +292,7 @@ class _$TopicImpl implements _Topic {
 
   @override
   String toString() {
-    return 'Topic(id: $id, communityId: $communityId, title: $title, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, tags: $tags, postCount: $postCount, participantCount: $participantCount, isActive: $isActive, isPro: $isPro)';
+    return 'Topic(id: $id, communityId: $communityId, title: $title, text: $text, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, tags: $tags, postCount: $postCount, participantCount: $participantCount, isActive: $isActive, isPro: $isPro)';
   }
 
   @override
@@ -288,6 +304,7 @@ class _$TopicImpl implements _Topic {
             (identical(other.communityId, communityId) ||
                 other.communityId == communityId) &&
             (identical(other.title, title) || other.title == title) &&
+            (identical(other.text, text) || other.text == text) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -310,6 +327,7 @@ class _$TopicImpl implements _Topic {
       id,
       communityId,
       title,
+      text,
       userId,
       createdAt,
       updatedAt,
@@ -338,6 +356,7 @@ abstract class _Topic implements Topic {
       {required final String id,
       required final String communityId,
       required final String title,
+      required final String text,
       required final String userId,
       required final Timestamp createdAt,
       required final Timestamp updatedAt,
@@ -355,6 +374,8 @@ abstract class _Topic implements Topic {
   String get communityId;
   @override
   String get title;
+  @override
+  String get text;
   @override
   String get userId;
   @override

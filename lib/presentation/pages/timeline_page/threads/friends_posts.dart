@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
@@ -46,7 +47,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
     super.build(context);
     //final themeSize = ref.watch(themeSizeProvider(context));
     //final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final postList = ref.watch(friendsPostsNotiferProvider);
+    final postList = ref.watch(friendsPostsNotifierProvider);
     //final asyncValue = ref.watch(myAccountNotifierProvider);
 
     /* final card = asyncValue.when(
@@ -66,7 +67,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
           backgroundColor: ThemeColor.stroke,
           onRefresh: () async {
             ref.read(voiceChatListNotifierProvider.notifier).refresh();
-            ref.read(friendsPostsNotiferProvider.notifier).refresh();
+            ref.read(friendsPostsNotifierProvider.notifier).refresh();
             ref
                 .read(friendsCurrentStatusPostsNotiferProvider.notifier)
                 .refresh();
@@ -786,7 +787,68 @@ class _CurrentStatusPostsSectionState
           ),
         );
       },
-      loading: () => const SizedBox(),
+      loading: () => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Text(
+                "友達のステータス",
+                style: textStyle.w600(
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            const Gap(8),
+            SizedBox(
+              height: boxHeight,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                children: [
+                  Stack(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                        ),
+                        child: UserIconStoryIcon(
+                          user: me,
+                          isSeen: true,
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(3.2),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: ThemeColor.background,
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.blue,
+                            ),
+                            child: const Icon(
+                              Icons.add_rounded,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
       error: (e, s) => const SizedBox(),
     );
   }

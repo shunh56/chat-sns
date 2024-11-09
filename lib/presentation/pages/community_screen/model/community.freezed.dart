@@ -30,7 +30,7 @@ mixin _$Community {
   int get monthlyActiveUsers => throw _privateConstructorUsedError;
   int get totalPosts => throw _privateConstructorUsedError;
   int get dailyPosts => throw _privateConstructorUsedError;
-  int get activeVoiceRooms => throw _privateConstructorUsedError;
+  int get topicsCount => throw _privateConstructorUsedError;
   Timestamp get createdAt => throw _privateConstructorUsedError;
   Timestamp get updatedAt => throw _privateConstructorUsedError;
   List<String> get rules => throw _privateConstructorUsedError;
@@ -59,7 +59,7 @@ abstract class $CommunityCopyWith<$Res> {
       int monthlyActiveUsers,
       int totalPosts,
       int dailyPosts,
-      int activeVoiceRooms,
+      int topicsCount,
       Timestamp createdAt,
       Timestamp updatedAt,
       List<String> rules,
@@ -90,7 +90,7 @@ class _$CommunityCopyWithImpl<$Res, $Val extends Community>
     Object? monthlyActiveUsers = null,
     Object? totalPosts = null,
     Object? dailyPosts = null,
-    Object? activeVoiceRooms = null,
+    Object? topicsCount = null,
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? rules = null,
@@ -138,9 +138,9 @@ class _$CommunityCopyWithImpl<$Res, $Val extends Community>
           ? _value.dailyPosts
           : dailyPosts // ignore: cast_nullable_to_non_nullable
               as int,
-      activeVoiceRooms: null == activeVoiceRooms
-          ? _value.activeVoiceRooms
-          : activeVoiceRooms // ignore: cast_nullable_to_non_nullable
+      topicsCount: null == topicsCount
+          ? _value.topicsCount
+          : topicsCount // ignore: cast_nullable_to_non_nullable
               as int,
       createdAt: null == createdAt
           ? _value.createdAt
@@ -185,7 +185,7 @@ abstract class _$$CommunityImplCopyWith<$Res>
       int monthlyActiveUsers,
       int totalPosts,
       int dailyPosts,
-      int activeVoiceRooms,
+      int topicsCount,
       Timestamp createdAt,
       Timestamp updatedAt,
       List<String> rules,
@@ -214,7 +214,7 @@ class __$$CommunityImplCopyWithImpl<$Res>
     Object? monthlyActiveUsers = null,
     Object? totalPosts = null,
     Object? dailyPosts = null,
-    Object? activeVoiceRooms = null,
+    Object? topicsCount = null,
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? rules = null,
@@ -262,9 +262,9 @@ class __$$CommunityImplCopyWithImpl<$Res>
           ? _value.dailyPosts
           : dailyPosts // ignore: cast_nullable_to_non_nullable
               as int,
-      activeVoiceRooms: null == activeVoiceRooms
-          ? _value.activeVoiceRooms
-          : activeVoiceRooms // ignore: cast_nullable_to_non_nullable
+      topicsCount: null == topicsCount
+          ? _value.topicsCount
+          : topicsCount // ignore: cast_nullable_to_non_nullable
               as int,
       createdAt: null == createdAt
           ? _value.createdAt
@@ -304,7 +304,7 @@ class _$CommunityImpl implements _Community {
       required this.monthlyActiveUsers,
       required this.totalPosts,
       required this.dailyPosts,
-      required this.activeVoiceRooms,
+      required this.topicsCount,
       required this.createdAt,
       required this.updatedAt,
       required final List<String> rules,
@@ -337,7 +337,7 @@ class _$CommunityImpl implements _Community {
   @override
   final int dailyPosts;
   @override
-  final int activeVoiceRooms;
+  final int topicsCount;
   @override
   final Timestamp createdAt;
   @override
@@ -363,7 +363,7 @@ class _$CommunityImpl implements _Community {
 
   @override
   String toString() {
-    return 'Community(id: $id, name: $name, description: $description, thumbnailImageUrl: $thumbnailImageUrl, memberCount: $memberCount, dailyActiveUsers: $dailyActiveUsers, weeklyActiveUsers: $weeklyActiveUsers, monthlyActiveUsers: $monthlyActiveUsers, totalPosts: $totalPosts, dailyPosts: $dailyPosts, activeVoiceRooms: $activeVoiceRooms, createdAt: $createdAt, updatedAt: $updatedAt, rules: $rules, moderators: $moderators, dailyNewMembers: $dailyNewMembers)';
+    return 'Community(id: $id, name: $name, description: $description, thumbnailImageUrl: $thumbnailImageUrl, memberCount: $memberCount, dailyActiveUsers: $dailyActiveUsers, weeklyActiveUsers: $weeklyActiveUsers, monthlyActiveUsers: $monthlyActiveUsers, totalPosts: $totalPosts, dailyPosts: $dailyPosts, topicsCount: $topicsCount, createdAt: $createdAt, updatedAt: $updatedAt, rules: $rules, moderators: $moderators, dailyNewMembers: $dailyNewMembers)';
   }
 
   @override
@@ -389,8 +389,8 @@ class _$CommunityImpl implements _Community {
                 other.totalPosts == totalPosts) &&
             (identical(other.dailyPosts, dailyPosts) ||
                 other.dailyPosts == dailyPosts) &&
-            (identical(other.activeVoiceRooms, activeVoiceRooms) ||
-                other.activeVoiceRooms == activeVoiceRooms) &&
+            (identical(other.topicsCount, topicsCount) ||
+                other.topicsCount == topicsCount) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -416,7 +416,7 @@ class _$CommunityImpl implements _Community {
       monthlyActiveUsers,
       totalPosts,
       dailyPosts,
-      activeVoiceRooms,
+      topicsCount,
       createdAt,
       updatedAt,
       const DeepCollectionEquality().hash(_rules),
@@ -449,7 +449,7 @@ abstract class _Community implements Community {
       required final int monthlyActiveUsers,
       required final int totalPosts,
       required final int dailyPosts,
-      required final int activeVoiceRooms,
+      required final int topicsCount,
       required final Timestamp createdAt,
       required final Timestamp updatedAt,
       required final List<String> rules,
@@ -480,7 +480,7 @@ abstract class _Community implements Community {
   @override
   int get dailyPosts;
   @override
-  int get activeVoiceRooms;
+  int get topicsCount;
   @override
   Timestamp get createdAt;
   @override

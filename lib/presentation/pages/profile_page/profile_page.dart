@@ -5,6 +5,8 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.dart';
+import 'package:app/presentation/components/bottom_sheets/user_image_bottomsheet.dart';
+import 'package:app/presentation/components/core/sticky_tabbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
@@ -12,7 +14,11 @@ import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_canvas_theme_screem.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_top_friends.dart';
+import 'package:app/presentation/pages/timeline_page/threads/users_posts.dart';
+import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
+import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/images/images.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -54,210 +60,320 @@ class ProfileScreen extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(myAccountNotifierProvider);
-    bool popped = false;
+
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    final canPop = Navigator.of(context).canPop();
+    final height = canPop ? 156.0 : 80.0 + 32;
     return asyncValue.when(
       data: (me) {
         final canvasTheme = me.canvasTheme;
         return Scaffold(
           backgroundColor: canvasTheme.bgColor,
-          body: NotificationListener(
-            onNotification: (notification) {
-              if (notification is ScrollUpdateNotification) {
-                if (notification.dragDetails != null &&
-                    notification.dragDetails!.primaryDelta != null &&
-                    notification.dragDetails!.primaryDelta! > 85 &&
-                    !popped) {
-                  popped = true;
-                  if (Navigator.canPop(context)) {
-                    Navigator.pop(context);
-                  }
-                  return true;
-                }
-              }
-              return false;
-            },
-            child: ListView(
-              padding: const EdgeInsets.only(
-                top: kToolbarHeight,
-                bottom: 120,
-              ),
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: themeSize.horizontalPadding,
-                    right: themeSize.horizontalPadding,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      UserIconCanvasIcon(user: me),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Row(
-                          children: [
-                            /* GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  PageTransitionMethods.slideUp(
-                                      const QrCodeScreen()),
-                                );
-                              },
-                              child: Icon(
-                                Icons.qr_code_rounded,
-                                color: canvasTheme.profileTextColor,
-                              ),
-                            ), */
-                            const Gap(12),
-                            GestureDetector(
-                              onTap: () {
-                                ref.read(canvasThemeProvider.notifier).state =
-                                    canvasTheme;
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        const EditCanvasThemeScreen(),
-                                  ),
-                                );
-                              },
-                              child: Icon(
-                                Icons.palette_outlined,
-                                color: canvasTheme.profileTextColor,
-                              ),
-                            ),
-                            const Gap(12),
-                            GestureDetector(
-                              onTap: () {
-                                ProfileBottomSheet(context).openBottomSheet(me);
-                              },
-                              child: Icon(
-                                Icons.settings_outlined,
-                                color: canvasTheme.profileTextColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: themeSize.horizontalPadding,
-                    right: themeSize.horizontalPadding,
-                    bottom: 12,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              me.name,
-                              style: textStyle.w600(
-                                fontSize: 24,
-                                color: canvasTheme.profileTextColor,
-                              ),
-                            ),
-                            Text(
-                              "${me.createdAt.toDateStr}〜",
-                              style: textStyle.w600(
-                                fontSize: 14,
-                                color: canvasTheme.profileSecondaryTextColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (me.links.isShown)
-                        Row(
-                          children: [
-                            /* if (me.links.line.isShown && me.links.line.path != null)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: GestureDetector(
-                            onTap: () {
-                              launchUrl(Uri.parse(me.links.line.url!));
-                            },
-                            child: SizedBox(
-                              height: 32,
-                              width: 32,
-                              child: Image.asset(
-                                me.links.line.assetString,
-                                color: canvasTheme.profileLinksColor,
+          body: DefaultTabController(
+            length: 3,
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  expandedHeight: height,
+                  pinned: true,
+                  stretch: true,
+                  backgroundColor: canvasTheme.bgColor,
+                  iconTheme: IconThemeData(color: canvasTheme.profileTextColor),
+                  flexibleSpace: LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                      final top = constraints.biggest.height;
+                      final expandedHeight = height + statusBarHeight;
+                      // 展開率を計算（1.0が完全展開、0.0が完全収縮）
+                      final expandRatio =
+                          ((top - kToolbarHeight - statusBarHeight) /
+                                  (expandedHeight -
+                                      kToolbarHeight -
+                                      statusBarHeight))
+                              .clamp(0.0, 1.0);
+
+                      // 展開率に基づいてアニメーションを制御
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // 展開時のレイアウト
+                          Opacity(
+                            opacity: expandRatio,
+                            child: SafeArea(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: themeSize.horizontalPadding,
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.bottomCenter,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        UserIconCanvasIcon(user: me),
+                                        const Expanded(
+                                          child: SizedBox(),
+                                        ),
+                                        SizedBox(
+                                          height: kToolbarHeight,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  ref
+                                                      .read(canvasThemeProvider
+                                                          .notifier)
+                                                      .state = canvasTheme;
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          const EditCanvasThemeScreen(),
+                                                    ),
+                                                  );
+                                                },
+                                                child: Icon(
+                                                  Icons.palette_outlined,
+                                                  color: canvasTheme
+                                                      .profileTextColor,
+                                                ),
+                                              ),
+                                              const Gap(12),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  ProfileBottomSheet(context)
+                                                      .openBottomSheet(me);
+                                                },
+                                                child: Icon(
+                                                  Icons.settings_outlined,
+                                                  color: canvasTheme
+                                                      .profileTextColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ), */
-                            if (me.links.instagram.isShown &&
-                                me.links.instagram.path != null)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 12),
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    launchUrl(
-                                      Uri.parse(
-                                        me.links.instagram.url!,
+                          // 収縮時のレイアウト
+                          Opacity(
+                            opacity: 1 - expandRatio,
+                            child: SafeArea(
+                              child: SizedBox(
+                                height: kToolbarHeight,
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    left: canPop
+                                        ? themeSize.horizontalPadding + 32
+                                        : themeSize.horizontalPadding,
+                                    right: themeSize.horizontalPadding,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            UserIcon(
+                                              user: me,
+                                              width: 40,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              me.name,
+                                              style: textStyle.w600(
+                                                fontSize: 16,
+                                                color: canvasTheme
+                                                    .profileTextColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      mode: LaunchMode.externalApplication,
-                                    );
-                                    //showMessage("${me.links.instagram.url}");
-                                  },
-                                  child: SizedBox(
-                                    height: 26,
-                                    width: 26,
-                                    child: Image.asset(
-                                      me.links.instagram.assetString,
-                                      color: canvasTheme.profileLinksColor,
-                                    ),
+                                      Row(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              ref
+                                                  .read(canvasThemeProvider
+                                                      .notifier)
+                                                  .state = canvasTheme;
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      const EditCanvasThemeScreen(),
+                                                ),
+                                              );
+                                            },
+                                            child: Icon(
+                                              Icons.palette_outlined,
+                                              color:
+                                                  canvasTheme.profileTextColor,
+                                            ),
+                                          ),
+                                          const Gap(12),
+                                          GestureDetector(
+                                            onTap: () {
+                                              ProfileBottomSheet(context)
+                                                  .openBottomSheet(me);
+                                            },
+                                            child: Icon(
+                                              Icons.settings_outlined,
+                                              color:
+                                                  canvasTheme.profileTextColor,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
                                   ),
                                 ),
                               ),
-                            if (me.links.x.isShown && me.links.x.path != null)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 12),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    launchUrl(
-                                      Uri.parse(me.links.x.url!),
-                                      mode: LaunchMode.externalApplication,
-                                    );
-                                  },
-                                  child: SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: Image.asset(
-                                      me.links.x.assetString,
-                                      color: canvasTheme.profileLinksColor,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                    ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: themeSize.horizontalPadding,
-                  ),
-                  child: Text(
-                    me.aboutMe,
-                    style: textStyle.w600(
-                      fontSize: 14,
-                      color: canvasTheme.profileAboutMeColor,
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: 16,
+                    ),
+                    color: canvasTheme.bgColor,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    me.name,
+                                    style: textStyle.w600(
+                                      fontSize: 24,
+                                      color: canvasTheme.profileTextColor,
+                                    ),
+                                  ),
+                                  Text(
+                                    "${me.createdAt.toDateStr}〜",
+                                    style: textStyle.w600(
+                                      fontSize: 14,
+                                      color:
+                                          canvasTheme.profileSecondaryTextColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Gap(12),
+                        Text(
+                          me.aboutMe,
+                          style: textStyle.w600(
+                            fontSize: 14,
+                            color: canvasTheme.profileAboutMeColor,
+                          ),
+                        ),
+                        if (me.links.isShown)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: Row(
+                              children: [
+                                if (me.links.instagram.isShown &&
+                                    me.links.instagram.path != null)
+                                  GestureDetector(
+                                    onTap: () async {
+                                      launchUrl(
+                                        Uri.parse(
+                                          me.links.instagram.url!,
+                                        ),
+                                        mode: LaunchMode.externalApplication,
+                                      );
+                                      //showMessage("${me.links.instagram.url}");
+                                    },
+                                    child: SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: Image.asset(
+                                        me.links.instagram.assetString,
+                                        color: canvasTheme.profileLinksColor,
+                                      ),
+                                    ),
+                                  ),
+                                if (me.links.x.isShown &&
+                                    me.links.x.path != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 12),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        launchUrl(
+                                          Uri.parse(me.links.x.url!),
+                                          mode: LaunchMode.externalApplication,
+                                        );
+                                      },
+                                      child: SizedBox(
+                                        height: 18,
+                                        width: 18,
+                                        child: Image.asset(
+                                          me.links.x.assetString,
+                                          color: canvasTheme.profileLinksColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
-                const Gap(24),
-                //_buildImages(context, ref, me),
-                _buildCurrentStatus(context, ref, canvasTheme, me),
-                _buildTopFriends(context, ref, canvasTheme, me),
-                _buildFriends(context, ref, canvasTheme, me),
+                //tabbar
+                _buildTabBar(context, ref, me.canvasTheme),
+                SliverFillRemaining(
+                  child: TabBarView(
+                    children: [
+                      CustomScrollView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: Column(
+                              children: [
+                                const Gap(12),
+                                _buildCurrentStatus(
+                                    context, ref, canvasTheme, me),
+                                _buildTopFriends(context, ref, canvasTheme, me),
+                                _buildFriends(context, ref, canvasTheme, me),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // 投稿タブ
+
+                      UserPostsThread(
+                          userId: ref.read(authProvider).currentUser!.uid),
+                      // アルバムタブ
+                      _buildImages(context, ref, me),
+                    ],
+                  ),
+                )
               ],
             ),
           ),
@@ -265,6 +381,75 @@ class ProfileScreen extends ConsumerWidget {
       },
       error: (e, s) => const Scaffold(),
       loading: () => const Scaffold(),
+    );
+  }
+
+  Widget _buildTabBar(
+      BuildContext context, WidgetRef ref, CanvasTheme canvasTheme) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    return SliverPersistentHeader(
+      pinned: true,
+      delegate: StickyTabBarDelegete(
+        bgColor: canvasTheme.bgColor,
+        TabBar(
+          isScrollable: true,
+          onTap: (val) {},
+          padding:
+              EdgeInsets.symmetric(horizontal: themeSize.horizontalPadding - 4),
+          indicator: BoxDecoration(
+            color: canvasTheme.boxBgColor,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          tabAlignment: TabAlignment.start,
+          indicatorPadding: const EdgeInsets.only(
+            left: 4,
+            right: 4,
+            top: 5,
+            bottom: 7,
+          ),
+          labelPadding: const EdgeInsets.symmetric(horizontal: 24),
+          indicatorSize: TabBarIndicatorSize.tab,
+          labelColor: canvasTheme.boxTextColor,
+          unselectedLabelColor: canvasTheme.boxTextColor,
+          dividerColor: Colors.transparent,
+          splashFactory: NoSplash.splashFactory,
+          overlayColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              // Use the default focused overlay color
+              return states.contains(WidgetState.focused)
+                  ? null
+                  : Colors.transparent;
+            },
+          ),
+          tabs: [
+            Tab(
+              child: Text(
+                "情報",
+                style: textStyle.tabText(),
+              ),
+            ),
+            Tab(
+              child: Text(
+                "投稿",
+                style: textStyle.tabText(),
+              ),
+            ),
+            /* Tab(
+              child: Text(
+                "ルーム",
+                style: textStyle.tabText(),
+              ),
+            ), */
+            Tab(
+              child: Text(
+                "アルバム",
+                style: textStyle.tabText(),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1071,19 +1256,19 @@ class ProfileScreen extends ConsumerWidget {
                 const Gap(8),
                 asyncValue.when(
                   data: (friendInfos) {
+                    friendInfos.sort((a, b) =>
+                        b.engagementCount.compareTo(a.engagementCount));
                     final friendIds = friendInfos.map((item) => item.userId);
 
                     final userIds = friendIds
                         .where((userId) => !me.topFriends.contains(userId))
                         .toList();
 
-                    final users = ref
-                        .read(allUsersNotifierProvider)
-                        .asData!
-                        .value
-                        .values
-                        .where((user) => userIds.contains(user.userId))
-                        .toList();
+                    final map =
+                        ref.read(allUsersNotifierProvider).asData!.value;
+
+                    final users =
+                        userIds.map((userId) => map[userId]!).toList();
 
                     if (users.isEmpty) {
                       return Center(
@@ -1186,11 +1371,11 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  /* Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
+  Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
     final asyncValue = ref.watch(userImagesNotiferProvider(me.userId));
     final themeSize = ref.watch(themeSizeProvider(context));
 
-    const imageHeight = 96.0;
+    final imageHeight = (themeSize.screenWidth / 3 - 8) * 4 / 3;
 
     return asyncValue.when(
       data: (imageUrls) {
@@ -1273,246 +1458,168 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ); */
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: themeSize.horizontalPadding,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "最近の写真",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: me.canvasTheme.profileAboutMeColor,
-                      fontWeight: FontWeight.w600,
+        return GridView.builder(
+          itemCount: imageUrls.length,
+          padding:
+              const EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 120),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemBuilder: (context, index) {
+            final userImage = imageUrls[index];
+            return GestureDetector(
+              onLongPress: () {
+                UserImageBottomSheet(context).showImageMenu(userImage);
+              },
+              onTap: () {
+                /*pushPage(
+                  context,
+                  VerticalScrollview(
+                    scrollToPopOption: ScrollToPopOption.start,
+                    dragToPopDirection: DragToPopDirection.toBottom,
+                    child: ImagesView(
+                      imageUrls:
+                          imageUrls.map((item) => item.imageUrl).toList(),
+                      initialIndex: index,
                     ),
                   ),
-                  /* Icon(
-                    Icons.arrow_forward_ios,
-                    color: me.canvasTheme.profileAboutMeColor,
-                    size: 18,
-                  ), */
+                ); */
+                Navigator.push(
+                  context,
+                  PageTransitionMethods.fadeIn(
+                    VerticalScrollview(
+                      scrollToPopOption: ScrollToPopOption.both,
+                      dragToPopDirection: DragToPopDirection.toBottom,
+                      child: ImagesView(
+                        imageUrls:
+                            imageUrls.map((item) => item.imageUrl).toList(),
+                        initialIndex: index,
+                      ),
+                    ),
+                  ),
+                );
+              },
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  /*    Container(
+                    margin: const EdgeInsets.only(top: 32),
+                    height: imageHeight * 1.2,
+                    width: imageHeight,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 12,
+                          offset: const Offset(0, 8),
+                          color: Colors.black.withOpacity(0.3),
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      left: 8,
+                      right: 8,
+                      bottom: 24,
+                    ),
+                    color: Colors.white,
+                    child: SizedBox(
+                      height: imageHeight * 1.2,
+                      width: imageHeight,
+                      child: CachedImage.profileBoardImage(
+                        userImage.imageUrl,
+                      ),
+                    ),
+                  ),
+                  */
+                  Container(
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      left: 8,
+                      right: 8,
+                      bottom: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 2,
+                          offset: const Offset(4, 4),
+                          color: Colors.black.withOpacity(0.5),
+                        )
+                      ],
+                    ),
+                    child: SizedBox(
+                      height: imageHeight * 1.2,
+                      width: imageHeight,
+                      child: CachedImage.profileBoardImage(
+                        userImage.imageUrl,
+                      ),
+                    ),
+                  ),
+                  if (userImage.isNew)
+                    const Positioned(
+                      bottom: 24,
+                      right: 8,
+                      child: GradientText(
+                        text: "NEW",
+                      ),
+                    ),
                 ],
               ),
-            ),
-            const Gap(8),
-            /* Container(
-                color: Colors.cyan,
-                height: sqrt((imageHeight + 16) * (imageHeight + 16) +
-                    (imageHeight * 1.2 + 32) * (imageHeight * 1.2 + 32)),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: imageUrls.reversed
-                      .map(
-                        (imageUrl) => Positioned(
-                          left: 24.0 * (imageUrls.indexOf(imageUrl)),
-                          child: Transform.rotate(
-                            alignment: Alignment.center,
-                            angle: pi / 24 * (imageUrls.indexOf(imageUrl)),
-                            child: Transform.scale(
-                              scale: cos(
-                                pi / 24 * (imageUrls.indexOf(imageUrl)),
-                              ),
-                              child: Container(
-                                height: imageHeight * 1.2 + 32,
-                                margin: EdgeInsets.symmetric(horizontal: 4),
-                                padding: EdgeInsets.only(
-                                  top: 8,
-                                  left: 8,
-                                  right: 8,
-                                  bottom: 24,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.black,
-                                    width: 0.2,
-                                  ),
-                                  color: Colors.white,
-                                ),
-                                child: Container(
-                                  height: imageHeight * 1.2,
-                                  width: imageHeight,
-                                  child: CachedImage.profileBoardImage(
-                                    imageUrl,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ), */
-            SizedBox(
-              height: imageHeight * 1.2 + 32 + 24,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: imageUrls.length,
-                padding: EdgeInsets.symmetric(
-                  horizontal: themeSize.horizontalPadding - 4,
-                ),
-                itemBuilder: (context, index) {
-                  final userImage = imageUrls[index];
-                  return GestureDetector(
-                    onLongPress: () {
-                      UserImageBottomSheet(context).showImageMenu(userImage);
-                    },
-                    onTap: () {
-                      /*pushPage(
-                        context,
-                        VerticalScrollview(
-                          scrollToPopOption: ScrollToPopOption.start,
-                          dragToPopDirection: DragToPopDirection.toBottom,
-                          child: ImagesView(
-                            imageUrls:
-                                imageUrls.map((item) => item.imageUrl).toList(),
-                            initialIndex: index,
-                          ),
-                        ),
-                      ); */
-                      Navigator.push(
-                        context,
-                        PageTransitionMethods.fadeIn(
-                          VerticalScrollview(
-                            scrollToPopOption: ScrollToPopOption.both,
-                            dragToPopDirection: DragToPopDirection.toBottom,
-                            child: ImagesView(
-                              imageUrls: imageUrls
-                                  .map((item) => item.imageUrl)
-                                  .toList(),
-                              initialIndex: index,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    child: Stack(
-                      alignment: Alignment.topCenter,
-                      children: [
-                        /*    Container(
-                          margin: const EdgeInsets.only(top: 32),
-                          height: imageHeight * 1.2,
-                          width: imageHeight,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 12,
-                                offset: const Offset(0, 8),
-                                color: Colors.black.withOpacity(0.3),
-                              )
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          padding: const EdgeInsets.only(
-                            top: 8,
-                            left: 8,
-                            right: 8,
-                            bottom: 24,
-                          ),
-                          color: Colors.white,
-                          child: SizedBox(
-                            height: imageHeight * 1.2,
-                            width: imageHeight,
-                            child: CachedImage.profileBoardImage(
-                              userImage.imageUrl,
-                            ),
-                          ),
-                        ),
-                        */
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          padding: const EdgeInsets.only(
-                            top: 8,
-                            left: 8,
-                            right: 8,
-                            bottom: 24,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 2,
-                                offset: const Offset(4, 4),
-                                color: Colors.black.withOpacity(0.5),
-                              )
-                            ],
-                          ),
-                          child: SizedBox(
-                            height: imageHeight * 1.2,
-                            width: imageHeight,
-                            child: CachedImage.profileBoardImage(
-                              userImage.imageUrl,
-                            ),
-                          ),
-                        ),
-                        if (userImage.isNew)
-                          const Positioned(
-                            bottom: 24,
-                            right: 8,
-                            child: GradientText(
-                              text: "NEW",
-                            ),
-                          ),
+            );
+            /* return Container(
+              margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              height: imageHeight,
+              width: imageHeight,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    height: imageHeight - 4,
+                    width: imageHeight - 24,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 2,
+                          spreadRadius: 4,
+                          color: Colors.black.withOpacity(0.5),
+                          offset: Offset(0, 4),
+                        )
                       ],
                     ),
-                  );
-                  /* return Container(
-                    margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                    height: imageHeight,
-                    width: imageHeight,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          height: imageHeight - 4,
-                          width: imageHeight - 24,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 2,
-                                spreadRadius: 4,
-                                color: Colors.black.withOpacity(0.5),
-                                offset: Offset(0, 4),
-                              )
-                            ],
-                          ),
+                  ),
+                  Opacity(
+                    opacity: 1, //0.3,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        height: imageHeight,
+                        width: imageHeight,
+                        child: CachedImage.profileBoardImage(
+                          imageUrl,
                         ),
-                        Opacity(
-                          opacity: 1, //0.3,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              height: imageHeight,
-                              width: imageHeight,
-                              child: CachedImage.profileBoardImage(
-                                imageUrl,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ); */
-                },
+                  ),
+                ],
               ),
-            ),
-          ],
+            ); */
+          },
         );
       },
       error: (e, s) => Text("error : $e, $s"),
       loading: () => const SizedBox(),
     );
   }
- */
+
   /* Widget _buildWishList(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount me) {
     return Column(
@@ -1766,6 +1873,32 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this.tabBar, this.backgroundColor);
+
+  final TabBar tabBar;
+  final Color backgroundColor;
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: backgroundColor,
+      child: tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
   }
 }
 

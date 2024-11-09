@@ -1,4 +1,3 @@
-
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
@@ -63,6 +62,120 @@ class ChatScreen extends ConsumerWidget {
               unseenCheck = true;
             }
             return InkWell(
+              onLongPress: () async {
+                final closed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    backgroundColor: Colors.grey[900],
+                    title: Row(
+                      children: [
+                        UserIcon(user: user),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                user.name,
+                                style: textStyle.w600(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'このチャットを閉じますか？',
+                          style: textStyle.w600(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.red.withOpacity(0.3),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.warning_rounded,
+                                    size: 16,
+                                    color: Colors.red[400],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '注意事項',
+                                    style: textStyle.w600(
+                                      fontSize: 14,
+                                      //  color: Colors.red[400],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '• チャットを閉じても履歴は消えません\n'
+                                '• 再度チャットを開始するには新しく始める必要があります',
+                                style: textStyle.w400(
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(
+                          'キャンセル',
+                          style: textStyle.w600(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'チャットを閉じる',
+                          style:
+                              textStyle.w600(fontSize: 14, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                    actionsPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  ),
+                );
+                if (closed == true) {
+                  ref
+                      .read(dmOverviewListNotifierProvider.notifier)
+                      .leaveChat(user);
+                }
+              },
               onTap: () {
                 Navigator.push(
                   context,

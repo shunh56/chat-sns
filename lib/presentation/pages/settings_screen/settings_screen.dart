@@ -3,6 +3,8 @@ import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart'
 import 'package:app/presentation/pages/profile_page/invite_code_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/account_screen.dart';
+import 'package:app/presentation/pages/settings_screen/contact_screen.dart';
+import 'package:app/presentation/pages/settings_screen/debug_report_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/direct_messages_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/friend_requests_screen.dart';
 import 'package:app/presentation/pages/settings_screen/privacy_settings/friend_requests_screen.dart';
@@ -200,6 +202,42 @@ class SettingsScreen extends ConsumerWidget {
                   launchUrl(
                     Uri.parse("https://blank-pj.vercel.app"),
                     mode: LaunchMode.externalApplication,
+                  );
+                },
+              ),
+            ],
+          ),
+          const Gap(32),
+          _buildContainer(
+            "アプリ改善",
+            [
+              _buildTopTile(
+                context,
+                _tileContent(
+                  Icons.bug_report_outlined,
+                  "バグを報告",
+                ),
+                function: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const DebugReportScreen(),
+                    ),
+                  );
+                },
+              ),
+              _buildBottomTile(
+                context,
+                _tileContent(
+                  Icons.question_answer_outlined,
+                  "要望・お問い合わせ",
+                ),
+                function: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ContactScreen(),
+                    ),
                   );
                 },
               ),

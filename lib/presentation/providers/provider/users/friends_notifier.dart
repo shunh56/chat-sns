@@ -5,6 +5,7 @@ import 'package:app/core/utils/debug_print.dart';
 import 'package:app/datasource/local/hive/friends_map.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
+import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -111,7 +112,6 @@ class DeletesIdListNotifier extends StateNotifier<AsyncValue<List<String>>> {
   deleteUser(UserAccount user) {
     final list = state.asData?.value ?? [];
     list.add(user.userId);
-
     if (mounted) {
       state = AsyncValue.data(list);
     }
@@ -144,7 +144,6 @@ class FriendRequestIdListNotifier
       await _ref
           .read(allUsersNotifierProvider.notifier)
           .getUserAccounts(userIds);
-
       if (mounted) {
         state = AsyncValue.data(userIds);
       }
@@ -158,8 +157,14 @@ class FriendRequestIdListNotifier
   }
 
   sendFriendRequest(UserAccount user) async {
+    final list = state.asData?.value ?? [];
+    if (list.length >= 30) {
+      showMessage("フレンド数は30人までです。");
+      return;
+    }
     try {
       await usecase.sendFriendRequest(user);
+      _ref.read(pushNotificationNotifierProvider).sendFriendRequest(user);
       //showMessage("フレンド申請を送りました！");
     } catch (e) {
       showErrorSnackbar(error: e);
@@ -205,6 +210,11 @@ class FriendRequestedIdListNotifier
   }
 
   admitFriendRequested(UserAccount user) {
+    final list = _ref.read(friendIdListNotifierProvider).asData?.value ?? [];
+    if (list.length >= 30) {
+      showMessage("フレンド数は30人までです。");
+      return;
+    }
     usecase.admitFriendRequested(user.userId);
   }
 

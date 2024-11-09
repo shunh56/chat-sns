@@ -110,12 +110,29 @@ class AllUsersNotifier extends _$AllUsersNotifier {
         ),
       );
     }
-    DebugPrint("addUserAccounts ${users.map((user) => user.name)}");
+
     state = AsyncValue.data(cache);
   }
 
   UserAccount getUser(String userId) {
     final hiveObject = box.get(userId);
     return hiveObject!.toUserAccount();
+  }
+
+  //
+  Future<List<UserAccount>> getOnlineUsers({Timestamp? lastOpenedAt}) async {
+    final users = await ref
+        .read(userUsecaseProvider)
+        .getOnlineUsers(lastOpenedAt: lastOpenedAt);
+    addUserAccounts(users);
+
+    return users;
+  }
+
+  Future<List<UserAccount>> getNewUsers({Timestamp? createdAt}) async {
+    final users =
+        await ref.read(userUsecaseProvider).getNewUsers(createdAt: createdAt);
+    addUserAccounts(users);
+    return users;
   }
 }

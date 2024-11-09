@@ -5,6 +5,7 @@ import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/pages/auth/forgot_password_screen.dart';
 import 'package:app/presentation/pages/auth/signup_page.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -265,7 +266,7 @@ class SignInPage extends ConsumerWidget {
                     ],
                   ),
                   const Gap(12),
-                  true
+                  kDebugMode
                       ? Expanded(
                           child: ListView.builder(
                             itemCount: testerAccount.length,

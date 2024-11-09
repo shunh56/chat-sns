@@ -1,4 +1,7 @@
 // 1. 投稿タブの実装
+import 'dart:math';
+
+import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
@@ -10,17 +13,18 @@ import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/community_screen/model/room.dart';
 import 'package:app/presentation/pages/community_screen/model/topic.dart';
-import 'package:app/presentation/pages/community_screen/provider/states/community_membership_provider.dart';
 import 'package:app/presentation/pages/community_screen/screens/community_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/create_topics_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/room_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/topic_screen.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
+import 'package:app/presentation/providers/provider/community.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
 import 'package:app/presentation/providers/provider/posts/community_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/topics/topics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,10 +79,12 @@ class PostsTab extends ConsumerWidget {
           child: FloatingActionButton(
             shape: const StadiumBorder(),
             onPressed: () {
-              final isMember =
-                  ref.watch(communityMembershipProvider(community.id));
+              final joinedCommunites = ref.watch(joinedCommunitiesProvider);
+              final isMember = (joinedCommunites.asData?.value ?? [])
+                  .map((e) => e.id)
+                  .contains(community.id);
               if (!isMember) {
-                showJoinDialog(context, ref, community.id);
+                showJoinDialog(context, ref, community);
               } else {
                 Navigator.push(
                   context,
@@ -91,7 +97,11 @@ class PostsTab extends ConsumerWidget {
               }
             },
             backgroundColor: Colors.blue,
-            child: const Icon(Icons.add),
+            child: const Icon(
+              Icons.add_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
         ),
       ],
@@ -117,13 +127,13 @@ class PostsTab extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
-              const SizedBox(height: 12),
+             const Gap( 12),
               _buildContent(),
               /*  if (post.tags != null) ...[
-                const SizedBox(height: 8),
+               const Gap( 8),
                 _buildTags(),
               ], */
-              const SizedBox(height: 12),
+             const Gap( 12),
               _buildActions(),
             ],
           ),
@@ -182,7 +192,7 @@ class PostsTab extends ConsumerWidget {
           ),
         ),
         if (post.imageUrls != null && post.imageUrls!.isNotEmpty) ...[
-          const SizedBox(height: 8),
+         const Gap( 8),
           _buildImageGrid(),
         ],
       ],
@@ -278,14 +288,86 @@ class PostsTab extends ConsumerWidget {
 }
 z */
 
+final textChannels = [
+  // 基本チャンネル
+  "一般", // 雑談や一般的な会話
+  "自己紹介", // 新メンバーの自己紹介
+  "お知らせ", // 重要な情報や告知
+
+  // 学業関連
+  "授業相談", // 授業や課題についての相談
+  "資格勉強", // 資格取得に関する情報共有
+  "課題提出", // 課題の締め切りや進捗共有
+
+  // 学生生活
+  "サークル", // サークル活動の情報共有
+  "イベント", // 学校行事や課外活動
+  "バイト探し", // アルバイト情報の共有
+
+  // 交流
+  "趣味", // 趣味や日常の話題
+  "相談室", // 悩み相談や助言
+  "フリマ", // 教科書や生活用品の売買
+];
+
 // 2. トピックタブの実装
 class TopicsTab extends ConsumerWidget {
   const TopicsTab({super.key, required this.community});
   final Community community;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final topicsAsync = ref.watch(communityTopicsNotifier(community.id));
+    /**   final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
 
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: textChannels.length,
+      itemBuilder: (context, index) {
+        int id = Random().nextInt(
+            ref.read(allUsersNotifierProvider).asData!.value.length - 5);
+        return Container(
+          margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: ThemeColor.accent,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.tag_rounded,
+                color: Colors.white,
+              ),
+              Gap(12),
+              Text(
+                textChannels[index],
+                style: textStyle.w600(
+                  fontSize: 14,
+                ),
+              ),
+              Gap(12),
+              UserStackIcons(
+                imageRadius: 14,
+                strokeColor: ThemeColor.accent,
+                users: ref
+                    .read(allUsersNotifierProvider)
+                    .asData!
+                    .value
+                    .values
+                    .toList()
+                    .sublist(
+                      id,
+                      id + Random().nextInt(5),
+                    ),
+              ),
+              Spacer(),
+            ],
+          ),
+        );
+      },
+    );
+    */
+    final topicsAsync = ref.watch(communityTopicsNotifier(community.id));
     return Stack(
       children: [
         topicsAsync.when(
@@ -297,21 +379,22 @@ class TopicsTab extends ConsumerWidget {
                   .initialize();
             },
             child: FutureBuilder(
-                future: ref
-                    .read(allUsersNotifierProvider.notifier)
-                    .getUserAccounts(
-                        topics.map((topic) => topic.userId).toList()),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const SizedBox();
-                  }
-                  return ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: topics.length,
-                    itemBuilder: (context, index) =>
-                        TopicCard(topic: topics[index]),
-                  );
-                }),
+              future: ref
+                  .read(allUsersNotifierProvider.notifier)
+                  .getUserAccounts(
+                      topics.map((topic) => topic.userId).toList()),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const SizedBox();
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: topics.length,
+                  itemBuilder: (context, index) =>
+                      TopicCard(topic: topics[index]),
+                );
+              },
+            ),
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => Center(
@@ -321,16 +404,19 @@ class TopicsTab extends ConsumerWidget {
             ),
           ),
         ),
+        // if (ref.read(myAccountNotifierProvider).asData!.value.isAdmin)
         Positioned(
           right: 16,
           bottom: 32,
           child: FloatingActionButton(
             shape: const StadiumBorder(),
             onPressed: () {
-              final isMember =
-                  ref.watch(communityMembershipProvider(community.id));
+              final joinedCommunites = ref.watch(joinedCommunitiesProvider);
+              final isMember = (joinedCommunites.asData?.value ?? [])
+                  .map((e) => e.id)
+                  .contains(community.id);
               if (!isMember) {
-                showJoinDialog(context, ref, community.id);
+                showJoinDialog(context, ref, community);
               } else {
                 Navigator.push(
                   context,
@@ -341,7 +427,11 @@ class TopicsTab extends ConsumerWidget {
               }
             },
             backgroundColor: Colors.blue,
-            child: const Icon(Icons.add),
+            child: const Icon(
+              Icons.add_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
         ),
       ],
@@ -356,73 +446,116 @@ class TopicCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final user =
         ref.read(allUsersNotifierProvider).asData!.value[topic.userId]!;
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.grey[900],
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => TopicScreen(topic: topic)),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              UserIcon(
-                user: user,
-                width: 48,
-                isCircle: true,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      topic.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: Material(
+        color: ThemeColor.accent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => TopicScreen(topic: topic)),
+            );
+          },
+          splashColor: Colors.white.withOpacity(0.05),
+          highlightColor: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        topic.title,
+                        style: textStyle.w600(
+                          fontSize: 18,
+                          color: ThemeColor.white,
+                        ),
+                      ),
+                      const Gap(12),
+                      if (topic.tags.isNotEmpty)
+                        Wrap(
+                          children: topic.tags
+                              .map((tag) => _buildTag(tag, textStyle))
+                              .toList(),
+                        ),
+                      Row(
+                        children: [
+                          UserIcon(
+                            user: user,
+                            width: 20,
+                            isCircle: true,
+                          ),
+                          const Gap(12),
+                          Text(
+                            '投稿件数 ${topic.postCount}件',
+                            style: textStyle.w400(
+                              fontSize: 14,
+                              color: ThemeColor.subText,
+                            ),
+                          ),
+                          const Gap(16),
+                          Text(
+                            "最終更新 ${topic.updatedAt.xxAgo}",
+                            style: textStyle.w400(
+                              fontSize: 14,
+                              color: ThemeColor.subText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (topic.isPro)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.pink.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'PRO',
+                      style: TextStyle(
+                        color: Colors.pink,
+                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${topic.participantCount}人が参加中',
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (topic.isPro)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'PRO',
-                    style: TextStyle(
-                      color: Colors.amber,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTag(String tag, ThemeTextStyle textStyle) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8, bottom: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: ThemeColor.button.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Text(
+        tag,
+        style: textStyle.w600(),
       ),
     );
   }
@@ -474,7 +607,11 @@ class RoomsTab extends ConsumerWidget {
             shape: const StadiumBorder(),
             onPressed: () => _showCreateRoomDialog(context, ref),
             backgroundColor: Colors.blue,
-            child: const Icon(Icons.mic),
+            child: const Icon(
+              Icons.add,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
         ),
       ],
@@ -482,9 +619,12 @@ class RoomsTab extends ConsumerWidget {
   }
 
   void _showCreateRoomDialog(BuildContext context, WidgetRef ref) {
-    final isMember = ref.watch(communityMembershipProvider(community.id));
+    final joinedCommunites = ref.watch(joinedCommunitiesProvider);
+    final isMember = (joinedCommunites.asData?.value ?? [])
+        .map((e) => e.id)
+        .contains(community.id);
     if (!isMember) {
-      showJoinDialog(context, ref, community.id);
+      showJoinDialog(context, ref, community);
     } else {
       showDialog(
         context: context,
@@ -495,6 +635,8 @@ class RoomsTab extends ConsumerWidget {
 }
 
 // まずタグのプロバイダーを作成
+final titleTextProvider = StateProvider((ref) => "");
+final countTextProvider = StateProvider((ref) => "20");
 final selectedTagsProvider = StateProvider<List<String>>((ref) => []);
 
 // タグのリストを定義（または別途管理）
@@ -543,8 +685,8 @@ class CreateRoomDialog extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
-    final titleController = TextEditingController();
-    final maxParticipantsController = TextEditingController(text: "20");
+    //final titleController = TextEditingController();
+    // final maxParticipantsController = TextEditingController(text: "20");
     final selectedTags = ref.watch(selectedTagsProvider);
 
     return AlertDialog(
@@ -559,24 +701,31 @@ class CreateRoomDialog extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              controller: titleController,
+              //controller: titleController,
               decoration: const InputDecoration(
                 labelText: 'ルーム名',
                 labelStyle: TextStyle(color: Colors.white),
               ),
               style: const TextStyle(color: Colors.white),
+              onChanged: (val) {
+                ref.read(titleTextProvider.notifier).state = val;
+              },
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: maxParticipantsController,
+            const Gap(16),
+            TextFormField(
+              initialValue: ref.watch(countTextProvider),
+              //controller: maxParticipantsController,
               decoration: const InputDecoration(
                 labelText: '最大参加人数',
                 labelStyle: TextStyle(color: Colors.white),
               ),
               keyboardType: TextInputType.number,
               style: const TextStyle(color: Colors.white),
+              onChanged: (val) {
+                ref.read(countTextProvider.notifier).state = val;
+              },
             ),
-            const SizedBox(height: 24),
+            const Gap(24),
             Text(
               'タグを選択（最大3つまで）',
               style: TextStyle(
@@ -584,7 +733,7 @@ class CreateRoomDialog extends ConsumerWidget {
                 fontSize: 14,
               ),
             ),
-            const SizedBox(height: 8),
+            const Gap(8),
             Wrap(
               spacing: 8,
               runSpacing: 0,
@@ -629,19 +778,31 @@ class CreateRoomDialog extends ConsumerWidget {
             ref.read(selectedTagsProvider.notifier).state = [];
             Navigator.pop(context);
           },
-          child: const Text('キャンセル'),
+          child: Text(
+            'キャンセル',
+            style: textStyle.w600(
+              fontSize: 14,
+              color: ThemeColor.subText,
+            ),
+          ),
         ),
         ElevatedButton(
           onPressed: () => _createRoom(
             context,
             ref,
-            titleController.text,
-            int.parse(maxParticipantsController.text),
+            ref.read(titleTextProvider),
+            int.parse(ref.read(countTextProvider)),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
           ),
-          child: const Text('作成'),
+          child: Text(
+            '作成',
+            style: textStyle.w600(
+              fontSize: 14,
+              color: Colors.white,
+            ),
+          ),
         ),
       ],
     );
@@ -737,60 +898,66 @@ class RoomCard extends ConsumerWidget {
   }
 
   Widget _buildHeader(ThemeTextStyle textStyle) {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                room.title,
-                style: textStyle.w600(
-                  fontSize: 22,
+        Row(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  /* SizedBox(
+                    height: 24,
+                    child: SoundWave(hasVoiceCome: true),
+                  ), */
+                  Text(
+                    room.title,
+                    style: textStyle.w600(
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (room.isLive)
+              Container(
+                margin: const EdgeInsets.only(top: 4, left: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'LIVE',
+                      style: textStyle.w600(
+                        color: Colors.red,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              if (room.tags.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Row(
-                    children: room.tags
-                        .map((tag) => _buildTag(tag, textStyle))
-                        .toList(),
-                  ),
-                )
-            ],
-          ),
+          ],
         ),
-        if (room.isLive)
-          Container(
-            margin: const EdgeInsets.only(top: 4, left: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
+        if (room.tags.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
             child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'LIVE',
-                  style: textStyle.w600(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+              children:
+                  room.tags.map((tag) => _buildTag(tag, textStyle)).toList(),
             ),
-          ),
+          )
       ],
     );
   }
@@ -823,7 +990,7 @@ class RoomCard extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const Gap(8),
         Row(
           children: [
             Expanded(
@@ -846,12 +1013,12 @@ class RoomCard extends ConsumerWidget {
                     height: 40,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: participants.length * 5,
+                      itemCount: participants.length,
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: UserIcon(
-                            user: participants[index % participants.length],
+                            user: participants[index],
                             isCircle: true,
                             width: 40,
                           ),
@@ -921,10 +1088,6 @@ class RoomCard extends ConsumerWidget {
 
     try {
       await ref.read(roomProvider(room.id).notifier).leaveRoom(currentUser.uid);
-
-      if (context.mounted && Navigator.canPop(context)) {
-        Navigator.pop(context);
-      }
     } catch (e) {
       if (context.mounted) {
         showMessage(
@@ -970,27 +1133,89 @@ class InfoTab extends ConsumerWidget {
   final Community community;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    final asyncValue = ref.watch(communityMembersNotifierProvider);
+
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(left: 12, right: 12, bottom: 60),
       children: [
         _buildSection(
+          context,
+          ref,
           title: 'コミュニティについて',
           child: Text(
             community.description,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-            ),
+            style: textStyle.w600(fontSize: 14),
           ),
         ),
-        const SizedBox(height: 24),
+        const Gap(24),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.people_outline,
+                color: ThemeColor.icon,
+              ),
+              const Gap(12),
+              Expanded(
+                child: Text(
+                  "コミュニティのメンバーのみ投稿または返信を行えます。",
+                  style: textStyle.w600(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.public_outlined,
+                color: ThemeColor.icon,
+              ),
+              const Gap(12),
+              Expanded(
+                child: Text(
+                  "全てのコミュニティは公開されます。誰でもコミュニティに参加できます。",
+                  style: textStyle.w600(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.event,
+                color: ThemeColor.icon,
+              ),
+              const Gap(12),
+              Expanded(
+                child: Text(
+                  "作成日 : ${community.createdAt.toDateStr}",
+                  style: textStyle.w600(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Gap(24),
         _buildSection(
+          context,
+          ref,
           title: 'コミュニティルール',
           child: Column(
-            children: community.rules.map((rule) => _buildRule(rule)).toList(),
+            children: community.rules
+                .map((rule) => _buildRule(context, ref, rule))
+                .toList(),
           ),
         ),
-        const SizedBox(height: 24),
+        const Gap(24),
         FutureBuilder(
             future: ref
                 .read(allUsersNotifierProvider.notifier)
@@ -1005,6 +1230,8 @@ class InfoTab extends ConsumerWidget {
               }
               final users = snapshot.data!;
               return _buildSection(
+                context,
+                ref,
                 title: 'モデレーター',
                 child: Column(
                   children: users
@@ -1013,52 +1240,61 @@ class InfoTab extends ConsumerWidget {
                 ),
               );
             }),
+        const Gap(24),
+        asyncValue.maybeWhen(
+          data: (users) => _buildSection(
+            context,
+            ref,
+            title: "メンバー",
+            child: Column(
+              children: users
+                  .map((user) => _buildMember(context, ref, user))
+                  .toList(),
+            ),
+          ),
+          orElse: () => const SizedBox(),
+        ),
       ],
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required Widget child,
-  }) {
+  Widget _buildSection(BuildContext context, WidgetRef ref,
+      {required String title, required Widget child}) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+          style: textStyle.w600(
+            fontSize: 14,
+            color: ThemeColor.headline,
           ),
         ),
-        const SizedBox(height: 16),
+        const Gap(8),
         child,
       ],
     );
   }
 
-  Widget _buildRule(String rule) {
+  Widget _buildRule(BuildContext context, WidgetRef ref, String rule) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '•',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-            ),
+            style: textStyle.w600(fontSize: 14),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               rule,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
+              style: textStyle.w600(fontSize: 14),
             ),
           ),
         ],
@@ -1068,10 +1304,59 @@ class InfoTab extends ConsumerWidget {
 
   Widget _buildModerator(
       BuildContext context, WidgetRef ref, UserAccount user) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     return ListTile(
       onTap: () {
         ref.read(navigationRouterProvider(context)).goToProfile(user);
       },
+      splashColor: Colors.white.withOpacity(0.05),
+      hoverColor: Colors.white.withOpacity(0.1),
+      contentPadding: EdgeInsets.zero,
+      leading: UserIcon(
+        user: user,
+      ),
+      title: Row(
+        children: [
+          Text(
+            user.name,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Gap(8),
+          Text(
+            "モデレータ",
+            style: textStyle.w600(
+              color: Colors.blue,
+            ),
+          ),
+        ],
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${_getTimeAgo(user.createdAt.toDate())}から',
+            style: textStyle.w600(
+              color: ThemeColor.subText,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMember(BuildContext context, WidgetRef ref, UserAccount user) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    return ListTile(
+      onTap: () {
+        ref.read(navigationRouterProvider(context)).goToProfile(user);
+      },
+      splashColor: Colors.white.withOpacity(0.05),
+      hoverColor: Colors.white.withOpacity(0.1),
       contentPadding: EdgeInsets.zero,
       leading: UserIcon(
         user: user,
@@ -1083,29 +1368,11 @@ class InfoTab extends ConsumerWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "モデレータ",
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 12,
-            ),
-          ),
-          Text(
-            '${_getTimeAgo(user.createdAt.toDate())}から',
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-      trailing: IconButton(
-        icon: const Icon(Icons.message_outlined, color: Colors.grey),
-        onPressed: () {},
-        // onPressed: () => _contactModerator(context, moderator),
+      subtitle: Text(
+        "メンバー",
+        style: textStyle.w600(
+          color: ThemeColor.subText,
+        ),
       ),
     );
   }

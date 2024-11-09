@@ -16,4 +16,12 @@ class ReportDatasource {
   reportUser(Map<String, dynamic> json) {
     return _firestore.collection("report_users").doc(json["id"]).set(json);
   }
+
+  reportBug(Map<String, dynamic> json) {
+    return _firestore.collection("report_bugs").doc(json["id"]).set(json);
+  }
+
+  reportForm(Map<String, dynamic> json) {
+    return _firestore.collection("report_form").doc(json["id"]).set(json);
+  }
 }

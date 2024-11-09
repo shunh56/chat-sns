@@ -14,4 +14,12 @@ class ReportRepository {
   reportUser(Map<String, dynamic> json) {
     return _datasource.reportUser(json);
   }
+
+  reportBug(Map<String, dynamic> json) {
+    return _datasource.reportBug(json);
+  }
+
+  reportForm(Map<String, dynamic> json) {
+    return _datasource.reportForm(json);
+  }
 }

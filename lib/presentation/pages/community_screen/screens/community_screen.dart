@@ -1,16 +1,21 @@
 // lib/screens/community/community_screen.dart
+import 'dart:math';
+
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/core/sticky_tabbar.dart';
 import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
-import 'package:app/presentation/pages/community_screen/provider/states/community_membership_provider.dart';
 import 'package:app/presentation/pages/community_screen/screens/community_management_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/tabs.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/providers/provider/community.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/usecase/comunity_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -22,23 +27,17 @@ class CommunityScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMember = ref.watch(communityMembershipProvider(communityId));
     final communityAsyncValue = ref.watch(communityNotifierProvider);
-
     return communityAsyncValue.when(
       data: (community) => Stack(
         children: [
           Scaffold(
             body: DefaultTabController(
-              length: 4,
+              length: 3,
               child: NestedScrollView(
                 headerSliverBuilder: (context, innerBoxIsScrolled) {
                   return [
                     _buildSliverAppBar(context, ref, community),
-                    if (!isMember)
-                      SliverToBoxAdapter(
-                        child: _buildJoinPrompt(context, ref),
-                      ),
                     SliverToBoxAdapter(
                       child: _buildHeader(context, ref, community),
                     ),
@@ -49,7 +48,7 @@ class CommunityScreen extends ConsumerWidget {
                   children: [
                     PostsTab(community: community!),
                     TopicsTab(community: community),
-                    RoomsTab(community: community),
+                    // RoomsTab(community: community),
                     InfoTab(community: community),
                   ],
                 ),
@@ -75,45 +74,66 @@ class CommunityScreen extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final currentUser = ref.watch(authProvider).currentUser;
-    final isMember = ref.watch(communityMembershipProvider(communityId));
+    final joinedCommunites = ref.watch(joinedCommunitiesProvider);
+    final isMember = (joinedCommunites.asData?.value ?? [])
+        .map((e) => e.id)
+        .contains(communityId);
     final isModerator =
         currentUser != null && community.moderators.contains(currentUser.uid);
-
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    const height = 120.0;
     return SliverAppBar(
-      expandedHeight: 120,
+      expandedHeight: height,
       pinned: true,
-      flexibleSpace: FlexibleSpaceBar(
-        expandedTitleScale: 1.5,
-        title: Text(
-          community.name,
-          style: textStyle.appbarText(japanese: true),
-        ),
-        background: Stack(
-          children: [
-            // 背景画像
-            Positioned.fill(
-              child: CachedImage.postImage(community.thumbnailImageUrl),
+      flexibleSpace: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+        final top = constraints.biggest.height;
+        final expandedHeight = height + statusBarHeight;
+        // 展開率を計算（1.0が完全展開、0.0が完全収縮）
+        final expandRatio = ((top - kToolbarHeight - statusBarHeight) /
+                (expandedHeight - kToolbarHeight - statusBarHeight))
+            .clamp(0.0, 1.0);
+        return FlexibleSpaceBar(
+          expandedTitleScale: 1.5,
+          title: Opacity(
+            opacity: 1 - expandRatio,
+            child: Text(
+              community.name,
+              style: textStyle.appbarText(japanese: true),
             ),
-            // グラデーションオーバーレイ
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      ThemeColor.background.withOpacity(0.1),
-                      ThemeColor.background.withOpacity(0.2),
-                      ThemeColor.background.withOpacity(0.4),
-                      ThemeColor.background,
-                    ],
-                  ),
+          ),
+          background: Stack(
+            children: [
+              // 背景画像
+              Positioned.fill(
+                child: CachedImage.postImage(community.thumbnailImageUrl),
+              ),
+              Positioned.fill(
+                child: Container(
+                  color: ThemeColor.background.withOpacity(0.25),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
+              // グラデーションオーバーレイ
+              /* Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        ThemeColor.background.withOpacity(0.1),
+                        ThemeColor.background.withOpacity(0.2),
+                        ThemeColor.background.withOpacity(0.4),
+                        ThemeColor.background,
+                      ],
+                    ),
+                  ),
+                ),
+              ), */
+            ],
+          ),
+        );
+      }),
       actions: [
         if (isModerator)
           Padding(
@@ -125,7 +145,7 @@ class CommunityScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: GestureDetector(
               onTap: () {
-                _showLeaveDialog(context, ref);
+                _showLeaveDialog(context, ref, community);
               },
               child: const Icon(
                 Icons.exit_to_app_rounded,
@@ -140,6 +160,11 @@ class CommunityScreen extends ConsumerWidget {
       BuildContext context, WidgetRef ref, Community community) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
+    final asyncValue = ref.watch(communityMembersNotifierProvider);
+    final joinedCommunites = ref.watch(joinedCommunitiesProvider);
+    final isMember = (joinedCommunites.asData?.value ?? [])
+        .map((e) => e.id)
+        .contains(communityId);
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: themeSize.horizontalPadding,
@@ -150,15 +175,60 @@ class CommunityScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${community.memberCount}人のメンバー',
+            community.name,
+            style: textStyle.w600(
+              color: Colors.white,
+              fontSize: 24,
+            ),
+          ),
+          const Gap(12),
+          SizedBox(
+            height: 32,
+            child: Row(
+              children: [
+                asyncValue.maybeWhen(
+                  data: (users) => UserStackIcons(
+                    users: users,
+                    imageRadius: 14,
+                  ),
+                  orElse: () => const EmptyUserStackIcons(
+                    imageRadius: 14,
+                  ),
+                ),
+                const Gap(8),
+                Text(
+                  '${community.memberCount}人のメンバー',
+                  style: textStyle.w400(
+                    color: ThemeColor.subText,
+                    fontSize: 14,
+                  ),
+                ),
+                Spacer(),
+                if (!isMember) _buildJoinPrompt(context, ref, community),
+              ],
+            ),
+          ),
+          const Gap(12),
+          Text(
+            community.description,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: textStyle.w400(
-              color: ThemeColor.subText,
+              color: ThemeColor.headline,
               fontSize: 14,
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<List<UserAccount>> getUsers(WidgetRef ref) async {
+    final userIds =
+        await ref.read(communityUsecaseProvider).getRecentUsers(communityId);
+    return await ref
+        .read(allUsersNotifierProvider.notifier)
+        .getUserAccounts(userIds);
   }
 
   Widget _buildTabBar(BuildContext context, WidgetRef ref) {
@@ -210,12 +280,12 @@ class CommunityScreen extends ConsumerWidget {
                 style: textStyle.tabText(),
               ),
             ),
-            Tab(
+            /* Tab(
               child: Text(
                 "ルーム",
                 style: textStyle.tabText(),
               ),
-            ),
+            ), */
             Tab(
               child: Text(
                 "情報",
@@ -245,11 +315,33 @@ class CommunityScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildJoinPrompt(BuildContext context, WidgetRef ref) {
+  Widget _buildJoinPrompt(
+      BuildContext context, WidgetRef ref, Community community) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
+    return Material(
+      borderRadius: BorderRadius.circular(100),
+      color: Colors.blue,
+      child: InkWell(
+        onTap: () => showJoinDialog(context, ref, community),
+        splashColor: Colors.black.withOpacity(0.3),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 6,
+          ),
+          child: Text(
+            '参加する',
+            style: textStyle.w600(
+              fontSize: 14,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       margin: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.blue.withOpacity(0.3),
@@ -266,9 +358,9 @@ class CommunityScreen extends ConsumerWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const Gap(12),
+          const Gap(8),
           ElevatedButton(
-            onPressed: () => showJoinDialog(context, ref, communityId),
+            onPressed: () => showJoinDialog(context, ref, community),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               shape: RoundedRectangleBorder(
@@ -288,7 +380,8 @@ class CommunityScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showLeaveDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showLeaveDialog(
+      BuildContext context, WidgetRef ref, Community community) async {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final confirmed = await showDialog<bool>(
@@ -354,8 +447,8 @@ class CommunityScreen extends ConsumerWidget {
     if (confirmed == true) {
       try {
         await ref
-            .read(communityMembershipProvider(communityId).notifier)
-            .leaveCommunity();
+            .read(joinedCommunitiesProvider.notifier)
+            .leaveCommunity(community);
         // 成功メッセージの表示
         if (context.mounted) {
           showMessage('コミュニティから退会しました');
@@ -379,7 +472,7 @@ class CommunityScreen extends ConsumerWidget {
 }
 
 Future<void> showJoinDialog(
-    BuildContext context, WidgetRef ref, String communityId) async {
+    BuildContext context, WidgetRef ref, Community community) async {
   final themeSize = ref.watch(themeSizeProvider(context));
   final textStyle = ThemeTextStyle(themeSize: themeSize);
   final confirmed = await showDialog<bool>(
@@ -440,8 +533,108 @@ Future<void> showJoinDialog(
   );
 
   if (confirmed == true) {
-    await ref
-        .read(communityMembershipProvider(communityId).notifier)
-        .joinCommunity();
+    await ref.read(joinedCommunitiesProvider.notifier).joinCommunity(community);
+  }
+}
+
+class UserStackIcons extends ConsumerWidget {
+  const UserStackIcons({
+    super.key,
+    required this.users,
+    this.displayCount = 5,
+    this.imageRadius = 24.0,
+    this.strokeColor,
+  });
+  final List<UserAccount> users;
+
+  final int displayCount;
+  final double imageRadius;
+  final Color? strokeColor;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    const stroke = 4.0;
+    List<Widget> stack = [];
+    for (int i = min(displayCount, users.length) - 1; i >= 0; i--) {
+      stack.add(
+        Positioned(
+          left: i * (imageRadius * 3 / 2) - stroke,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                width: stroke,
+                color: strokeColor ?? ThemeColor.background,
+              ),
+            ),
+            child: UserIcon(
+              user: users[i],
+              width: imageRadius * 2,
+              isCircle: true,
+              navDisabled: true,
+            ),
+          ),
+        ),
+      );
+    }
+    return SizedBox(
+      width: (imageRadius * 2 + stroke) +
+          (min(displayCount, users.length) - 1) * (imageRadius * 3 / 2),
+      height: imageRadius * 2,
+      child: Stack(
+        alignment: Alignment.centerLeft,
+        children: stack,
+      ),
+    );
+  }
+}
+
+class EmptyUserStackIcons extends ConsumerWidget {
+  const EmptyUserStackIcons({
+    super.key,
+    this.displayCount = 5,
+    this.imageRadius = 24.0,
+    this.bgColor,
+    this.strokeColor,
+  });
+
+  final int displayCount;
+  final double imageRadius;
+  final Color? bgColor;
+  final Color? strokeColor;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    const stroke = 4.0;
+    List<Widget> stack = [];
+    for (int i = displayCount - 1; i >= 0; i--) {
+      stack.add(
+        Positioned(
+          left: i * (imageRadius * 3 / 2) - stroke,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                width: stroke,
+                color: strokeColor ?? ThemeColor.background,
+              ),
+            ),
+            child: CircleAvatar(
+              radius: imageRadius,
+              backgroundColor: bgColor ?? ThemeColor.accent,
+            ),
+          ),
+        ),
+      );
+    }
+    return SizedBox(
+      width: (imageRadius * 2 + stroke) +
+          (displayCount - 1) * (imageRadius * 3 / 2),
+      height: imageRadius * 2,
+      child: Stack(
+        alignment: Alignment.centerLeft,
+        children: stack,
+      ),
+    );
   }
 }

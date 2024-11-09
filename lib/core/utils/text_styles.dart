@@ -61,17 +61,18 @@ class ThemeTextStyle {
     );
   }
 
-  TextStyle w400({
-    Color color = ThemeColor.text,
-    double fontSize = 12.0,
-    bool underline = false,
-  }) {
+  TextStyle w400(
+      {Color color = ThemeColor.text,
+      double fontSize = 12.0,
+      bool underline = false,
+      double? height}) {
     return TextStyle(
       color: color,
       fontSize: fontSize,
       fontWeight: FontWeight.w400,
       fontFamily: primary,
       decoration: underline ? TextDecoration.underline : null,
+      height: height,
     );
   }
 

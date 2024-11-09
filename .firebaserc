@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "chat-sns-project"
+    "default": "chat-sns-project",
+    "development": "chat-sns-project-dev",
+    "production": "blank-project-prod"
   }
 }

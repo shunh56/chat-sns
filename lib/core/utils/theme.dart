@@ -8,6 +8,56 @@ class Images {
 }
 
 class ThemeColor {
+  // 背景色のグラデーション
+  static const background = Color(0xFF121212); // メイン背景色
+  static const surface = Color(0xFF1E1E1E); // カード・要素の背景
+  static const accent = Color(0xFF1E1E1E); // 要素の強調背景
+
+  // 境界線と分離要素
+  static const stroke = Color(0xFF303030);
+  static const divider = Color(0xFF383838); // 区切り線
+
+  // テキストカラー
+  static const text = Color(0xFFF0F0F0); // メインテキスト
+  static const textSecondary = Color(0xFFB0B0B0); // セカンダリーテキスト
+  static const textTertiary = Color(0xFF808080); // 補足テキスト
+
+  // アクセントカラー
+  static const primary = Color(0xFF3B82F6); // プライマリーアクセント（青）
+  static const primaryLight = Color(0xFF60A5FA); // プライマリーライト
+  static const secondary = Color(0xFF10B981); // セカンダリーアクセント（緑）
+
+  // 状態表示
+  static const success = Color(0xFF34D399); // 成功
+  static const warning = Color(0xFFFBBF24); // 警告
+  static const error = Color(0xFFEF4444); // エラー
+
+  // インタラクティブ要素
+  static const hover = Color(0xFF2A2A2A); // ホバー状態
+  static const pressed = Color(0xFF323232); // プレス状態
+  static const selected = Color(0xFF3B82F6); // 選択状態
+
+  // 特殊要素
+  static const overlay = Color(0x80000000); // オーバーレイ
+  static const shimmer = Color(0xFF242424); // ローディングシマー効果
+
+  //
+  //
+  //static const background = Color(0xFF080808);
+  //static const accent = Color(0xFF0F0F0F);
+
+  static const white = Color(0xFFFFFFFF);
+  static const beige = Color(0xFFC0C0C0);
+  static const icon = Color(0xFFcacaca);
+  static const button = Color(0xFFD0D0D0);
+  static const headline = Color(0xFFACACAC);
+  static const highlight = Colors.blue;
+  static const subText = Color(0xFF808080);
+}
+
+/*
+
+class ThemeColor {
   //static const textLight = Color(0xFFC7C7C7);
   //static const textGrey = Color(0xFF999999);
   //static const primary = Color.fromARGB(255, 244, 242, 236);
@@ -43,6 +93,7 @@ class ThemeColor {
   static const text = Color(0xFFDDDDDD);
   static const subText = Color(0xFF808080);
 }
+*/
 
 final themeSizeProvider =
     Provider.family<ThemeSize, BuildContext>((Ref ref, BuildContext context) {

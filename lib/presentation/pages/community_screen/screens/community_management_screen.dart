@@ -319,7 +319,7 @@ class _StatisticsTab extends ConsumerWidget {
           items: [
             _StatItem('総投稿数', community.totalPosts),
             _StatItem('日間投稿数', community.dailyPosts),
-            _StatItem('アクティブな通話ルーム', community.activeVoiceRooms),
+            _StatItem('トピックの数', community.topicsCount),
           ],
         ),
       ],

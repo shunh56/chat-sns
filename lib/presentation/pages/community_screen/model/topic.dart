@@ -10,9 +10,11 @@ class Topic with _$Topic {
     required String id,
     required String communityId,
     required String title,
+    required String text,
     required String userId,
     required Timestamp createdAt,
     required Timestamp updatedAt,
+
 
     //
     required List<String> tags,

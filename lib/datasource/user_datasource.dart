@@ -1,4 +1,5 @@
 import 'package:app/core/utils/debug_print.dart';
+import 'package:app/core/values.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,6 +19,50 @@ class UserDatasource {
 
   UserDatasource(this._auth, this._firestore);
 
+  final collectionName = "users";
+  Future<QuerySnapshot<Map<String, dynamic>>> getOnlineUsers(
+      {Timestamp? lastOpenedAt}) async {
+    final floor =
+        Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 3)));
+    if (lastOpenedAt != null) {
+      return _firestore
+          .collection(collectionName)
+          .where("isOnline", isEqualTo: true)
+          .where("lastOpenedAt", isLessThan: lastOpenedAt)
+          .where("lastOpenedAt", isGreaterThan: floor)
+          .orderBy("lastOpenedAt", descending: true)
+          .limit(QUERY_LIMIT)
+          .get();
+    } else {
+      return _firestore
+          .collection(collectionName)
+          .where("isOnline", isEqualTo: true)
+          .where("lastOpenedAt", isGreaterThan: floor)
+          .orderBy("lastOpenedAt", descending: true)
+          .limit(10)
+          .get();
+    }
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getNewUsers(
+      {Timestamp? createdAt}) async {
+    if (createdAt != null) {
+      return _firestore
+          .collection(collectionName)
+          .where("createdAt", isLessThan: createdAt)
+          .orderBy("createdAt", descending: true)
+          .limit(QUERY_LIMIT)
+          .get();
+    } else {
+      return _firestore
+          .collection(collectionName)
+          .orderBy("createdAt", descending: true)
+          .limit(10)
+          .get();
+    }
+  }
+
+  // usernameのチェック用
   Future<DocumentSnapshot<Map<String, dynamic>>?> fetchUserByUsername(
       String username) async {
     try {
@@ -51,10 +96,6 @@ class UserDatasource {
       DebugPrint('Exception: $e');
       return null;
     }
-  }
-
-  Future<QuerySnapshot<Map<String, dynamic>>> getAllUsers() async {
-    return await _firestore.collection("users").get();
   }
 
   updateJson(Map<String, dynamic> json) async {

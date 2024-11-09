@@ -1,6 +1,7 @@
 // Flutter imports:
 
 // Package imports:
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/datasource/post/algolia_post_datasource.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
@@ -14,11 +15,10 @@ import 'package:app/usecase/posts/current_status_post_usecase.dart';
 import 'package:app/usecase/posts/post_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final friendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
+final friendsPostsNotifierProvider = StateNotifierProvider.autoDispose<
     FriendsPostsNotifier, AsyncValue<List<PostBase>>>((ref) {
   return FriendsPostsNotifier(
     ref,
-    ref.watch(friendIdListNotifierProvider),
     ref.watch(postUsecaseProvider),
     ref.watch(currentStatusPostUsecaseProvider),
     ref.watch(algoliaPostUsecaseProvider),
@@ -29,14 +29,13 @@ final friendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
 class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   FriendsPostsNotifier(
     this.ref,
-    this.asyncValue,
     this.postUsecase,
     this.currentStatusPostUsecase,
     this._algoliaPostUsecase,
   ) : super(const AsyncValue.loading());
 
   final Ref ref;
-  final AsyncValue<List<FriendInfo>> asyncValue;
+
   final PostUsecase postUsecase;
   final CurrentStatusPostUsecase currentStatusPostUsecase;
   final AlgoliaPostUsecase _algoliaPostUsecase;
@@ -45,6 +44,7 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   Future<void> initialize() async {
     final myId = ref.read(authProvider).currentUser!.uid;
     List<PostBase> posts = [];
+    final asyncValue = ref.read(friendIdListNotifierProvider);
     asyncValue.maybeWhen(
       data: (infos) async {
         if (initialized) return;
@@ -72,8 +72,12 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
         if (mounted) {
           state = AsyncValue.data(posts);
         }
+        return;
       },
-      orElse: () {},
+      orElse: () async {
+        await Future.delayed(const Duration(milliseconds: 100));
+        initialize();
+      },
     );
   }
 

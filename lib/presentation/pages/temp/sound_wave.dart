@@ -23,12 +23,12 @@ class SoundWave extends StatelessWidget {
 
     return Row(
       children: List.generate(
-        2,
+        1,
         (index) {
           return Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: LoadingIndicator(
-              indicatorType: Indicator.lineScalePulseOutRapid,
+              indicatorType: Indicator.audioEqualizer,
               colors: soundWaveColors.sublist(index * 5, (index + 1) * 5),
               pause: !hasVoiceCome,
             ),

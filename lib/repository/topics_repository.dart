@@ -11,8 +11,8 @@ class TopicsRepository {
   final TopicsDatasource _datasource;
   TopicsRepository(this._datasource);
 
-  Future<List<Topic>> getRecentTopics() async {
-    final res = await _datasource.getRecentTopics();
+  Future<List<Topic>> getPopularTopics() async {
+    final res = await _datasource.getPopularTopics();
     return res.docs.map((doc) => Topic.fromJson(doc.data())).toList();
   }
 
@@ -23,5 +23,9 @@ class TopicsRepository {
 
   createTopic(TopicState state) {
     return _datasource.createTopic(state.toJson());
+  }
+
+  sendMessage(String topicId, String text) {
+    return _datasource.sendMessage(topicId, text);
   }
 }

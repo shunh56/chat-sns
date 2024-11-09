@@ -1,9 +1,10 @@
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/usecase/push_notification_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// TODO
+//　今実装されているのは投稿に対するいいね、DM、フレンドリクエスト
 
 final pushNotificationNotifierProvider = Provider(
   (ref) => PushNotificationNotifier(
@@ -20,15 +21,36 @@ class PushNotificationNotifier {
     this._usecase,
   );
 
-  sendDm(
-    UserAccount user,
-    String text,
-  ) {
+  sendDm(UserAccount user, String text) {
     final me = ref.read(myAccountNotifierProvider).asData!.value;
     _usecase.sendDm(user, me.name, text);
   }
 
-  sendCurrentStatusPost() {
+  sendPostReaction(UserAccount user, String type) {
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    if (type == "postLike") {
+      _usecase.sendReaction(user, me.name, "あなたの投稿にいいねしました。");
+    }
+    if (type == "postComment") {
+      _usecase.sendReaction(user, me.name, "あなたの投稿にコメントしました。");
+    }
+  }
+
+  sendCurrentStatusPostReaction(UserAccount user, String type) {
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    if (type == "currentStatusPostLike") {
+      _usecase.sendReaction(user, me.name, "あなたのステータスにいいねしました。");
+    }
+  }
+
+  sendFriendRequest(UserAccount user) {
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    if (user.notificationData.friendRequest && user.fcmToken != null) {
+      _usecase.sendmulticast([user.fcmToken!], me.name, "フレンドリクエストが届きました。Ï");
+    }
+  }
+
+/*  sendCurrentStatusPost() {
     final me = ref.read(myAccountNotifierProvider).asData!.value;
     final friendIds = ref
         .read(friendIdListNotifierProvider)
@@ -63,6 +85,7 @@ class PushNotificationNotifier {
         .toList();
     return _usecase.sendPost(friends, "${me.name}が投稿をしました。");
   }
+ */
 
   sendVoiceChat() {}
   sendFriendReqeust() {}
@@ -83,21 +106,4 @@ class PushNotificationNotifier {
         .toList();
     return _usecase.sendmulticast(friends, "TITLE", "THIS IS BODY");
   } */
-
-  sendPostReaction(UserAccount user, String type) {
-    final me = ref.read(myAccountNotifierProvider).asData!.value;
-    if (type == "postLike") {
-      _usecase.sendReaction(user, me.name, "あなたの投稿にいいねしました。");
-    }
-    if (type == "postComment") {
-      _usecase.sendReaction(user, me.name, "あなたの投稿にコメントしました。");
-    }
-  }
-
-  sendCurrentStatusPostReaction(UserAccount user, String type) {
-    final me = ref.read(myAccountNotifierProvider).asData!.value;
-    if (type == "currentStatusPostLike") {
-      _usecase.sendReaction(user, me.name, "あなたのステータスにいいねしました。");
-    }
-  }
 }

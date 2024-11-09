@@ -165,8 +165,6 @@ class UserAccount extends HiveObject {
     );
   }
 
-  
-
   Map<String, dynamic> toJson() {
     return {
       "userId": userId,
@@ -473,6 +471,14 @@ class UserAccount extends HiveObject {
   bool get greenBadge {
     return isOnline &&
         DateTime.now().difference(lastOpenedAt.toDate()).inMinutes < 10;
+  }
+
+  bool get isAdmin {
+    final admins = [
+      "Bp9DWVP8PGXEZmcdx5LZrqL5apw2",
+      "AJNL9L1qGVhlDAmiqFaH7nikSOX2",
+    ];
+    return admins.contains(userId);
   }
 }
 

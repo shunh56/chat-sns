@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/values.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
@@ -105,7 +106,24 @@ class PostDatasource {
   } */
 
   uploadPost(Map<String, dynamic> json) async {
-    _firestore.collection(collectionName).doc(json["id"]).set(json);
+    final batch = _firestore.batch();
+    final postRef = _firestore.collection(collectionName).doc(json["id"]);
+    batch.set(postRef, json);
+    if (json["communityId"] != null) {
+      final communityId = json["communityId"];
+      final communityRef =
+          _firestore.collection("communities").doc(communityId);
+      batch.update(communityRef, {
+        "updatedAt": Timestamp.now(),
+        "totalPosts": FieldValue.increment(1),
+        "dailyPosts": FieldValue.increment(1),
+      });
+    }
+    try {
+      batch.commit();
+    } catch (e) {
+      DebugPrint("POST UPLOAD ERROR");
+    }
   }
 
   incrementLikeCount(String id, int count) {

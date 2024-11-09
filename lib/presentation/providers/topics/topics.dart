@@ -23,7 +23,7 @@ class RecentTopicsNotifier extends StateNotifier<AsyncValue<List<Topic>>> {
   final TopicsUsecase usecase;
 
   Future<void> initialize() async {
-    final res = await usecase.getRecentTopics();
+    final res = await usecase.getPopularTopics();
     //final communityIds = res.map((topic) => topic.communityId).toList();
     state = AsyncValue.data(res);
   }

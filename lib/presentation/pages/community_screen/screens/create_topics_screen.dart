@@ -179,7 +179,7 @@ class _TagsInput extends ConsumerWidget {
 
   void _addTag(WidgetRef ref, List<String> currentTags, String newTag) {
     // #が付いていない場合は追加
-    final formattedTag = newTag.startsWith('#') ? newTag : '#$newTag';
+    final formattedTag = newTag; //newTag.startsWith('#') ? newTag : '#$newTag';
     if (!currentTags.contains(formattedTag)) {
       ref.read(tagsProvider.notifier).state = [...currentTags, formattedTag];
     }

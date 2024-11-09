@@ -21,4 +21,9 @@ class CommunityRepository {
   createCommunity(Map<String, dynamic> json) {
     return _datasource.createCommunity(json);
   }
+
+  Future<List<String>> getRecentUsers(String communityId) async {
+    final res = await _datasource.getRecentUsers(communityId);
+    return res.docs.map((doc) => doc.id).toList();
+  }
 }

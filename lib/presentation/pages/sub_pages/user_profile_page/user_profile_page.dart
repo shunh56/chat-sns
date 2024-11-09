@@ -4,12 +4,19 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
+import 'package:app/presentation/components/core/sticky_tabbar.dart';
+import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
 import 'package:app/presentation/navigation/navigator.dart';
+import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/others/report_user_screen.dart';
+import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/users_friends_screen.dart';
+import 'package:app/presentation/pages/timeline_page/threads/users_posts.dart';
+import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
+import 'package:app/presentation/providers/provider/images/images.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -21,7 +28,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:overscroll_pop/overscroll_pop.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+final scrollControllerProvider = Provider((ref) => ScrollController());
 
 class UserProfileScreen extends ConsumerWidget {
   const UserProfileScreen({
@@ -38,10 +48,441 @@ class UserProfileScreen extends ConsumerWidget {
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
 
     bool popped = false;
-
     if (!friendInfos.map((item) => item.userId).contains(user.userId)) {
       return NotFriendScreen(user: user);
     }
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    const height = 156.0;
+
+    /* final scrollController = ref.watch(scrollControllerProvider);
+    scrollController.addListener(() {
+      DebugPrint(
+          "${scrollController.position.userScrollDirection} , ${scrollController.position.pixels}");
+      if (scrollController.position.userScrollDirection ==
+              ScrollDirection.forward &&
+          scrollController.position.pixels <= -80) {
+        if (!popped) {
+          popped = true;
+          Navigator.popUntil(context, (route) => route.isFirst);
+        }
+      }
+    }); */
+    return Scaffold(
+      backgroundColor: canvasTheme.bgColor,
+      body: DefaultTabController(
+        length: 3,
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: height,
+              pinned: true,
+              stretch: true,
+              backgroundColor: canvasTheme.bgColor,
+              iconTheme: IconThemeData(color: canvasTheme.profileTextColor),
+              flexibleSpace: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  final top = constraints.biggest.height;
+                  final expandedHeight = height + statusBarHeight;
+                  // 展開率を計算（1.0が完全展開、0.0が完全収縮）
+                  final expandRatio = ((top -
+                              kToolbarHeight -
+                              statusBarHeight) /
+                          (expandedHeight - kToolbarHeight - statusBarHeight))
+                      .clamp(0.0, 1.0);
+
+                  // 展開率に基づいてアニメーションを制御
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // 展開時のレイアウト
+                      Opacity(
+                        opacity: expandRatio,
+                        child: SafeArea(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: themeSize.horizontalPadding,
+                            ),
+                            child: Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    UserIconCanvasIcon(user: user),
+                                    const Expanded(
+                                      child: SizedBox(),
+                                    ),
+                                    SizedBox(
+                                      height: kToolbarHeight,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              ref
+                                                  .read(
+                                                      navigationRouterProvider(
+                                                          context))
+                                                  .goToChat(user);
+                                            },
+                                            child: SizedBox(
+                                              height: 22,
+                                              width: 22,
+                                              child: SvgPicture.asset(
+                                                "assets/images/icons/chat.svg",
+                                                // ignore: deprecated_member_use
+                                                color: canvasTheme
+                                                    .profileTextColor,
+                                              ),
+                                            ),
+                                          ),
+                                          const Gap(12),
+                                          /*GestureDetector(
+                      onTap: () {
+                        
+                      },
+                      child: Icon(
+                        shareIcon,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Gap(12), */
+                                          FocusedMenuHolder(
+                                            onPressed: () {},
+                                            menuWidth: 120,
+                                            blurSize: 0,
+                                            animateMenuItems: false,
+                                            openWithTap: true,
+                                            menuBoxDecoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                            ),
+                                            menuItems: <FocusedMenuItem>[
+                                              FocusedMenuItem(
+                                                backgroundColor:
+                                                    ThemeColor.background,
+                                                title: const Text(
+                                                  "フレンド解除",
+                                                ),
+                                                onPressed: () {
+                                                  UserBottomModelSheet(context)
+                                                      .quitFriendBottomSheet(
+                                                          user);
+                                                },
+                                              ),
+                                              FocusedMenuItem(
+                                                backgroundColor:
+                                                    ThemeColor.background,
+                                                title: const Text(
+                                                  "報告",
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          ReportUserScreen(
+                                                              user),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                              FocusedMenuItem(
+                                                backgroundColor:
+                                                    ThemeColor.background,
+                                                title: const Text(
+                                                  "ブロック",
+                                                ),
+                                                onPressed: () {
+                                                  UserBottomModelSheet(context)
+                                                      .blockUserBottomSheet(
+                                                          user);
+                                                },
+                                              ),
+                                            ],
+                                            child: Icon(
+                                              Icons.more_horiz,
+                                              color:
+                                                  canvasTheme.profileTextColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // 収縮時のレイアウト
+                      Opacity(
+                        opacity: 1 - expandRatio,
+                        child: SafeArea(
+                          child: SizedBox(
+                            height: kToolbarHeight,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                left: themeSize.horizontalPadding + 32,
+                                right: themeSize.horizontalPadding,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        UserIcon(
+                                          user: user,
+                                          width: 40,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          user.name,
+                                          style: textStyle.w600(
+                                            fontSize: 16,
+                                            color: canvasTheme.profileTextColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: kToolbarHeight,
+                                    child: Row(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            ref
+                                                .read(navigationRouterProvider(
+                                                    context))
+                                                .goToChat(user);
+                                          },
+                                          child: SizedBox(
+                                            height: 22,
+                                            width: 22,
+                                            child: SvgPicture.asset(
+                                              "assets/images/icons/chat.svg",
+                                              // ignore: deprecated_member_use
+                                              color:
+                                                  canvasTheme.profileTextColor,
+                                            ),
+                                          ),
+                                        ),
+                                        const Gap(12),
+                                        /*GestureDetector(
+                      onTap: () {
+                        
+                      },
+                      child: Icon(
+                        shareIcon,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Gap(12), */
+                                        FocusedMenuHolder(
+                                          onPressed: () {},
+                                          menuWidth: 120,
+                                          blurSize: 0,
+                                          animateMenuItems: false,
+                                          openWithTap: true,
+                                          menuBoxDecoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(24),
+                                          ),
+                                          menuItems: <FocusedMenuItem>[
+                                            FocusedMenuItem(
+                                              backgroundColor:
+                                                  ThemeColor.background,
+                                              title: const Text(
+                                                "フレンド解除",
+                                              ),
+                                              onPressed: () {
+                                                UserBottomModelSheet(context)
+                                                    .quitFriendBottomSheet(
+                                                        user);
+                                              },
+                                            ),
+                                            FocusedMenuItem(
+                                              backgroundColor:
+                                                  ThemeColor.background,
+                                              title: const Text(
+                                                "報告",
+                                              ),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        ReportUserScreen(user),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                            FocusedMenuItem(
+                                              backgroundColor:
+                                                  ThemeColor.background,
+                                              title: const Text(
+                                                "ブロック",
+                                              ),
+                                              onPressed: () {
+                                                UserBottomModelSheet(context)
+                                                    .blockUserBottomSheet(user);
+                                              },
+                                            ),
+                                          ],
+                                          child: Icon(
+                                            Icons.more_horiz,
+                                            color: canvasTheme.profileTextColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  bottom: 16,
+                ),
+                color: canvasTheme.bgColor,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.name,
+                                style: textStyle.w600(
+                                  fontSize: 24,
+                                  color: canvasTheme.profileTextColor,
+                                ),
+                              ),
+                              Text(
+                                "${user.createdAt.toDateStr}〜",
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                  color: canvasTheme.profileSecondaryTextColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Gap(12),
+                    Text(
+                      user.aboutMe,
+                      style: textStyle.w600(
+                        fontSize: 14,
+                        color: canvasTheme.profileAboutMeColor,
+                      ),
+                    ),
+                    if (user.links.isShown)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Row(
+                          children: [
+                            if (user.links.instagram.isShown &&
+                                user.links.instagram.path != null)
+                              GestureDetector(
+                                onTap: () async {
+                                  launchUrl(
+                                    Uri.parse(
+                                      user.links.instagram.url!,
+                                    ),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                  //showMessage("${me.links.instagram.url}");
+                                },
+                                child: SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: Image.asset(
+                                    user.links.instagram.assetString,
+                                    color: canvasTheme.profileLinksColor,
+                                  ),
+                                ),
+                              ),
+                            if (user.links.x.isShown &&
+                                user.links.x.path != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    launchUrl(
+                                      Uri.parse(user.links.x.url!),
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  },
+                                  child: SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: Image.asset(
+                                      user.links.x.assetString,
+                                      color: canvasTheme.profileLinksColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            //tabbar
+            _buildTabBar(context, ref, canvasTheme),
+            SliverFillRemaining(
+              child: TabBarView(
+                children: [
+                  CustomScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Column(
+                          children: [
+                            const Gap(12),
+                            _buildCurrentStatus(
+                                context, ref, canvasTheme, user),
+                            _buildTopFriends(context, ref, canvasTheme, user),
+                            _buildFriends(context, ref, canvasTheme, user),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  // 投稿タブ
+                  UserPostsThread(userId: user.userId),
+
+                  // アルバムタブ
+                  _buildImages(context, ref, user),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
     return Scaffold(
       backgroundColor: canvasTheme.bgColor,
       body: NotificationListener<ScrollNotification>(
@@ -284,391 +725,75 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
-  /* Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
-    final asyncValue = ref.watch(userImagesNotiferProvider(me.userId));
+  Widget _buildTabBar(
+      BuildContext context, WidgetRef ref, CanvasTheme canvasTheme) {
     final themeSize = ref.watch(themeSizeProvider(context));
-
-    const imageHeight = 96.0;
-
-    return asyncValue.when(
-      data: (imageUrls) {
-        if (imageUrls.isEmpty) return const SizedBox();
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: themeSize.horizontalPadding,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "最近の写真",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: me.canvasTheme.profileAboutMeColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    return SliverPersistentHeader(
+      pinned: true,
+      delegate: StickyTabBarDelegete(
+        bgColor: canvasTheme.bgColor,
+        TabBar(
+          isScrollable: true,
+          onTap: (val) {},
+          padding:
+              EdgeInsets.symmetric(horizontal: themeSize.horizontalPadding - 4),
+          indicator: BoxDecoration(
+            color: canvasTheme.boxBgColor,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          tabAlignment: TabAlignment.start,
+          indicatorPadding: const EdgeInsets.only(
+            left: 4,
+            right: 4,
+            top: 5,
+            bottom: 7,
+          ),
+          labelPadding: const EdgeInsets.symmetric(horizontal: 24),
+          indicatorSize: TabBarIndicatorSize.tab,
+          labelColor: canvasTheme.boxTextColor,
+          unselectedLabelColor: canvasTheme.boxTextColor,
+          dividerColor: Colors.transparent,
+          splashFactory: NoSplash.splashFactory,
+          overlayColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              // Use the default focused overlay color
+              return states.contains(WidgetState.focused)
+                  ? null
+                  : Colors.transparent;
+            },
+          ),
+          tabs: [
+            Tab(
+              child: Text(
+                "情報",
+                style: textStyle.tabText(),
               ),
             ),
-            const Gap(4),
-            SizedBox(
-              height: imageHeight * 1.2 + 32 + 24,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: imageUrls.length,
-                padding: EdgeInsets.symmetric(
-                  horizontal: themeSize.horizontalPadding - 4,
-                ),
-                itemBuilder: (context, index) {
-                  final userImage = imageUrls[index];
-                  return Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          left: 8,
-                          right: 8,
-                          bottom: 24,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 2,
-                              offset: const Offset(4, 4),
-                              color: Colors.black.withOpacity(0.5),
-                            )
-                          ],
-                        ),
-                        child: SizedBox(
-                          height: imageHeight * 1.2,
-                          width: imageHeight,
-                          child: CachedImage.profileBoardImage(
-                            userImage.imageUrl,
-                          ),
-                        ),
-                      ),
-                      if (userImage.isNew)
-                        const Positioned(
-                          bottom: 24,
-                          right: 8,
-                          child: GradientText(
-                            text: "NEW",
-                          ),
-                        ),
-                    ],
-                  );
-                  /* return Container(
-                    margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                    height: imageHeight,
-                    width: imageHeight,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          height: imageHeight - 4,
-                          width: imageHeight - 24,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 2,
-                                spreadRadius: 4,
-                                color: Colors.black.withOpacity(0.5),
-                                offset: Offset(0, 4),
-                              )
-                            ],
-                          ),
-                        ),
-                        Opacity(
-                          opacity: 1, //0.3,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              height: imageHeight,
-                              width: imageHeight,
-                              child: CachedImage.profileBoardImage(
-                                imageUrl,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ); */
-                },
+            Tab(
+              child: Text(
+                "投稿",
+                style: textStyle.tabText(),
+              ),
+            ),
+            /* Tab(
+              child: Text(
+                "ルーム",
+                style: textStyle.tabText(),
+              ),
+            ), */
+            Tab(
+              child: Text(
+                "アルバム",
+                style: textStyle.tabText(),
               ),
             ),
           ],
-        );
-      },
-      error: (e, s) => Text("error : $e, $s"),
-      loading: () => const SizedBox(),
-    );
-  }
-
-  Widget _buildIconAndBio(BuildContext context, WidgetRef ref,
-      CanvasTheme canvasTheme, UserAccount user) {
-    const imageHeight = 80.0;
-    final themeSize = ref.watch(themeSizeProvider(context));
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: themeSize.horizontalPadding,
-      ),
-      child: Column(
-        children: [
-          //icon bio
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(canvasTheme.iconStrokeWidth),
-                    decoration: BoxDecoration(
-                      gradient: !canvasTheme.iconHideBorder
-                          ? LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                canvasTheme.iconGradientStartColor,
-                                canvasTheme.iconGradientEndColor,
-                              ],
-                            )
-                          : null,
-                      borderRadius: BorderRadius.circular(
-                        canvasTheme.iconRadius + 12,
-                      ),
-                    ),
-                    child: Container(
-                      padding: EdgeInsets.all(12 - canvasTheme.iconStrokeWidth),
-                      decoration: BoxDecoration(
-                        color: canvasTheme.bgColor,
-                        borderRadius: BorderRadius.circular(
-                          canvasTheme.iconRadius +
-                              12 -
-                              canvasTheme.iconStrokeWidth,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(canvasTheme.iconRadius),
-                        child: SizedBox(
-                          height: imageHeight,
-                          width: imageHeight,
-                          child: user.imageUrl != null
-                              ? CachedNetworkImage(
-                                  imageUrl: user.imageUrl!,
-                                  fadeInDuration:
-                                      const Duration(milliseconds: 120),
-                                  imageBuilder: (context, imageProvider) =>
-                                      Container(
-                                    height: imageHeight,
-                                    width: imageHeight,
-                                    decoration: BoxDecoration(
-                                      color: Colors.transparent,
-                                      image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  placeholder: (context, url) =>
-                                      const SizedBox(),
-                                  errorWidget: (context, url, error) =>
-                                      const SizedBox(),
-                                )
-                              : const Icon(
-                                  Icons.person_outline,
-                                  size: imageHeight * 0.8,
-                                  color: ThemeColor.stroke,
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Gap(8),
-                  Text(
-                    !canvasTheme.iconHideLevel ? "LEVEL 1" : "",
-                    style: TextStyle(
-                      color: canvasTheme.profileTextColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const Gap(12),
-              Expanded(
-                child: box(
-                  canvasTheme,
-                  Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            "年齢",
-                            style: TextStyle(
-                              color: canvasTheme.boxSecondaryTextColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const Gap(4),
-                          Text(
-                            user.bio.age != null
-                                ? user.bio.age.toString()
-                                : "未設定",
-                            style: TextStyle(
-                              color: canvasTheme.boxSecondaryTextColor,
-                              fontSize: 14,
-                            ),
-                          )
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "誕生日",
-                            style: TextStyle(
-                              color: canvasTheme.boxSecondaryTextColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const Gap(4),
-                          Text(
-                            user.bio.birthday != null
-                                ? user.bio.birthday!.toDateStr
-                                : "未設定",
-                            style: TextStyle(
-                              color: canvasTheme.boxSecondaryTextColor,
-                              fontSize: 14,
-                            ),
-                          )
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "性別",
-                            style: TextStyle(
-                              color: canvasTheme.boxSecondaryTextColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const Gap(4),
-                          Text(
-                            user.bio.gender == null
-                                ? "未設定"
-                                : user.bio.gender == "system_male"
-                                    ? "男性"
-                                    : user.bio.gender == "system_female"
-                                        ? "女性"
-                                        : user.bio.gender!
-                                                .startsWith("system_custom")
-                                            ? user.bio.gender!.substring(
-                                                13, user.bio.gender!.length)
-                                            : "未設定",
-                            style: TextStyle(
-                              color: canvasTheme.boxSecondaryTextColor,
-                              fontSize: 14,
-                            ),
-                          )
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "興味",
-                            style: TextStyle(
-                              color: canvasTheme.boxSecondaryTextColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const Gap(4),
-                          Text(
-                            user.bio.interestedIn == null
-                                ? "未設定"
-                                : user.bio.interestedIn == "system_male"
-                                    ? "男性"
-                                    : user.bio.interestedIn == "system_female"
-                                        ? "女性"
-                                        : user.bio.interestedIn!
-                                                .startsWith("system_custom")
-                                            ? user.bio.interestedIn!.substring(
-                                                13,
-                                                user.bio.interestedIn!.length)
-                                            : "未設定",
-                            style: TextStyle(
-                              color: canvasTheme.boxSecondaryTextColor,
-                              fontSize: 14,
-                            ),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const Gap(12),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildAboutMe(BuildContext context, WidgetRef ref,
-      CanvasTheme canvasTheme, UserAccount user) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: themeSize.horizontalPadding,
-      ),
-      child: Column(
-        children: [
-          box(
-            canvasTheme,
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "ひとこと",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: canvasTheme.boxTextColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Gap(8),
-                Text(
-                  user.aboutMe,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: canvasTheme.boxSecondaryTextColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Gap(12),
-        ],
-      ),
-    );
-  }
- */
   Widget _buildCurrentStatus(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
     final themeSize = ref.watch(themeSizeProvider(context));
@@ -1258,6 +1383,91 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount user) {
+    final asyncValue = ref.watch(userImagesNotiferProvider(user.userId));
+    final themeSize = ref.watch(themeSizeProvider(context));
+
+    final imageHeight = (themeSize.screenWidth / 3 - 8) * 4 / 3;
+
+    return asyncValue.when(
+      data: (imageUrls) {
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: imageUrls.length,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemBuilder: (context, index) {
+            final userImage = imageUrls[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  PageTransitionMethods.fadeIn(
+                    VerticalScrollview(
+                      scrollToPopOption: ScrollToPopOption.both,
+                      dragToPopDirection: DragToPopDirection.toBottom,
+                      child: ImagesView(
+                        imageUrls:
+                            imageUrls.map((item) => item.imageUrl).toList(),
+                        initialIndex: index,
+                      ),
+                    ),
+                  ),
+                );
+              },
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      left: 8,
+                      right: 8,
+                      bottom: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 2,
+                          offset: const Offset(4, 4),
+                          color: Colors.black.withOpacity(0.5),
+                        )
+                      ],
+                    ),
+                    child: SizedBox(
+                      height: imageHeight * 1.2,
+                      width: imageHeight,
+                      child: CachedImage.profileBoardImage(
+                        userImage.imageUrl,
+                      ),
+                    ),
+                  ),
+                  if (userImage.isNew)
+                    const Positioned(
+                      bottom: 24,
+                      right: 8,
+                      child: GradientText(
+                        text: "NEW",
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+      error: (e, s) => Text("error : $e, $s"),
+      loading: () => const SizedBox(),
+    );
+  }
+
 /*
   Widget _buildWishList(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
@@ -1482,7 +1692,6 @@ class NotFriendScreen extends ConsumerWidget {
     final friendInfos =
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
     final friendIds = friendInfos.map((item) => item.userId);
-
     const imageHeight = 108.0;
 
     return Scaffold(
@@ -1628,12 +1837,6 @@ class NotFriendScreen extends ConsumerWidget {
                     users.removeWhere((e) => !friendIds.contains(e.userId));
                     final shorten = users.length > 2;
 
-                    final privateMode = user.privacy.privateMode;
-                    final range = user.privacy.requestRange;
-                    final buttonShown = !privateMode &&
-                        ((range == PublicityRange.public) ||
-                            (range == PublicityRange.friendOfFriend &&
-                                users.isNotEmpty));
                     return FadeTransitionWidget(
                       child: Column(
                         children: [
@@ -1711,18 +1914,15 @@ class NotFriendScreen extends ConsumerWidget {
                             ),
                           ),
                           const Gap(24),
-                          buttonShown
-                              ? Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal:
-                                        themeSize.horizontalPaddingLarge,
-                                  ),
-                                  child: UserRequestButton(
-                                    user: user,
-                                    hasNoMutualFriends: users.isEmpty,
-                                  ),
-                                )
-                              : const SizedBox(),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: themeSize.horizontalPaddingLarge,
+                            ),
+                            child: UserRequestButton(
+                              user: user,
+                              hasNoMutualFriends: users.isEmpty,
+                            ),
+                          )
                         ],
                       ),
                     );

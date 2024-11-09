@@ -179,7 +179,7 @@ class SearchScreen extends ConsumerWidget {
                     scrollDirection: Axis.horizontal,
                     itemCount: userIds.length,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
+                      horizontal: 6,
                     ),
                     itemBuilder: (context, index) {
                       final userId = userIds[index];
@@ -188,7 +188,7 @@ class SearchScreen extends ConsumerWidget {
                           .asData!
                           .value[userId]!;
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
                         child: GestureDetector(
                           onTap: () {
                             ref

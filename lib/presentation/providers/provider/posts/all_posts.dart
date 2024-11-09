@@ -75,6 +75,6 @@ class AllPostsNotifier extends _$AllPostsNotifier {
 
   createPost(PostState postState) {
     ref.read(postUsecaseProvider).uploadPost(postState);
-    ref.read(pushNotificationNotifierProvider).uploadPost();
+    //ref.read(pushNotificationNotifierProvider).uploadPost();
   }
 }

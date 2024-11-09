@@ -46,6 +46,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+bool devMode = false;
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
@@ -470,6 +472,13 @@ class MyApp extends ConsumerWidget {
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(),
         ),
+
+        //InkWellを含むSplashFactory全体の設定
+        //splashFactory: InkRipple.splashFactory,
+
+        // InkWellのデフォルト設定
+        splashColor: Colors.white.withOpacity(0.05),
+        highlightColor: Colors.white.withOpacity(0.05),
       ),
       debugShowCheckedModeBanner: false,
       home: isUnderMaintenance

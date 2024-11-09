@@ -15,4 +15,8 @@ class CommunityUsecase {
   Future<Community?> getCommunityFromId(String communityId) async {
     return _repository.getCommunityFromId(communityId);
   }
+
+  Future<List<String>> getRecentUsers(String communityId) async {
+    return _repository.getRecentUsers(communityId);
+  }
 }

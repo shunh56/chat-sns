@@ -1,5 +1,6 @@
 import 'package:app/datasource/user_datasource.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final userRepositoryProvider = Provider(
@@ -11,6 +12,16 @@ final userRepositoryProvider = Provider(
 class UserRepository {
   final UserDatasource _datasource;
   UserRepository(this._datasource);
+
+  Future<List<UserAccount>> getOnlineUsers({Timestamp? lastOpenedAt}) async {
+    final res = await _datasource.getOnlineUsers(lastOpenedAt: lastOpenedAt);
+    return res.docs.map((doc) => UserAccount.fromJson(doc.data())).toList();
+  }
+
+  Future<List<UserAccount>> getNewUsers({Timestamp? createdAt}) async {
+    final res = await _datasource.getNewUsers(createdAt: createdAt);
+    return res.docs.map((doc) => UserAccount.fromJson(doc.data())).toList();
+  }
 
   Future<UserAccount?> getUserByUsername(String username) async {
     final res = await _datasource.fetchUserByUsername(username);

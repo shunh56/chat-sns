@@ -43,7 +43,7 @@ class PostWidget extends ConsumerWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: GestureDetector(
         onTap: () {
           ref.read(navigationRouterProvider(context)).goToPost(post, user);

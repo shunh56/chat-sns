@@ -4,10 +4,12 @@ import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/community_screen/model/topic.dart';
 import 'package:app/presentation/pages/community_screen/model/voice_room.dart';
-import 'package:app/presentation/pages/community_screen/provider/states/community_membership_provider.dart';
 import 'package:app/presentation/pages/community_screen/screens/community_screen.dart';
-import 'package:app/presentation/pages/community_screen/screens/topic_screen.dart';
+import 'package:app/presentation/pages/community_screen/screens/new_users_screen.dart';
+import 'package:app/presentation/pages/community_screen/screens/online_users_screen.dart';
+import 'package:app/presentation/pages/community_screen/screens/tabs.dart';
 import 'package:app/presentation/providers/provider/community.dart';
+import 'package:app/presentation/providers/provider/users/online_users.dart';
 import 'package:app/presentation/providers/topics/topics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,11 +22,12 @@ class CommunityTabScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    const String communityId = 'student_life'; // α版では固定
+    //const String communityId = 'student_life'; // α版では固定
 
     final communityAsyncValue = ref.watch(communityNotifierProvider);
-    ref.watch(communityMembershipProvider(communityId));
     final topicsAsyncValue = ref.watch(recentTopicsNotifier);
+    final onlineUsersAsyncValue = ref.watch(onlineUsersNotifierProvider);
+    final newUsersAsyncValue = ref.watch(newUsersNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -34,13 +37,167 @@ class CommunityTabScreen extends ConsumerWidget {
             SliverAppBar(
               floating: true,
               title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'コミュニティ',
+                    "コミュニティ",
                     style: textStyle.appbarText(japanese: true),
                   ),
-                  const Expanded(child: SizedBox()),
                 ],
+              ),
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const OnlineUsersScreen(),
+                              ),
+                            );
+                          },
+                          splashColor: Colors.white.withOpacity(0.05),
+                          highlightColor: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: ThemeColor.accent,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const CircleAvatar(
+                                      radius: 6,
+                                      backgroundColor: Colors.green,
+                                    ),
+                                    const Gap(6),
+                                    Text(
+                                      "オンライン",
+                                      style: textStyle.w600(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Gap(6),
+                                Text(
+                                  "アクティブなユーザー",
+                                  style: textStyle.w400(
+                                    fontSize: 12,
+                                    color: ThemeColor.subText,
+                                  ),
+                                ),
+                                const Gap(12),
+                                onlineUsersAsyncValue.maybeWhen(
+                                  data: (users) {
+                                    return UserStackIcons(
+                                      imageRadius: 16,
+                                      users: users,
+                                      strokeColor: ThemeColor.accent,
+                                    );
+                                  },
+                                  orElse: () {
+                                    return const EmptyUserStackIcons(
+                                      imageRadius: 16,
+                                      strokeColor: ThemeColor.accent,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Gap(12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NewUsersScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: ThemeColor.accent,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.event_outlined,
+                                    color: ThemeColor.text,
+                                    size: 18,
+                                  ),
+                                  const Gap(6),
+                                  Text(
+                                    "今日の活動",
+                                    style: textStyle.w600(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Gap(6),
+                              Text(
+                                "新規ユーザー",
+                                style: textStyle.w400(
+                                  fontSize: 12,
+                                  color: ThemeColor.subText,
+                                ),
+                              ),
+                              const Gap(12),
+                              newUsersAsyncValue.maybeWhen(
+                                data: (users) {
+                                  return UserStackIcons(
+                                    imageRadius: 16,
+                                    users: users,
+                                    strokeColor: ThemeColor.accent,
+                                  );
+                                },
+                                orElse: () {
+                                  return const EmptyUserStackIcons(
+                                    imageRadius: 16,
+                                    strokeColor: ThemeColor.accent,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -72,14 +229,14 @@ class CommunityTabScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
 
                       // アクティブな通話室
-                      const Text(
+                      /*  const Text(
                         'アクティブな通話室',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 12), */
                       /*VoiceRoomsList(
                        voiceRoomsAsyncValue: voiceRoomsAsyncValue,
                           ), */
@@ -106,10 +263,17 @@ class CommunityCard extends ConsumerWidget {
     if (community == null) {
       return const Text("NULL");
     }
+    final asyncValue = ref.watch(communityMembersNotifierProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // バナー部分
+        Text(
+          "おすすめのコミュニティ",
+          style: textStyle.w600(
+            fontSize: 18,
+          ),
+        ),
+        const Gap(8), // バナー部分
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -123,7 +287,7 @@ class CommunityCard extends ConsumerWidget {
           },
           child: Container(
             decoration: const BoxDecoration(
-              color: ThemeColor.stroke,
+              color: ThemeColor.accent,
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(12),
               ),
@@ -143,10 +307,22 @@ class CommunityCard extends ConsumerWidget {
                       ),
                       const Gap(4),
                       Text(
-                        '${community!.memberCount.toString()} メンバー • オンライン ${community!.dailyActiveUsers.toString()}人',
+                        '${community!.memberCount.toString()} 人のメンバー',
                         style: textStyle.w400(
                           fontSize: 14,
                           color: ThemeColor.subText,
+                        ),
+                      ),
+                      const Gap(8),
+                      asyncValue.maybeWhen(
+                        data: (users) => UserStackIcons(
+                          users: users,
+                          strokeColor: ThemeColor.accent,
+                          imageRadius: 16,
+                        ),
+                        orElse: () => const EmptyUserStackIcons(
+                          imageRadius: 16,
+                          strokeColor: ThemeColor.accent,
                         ),
                       ),
                     ],
@@ -167,7 +343,7 @@ class CommunityCard extends ConsumerWidget {
         // 統計情報
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withOpacity(0.01),
             borderRadius: const BorderRadius.vertical(
               bottom: Radius.circular(12),
             ),
@@ -179,19 +355,20 @@ class CommunityCard extends ConsumerWidget {
               statItem(
                 context,
                 ref,
+                label: '投稿',
+                value: community!.totalPosts.toString(),
+              ),
+              statItem(
+                context,
+                ref,
                 label: '今日の投稿',
                 value: community!.dailyPosts.toString(),
               ),
               statItem(
                 context,
                 ref,
-                label: '通話中',
-                value: community!.activeVoiceRooms.toString(),
-              ),
-              statItem(
-                context, ref,
-                label: '未読の話題',
-                value: '5', // この値は別途管理が必要
+                label: 'トピック',
+                value: community!.topicsCount.toString(),
               ),
             ],
           ),
@@ -239,71 +416,18 @@ class TopicsList extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(child: Text('Error: $error')),
       data: (topics) {
-        return GridView.count(
+        return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 2,
-          children: topics.map((topic) => TopicCard(topic: topic)).toList(),
+          padding: EdgeInsets.zero,
+          itemCount: topics.length,
+          itemBuilder: (context, index) {
+            return TopicCard(
+              topic: topics[index],
+            );
+          },
         );
       },
-    );
-  }
-}
-
-class TopicCard extends ConsumerWidget {
-  final Topic topic;
-
-  const TopicCard({super.key, required this.topic});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: () {
-        final isMember =
-            ref.watch(communityMembershipProvider(topic.communityId));
-        if (!isMember) {
-          showJoinDialog(context, ref, topic.communityId);
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TopicScreen(topic: topic),
-            ),
-          );
-        }
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: ThemeColor.stroke,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                topic.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '${topic.postCount}件の投稿',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

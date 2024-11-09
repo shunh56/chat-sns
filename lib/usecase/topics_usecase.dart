@@ -13,8 +13,8 @@ class TopicsUsecase {
   final TopicsRepository _repository;
   TopicsUsecase(this._repository);
 
-  Future<List<Topic>> getRecentTopics() {
-    return _repository.getRecentTopics();
+  Future<List<Topic>> getPopularTopics() {
+    return _repository.getPopularTopics();
   }
 
   Future<List<Topic>> getTopicsFromCommunity(String communityId) {
@@ -23,5 +23,9 @@ class TopicsUsecase {
 
   createTopic(TopicState state) {
     return _repository.createTopic(state);
+  }
+
+  sendMessage(String topicId,String text){
+    return _repository.sendMessage(topicId,text);
   }
 }
