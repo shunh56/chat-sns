@@ -1,5 +1,6 @@
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/repository/community_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final communityUsecaseProvider = Provider(
@@ -16,7 +17,11 @@ class CommunityUsecase {
     return _repository.getCommunityFromId(communityId);
   }
 
-  Future<List<String>> getRecentUsers(String communityId) async {
-    return _repository.getRecentUsers(communityId);
+  Future<List<Map<String, dynamic>>> getRecentUsers(String communityId,
+      {Timestamp? timestamp}) async {
+    return _repository.getRecentUsers(
+      communityId,
+      timestamp: timestamp,
+    );
   }
 }

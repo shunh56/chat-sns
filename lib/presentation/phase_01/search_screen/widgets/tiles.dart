@@ -456,12 +456,12 @@ class UserRequestButton extends ConsumerWidget {
                         splashColor: Colors.black.withOpacity(0.3),
                         highlightColor: Colors.transparent,
                         onTap: () {
-                          if (hasNoMutualFriends && !subscribed) {
+                          /*if (hasNoMutualFriends && !subscribed) {
                             showUpcomingSnackbar();
                             UserBottomModelSheet(context)
                                 .admitNonMutualUserBottomSheet(user);
                             return;
-                          }
+                          } */
                           ref
                               .read(friendRequestedIdListNotifierProvider
                                   .notifier)

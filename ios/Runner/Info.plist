@@ -12,15 +12,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>BLANK</string>
+	<string>$(APPNAME)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)$(APP_ID_SUFFIX)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>BLANK</string>
+	<string>$(APPNAME)</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -34,10 +34,19 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<!-- dev -->
 				<string>com.googleusercontent.apps.889410445548-4sqpqmv6mejnsk1pgg2tb1i6ja13iahn</string>
 				<string>chat-sns-project.firebaseapp.com</string>
 				<string>chat-sns-project.firebaseapp</string>
 				<string>chat-sns-project</string>
+				<!-- prod -->
+				<string>com.googleusercontent.apps.822316855484-3gcaup6u2k9b8jfljdn56rilbsgekm9i</string>
+				<!-- 
+				<string>blank-project-prod.firebaseapp.com</string>
+				<string>blank-project-prod.firebaseapp</string>
+				<string>blank-project-prod</string>
+				-->
+				<!-- common -->
 				<string>twitterauth</string>
 				<string>https</string>
 			</array>

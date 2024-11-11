@@ -12,11 +12,13 @@ import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
+import 'package:app/presentation/pages/sub_pages/user_profile_page/blocked_profile_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/users_friends_screen.dart';
 import 'package:app/presentation/pages/timeline_page/threads/users_posts.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/images/images.dart';
+import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -44,6 +46,15 @@ class UserProfileScreen extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final canvasTheme = user.canvasTheme;
+    final blocks = ref.watch(blocksListNotifierProvider).asData?.value ?? [];
+    final blockeds =
+        ref.watch(blockedsListNotifierProvider).asData?.value ?? [];
+    if (blocks.contains(user.userId)) {
+      return BlockedProfileScreen(user: user, state: "block");
+    }
+    if (blockeds.contains(user.userId)) {
+      return BlockedProfileScreen(user: user, state: "blocked");
+    }
     final friendInfos =
         ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
 
@@ -1387,24 +1398,29 @@ class UserProfileScreen extends ConsumerWidget {
     final asyncValue = ref.watch(userImagesNotiferProvider(user.userId));
     final themeSize = ref.watch(themeSizeProvider(context));
 
-    final imageHeight = (themeSize.screenWidth / 3 - 8) * 4 / 3;
-
     return asyncValue.when(
-      data: (imageUrls) {
+      data: (posts) {
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: imageUrls.length,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          itemCount: posts.length,
+          padding: const EdgeInsets.only(
+            top: 12,
+            left: 4,
+            right: 4,
+          ),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
-            childAspectRatio: 0.75,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+            childAspectRatio: 1,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
           ),
           itemBuilder: (context, index) {
-            final userImage = imageUrls[index];
-            return GestureDetector(
+            final post = posts[index];
+            return CachedImage.profileBoardImage(
+              post.imageUrl,
+            );
+            /*  return GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
@@ -1460,6 +1476,8 @@ class UserProfileScreen extends ConsumerWidget {
                 ],
               ),
             );
+          
+           */
           },
         );
       },

@@ -65,6 +65,11 @@ class PostRepository {
     return query.docs.map((e) => Post.fromJson(e.data())).toList();
   }
 
+  Future<List<Post>> getImagePostFromUserId(String userId) async {
+    final query = await _datasource.getImagePostFromUserId(userId);
+    return query.docs.map((e) => Post.fromJson(e.data())).toList();
+  }
+
   Stream<List<Reply>> streamPostReplies(String postId) {
     final stream = _datasource.streamPostReplies(postId);
     return stream.map((event) =>

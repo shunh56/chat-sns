@@ -46,13 +46,12 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-bool devMode = false;
+const flavor = String.fromEnvironment('FLAVOR');
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
   // make sure you call `initializeApp` before using other Firebase services.
-  await Firebase.initializeApp();
   DebugPrint("Handling a background message: ${message.messageId}");
   //TODO 時差は命取りなので、送信時との時間差が5秒以内であれば鳴らす
   HapticFeedback.vibrate();
@@ -78,9 +77,8 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-configureSystem() {
-  WidgetsFlutterBinding.ensureInitialized();
-  MobileAds.instance.initialize();
+configureSystem() async {
+  DebugPrint("FLAVOR : $flavor");
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
     SystemUiOverlay.top,
     SystemUiOverlay.bottom,
@@ -99,6 +97,25 @@ configureSystem() {
   SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp],
   );
+}
+
+Future<void> initializeFirebaseApp() async {
+  try {
+    // 既に初期化されているかチェック
+    final apps = Firebase.apps;
+    if (apps.isNotEmpty) {
+      debugPrint('Firebase is already initialized');
+      return;
+    }
+
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    debugPrint('Firebase initialized successfully');
+  } catch (e, stack) {
+    debugPrint('Firebase initialization error: $e');
+    debugPrint(stack.toString());
+  }
 }
 
 configureNotification() async {
@@ -301,15 +318,18 @@ void main() {
   DebugPrint("main()");
   runZonedGuarded<Future<void>>(
     () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      await MobileAds.instance.initialize();
       //1. initialize system
-      configureSystem();
+      await configureSystem();
+
+      //2. initialize firebase
+      await initializeFirebaseApp();
 
       FirebaseMessaging.onBackgroundMessage(
-          _firebaseMessagingBackgroundHandler);
-      //2. initialize firebase
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
+        _firebaseMessagingBackgroundHandler,
       );
+
       await Hive.initFlutter();
       HiveBoxes.registerAdapters();
       await HiveBoxes.openBoxes();
@@ -320,15 +340,11 @@ void main() {
       //methodChannelhandler
       //configureSwiftMethodChannel();
 
-      if (kDebugMode) {
+      if (!kDebugMode) {
         await FirebaseCrashlytics.instance
             .setCrashlyticsCollectionEnabled(true);
         await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
-      }
-
-      if (kProfileMode || kReleaseMode) {
-        await FirebaseCrashlytics.instance
-            .setCrashlyticsCollectionEnabled(true);
+        FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
       }
 
       FlutterError.onError =
@@ -1278,12 +1294,29 @@ class LoadingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: SizedBox(
-          height: 72,
-          width: 72,
-          child: Image.asset(
-            'assets/images/icons/icon_circle_bg_white.png',
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (flavor=="dev")
+              const Padding(
+                padding: EdgeInsets.only(bottom: 24),
+                child: Text(
+                  "DEVMODE",
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            SizedBox(
+              height: 72,
+              width: 72,
+              child: Image.asset(
+                'assets/images/icons/icon_circle_bg_white.png',
+              ),
+            ),
+          ],
         ),
       ),
     );

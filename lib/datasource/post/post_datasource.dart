@@ -36,6 +36,7 @@ class PostDatasource {
     return await _firestore
         .collection(collectionName)
         .where("isPublic", isEqualTo: true)
+        .where("communityId",isNull: true)
         .orderBy("createdAt", descending: true)
         .limit(QUERY_LIMIT)
         .get();
@@ -85,6 +86,18 @@ class PostDatasource {
     return await _firestore
         .collection(collectionName)
         .where("userId", isEqualTo: userId)
+        .orderBy("createdAt", descending: true)
+        .limit(10)
+        .get();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getImagePostFromUserId(
+      String userId) async {
+    return await _firestore
+        .collection(collectionName)
+        .where("userId", isEqualTo: userId)
+        .where("mediaUrls", isNotEqualTo: [])
+        .orderBy("mediaUrls")
         .orderBy("createdAt", descending: true)
         .limit(10)
         .get();

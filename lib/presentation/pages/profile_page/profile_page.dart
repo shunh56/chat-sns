@@ -1378,8 +1378,8 @@ class ProfileScreen extends ConsumerWidget {
     final imageHeight = (themeSize.screenWidth / 3 - 8) * 4 / 3;
 
     return asyncValue.when(
-      data: (imageUrls) {
-        if (imageUrls.isEmpty) return const SizedBox();
+      data: (posts) {
+        if (posts.isEmpty) return const SizedBox();
         /*return Padding(
             padding: EdgeInsets.symmetric(
               horizontal: themeSize.horizontalPadding,
@@ -1459,34 +1459,26 @@ class ProfileScreen extends ConsumerWidget {
           ); */
 
         return GridView.builder(
-          itemCount: imageUrls.length,
-          padding:
-              const EdgeInsets.only(left: 8, right: 8, top: 12, bottom: 120),
+          itemCount: posts.length,
+          padding: const EdgeInsets.only(
+            left: 4,
+            right: 4,
+            top: 12,
+            bottom: 120,
+          ),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
-            childAspectRatio: 0.75,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+            childAspectRatio: 1,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
           ),
           itemBuilder: (context, index) {
-            final userImage = imageUrls[index];
+            final post = posts[index];
             return GestureDetector(
               onLongPress: () {
-                UserImageBottomSheet(context).showImageMenu(userImage);
+                // UserImageBottomSheet(context).showImageMenu(userImage);
               },
               onTap: () {
-                /*pushPage(
-                  context,
-                  VerticalScrollview(
-                    scrollToPopOption: ScrollToPopOption.start,
-                    dragToPopDirection: DragToPopDirection.toBottom,
-                    child: ImagesView(
-                      imageUrls:
-                          imageUrls.map((item) => item.imageUrl).toList(),
-                      initialIndex: index,
-                    ),
-                  ),
-                ); */
                 Navigator.push(
                   context,
                   PageTransitionMethods.fadeIn(
@@ -1495,85 +1487,22 @@ class ProfileScreen extends ConsumerWidget {
                       dragToPopDirection: DragToPopDirection.toBottom,
                       child: ImagesView(
                         imageUrls:
-                            imageUrls.map((item) => item.imageUrl).toList(),
+                            posts.map((item) => post.imageUrl).toList(),
                         initialIndex: index,
                       ),
                     ),
                   ),
                 );
               },
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  /*    Container(
-                    margin: const EdgeInsets.only(top: 32),
-                    height: imageHeight * 1.2,
-                    width: imageHeight,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 12,
-                          offset: const Offset(0, 8),
-                          color: Colors.black.withOpacity(0.3),
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                      left: 8,
-                      right: 8,
-                      bottom: 24,
-                    ),
-                    color: Colors.white,
-                    child: SizedBox(
-                      height: imageHeight * 1.2,
-                      width: imageHeight,
-                      child: CachedImage.profileBoardImage(
-                        userImage.imageUrl,
-                      ),
-                    ),
-                  ),
-                  */
-                  Container(
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                      left: 8,
-                      right: 8,
-                      bottom: 24,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 2,
-                          offset: const Offset(4, 4),
-                          color: Colors.black.withOpacity(0.5),
-                        )
-                      ],
-                    ),
-                    child: SizedBox(
-                      height: imageHeight * 1.2,
-                      width: imageHeight,
-                      child: CachedImage.profileBoardImage(
-                        userImage.imageUrl,
-                      ),
-                    ),
-                  ),
-                  if (userImage.isNew)
-                    const Positioned(
-                      bottom: 24,
-                      right: 8,
-                      child: GradientText(
-                        text: "NEW",
-                      ),
-                    ),
-                ],
+              child: SizedBox(
+                height: imageHeight,
+                width: imageHeight,
+                child: CachedImage.profileBoardImage(
+                  post.imageUrl,
+                ),
               ),
             );
+            /*v */
             /* return Container(
               margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               height: imageHeight,

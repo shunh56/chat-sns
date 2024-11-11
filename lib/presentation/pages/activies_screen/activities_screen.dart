@@ -121,6 +121,8 @@ class ActivityTile extends ConsumerWidget {
             Expanded(
               child: Row(
                 children: [
+                  _buildActionIcon(activity.actionType),
+                  Gap(16),
                   SizedBox(
                     width: 54,
                     height: 54,
@@ -157,8 +159,8 @@ class ActivityTile extends ConsumerWidget {
                         children: [
                           TextSpan(
                             text: activity.userIds.length > 1
-                                ? "${users[0].name}、他${activity.userIds.length - 1}人"
-                                : users[0].name,
+                                ? "${users[0].name}さん、他${activity.userIds.length - 1}人"
+                                : "${users[0].name}さん",
                             style: textStyle.w600(
                               fontSize: 14,
                             ),
@@ -167,7 +169,7 @@ class ActivityTile extends ConsumerWidget {
                             text: contentText(
                               activity.actionType,
                             ),
-                            style: textStyle.w600(
+                            style: textStyle.w400(
                               fontSize: 14,
                             ),
                           ),
@@ -188,6 +190,31 @@ class ActivityTile extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildActionIcon(ActionType type) {
+    final IconData iconData;
+    final Color iconColor;
+
+    switch (type) {
+      case ActionType.postLike:
+      case ActionType.currentStatusPostLike:
+        iconData = Icons.favorite_outline_rounded;
+        iconColor = Colors.pinkAccent;
+        break;
+      case ActionType.postComment:
+        iconData = Icons.comment_outlined;
+        iconColor = Colors.blue;
+        break;
+      case ActionType.none:
+        return const SizedBox(); // 空のウィジェットを返す
+    }
+
+    return Icon(
+      iconData,
+      color: iconColor,
+      size: 24,
     );
   }
 

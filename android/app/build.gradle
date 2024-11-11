@@ -36,7 +36,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace  'com.blank.sns'
-    compileSdk = 34//flutter.compileSdkVersion
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -47,9 +47,7 @@ android {
     defaultConfig {
         multiDexEnabled true
         applicationId = "com.blank.sns"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdk = 26//flutter.minSdkVersion
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
@@ -66,13 +64,26 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             minifyEnabled true
             shrinkResources true
-            //useProguard true
+        }
+    }
+
+    // google-services.jsonを環境に応じて切り替える
+    applicationVariants.all { variant ->
+        def devMode = dartEnvironmentVariables.FLAVOR == 'dev'
+        def targetJson = devMode ? 'google-services-dev.json' : 'google-services-prod.json'
+        
+        variant.preBuild.doFirst {
+            copy {
+                from file("${projectDir}/${targetJson}")
+                into projectDir
+                rename { String fileName ->
+                    'google-services.json'
+                }
+            }
         }
     }
 }

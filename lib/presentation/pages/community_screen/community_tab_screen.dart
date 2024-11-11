@@ -4,6 +4,7 @@ import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/community_screen/model/topic.dart';
 import 'package:app/presentation/pages/community_screen/model/voice_room.dart';
+import 'package:app/presentation/pages/community_screen/screens/community_member_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/community_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/new_users_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/online_users_screen.dart';
@@ -261,7 +262,7 @@ class CommunityCard extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     if (community == null) {
-      return const Text("NULL");
+      return const SizedBox();
     }
     final asyncValue = ref.watch(communityMembersNotifierProvider);
     return Column(
@@ -286,15 +287,22 @@ class CommunityCard extends ConsumerWidget {
             );
           },
           child: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: ThemeColor.accent,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
+              borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 108,
+                    height: 108,
+                    child: CachedImage.postImage(community!.thumbnailImageUrl),
+                  ),
+                ),
+                const Gap(12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,35 +313,46 @@ class CommunityCard extends ConsumerWidget {
                           fontSize: 24,
                         ),
                       ),
-                      const Gap(4),
-                      Text(
-                        '${community!.memberCount.toString()} 人のメンバー',
-                        style: textStyle.w400(
-                          fontSize: 14,
-                          color: ThemeColor.subText,
-                        ),
-                      ),
                       const Gap(8),
-                      asyncValue.maybeWhen(
-                        data: (users) => UserStackIcons(
-                          users: users,
-                          strokeColor: ThemeColor.accent,
-                          imageRadius: 16,
-                        ),
-                        orElse: () => const EmptyUserStackIcons(
-                          imageRadius: 16,
-                          strokeColor: ThemeColor.accent,
+                      GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  CommunityMemberScreen(community: community!),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${community!.memberCount.toString()} 人のメンバー',
+                              style: textStyle.w400(
+                                fontSize: 14,
+                                color: ThemeColor.subText,
+                              ),
+                            ),
+                            const Gap(8),
+                            asyncValue.maybeWhen(
+                              data: (members) => UserStackIcons(
+                                users: members
+                                    .map((member) => member.user)
+                                    .toList(),
+                                strokeColor: ThemeColor.accent,
+                                imageRadius: 16,
+                              ),
+                              orElse: () => const EmptyUserStackIcons(
+                                imageRadius: 16,
+                                strokeColor: ThemeColor.accent,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    width: 108,
-                    height: 72,
-                    child: CachedImage.postImage(community!.thumbnailImageUrl),
                   ),
                 ),
               ],
@@ -341,7 +360,7 @@ class CommunityCard extends ConsumerWidget {
           ),
         ),
         // 統計情報
-        Container(
+        /*Container(
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.01),
             borderRadius: const BorderRadius.vertical(
@@ -372,7 +391,7 @@ class CommunityCard extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        ), */
       ],
     );
   }

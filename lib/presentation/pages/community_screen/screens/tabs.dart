@@ -13,6 +13,7 @@ import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/community_screen/model/room.dart';
 import 'package:app/presentation/pages/community_screen/model/topic.dart';
+import 'package:app/presentation/pages/community_screen/screens/community_member_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/community_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/create_topics_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/room_screen.dart';
@@ -1242,13 +1243,13 @@ class InfoTab extends ConsumerWidget {
             }),
         const Gap(24),
         asyncValue.maybeWhen(
-          data: (users) => _buildSection(
+          data: (members) => _buildSection(
             context,
             ref,
             title: "メンバー",
             child: Column(
-              children: users
-                  .map((user) => _buildMember(context, ref, user))
+              children: members
+                  .map((member) => _buildMember(context, ref, member.user))
                   .toList(),
             ),
           ),
@@ -1265,13 +1266,43 @@ class InfoTab extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: textStyle.w600(
-            fontSize: 14,
-            color: ThemeColor.headline,
-          ),
-        ),
+        title == "メンバー"
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: textStyle.w600(
+                      fontSize: 14,
+                      color: ThemeColor.headline,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              CommunityMemberScreen(community: community),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      "全て見る",
+                      style: textStyle.w600(
+                        color: ThemeColor.headline,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Text(
+                title,
+                style: textStyle.w600(
+                  fontSize: 14,
+                  color: ThemeColor.headline,
+                ),
+              ),
         const Gap(8),
         child,
       ],

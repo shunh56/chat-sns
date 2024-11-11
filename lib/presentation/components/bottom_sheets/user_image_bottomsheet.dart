@@ -58,9 +58,9 @@ class UserImageBottomSheet {
                         GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            ref
+                            /* ref
                                 .read(userImagesNotiferProvider(myId).notifier)
-                                .removeImage(image);
+                                .removeImage(image); */
                             Navigator.pop(context);
                             showMessage("写真を削除しました");
                           },

@@ -6,6 +6,7 @@ import 'package:app/presentation/pages/community_screen/provider/states/topic_st
 import 'package:app/usecase/topics_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 
 class CreateTopicScreen extends ConsumerWidget {
   const CreateTopicScreen({super.key, required this.community});
@@ -29,7 +30,9 @@ class CreateTopicScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 children: const [
                   _TitleInput(),
-                  SizedBox(height: 24),
+                  Gap(24),
+                  TextInput(),
+                  Gap(24),
                   _TagsInput(),
                 ],
               ),
@@ -47,31 +50,99 @@ class _TitleInput extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'タイトル',
-          style: TextStyle(
+        Text(
+          "タイトル",
+          style: textStyle.w600(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            color: ThemeColor.white,
           ),
         ),
-        const SizedBox(height: 8),
+        const Gap(8),
         TextFormField(
           initialValue: ref.watch(titleProvider),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'トピックのタイトルを入力してください',
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(8),
+            ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
             ),
+            filled: true,
+            isDense: true,
+            fillColor: ThemeColor.accent,
           ),
-          maxLength: 50, // タイトルの最大文字数
+          maxLength: 32, // タイトルの最大文字数
           onChanged: (value) {
-            ref.read(titleProvider.notifier).state = value;
+            if (value.isNotEmpty) {
+              ref.read(titleProvider.notifier).state = value;
+            } else {
+              ref.read(titleProvider.notifier).state = null;
+            }
           },
+        ),
+      ],
+    );
+  }
+}
+
+class TextInput extends ConsumerWidget {
+  const TextInput({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "内容",
+          style: textStyle.w600(
+            fontSize: 16,
+            color: ThemeColor.white,
+          ),
+        ),
+        const Gap(8),
+        TextField(
+          minLines: 4,
+          maxLines: 10,
+          cursorColor: ThemeColor.text,
+          style: textStyle.w600(),
+          onChanged: (text) {
+            if (text.isNotEmpty) {
+              ref.read(textProvider.notifier).state = text;
+            } else {
+              ref.read(textProvider.notifier).state = null;
+            }
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                width: 0,
+                style: BorderStyle.none,
+              ),
+            ),
+            filled: true,
+            hintText: "ここで文章を入力",
+            hintStyle: textStyle.w600(
+              color: ThemeColor.subText,
+            ),
+            fillColor: ThemeColor.accent,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            isDense: true,
+          ),
         ),
       ],
     );
@@ -83,19 +154,21 @@ class _TagsInput extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final tags = ref.watch(tagsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'タグ',
-          style: TextStyle(
+          style: textStyle.w600(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            color: ThemeColor.white,
           ),
         ),
-        const SizedBox(height: 8),
+        Gap(8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -111,20 +184,19 @@ class _TagsInput extends ConsumerWidget {
                 )),
             if (tags.length < 5) // タグの最大数を制限
               InputChip(
-                backgroundColor: ThemeColor.stroke,
+                backgroundColor: ThemeColor.accent,
                 label: const Text('タグを追加'),
                 onPressed: () => _showAddTagDialog(context, ref, tags),
               ),
           ],
         ),
         if (tags.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 8),
             child: Text(
               'タグを追加してトピックを見つけやすくしましょう',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
+              style: textStyle.w600(
+                color: ThemeColor.subText,
               ),
             ),
           ),
@@ -147,8 +219,11 @@ class _TagsInput extends ConsumerWidget {
         content: TextField(
           controller: controller,
           decoration: const InputDecoration(
-            hintText: '例: #テスト対策',
+            hintText: ' 例: テスト対策',
             prefixText: '#',
+            hintStyle: TextStyle(
+              color: ThemeColor.subText,
+            ),
           ),
           autofocus: true,
           onSubmitted: (value) {
@@ -200,13 +275,6 @@ class _CreateButton extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
       ),
       child: SafeArea(
         top: false,
@@ -215,7 +283,6 @@ class _CreateButton extends ConsumerWidget {
               ? () async {
                   try {
                     ref.read(communityIdProvider.notifier).state = community.id;
-                    await Future.delayed(const Duration(milliseconds: 100));
                     final topic = ref.read(topicStateProvider);
                     ref.read(topicsUsecaseProvider).createTopic(topic);
                     showMessage("TOPIC CREATED!");
@@ -230,12 +297,15 @@ class _CreateButton extends ConsumerWidget {
                 }
               : null,
           style: FilledButton.styleFrom(
-            backgroundColor: ThemeColor.stroke,
+            backgroundColor: isReadyToUpload ? Colors.blue : ThemeColor.stroke,
             minimumSize: const Size.fromHeight(48),
           ),
           child: Text(
             'トピックを作成',
-            style: textStyle.w600(fontSize: 14),
+            style: textStyle.w600(
+              fontSize: 16,
+              color: ThemeColor.white,
+            ),
           ),
         ),
       ),

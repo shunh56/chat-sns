@@ -39,13 +39,25 @@ class CommunityDatasource {
     return _firestore.collection(collectionName).doc(json["id"]).set(json);
   }
 
-  Future<QuerySnapshot> getRecentUsers(String communityId) async {
-    return await _firestore
-        .collection(collectionName)
-        .doc(communityId)
-        .collection("members")
-        .orderBy("joinedAt", descending: true)
-        .limit(5)
-        .get();
+  Future<QuerySnapshot<Map<String, dynamic>>> getRecentUsers(String communityId,
+      {Timestamp? timestamp}) async {
+    if (timestamp != null) {
+      return await _firestore
+          .collection(collectionName)
+          .doc(communityId)
+          .collection("members")
+          .where("joinedAt",isLessThan: timestamp)
+          .orderBy("joinedAt", descending: true)
+          .limit(5)
+          .get();
+    } else {
+      return await _firestore
+          .collection(collectionName)
+          .doc(communityId)
+          .collection("members")
+          .orderBy("joinedAt", descending: true)
+          .limit(5)
+          .get();
+    }
   }
 }

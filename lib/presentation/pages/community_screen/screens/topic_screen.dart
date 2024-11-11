@@ -17,6 +17,10 @@ import 'package:gap/gap.dart';
 const initialMessageCount = 20;
 const additionalMessageCount = 15;
 
+final scrollControllerProvider = Provider.autoDispose(
+  (ref) => ScrollController(),
+);
+
 // メッセージ管理用のプロバイダー
 final messageListProvider = StateNotifierProvider.family<MessageListNotifier,
     List<QueryDocumentSnapshot>, String>((ref, topicId) {
@@ -113,7 +117,7 @@ class TopicScreen extends ConsumerWidget {
 
     final user =
         ref.read(allUsersNotifierProvider).asData!.value[topic.userId]!;
-    final scrollController = ScrollController();
+    final scrollController = ref.watch(scrollControllerProvider);
     scrollController.addListener(() async {
       if (scrollController.position.pixels >
           scrollController.position.maxScrollExtent + 120) {
@@ -133,6 +137,7 @@ class TopicScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () {
               scrollController.animateTo(
                 0,
@@ -141,7 +146,7 @@ class TopicScreen extends ConsumerWidget {
               );
             },
             child: Text(
-              "トピック一覧",
+              "",
               style: textStyle.appbarText(isSmall: true),
             ),
           ),
@@ -170,94 +175,97 @@ class TopicScreen extends ConsumerWidget {
         ),
         body: Stack(
           children: [
-            SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            UserIcon(user: user),
-                            const Gap(12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    topic.title,
-                                    style: textStyle.w600(
-                                      fontSize: 18,
+            SizedBox(
+              height: themeSize.screenHeight,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              UserIcon(user: user),
+                              const Gap(12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      topic.title,
+                                      style: textStyle.w600(
+                                        fontSize: 18,
+                                      ),
                                     ),
-                                  ),
-                                  const Gap(4),
-                                  Row(
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          "${user.name}・${topic.createdAt.xxAgo}",
-                                          style: textStyle.w600(
-                                            fontSize: 14,
-                                            color: ThemeColor.subText,
+                                    const Gap(4),
+                                    Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            "${user.name}・${topic.createdAt.xxAgo}",
+                                            style: textStyle.w600(
+                                              fontSize: 14,
+                                              color: ThemeColor.subText,
+                                            ),
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Gap(16),
+                          Text(
+                            topic.text,
+                            style: textStyle.w600(
+                              fontSize: 14,
+                            ),
+                          ),
+                          if (topic.tags.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Wrap(
+                                children: topic.tags
+                                    .map(
+                                      (tag) => Container(
+                                        margin: const EdgeInsets.only(
+                                          top: 8,
+                                          right: 8,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          color: ThemeColor.stroke,
+                                        ),
+                                        child: Text(
+                                          tag,
+                                          style: textStyle.w600(),
+                                        ),
                                       ),
-                                    ],
-                                  ),
-                                ],
+                                    )
+                                    .toList(),
                               ),
                             ),
-                          ],
-                        ),
-                        const Gap(16),
-                        Text(
-                          topic.text,
-                          style: textStyle.w600(
-                            fontSize: 14,
-                          ),
-                        ),
-                        if (topic.tags.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Wrap(
-                              children: topic.tags
-                                  .map(
-                                    (tag) => Container(
-                                      margin: const EdgeInsets.only(
-                                        top: 8,
-                                        right: 8,
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        color: ThemeColor.stroke,
-                                      ),
-                                      child: Text(
-                                        tag,
-                                        style: textStyle.w600(),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  TopicMessages(
-                    topicId: topic.id,
-                  ),
-                  const SizedBox(
-                    height: 96,
-                  ),
-                ],
+                    TopicMessages(
+                      topicId: topic.id,
+                    ),
+                    const SizedBox(
+                      height: 96,
+                    ),
+                  ],
+                ),
               ),
             ),
             Positioned(
@@ -287,20 +295,42 @@ class _TopicMessagesState extends ConsumerState<TopicMessages>
   Widget build(BuildContext context) {
     super.build(context);
 
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+
     final messages = ref.watch(messageListProvider(widget.topicId));
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      itemCount: messages.length,
-      itemBuilder: (context, index) {
-        final messageData = messages[index].data() as Map<String, dynamic>;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            left: 12,
+            bottom: 8,
+            top: 12,
+          ),
+          child: Text(
+            "コメント",
+            style: textStyle.w600(
+              color: Colors.white,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          itemCount: messages.length,
+          itemBuilder: (context, index) {
+            final messageData = messages[index].data() as Map<String, dynamic>;
 
-        return MessageItem(
-          messageData: messageData,
-        );
-      },
+            return MessageItem(
+              messageData: messageData,
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -342,24 +372,25 @@ class _MessageItemState extends ConsumerState<MessageItem>
         final user = snapshot.data![0];
 
         return Container(
-          margin: const EdgeInsets.symmetric(
-            vertical: 6,
-            horizontal: 12,
-          ),
           padding: const EdgeInsets.symmetric(
             vertical: 16,
             horizontal: 16,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: ThemeColor.accent,
+            border: Border.symmetric(
+              horizontal: BorderSide(
+                color: Colors.white.withOpacity(0.2),
+                width: 0.4,
+              ),
+            ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               UserIcon(
                 user: user,
-                width: 48,
+                width: 32,
+                isCircle: true,
               ),
               const Gap(12),
               Flexible(
@@ -416,7 +447,7 @@ class BottomTextField extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final controller = ref.watch(controllerProvider);
-
+    final scrollController = ref.watch(scrollControllerProvider);
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom + 24;
 
     return Container(
@@ -461,11 +492,16 @@ class BottomTextField extends ConsumerWidget {
           suffixIcon: ref.watch(inputTextProvider).isNotEmpty
               ? GestureDetector(
                   onTap: () async {
-                    ref
+                    await ref
                         .read(topicsUsecaseProvider)
                         .sendMessage(topic.id, ref.read(inputTextProvider));
                     controller.clear();
                     ref.read(inputTextProvider.notifier).state = "";
+                    scrollController.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeInOut,
+                    );
                   },
                   child: const Icon(
                     Icons.send,

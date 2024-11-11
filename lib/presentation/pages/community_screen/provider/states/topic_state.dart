@@ -9,6 +9,7 @@ class TopicState {
   final String id;
   final String userId;
   final String? title;
+  final String? text;
   final List<String> tags;
 
   final String? communityId;
@@ -16,11 +17,13 @@ class TopicState {
     required this.id,
     required this.userId,
     required this.title,
+    required this.text,
     required this.tags,
     required this.communityId,
   });
 
-  bool get isReadyToUpload => (title != null && title!.isNotEmpty);
+  bool get isReadyToUpload =>
+      (title != null && title!.isNotEmpty && text != null && text!.isNotEmpty);
 
   Map<String, dynamic> toJson() {
     return {
@@ -31,6 +34,7 @@ class TopicState {
       "communityId": communityId,
       //
       "title": title,
+      "text": text,
       "participantCount": 1,
       "postCount": 0,
       "tags": tags,
@@ -45,12 +49,14 @@ final topicStateProvider = Provider.autoDispose(
   (ref) {
     final id = const Uuid().v4();
     final title = ref.watch(titleProvider);
+    final text = ref.watch(textProvider);
     final userId = ref.watch(authProvider).currentUser!.uid;
     final tags = ref.watch(tagsProvider);
     final communityId = ref.watch(communityIdProvider);
     return TopicState(
       id: id,
       title: title,
+      text: text,
       userId: userId,
       tags: tags,
       communityId: communityId,
@@ -58,6 +64,7 @@ final topicStateProvider = Provider.autoDispose(
   },
 );
 final titleProvider = StateProvider.autoDispose<String?>((ref) => null);
+final textProvider = StateProvider.autoDispose<String?>((ref) => null);
 final tagsProvider = StateProvider<List<String>>((ref) => []);
 final isPublicProvider = StateProvider.autoDispose((ref) => false);
 final communityIdProvider = StateProvider<String?>((ref) => null);

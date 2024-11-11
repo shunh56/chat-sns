@@ -10,6 +10,7 @@ import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/community_screen/screens/community_management_screen.dart';
+import 'package:app/presentation/pages/community_screen/screens/community_member_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/tabs.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/providers/provider/community.dart';
@@ -187,8 +188,8 @@ class CommunityScreen extends ConsumerWidget {
             child: Row(
               children: [
                 asyncValue.maybeWhen(
-                  data: (users) => UserStackIcons(
-                    users: users,
+                  data: (members) => UserStackIcons(
+                    users: members.map((member) => member.user).toList(),
                     imageRadius: 14,
                   ),
                   orElse: () => const EmptyUserStackIcons(
@@ -196,11 +197,22 @@ class CommunityScreen extends ConsumerWidget {
                   ),
                 ),
                 const Gap(8),
-                Text(
-                  '${community.memberCount}人のメンバー',
-                  style: textStyle.w400(
-                    color: ThemeColor.subText,
-                    fontSize: 14,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            CommunityMemberScreen(community: community),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    '${community.memberCount}人のメンバー',
+                    style: textStyle.w400(
+                      color: ThemeColor.subText,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
                 Spacer(),
@@ -221,14 +233,6 @@ class CommunityScreen extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  Future<List<UserAccount>> getUsers(WidgetRef ref) async {
-    final userIds =
-        await ref.read(communityUsecaseProvider).getRecentUsers(communityId);
-    return await ref
-        .read(allUsersNotifierProvider.notifier)
-        .getUserAccounts(userIds);
   }
 
   Widget _buildTabBar(BuildContext context, WidgetRef ref) {

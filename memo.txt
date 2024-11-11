@@ -117,3 +117,7 @@ firebase functions:config:unset any.path
 
 
 export PATH="/Applications/Android Studio.app/Contents/jre/Contents/Home/bin:$PATH"
+
+
+dart flavors
+https://zenn.dev/altiveinc/articles/separating-environments-in-flutter-old-edition#firebase%E5%AF%BE%E5%BF%9C-(ios)

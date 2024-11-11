@@ -967,12 +967,12 @@ class CanvasTheme {
 
   static CanvasTheme defaultCanvasTheme() {
     return CanvasTheme(
-      bgColor: ThemeColor.accent,
+      bgColor: ThemeColor.background,
       profileTextColor: ThemeColor.text,
       profileSecondaryTextColor: ThemeColor.subText,
       profileLinksColor: ThemeColor.highlight,
       profileAboutMeColor: ThemeColor.text,
-      boxBgColor: ThemeColor.stroke,
+      boxBgColor: ThemeColor.accent,
       boxTextColor: ThemeColor.subText,
       boxSecondaryTextColor: ThemeColor.text,
       boxWidth: 0.4,

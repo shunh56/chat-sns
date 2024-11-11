@@ -45,23 +45,17 @@ class PostUsecase {
     return await _repository.getPostFromUserId(userId);
   }
 
+  Future<List<Post>> getImagePostFromUserId(String userId) async {
+    return await _repository.getImagePostFromUserId(userId);
+  }
+
   Stream<List<Reply>> streamPostReplies(String postId) {
     return _repository.streamPostReplies(postId);
   }
 
-  /* Future<Post?> getPostById(String postId) async {
-    return await _repository.getPostById(postId);
-  } */
-
   uploadPost(PostState state) async {
     final uploader = _ref.read(imageUploadUsecaseProvider);
     final imageUrls = await uploader.uploadPostImage(state.id, state.images);
-    _ref
-        .read(
-            userImagesNotiferProvider(_ref.read(authProvider).currentUser!.uid)
-                .notifier)
-        .addImages(imageUrls);
-
     final aspectRatios = uploader.getAspectRatios(state.images);
     return _repository.uploadPost(state, imageUrls, aspectRatios);
   }

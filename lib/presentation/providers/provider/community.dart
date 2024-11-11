@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
@@ -31,8 +32,15 @@ class CommunityNotifiier extends StateNotifier<AsyncValue<Community?>> {
   }
 }
 
+class CommunityMember {
+  final Timestamp joinedAt;
+  final UserAccount user;
+
+  CommunityMember(this.joinedAt, this.user);
+}
+
 final communityMembersNotifierProvider = StateNotifierProvider<
-    CommunityMembersNotifiier, AsyncValue<List<UserAccount>>>((ref) {
+    CommunityMembersNotifiier, AsyncValue<List<CommunityMember>>>((ref) {
   return CommunityMembersNotifiier(
     ref,
     ref.watch(communityUsecaseProvider),
@@ -41,7 +49,7 @@ final communityMembersNotifierProvider = StateNotifierProvider<
 
 /// State
 class CommunityMembersNotifiier
-    extends StateNotifier<AsyncValue<List<UserAccount>>> {
+    extends StateNotifier<AsyncValue<List<CommunityMember>>> {
   CommunityMembersNotifiier(
     this.ref,
     this.usecase,
@@ -50,14 +58,38 @@ class CommunityMembersNotifiier
   final Ref ref;
   final String communityId = "student_life";
   final CommunityUsecase usecase;
+  Timestamp timestamp = Timestamp.now();
 
   Future<void> initialize() async {
-    final userIds =
+    final res =
         await ref.read(communityUsecaseProvider).getRecentUsers(communityId);
-    final users = await ref
-        .read(allUsersNotifierProvider.notifier)
-        .getUserAccounts(userIds);
-    state = AsyncValue.data(users);
+    final userIds = res.map((data) => data["userId"] as String).toList();
+    await ref.read(allUsersNotifierProvider.notifier).getUserAccounts(userIds);
+    final map = ref.read(allUsersNotifierProvider).asData!.value;
+    timestamp = res[res.length - 1]["joinedAt"];
+    state = AsyncValue.data(res
+        .map((data) => CommunityMember(data["joinedAt"], map[data["userId"]]!))
+        .toList());
+  }
+
+  Future<bool> loadMore() async {
+    DebugPrint("RES : ${timestamp}");
+    final list = state.asData?.value ?? [];
+    final res = await ref
+        .read(communityUsecaseProvider)
+        .getRecentUsers(communityId, timestamp: timestamp);
+    if (res.isEmpty) return false;
+    final userIds = res.map((data) => data["userId"] as String).toList();
+    await ref.read(allUsersNotifierProvider.notifier).getUserAccounts(userIds);
+    final map = ref.read(allUsersNotifierProvider).asData!.value;
+    timestamp = res[res.length - 1]["joinedAt"];
+
+    state = AsyncValue.data([
+      ...list,
+      ...res.map(
+          (data) => CommunityMember(data["joinedAt"], map[data["userId"]]!))
+    ]);
+    return true;
   }
 }
 
