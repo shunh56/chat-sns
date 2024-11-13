@@ -1,6 +1,7 @@
 import 'package:app/core/debugParams/tester_accounts.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/main.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/pages/auth/forgot_password_screen.dart';
 import 'package:app/presentation/pages/auth/signup_page.dart';
@@ -266,7 +267,7 @@ class SignInPage extends ConsumerWidget {
                     ],
                   ),
                   const Gap(12),
-                  kDebugMode
+                  flavor == "dev"
                       ? Expanded(
                           child: ListView.builder(
                             itemCount: testerAccount.length,

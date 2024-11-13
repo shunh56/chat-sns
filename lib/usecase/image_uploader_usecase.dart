@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,6 +36,7 @@ class ImageUploadUsecase {
     UploadTask uploadTask = ref.putFile(imageFile);
     TaskSnapshot snap = await uploadTask;
     String downloadUrl = await snap.ref.getDownloadURL();
+    DebugPrint("ICONURL : $downloadUrl");
     return downloadUrl;
   }
 

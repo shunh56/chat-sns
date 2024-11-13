@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>822316855484-3gcaup6u2k9b8jfljdn56rilbsgekm9i.apps.googleusercontent.com</string>
+	<string>889410445548-4sqpqmv6mejnsk1pgg2tb1i6ja13iahn.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.822316855484-3gcaup6u2k9b8jfljdn56rilbsgekm9i</string>
+	<string>com.googleusercontent.apps.889410445548-4sqpqmv6mejnsk1pgg2tb1i6ja13iahn</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAJVVrkpGQqt6nAPVmocfa8Rdy4sH2G62Q</string>
+	<string>AIzaSyC8aB27Wo9Lo6NKgV2ctOSIJVQTztqitiM</string>
 	<key>GCM_SENDER_ID</key>
-	<string>822316855484</string>
+	<string>889410445548</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.blank.sns</string>
 	<key>PROJECT_ID</key>
-	<string>blank-project-prod</string>
+	<string>chat-sns-project</string>
 	<key>STORAGE_BUCKET</key>
-	<string>blank-project-prod.firebasestorage.app</string>
+	<string>chat-sns-project.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:822316855484:ios:cb0e33798aa5e3bfa6e0b9</string>
+	<string>1:889410445548:ios:58820ac80a95a1120185c9</string>
 </dict>
 </plist>

@@ -1,9 +1,2 @@
-//
-//  DartDefines.xcconfig
-//  Runner
-//
-//  Created by 日原駿 on 2024/11/12.
-//
+#include "dev.xxconfig"
 
-// Configuration settings file format documentation can be found at:
-// https://help.apple.com/xcode/#/dev745c5c974

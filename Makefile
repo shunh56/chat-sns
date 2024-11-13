@@ -31,12 +31,12 @@ prod-release:
 # リリースビルド用のタスク
 build-dev:
 	@echo "Building release version of DEVELOPMENT MODE..."
-	$(FLUTTER) build ios --release $(DART_DEFINE_DEV)
+	$(FLUTTER) build ipa --release $(DART_DEFINE_DEV)
 
 # リリースビルド用のタスク
 build-prod:
 	@echo "Building release version of RELEASE MODE..."
-	$(FLUTTER) build ios --release $(DART_DEFINE_PROD)
+	$(FLUTTER) build ipa --release $(DART_DEFINE_PROD)
 
 # クリーンアップ用のタスク
 clean:

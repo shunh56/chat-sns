@@ -184,6 +184,7 @@ class ProfileScreen extends ConsumerWidget {
                                             UserIcon(
                                               user: me,
                                               width: 40,
+                                              navDisabled: true,
                                             ),
                                             const SizedBox(width: 8),
                                             Text(

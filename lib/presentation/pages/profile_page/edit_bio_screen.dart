@@ -28,7 +28,6 @@ class EditBioScreen extends ConsumerWidget {
     final name = ref.watch(nameStateProvider);
     final nameNotifier = ref.watch(nameStateProvider.notifier);
     final bio = ref.watch(bioStateProvider);
-   
 
     final links = ref.watch(linksStateProvider);
     final linksStateNotifier = ref.watch(linksStateProvider.notifier);
@@ -922,19 +921,24 @@ class EditBioScreen extends ConsumerWidget {
                   }
                   String? imageUrl;
                   final iconImage = ref.watch(iconImageStateProvider);
-                  if (iconImage != null) {
-                    ref.read(imageUploadingProvider.notifier).state = true;
-                    imageUrl = await ref
-                        .read(imageUploadUsecaseProvider)
-                        .uploadIconImage(iconImage);
+                  ref.read(imageUploadingProvider.notifier).state = true;
+                  try {
+                    if (iconImage != null) {
+                      imageUrl = await ref
+                          .read(imageUploadUsecaseProvider)
+                          .uploadIconImage(iconImage);
+                    }
+                    notifier.updateBio(
+                      name: name,
+                      bio: bio,
+                      aboutMe: aboutMe,
+                      links: links,
+                      imageUrl: imageUrl,
+                    );
+                  } catch (e) {
+                    ref.read(imageUploadingProvider.notifier).state = false;
+                    showErrorSnackbar(error: e);
                   }
-                  notifier.updateBio(
-                    name: name,
-                    bio: bio,
-                    aboutMe: aboutMe,
-                    links: links,
-                    imageUrl: imageUrl,
-                  );
                   Navigator.pop(context);
                 },
                 child: Container(

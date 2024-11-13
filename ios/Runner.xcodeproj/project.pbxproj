@@ -337,7 +337,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/sh\nset -e\n\n# 環境変数のログ出力\necho \"Current environment variables:\"\necho \"FLAVOR: ${FLAVOR}\"\necho \"APPNAME: ${APPNAME}\"\necho \"CONFIGURATION: ${CONFIGURATION}\"\necho \"PROJECT_DIR: ${PROJECT_DIR}\"\necho \"PRODUCT_NAME: ${PRODUCT_NAME}\"\necho \"BUILT_PRODUCTS_DIR: ${BUILT_PRODUCTS_DIR}\"\n\n# FLAVOR に基づいて設定\nif [ \"${FLAVOR}\" = \"dev\" ]; then\n    PLIST_SUFFIX=\"-Dev\"\nelif [ \"${FLAVOR}\" = \"prod\" ]; then\n    PLIST_SUFFIX=\"-Prod\"\nelse\n    echo \"Error: Unknown FLAVOR: ${FLAVOR}\"\n    exit 1\nfi\n\necho \"Building for FLAVOR: ${FLAVOR}\"\necho \"Using configuration file: GoogleService-Info${PLIST_SUFFIX}.plist\"\n\n# ソースファイルの存在確認\nSOURCE_PLIST=\"${PROJECT_DIR}/Runner/GoogleService-Info${PLIST_SUFFIX}.plist\"\nif [ ! -f \"${SOURCE_PLIST}\" ]; then\n    echo \"Error: Source plist file not found: ${SOURCE_PLIST}\"\n    exit 1\nfi\n\n# 既存のファイルを削除\nrm -f \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n\n# 新しいファイルをコピー\ncp -f \"${SOURCE_PLIST}\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\n\n# コピー確認\nif [ -f \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\" ]; then\n    echo \"Successfully copied GoogleService-Info${PLIST_SUFFIX}.plist to app bundle\"\n    echo \"Destination: ${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/GoogleService-Info.plist\"\nelse\n    echo \"Error: Failed to copy GoogleService-Info${PLIST_SUFFIX}.plist\"\n    exit 1\nfi\n";
+			shellScript = "if [ \"${FLAVOR}\" = \"dev\" ] ; then\n    cp \"$SRCROOT/Runner/GoogleService-Info-dev.plist\" \"$SRCROOT/Runner/GoogleService-Info.plist\"\n    echo \"Development GoogleService-Info copied.\"\nelif [ \"${FLAVOR}\" = \"prod\" ] ; then\n    cp \"$SRCROOT/Runner/GoogleService-Info-prod.plist\" \"$SRCROOT/Runner/GoogleService-Info.plist\"\n    echo \"Production GoogleService-Info copied.\"\nfi\n";
 		};
 		6A21331BD16A81AE765AD071 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -409,7 +409,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\n#!/bin/bash\nPATH=${PATH}:$FLUTTER_ROOT/bin:$HOME/.pub-cache/bin\nflutterfire upload-crashlytics-symbols --upload-symbols-script-path=$PODS_ROOT/FirebaseCrashlytics/upload-symbols --platform=ios --apple-project-path=${SRCROOT} --env-platform-name=${PLATFORM_NAME} --env-configuration=${CONFIGURATION} --env-project-dir=${PROJECT_DIR} --env-built-products-dir=${BUILT_PRODUCTS_DIR} --env-dwarf-dsym-folder-path=${DWARF_DSYM_FOLDER_PATH} --env-dwarf-dsym-file-name=${DWARF_DSYM_FILE_NAME} --env-infoplist-path=${INFOPLIST_PATH} --default-config=default\n";
+			shellScript = "\n#!/bin/bash\n#PATH=${PATH}:$FLUTTER_ROOT/bin:$HOME/.pub-cache/bin\n#flutterfire upload-crashlytics-symbols --upload-symbols-script-path=$PODS_ROOT/FirebaseCrashlytics/upload-symbols --platform=ios --apple-project-path=${SRCROOT} --env-platform-name=${PLATFORM_NAME} --env-configuration=${CONFIGURATION} --env-project-dir=${PROJECT_DIR} --env-built-products-dir=${BUILT_PRODUCTS_DIR} --env-dwarf-dsym-folder-path=${DWARF_DSYM_FOLDER_PATH} --env-dwarf-dsym-file-name=${DWARF_DSYM_FILE_NAME} --env-infoplist-path=${INFOPLIST_PATH} --default-config=default\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
