@@ -20,6 +20,26 @@
             ]
         },
         {
+            "name": "dev-profile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define=FLAVOR=dev",
+                "--dart-define-from-file=dart_defines/dev.env"
+            ]
+        },
+        {
+            "name": "prod-profile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define=FLAVOR=prod",
+                "--dart-define-from-file=dart_defines/prod.env"
+            ]
+        },
+        {
             "name": "dev-release",
             "request": "launch",
             "type": "dart",
