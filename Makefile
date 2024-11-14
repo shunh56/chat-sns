@@ -1,46 +1,46 @@
-# .PHONY は、実際のファイルではなくタスクであることを示す
-.PHONY: dev prod clean
+.PHONY: dev prod clean dev-debug dev-profile dev-release prod-debug prod-profile prod-release build-dev build-prod
 
-# 変数定義
 FLUTTER = flutter
 DART_DEFINE_DEV = --dart-define=FLAVOR=dev --dart-define-from-file=dart_defines/dev.env
 DART_DEFINE_PROD = --dart-define=FLAVOR=prod --dart-define-from-file=dart_defines/prod.env
 
-# デフォルトのターゲット（makeコマンドだけで実行される）
-all: dev
-
-# 開発環境用のタスク
-dev:
-	@echo "Starting development build..."
+dev-debug:
+	@echo "Starting dev debug build..."
 	$(FLUTTER) run $(DART_DEFINE_DEV)
 
-# 本番環境用のタスク
-prod:
-	@echo "Starting production build..."
-	$(FLUTTER) run $(DART_DEFINE_PROD)
-# リリースビルド用のタスク
+dev-profile:
+	@echo "Starting dev profile build..."
+	$(FLUTTER) run --profile $(DART_DEFINE_DEV)
+
 dev-release:
-	@echo "Building release version of DEVELOPMENT MODE..."
+	@echo "Starting dev release build..."
 	$(FLUTTER) run --release $(DART_DEFINE_DEV)
 
-# リリースビルド用のタスク
-prod-release:
-	@echo "Building release version of RELEASE MODE..."
-	$(FLUTTER) run --release $(DART_DEFINE_PROD)
-
-# リリースビルド用のタスク
 build-dev:
-	@echo "Building release version of DEVELOPMENT MODE..."
+	@echo "Building dev IPA..."
 	$(FLUTTER) build ipa --release $(DART_DEFINE_DEV)
 
-# リリースビルド用のタスク
+prod-debug:
+	@echo "Starting prod debug build..."
+	$(FLUTTER) run $(DART_DEFINE_PROD)
+
+prod-profile:
+	@echo "Starting prod profile build..."
+	$(FLUTTER) run --profile $(DART_DEFINE_PROD)
+
+prod-release:
+	@echo "Starting prod release build..."
+	$(FLUTTER) run --release $(DART_DEFINE_PROD)
+
 build-prod:
-	@echo "Building release version of RELEASE MODE..."
+	@echo "Building prod IPA..."
 	$(FLUTTER) build ipa --release $(DART_DEFINE_PROD)
 
-# クリーンアップ用のタスク
+dev: dev-debug
+prod: prod-debug
+
 clean:
-	@echo "Cleaning the project..."
+	@echo "Cleaning project..."
 	$(FLUTTER) clean
 	cd ios && rm -rf Pods Podfile.lock
 	cd ios && pod install
