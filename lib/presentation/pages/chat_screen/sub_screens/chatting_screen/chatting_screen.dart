@@ -128,24 +128,16 @@ class ChattingScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      user.name,
-                                      style: const TextStyle(
-                                        color: ThemeColor.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const Gap(4),
-                                    /*const Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 12,
-                                      color: ThemeColor.white,
-                                    ), */
-                                  ],
+                                Gap(4),
+                                Text(
+                                  user.name,
+                                  style: const TextStyle(
+                                    color: ThemeColor.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 user.isOnline ||
                                         DateTime.now()
@@ -157,7 +149,7 @@ class ChattingScreen extends ConsumerWidget {
                                         "オンライン",
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: ThemeColor.white,
+                                          color: Colors.green,
                                         ),
                                       )
                                     : DateTime.now()
@@ -192,6 +184,7 @@ class ChattingScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  const Gap(4),
                   Divider(
                     height: 0,
                     color: Colors.white.withOpacity(0.1),
@@ -220,17 +213,17 @@ class ChattingScreen extends ConsumerWidget {
           itemCount: data.length + (isShort ? 1 : 0),
           padding: EdgeInsets.only(
             top: topPadding + themeSize.appbarHeight + 12,
-            bottom: 12,
+            bottom: 0,
           ),
           itemBuilder: (context, index) {
             if (isShort && index == data.length) {
               List<String> messages = [
-                "お待たせしました！${user.name}とのチャットの舞台が開幕です。さぁ、メッセージの交換を始めましょう！",
-                "おっす！ここからが${user.name}とのチャットのスタート地点。面白い会話をガンガン繰り広げよう！",
-                "${user.name}とのチャットの魔法が始まるよ！この先にはどんな会話が待っているのか、楽しみだね。",
-                "${user.name}とのチャットの時間がやってきました。さあ、楽しいおしゃべりを始めましょう！",
+                "お待たせしました！${user.name}さんとのチャットの舞台が開幕です。さぁ、メッセージの交換を始めましょう！",
+                "おっす！ここからが${user.name}さんとのチャットのスタート地点。面白い会話をガンガン繰り広げよう！",
+                "${user.name}さんとのチャットの魔法が始まるよ！この先にはどんな会話が待っているのか、楽しみだね。",
+                "${user.name}さんとのチャットの時間がやってきました。さあ、楽しいおしゃべりを始めましょう！",
                 "新しい物語の始まりだ！ここからチャットの冒険がスタートします。さぁ、話を続けよう！",
-                "${user.name}とのチャットの世界へようこそ！ここからが本格的な会話の始まりだ。楽しんでね！"
+                "${user.name}さんとのチャットの世界へようこそ！ここからが本格的な会話の始まりだ。楽しんでね！"
               ];
               return Container(
                 margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
@@ -392,7 +385,7 @@ class BottomTextField extends ConsumerWidget {
       return Container(
         width: MediaQuery.sizeOf(context).width,
         padding: EdgeInsets.only(
-          top: 12,
+          top: 8,
           left: 16,
           right: 16,
           bottom: bottomPadding,

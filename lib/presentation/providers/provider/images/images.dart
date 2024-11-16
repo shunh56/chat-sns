@@ -26,17 +26,17 @@ class UserImage {
   }
 }
 
-final userImagesNotiferProvider = StateNotifierProvider.family<
-    UserImagesNotifier, AsyncValue<List<UserImage>>, String>((ref, userId) {
-  return UserImagesNotifier(
+final imagesPostsNotiferProvider = StateNotifierProvider.family<
+    ImagesPostsNotifier, AsyncValue<List<Post>>, String>((ref, userId) {
+  return ImagesPostsNotifier(
     userId,
     ref.watch(postUsecaseProvider),
   )..initialize();
 });
 
 /// State
-class UserImagesNotifier extends StateNotifier<AsyncValue<List<UserImage>>> {
-  UserImagesNotifier(this.userId, this.usecase)
+class ImagesPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
+  ImagesPostsNotifier(this.userId, this.usecase)
       : super(const AsyncValue.loading());
 
   final String userId;
@@ -45,22 +45,25 @@ class UserImagesNotifier extends StateNotifier<AsyncValue<List<UserImage>>> {
   Future<void> initialize() async {
     try {
       final posts = await usecase.getImagePostFromUserId(userId);
-      final List<UserImage> images = [];
-      
+      posts.removeWhere((post) => (post.isDeletedByUser ||
+          post.isDeletedByModerator ||
+          post.isDeletedByAdmin));
+      state = AsyncValue.data(posts);
+      /* final List<Post> images = [];
       for (final post in posts) {
         for (final imageUrl in post.mediaUrls) {
           images.add(UserImage(
-            post.id,  // 投稿のIDを使用
+            post.id, // 投稿のIDを使用
             imageUrl,
             post.createdAt,
           ));
         }
       }
-      
+
       // createdAtで降順にソート
-      images.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      
-      state = AsyncValue.data(images);
+      images.sort((a, b) => b.createdAt.compareTo(a.createdAt)); */
+
+      // state = AsyncValue.data(images);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -77,7 +80,7 @@ class UserImagesNotifier extends StateNotifier<AsyncValue<List<UserImage>>> {
   }
 
   removeImage(UserImage image) {
-    final list = List<UserImage>.from(state.asData?.value ?? []);
+    final list = List<Post>.from(state.asData?.value ?? []);
     list.removeWhere((e) => e.id == image.id && e.imageUrl == image.imageUrl);
     state = AsyncValue.data(list);
     return usecase.removeImage(image);

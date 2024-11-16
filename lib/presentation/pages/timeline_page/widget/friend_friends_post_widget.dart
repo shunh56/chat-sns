@@ -232,7 +232,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                           imageUrls: post.mediaUrls,
                           aspectRatios: post.aspectRatios,
                           initialIndex: 0,
-                          tag: 'imageHero-${post.mediaUrls[0]}',
+                          //tag: 'imageHero-${post.mediaUrls[0]}',
                         ),
                       ),
                     );
@@ -285,7 +285,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
                                 imageUrls: post.mediaUrls,
                                 aspectRatios: post.aspectRatios,
                                 initialIndex: 0,
-                                tag: 'imageHero-${post.mediaUrls[0]}',
+                                //tag: 'imageHero-${post.mediaUrls[0]}',
                               ),
                             ),
                           );

@@ -63,5 +63,5 @@ final postStateProvider = Provider.autoDispose(
   },
 );
 
-final isPublicProvider = StateProvider.autoDispose((ref) => false);
+final isPublicProvider = StateProvider.autoDispose((ref) => true);
 final communityIdProvider = StateProvider.autoDispose<String?>((ref) => null);

@@ -77,4 +77,28 @@ class AllPostsNotifier extends _$AllPostsNotifier {
     ref.read(postUsecaseProvider).uploadPost(postState);
     //ref.read(pushNotificationNotifierProvider).uploadPost();
   }
+
+  deletePostByUser(Post post) {
+    Map<String, Post> cache = state.asData != null ? state.asData!.value : {};
+    post.isDeletedByUser = true;
+    cache[post.id] = post;
+    state = AsyncValue.data(cache);
+    ref.read(postUsecaseProvider).deletePostByUser(post);
+  }
+
+  deletePostByModerator(Post post) {
+    Map<String, Post> cache = state.asData != null ? state.asData!.value : {};
+    post.isDeletedByModerator = true;
+    cache[post.id] = post;
+    state = AsyncValue.data(cache);
+    ref.read(postUsecaseProvider).deletePostByModerator(post);
+  }
+
+  deletePostByAdmin(Post post) {
+    Map<String, Post> cache = state.asData != null ? state.asData!.value : {};
+    post.isDeletedByAdmin = true;
+    cache[post.id] = post;
+    state = AsyncValue.data(cache);
+    ref.read(postUsecaseProvider).deletePostByAdmin(post);
+  }
 }

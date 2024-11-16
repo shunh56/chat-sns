@@ -48,7 +48,7 @@ class CommunityDatasource {
           .collection("members")
           .where("joinedAt",isLessThan: timestamp)
           .orderBy("joinedAt", descending: true)
-          .limit(5)
+          .limit(10)
           .get();
     } else {
       return await _firestore
@@ -56,7 +56,7 @@ class CommunityDatasource {
           .doc(communityId)
           .collection("members")
           .orderBy("joinedAt", descending: true)
-          .limit(5)
+          .limit(10)
           .get();
     }
   }

@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:app/core/utils/debug_print.dart';
+import 'package:app/main.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,17 +29,40 @@ class ImageUploadUsecase {
   );
 
   Future<String> uploadIconImage(File imageFile) async {
-    DateTime now = DateTime.now();
-    Reference ref = _storage
-        .ref("photos")
-        .child(_auth.currentUser!.uid)
-        .child("icon_images")
-        .child(now.millisecondsSinceEpoch.toString());
-    UploadTask uploadTask = ref.putFile(imageFile);
-    TaskSnapshot snap = await uploadTask;
-    String downloadUrl = await snap.ref.getDownloadURL();
-    DebugPrint("ICONURL : $downloadUrl");
-    return downloadUrl;
+    try {
+      DebugPrint("Starting upload with flavor: $flavor"); // flavorの確認
+      DebugPrint(
+          "Storage instance: ${_storage.app.options.storageBucket}"); // Storage bucketの確認
+
+      DateTime now = DateTime.now();
+      final ref = _storage
+          .ref("photos")
+          .child(_auth.currentUser!.uid)
+          .child("icon_images")
+          .child(now.millisecondsSinceEpoch.toString());
+
+      DebugPrint("Upload reference path: ${ref.fullPath}");
+      final uploadTask = ref.putFile(imageFile);
+      // 進捗状況の監視を追加
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        DebugPrint(
+            'Upload progress: ${snapshot.bytesTransferred}/${snapshot.totalBytes}');
+      }, onError: (error) {
+        DebugPrint('Upload error during progress: $error');
+      });
+
+      final snap = await uploadTask;
+      DebugPrint("Upload completed, getting download URL");
+
+      final downloadUrl = await snap.ref.getDownloadURL();
+      DebugPrint("Download URL obtained: $downloadUrl");
+
+      return downloadUrl;
+    } catch (e, stack) {
+      DebugPrint("Upload failed with error: $e");
+      DebugPrint("Stack trace: $stack");
+      rethrow;
+    }
   }
 
   Future<String> _uploadIPostImage(File imageFile, String id, int index) async {

@@ -71,4 +71,16 @@ class PostUsecase {
   incrementLikeCountToReply(String postId, String replyId, int count) {
     return _repository.incrementLikeCountToReply(postId, replyId, count);
   }
+
+  deletePostByUser(Post post) {
+    return _repository.deletePostByUser(post.id);
+  }
+
+  deletePostByModerator(Post post) {
+    return _repository.deletePostByModerator(post.id);
+  }
+
+  deletePostByAdmin(Post post) {
+    return _repository.deletePostByAdmin(post.id);
+  }
 }

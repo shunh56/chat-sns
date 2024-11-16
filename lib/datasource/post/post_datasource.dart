@@ -36,7 +36,7 @@ class PostDatasource {
     return await _firestore
         .collection(collectionName)
         .where("isPublic", isEqualTo: true)
-        .where("communityId",isNull: true)
+        .where("communityId", isNull: true)
         .orderBy("createdAt", descending: true)
         .limit(QUERY_LIMIT)
         .get();
@@ -176,6 +176,30 @@ class PostDatasource {
       {
         "updatedAt": Timestamp.now(),
         "likeCount": FieldValue.increment(count),
+      },
+    );
+  }
+
+  deletePostByUser(String postId) {
+    _firestore.collection(collectionName).doc(postId).update(
+      {
+        "isDeletedByUser": true,
+      },
+    );
+  }
+
+  deletePostByModerator(String postId) {
+    _firestore.collection(collectionName).doc(postId).update(
+      {
+        "isDeletedByModerator": true,
+      },
+    );
+  }
+
+  deletePostByAdmin(String postId) {
+    _firestore.collection(collectionName).doc(postId).update(
+      {
+        "isDeletedByAdmin": true,
       },
     );
   }

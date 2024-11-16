@@ -1217,7 +1217,7 @@ class InfoTab extends ConsumerWidget {
           ),
         ),
         const Gap(24),
-        FutureBuilder(
+        /*FutureBuilder(
             future: ref
                 .read(allUsersNotifierProvider.notifier)
                 .getUserAccounts(community.moderators),
@@ -1240,8 +1240,8 @@ class InfoTab extends ConsumerWidget {
                       .toList(),
                 ),
               );
-            }),
-        const Gap(24),
+            }), */
+        //const Gap(24),
         asyncValue.maybeWhen(
           data: (members) => _buildSection(
             context,

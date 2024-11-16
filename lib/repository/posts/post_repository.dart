@@ -101,4 +101,14 @@ class PostRepository {
   incrementLikeCountToReply(String postId, String replyId, int count) {
     return _datasource.incrementLikeCountToReply(postId, replyId, count);
   }
+
+  deletePostByUser(String postId){
+    return _datasource.deletePostByUser(postId);
+  }
+  deletePostByModerator(String postId){
+    return _datasource.deletePostByModerator(postId);
+  }
+  deletePostByAdmin(String  postId){
+    return _datasource.deletePostByAdmin(postId);
+  }
 }

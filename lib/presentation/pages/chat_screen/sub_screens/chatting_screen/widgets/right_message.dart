@@ -2,6 +2,7 @@
 
 // Package imports:
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
@@ -34,10 +35,12 @@ class RightMessage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     //final dmOverviewList = ref.watch(dmOverviewListProvider);
 
-    return _buildDefaultMessage(ref);
+    return _buildDefaultMessage(context, ref);
   }
 
-  Widget _buildDefaultMessage(WidgetRef ref) {
+  Widget _buildDefaultMessage(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(dmOverviewListNotifierProvider);
     final checkIcon = asyncValue.when(
       data: (dmList) {
@@ -65,10 +68,10 @@ class RightMessage extends ConsumerWidget {
 
     return Container(
       margin: const EdgeInsets.only(
-        top: 4,
+        top: 6,
         left: 72,
         right: 12,
-        bottom: 4,
+        bottom: 6,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -90,9 +93,9 @@ class RightMessage extends ConsumerWidget {
 
                     Text(
                       message.createdAt.xxAgo,
-                      style: const TextStyle(
+                      style: textStyle.w400(
                         fontSize: 10,
-                        color: ThemeColor.text,
+                        color: ThemeColor.subText,
                       ),
                     ),
                   ],
@@ -114,7 +117,7 @@ class RightMessage extends ConsumerWidget {
                     ),
                     child: Text(
                       message.text,
-                      style: const TextStyle(
+                      style: textStyle.w500(
                         fontSize: 15,
                         color: ThemeColor.white,
                       ),

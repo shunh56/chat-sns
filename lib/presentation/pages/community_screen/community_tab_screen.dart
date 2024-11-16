@@ -32,6 +32,7 @@ class CommunityTabScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
+        maintainBottomViewPadding: true,
         child: CustomScrollView(
           slivers: [
             // ヘッダー

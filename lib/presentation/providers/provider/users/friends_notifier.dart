@@ -157,9 +157,9 @@ class FriendRequestIdListNotifier
   }
 
   sendFriendRequest(UserAccount user) async {
-    final list = state.asData?.value ?? [];
+    final list = _ref.read(friendIdListNotifierProvider).asData?.value ?? [];
     if (list.length >= 30) {
-      showMessage("フレンド数は30人までです。");
+      showMessage("フレンド数は30人までです");
       return;
     }
     try {
@@ -212,7 +212,7 @@ class FriendRequestedIdListNotifier
   admitFriendRequested(UserAccount user) {
     final list = _ref.read(friendIdListNotifierProvider).asData?.value ?? [];
     if (list.length >= 30) {
-      showMessage("フレンド数は30人までです。");
+      showMessage("フレンド数は30人までです");
       return;
     }
     usecase.admitFriendRequested(user.userId);

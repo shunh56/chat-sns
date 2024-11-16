@@ -99,7 +99,7 @@ class PostBottomModelSheet {
                     ),
                   ),
                 ),
-                
+
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () async {
@@ -625,87 +625,130 @@ class PostBottomModelSheet {
                   ),
  */
                   const Gap(12),
-                  if (user.userId != ref.watch(authProvider).currentUser!.uid)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: ThemeColor.stroke,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ReportUserScreen(user),
+                  (user.userId == ref.watch(authProvider).currentUser!.uid)
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: ThemeColor.stroke,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  ref
+                                      .read(allPostsNotifierProvider.notifier)
+                                      .deletePostByUser(post);
+                                  showMessage("投稿を削除しました。");
+                                  Navigator.pop(context);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "削除",
+                                        style: textStyle.w600(
+                                          fontSize: 14,
+                                          color: ThemeColor.error,
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.delete_outline,
+                                        color: ThemeColor.error,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
                               ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "報告",
-                                    style: textStyle.w600(
-                                      fontSize: 14,
-                                      color: ThemeColor.error,
+                            ],
+                          ),
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: ThemeColor.stroke,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ReportUserScreen(user),
                                     ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
                                   ),
-                                  const Icon(
-                                    Icons.warning_amber_rounded,
-                                    color: ThemeColor.error,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "報告",
+                                        style: textStyle.w600(
+                                          fontSize: 14,
+                                          color: ThemeColor.error,
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.warning_amber_rounded,
+                                        color: ThemeColor.error,
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                          Divider(
-                            height: 0,
-                            thickness: 0.4,
-                            color: Colors.white.withOpacity(0.3),
-                          ),
-                          GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () {
-                              Navigator.pop(context);
-                              UserBottomModelSheet(context)
-                                  .blockUserBottomSheet(user);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
+                              Divider(
+                                height: 0,
+                                thickness: 0.4,
+                                color: Colors.white.withOpacity(0.3),
                               ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "ブロック",
-                                    style: textStyle.w600(
-                                      fontSize: 14,
-                                      color: ThemeColor.error,
-                                    ),
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  UserBottomModelSheet(context)
+                                      .blockUserBottomSheet(user);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
                                   ),
-                                  const Icon(
-                                    Icons.block_outlined,
-                                    color: ThemeColor.error,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "ブロック",
+                                        style: textStyle.w600(
+                                          fontSize: 14,
+                                          color: ThemeColor.error,
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.block_outlined,
+                                        color: ThemeColor.error,
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
                 ],
               ),
             );

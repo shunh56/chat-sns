@@ -131,6 +131,7 @@ class TimelinePage extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
+        maintainBottomViewPadding: true,
         child: Stack(
           children: [
             joinedCommunities.maybeWhen(
@@ -299,12 +300,6 @@ class TimelinePage extends ConsumerWidget {
                                 ),
                                 tabs: [
                                   Tab(
-                                    child: Text(
-                                      "友達",
-                                      style: textStyle.tabText(),
-                                    ),
-                                  ),
-                                  Tab(
                                     child: Row(
                                       children: [
                                         const Icon(
@@ -317,6 +312,12 @@ class TimelinePage extends ConsumerWidget {
                                           style: textStyle.tabText(),
                                         ),
                                       ],
+                                    ),
+                                  ),
+                                  Tab(
+                                    child: Text(
+                                      "友達",
+                                      style: textStyle.tabText(),
                                     ),
                                   ),
                                   ...communities.map(
@@ -335,8 +336,8 @@ class TimelinePage extends ConsumerWidget {
                       },
                       body: TabBarView(
                         children: [
-                          const FriendsPostsThread(),
                           const PublicPostsThread(),
+                          const FriendsPostsThread(),
                           ...communities.map(
                               (community) => PostsTab(community: community)),
                         ],
@@ -537,8 +538,8 @@ class TimelinePage extends ConsumerWidget {
                         ];
                       },
                       body: const TabBarView(children: [
-                        FriendsPostsThread(),
                         PublicPostsThread(),
+                        FriendsPostsThread(),
                       ]),
                     ),
                   ),

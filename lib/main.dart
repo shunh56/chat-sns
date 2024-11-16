@@ -84,15 +84,15 @@ configureSystem() async {
     SystemUiOverlay.bottom,
   ]);
 
-  /* SystemChrome.setSystemUIOverlayStyle(
+  SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       //android
       statusBarColor: ThemeColor.background,
       statusBarIconBrightness: Brightness.dark, // => black text
       //ios
-      statusBarBrightness: Brightness.light, // black text
+      statusBarBrightness: Brightness.dark, // black text
     ),
-  ); */ // => appbartheme
+  ); // => appbartheme
 
   SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp],
@@ -104,17 +104,18 @@ Future<void> initializeFirebaseApp() async {
     // 既に初期化されているかチェック
     final apps = Firebase.apps;
     if (apps.isNotEmpty) {
-      debugPrint('Firebase is already initialized');
+      DebugPrint('Firebase is already initialized');
       return;
     }
 
     await Firebase.initializeApp(
+      name: flavor,
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    debugPrint('Firebase initialized successfully');
+    DebugPrint('Firebase initialized successfully');
   } catch (e, stack) {
-    debugPrint('Firebase initialization error: $e');
-    debugPrint(stack.toString());
+    DebugPrint('Firebase initialization error: $e');
+    DebugPrint(stack.toString());
   }
 }
 
@@ -139,7 +140,7 @@ configureNotification() async {
 
   FirebaseMessaging.onMessage.listen(
     (RemoteMessage message) async {
-      debugPrint(
+      DebugPrint(
           '通知を検出: ${message.notification?.title} - ${message.notification?.body}');
       if (message.notification != null) {
         HapticFeedback.vibrate();
@@ -157,7 +158,7 @@ configureNotification() async {
   );
   FirebaseMessaging.onMessageOpenedApp.listen(
     (message) {
-      debugPrint(
+      DebugPrint(
           'アプリ起動中通知を検出: ${message.notification?.title} - ${message.notification?.body}');
       switch (message.data['action']) {
         case 'push_notification':
@@ -354,7 +355,7 @@ void main() {
             .recordFlutterError(errorDetails, fatal: true);
       };
 
-      debugPrint("runApp");
+      DebugPrint("runApp");
       runApp(
         const ProviderScope(
           overrides: [
@@ -467,7 +468,7 @@ class MyApp extends ConsumerWidget {
             statusBarColor: Colors.transparent, // ThemeColor.background,
             statusBarIconBrightness: Brightness.dark, // => black text
             //ios
-            statusBarBrightness: Brightness.light, // black text
+            statusBarBrightness: Brightness.dark, // black text
           ),
         ),
         scaffoldBackgroundColor: ThemeColor.background,
@@ -728,9 +729,10 @@ class WelcomePage extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(borderRadius),
                     child: InkWell(
                       onTap: () async {
-                        await ref
+                        final status = await ref
                             .watch(authNotifierProvider)
                             .signInWithGoogle();
+                        DebugPrint("status : $status");
                       },
                       borderRadius: BorderRadius.circular(borderRadius),
                       child: Container(
@@ -1297,7 +1299,7 @@ class LoadingPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (flavor=="dev")
+            if (flavor == "dev")
               const Padding(
                 padding: EdgeInsets.only(bottom: 24),
                 child: Text(

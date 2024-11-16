@@ -26,8 +26,6 @@ class PostContentMenu extends ConsumerWidget {
         children: [
           GestureDetector(
             onTap: () async {
-              
-
               bool isGranted = await PhotoPermissionsHandler().isGranted;
               if (!isGranted) {
                 await PhotoPermissionsHandler().request();
@@ -37,8 +35,8 @@ class PostContentMenu extends ConsumerWidget {
                   return;
                 }
               }
-              if (imageList.length >= 2) {
-                showMessage("3枚以上投稿する場合はプレミアムでなければなりません。");
+              if (imageList.length >= 4) {
+                showMessage("5枚以上投稿する場合はプレミアムでなければなりません。");
                 return;
               }
               primaryFocus?.unfocus();
@@ -60,8 +58,6 @@ class PostContentMenu extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 2),
             child: GestureDetector(
               onTap: () async {
-                
-
                 bool isGranted = await CameraPermissionsHandler().isGranted;
                 if (!isGranted) {
                   await CameraPermissionsHandler().request();

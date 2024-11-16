@@ -11,6 +11,7 @@ import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
+import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/sub_pages/post_images_screen.dart';
 import 'package:app/presentation/providers/notifier/heart_animation_notifier.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
@@ -19,6 +20,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:overscroll_pop/overscroll_pop.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostWidget extends ConsumerWidget {
@@ -37,6 +39,11 @@ class PostWidget extends ConsumerWidget {
     final user = ref.read(allUsersNotifierProvider).asData!.value[post.userId];
     if (user == null) return const SizedBox();
     if (user.accountStatus != AccountStatus.normal) return const SizedBox();
+    if (post.isDeletedByUser ||
+        post.isDeletedByModerator ||
+        post.isDeletedByAdmin) {
+      return SizedBox();
+    }
 
     final heartAnimationNotifier = ref.read(
       heartAnimationNotifierProvider,
@@ -153,7 +160,7 @@ class PostWidget extends ConsumerWidget {
               child: FadeTransitionWidget(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.push(
+                    /*Navigator.push(
                       context,
                       PageTransitionMethods.fadeIn(
                         PostImageHero(
@@ -162,6 +169,22 @@ class PostWidget extends ConsumerWidget {
                           initialIndex: 0,
                           tag: 'imageHero-${post.mediaUrls[0]}',
                         ),
+                      ),
+                    ); */
+                    Navigator.push(
+                      context,
+                      PageTransitionMethods.fadeIn(
+                        VerticalScrollview(
+                          scrollToPopOption: ScrollToPopOption.both,
+                          dragToPopDirection: DragToPopDirection.toBottom,
+                          child: PostImageHero(
+                            imageUrls: post.mediaUrls,
+                            aspectRatios: post.aspectRatios,
+                            initialIndex: 0,
+                            //tag: 'imageHero-${post.mediaUrls[0]}',
+                          ),
+                        ),
+                        /*  */
                       ),
                     );
                   },
@@ -209,12 +232,20 @@ class PostWidget extends ConsumerWidget {
                           Navigator.push(
                             context,
                             PageTransitionMethods.fadeIn(
-                              PostImageHero(
-                                imageUrls: post.mediaUrls,
-                                aspectRatios: post.aspectRatios,
-                                initialIndex: 0,
-                                tag: 'imageHero-${post.mediaUrls[0]}',
+                              VerticalScrollview(
+                                scrollToPopOption: ScrollToPopOption.both,
+                                dragToPopDirection: DragToPopDirection.toBottom,
+                                child: ImagesView(
+                                  imageUrls: post.mediaUrls,
+                                  initialIndex: index,
+                                ),
                               ),
+                              /* PostImageHero(
+                                  imageUrls: post.mediaUrls,
+                                  aspectRatios: post.aspectRatios,
+                                  initialIndex: 0,
+                                  tag: 'imageHero-${post.mediaUrls[0]}',
+                                ), */
                             ),
                           );
                         },

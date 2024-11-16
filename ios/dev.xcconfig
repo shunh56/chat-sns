@@ -1,4 +1,4 @@
 FLAVOR=dev
 APPNAME=BLANK DEV
-APP_ID_SUFFIX=.dev
+APP_ID=com.blank.sns.dev
 

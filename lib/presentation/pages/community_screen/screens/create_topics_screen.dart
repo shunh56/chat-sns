@@ -67,11 +67,14 @@ class _TitleInput extends ConsumerWidget {
           initialValue: ref.watch(titleProvider),
           decoration: InputDecoration(
             hintText: 'トピックのタイトルを入力してください',
+            hintStyle: textStyle.w600(
+              color: ThemeColor.subText,
+            ),
             border: OutlineInputBorder(
               borderSide: BorderSide.none,
               borderRadius: BorderRadius.circular(8),
             ),
-            contentPadding: EdgeInsets.symmetric(
+            contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
             ),

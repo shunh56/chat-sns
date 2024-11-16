@@ -1395,15 +1395,16 @@ class UserProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount user) {
-    final asyncValue = ref.watch(userImagesNotiferProvider(user.userId));
+    final asyncValue = ref.watch(imagesPostsNotiferProvider(user.userId));
     final themeSize = ref.watch(themeSizeProvider(context));
 
     return asyncValue.when(
       data: (posts) {
+        final mediaUrls = posts.expand((item) => item.mediaUrls).toList();
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: posts.length,
+          itemCount: mediaUrls.length,
           padding: const EdgeInsets.only(
             top: 12,
             left: 4,
@@ -1416,9 +1417,9 @@ class UserProfileScreen extends ConsumerWidget {
             mainAxisSpacing: 4,
           ),
           itemBuilder: (context, index) {
-            final post = posts[index];
+            //final post = posts[index];
             return CachedImage.profileBoardImage(
-              post.imageUrl,
+              mediaUrls[index],
             );
             /*  return GestureDetector(
               onTap: () {

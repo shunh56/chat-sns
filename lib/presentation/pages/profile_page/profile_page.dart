@@ -14,6 +14,8 @@ import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_canvas_theme_screem.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_top_friends.dart';
+import 'package:app/presentation/pages/profile_page/qr_code_screen.dart';
+import 'package:app/presentation/pages/sub_pages/post_images_screen.dart';
 import 'package:app/presentation/pages/timeline_page/threads/users_posts.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
@@ -245,105 +247,180 @@ class ProfileScreen extends ConsumerWidget {
                     },
                   ),
                 ),
+
                 SliverToBoxAdapter(
-                  child: Container(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      bottom: 16,
-                    ),
-                    color: canvasTheme.bgColor,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  child: Column(
+                    children: [
+                      /* Padding(
+                        padding: EdgeInsets.only(
+                          left: themeSize.horizontalPadding,
+                          right: themeSize.horizontalPadding,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            UserIconCanvasIcon(user: me),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    me.name,
-                                    style: textStyle.w600(
-                                      fontSize: 24,
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        PageTransitionMethods.slideUp(
+                                            const QrCodeScreen()),
+                                      );
+                                    },
+                                    child: Icon(
+                                      Icons.qr_code_rounded,
                                       color: canvasTheme.profileTextColor,
                                     ),
                                   ),
-                                  Text(
-                                    "${me.createdAt.toDateStr}〜",
-                                    style: textStyle.w600(
-                                      fontSize: 14,
-                                      color:
-                                          canvasTheme.profileSecondaryTextColor,
+                                  const Gap(12),
+                                  GestureDetector(
+                                    onTap: () {
+                                      ref
+                                          .read(canvasThemeProvider.notifier)
+                                          .state = canvasTheme;
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const EditCanvasThemeScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: Icon(
+                                      Icons.palette_outlined,
+                                      color: canvasTheme.profileTextColor,
+                                    ),
+                                  ),
+                                  const Gap(12),
+                                  GestureDetector(
+                                    onTap: () {
+                                      ProfileBottomSheet(context)
+                                          .openBottomSheet(me);
+                                    },
+                                    child: Icon(
+                                      Icons.settings_outlined,
+                                      color: canvasTheme.profileTextColor,
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                            )
                           ],
                         ),
-                        const Gap(12),
-                        Text(
-                          me.aboutMe,
-                          style: textStyle.w600(
-                            fontSize: 14,
-                            color: canvasTheme.profileAboutMeColor,
-                          ),
+                      ), */
+                      Container(
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: 16,
                         ),
-                        if (me.links.isShown)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 12),
-                            child: Row(
+                        color: canvasTheme.bgColor,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                if (me.links.instagram.isShown &&
-                                    me.links.instagram.path != null)
-                                  GestureDetector(
-                                    onTap: () async {
-                                      launchUrl(
-                                        Uri.parse(
-                                          me.links.instagram.url!,
-                                        ),
-                                        mode: LaunchMode.externalApplication,
-                                      );
-                                      //showMessage("${me.links.instagram.url}");
-                                    },
-                                    child: SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: Image.asset(
-                                        me.links.instagram.assetString,
-                                        color: canvasTheme.profileLinksColor,
-                                      ),
-                                    ),
-                                  ),
-                                if (me.links.x.isShown &&
-                                    me.links.x.path != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 12),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        launchUrl(
-                                          Uri.parse(me.links.x.url!),
-                                          mode: LaunchMode.externalApplication,
-                                        );
-                                      },
-                                      child: SizedBox(
-                                        height: 18,
-                                        width: 18,
-                                        child: Image.asset(
-                                          me.links.x.assetString,
-                                          color: canvasTheme.profileLinksColor,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        me.name,
+                                        style: textStyle.w600(
+                                          fontSize: 24,
+                                          color: canvasTheme.profileTextColor,
                                         ),
                                       ),
-                                    ),
+                                      Text(
+                                        "${me.createdAt.toDateStr}〜",
+                                        style: textStyle.w600(
+                                          fontSize: 14,
+                                          color: canvasTheme
+                                              .profileSecondaryTextColor,
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                ),
                               ],
                             ),
-                          ),
-                      ],
-                    ),
+                            const Gap(12),
+                            Text(
+                              me.aboutMe,
+                              style: textStyle.w600(
+                                fontSize: 14,
+                                color: canvasTheme.profileAboutMeColor,
+                              ),
+                            ),
+                            if (me.links.isShown)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Row(
+                                  children: [
+                                    if (me.links.instagram.isShown &&
+                                        me.links.instagram.path != null)
+                                      GestureDetector(
+                                        onTap: () async {
+                                          launchUrl(
+                                            Uri.parse(
+                                              me.links.instagram.url!,
+                                            ),
+                                            mode:
+                                                LaunchMode.externalApplication,
+                                          );
+                                          //showMessage("${me.links.instagram.url}");
+                                        },
+                                        child: SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: Image.asset(
+                                            me.links.instagram.assetString,
+                                            color:
+                                                canvasTheme.profileLinksColor,
+                                          ),
+                                        ),
+                                      ),
+                                    if (me.links.x.isShown &&
+                                        me.links.x.path != null)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 12),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            launchUrl(
+                                              Uri.parse(me.links.x.url!),
+                                              mode: LaunchMode
+                                                  .externalApplication,
+                                            );
+                                          },
+                                          child: SizedBox(
+                                            height: 18,
+                                            width: 18,
+                                            child: Image.asset(
+                                              me.links.x.assetString,
+                                              color:
+                                                  canvasTheme.profileLinksColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+
                 //tabbar
                 _buildTabBar(context, ref, me.canvasTheme),
                 SliverFillRemaining(
@@ -1373,7 +1450,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount me) {
-    final asyncValue = ref.watch(userImagesNotiferProvider(me.userId));
+    final asyncValue = ref.watch(imagesPostsNotiferProvider(me.userId));
     final themeSize = ref.watch(themeSizeProvider(context));
 
     final imageHeight = (themeSize.screenWidth / 3 - 8) * 4 / 3;
@@ -1458,9 +1535,9 @@ class ProfileScreen extends ConsumerWidget {
               ],
             ),
           ); */
-
+        final mediaUrls = posts.expand((item) => item.mediaUrls).toList();
         return GridView.builder(
-          itemCount: posts.length,
+          itemCount: mediaUrls.length,
           padding: const EdgeInsets.only(
             left: 4,
             right: 4,
@@ -1474,7 +1551,6 @@ class ProfileScreen extends ConsumerWidget {
             mainAxisSpacing: 4,
           ),
           itemBuilder: (context, index) {
-            final post = posts[index];
             return GestureDetector(
               onLongPress: () {
                 // UserImageBottomSheet(context).showImageMenu(userImage);
@@ -1486,9 +1562,11 @@ class ProfileScreen extends ConsumerWidget {
                     VerticalScrollview(
                       scrollToPopOption: ScrollToPopOption.both,
                       dragToPopDirection: DragToPopDirection.toBottom,
-                      child: ImagesView(
+                      child: PostImageHero(
                         imageUrls:
-                            posts.map((item) => post.imageUrl).toList(),
+                            posts.expand((item) => item.mediaUrls).toList(),
+                        aspectRatios:
+                            posts.expand((item) => item.aspectRatios).toList(),
                         initialIndex: index,
                       ),
                     ),
@@ -1499,7 +1577,7 @@ class ProfileScreen extends ConsumerWidget {
                 height: imageHeight,
                 width: imageHeight,
                 child: CachedImage.profileBoardImage(
-                  post.imageUrl,
+                  mediaUrls[index],
                 ),
               ),
             );

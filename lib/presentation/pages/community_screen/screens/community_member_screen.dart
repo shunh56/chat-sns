@@ -161,7 +161,7 @@ class CommunityMemberScreen extends ConsumerWidget {
             },
           );
         },
-        orElse: () => SizedBox(),
+        orElse: () =>const SizedBox(),
       ),
     );
   }

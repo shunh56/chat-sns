@@ -252,6 +252,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
         clipBehavior: Clip.none,
         backgroundColor: ThemeColor.accent,
         child: SafeArea(
+          maintainBottomViewPadding: true,
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
@@ -407,7 +408,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
       bottomNavigationBar: ShaderWidget(
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withOpacity(0.5),
           ),
           child: const BottomBar(),
         ),

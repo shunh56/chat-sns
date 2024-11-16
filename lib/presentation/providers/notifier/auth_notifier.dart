@@ -53,6 +53,52 @@ class AuthNotifier {
   Future<String> signInWithGoogle() async {
     _ref.read(loginProcessProvider.notifier).state = true;
     try {
+      // GoogleSignInの初期化を一度だけ行う
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['profile', 'email'],
+      );
+
+      // 既存のサインインをクリア
+      await googleSignIn.signOut();
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        DebugPrint("canceled"); // DebugPrint ではなく debugPrint を使用
+        _ref.read(loginProcessProvider.notifier).state = false;
+        return "provider_error";
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+      if (userCredential.user != null) {
+        await Future.delayed(const Duration(seconds: 2));
+        return "success";
+      } else {
+        _ref.read(loginProcessProvider.notifier).state = false;
+        return "unknown_error";
+      }
+    } on FirebaseAuthException catch (e) {
+      _ref.read(loginProcessProvider.notifier).state = false;
+      DebugPrint("Firebase auth error: ${e.message}");
+      showErrorSnackbar(error: e.message ?? "Authentication failed");
+      return "firebase_error";
+    } catch (e) {
+      _ref.read(loginProcessProvider.notifier).state = false;
+      DebugPrint("Other auth error: $e");
+      showErrorSnackbar(error: "Authentication failed");
+      return "unknown_error";
+    }
+  }
+  /*Future<String> signInWithGoogle() async {
+    _ref.read(loginProcessProvider.notifier).state = true;
+    try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn(
         scopes: ['profile', 'email'],
       ).signIn();
@@ -83,6 +129,7 @@ class AuthNotifier {
       return "unknown_error";
     }
   }
+  */
 
   Future<String> signInWithApple() async {
     _ref.read(loginProcessProvider.notifier).state = true;
@@ -100,12 +147,12 @@ class AuthNotifier {
         accessToken: appleCredential.authorizationCode,
       );
 
-      //debugPrint(appleCredential.familyName);
-      //debugPrint(appleCredential.givenName);
-      //debugPrint(appleCredential.email);
-      //debugPrint(appleCredential.userIdentifier);
-      //debugPrint(appleCredential.identityToken);
-      //debugPrint(appleCredential.authorizationCode);
+      //DebugPrint(appleCredential.familyName);
+      //DebugPrint(appleCredential.givenName);
+      //DebugPrint(appleCredential.email);
+      //DebugPrint(appleCredential.userIdentifier);
+      //DebugPrint(appleCredential.identityToken);
+      //DebugPrint(appleCredential.authorizationCode);
 
       final UserCredential user = await _auth.signInWithCredential(credential);
 
