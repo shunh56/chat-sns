@@ -247,6 +247,11 @@ class CommunityTabScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            const SliverToBoxAdapter(
+              child: SizedBox(
+                height: 120,
+              ),
+            ),
           ],
         ),
       ),

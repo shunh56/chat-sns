@@ -1,7 +1,6 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/dialogs/dialogs.dart';
 import 'package:app/presentation/components/user_icon.dart';

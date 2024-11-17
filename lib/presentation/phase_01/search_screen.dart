@@ -6,6 +6,7 @@ import 'package:app/presentation/phase_01/friend_request_screen.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -220,7 +221,10 @@ class SearchScreen extends ConsumerWidget {
         ref.watch(deletesIdListNotifierProvider).asData?.value ?? [];
     final requesteds =
         ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
-    final filters = deletes + requesteds;
+    final blocks = ref.watch(blocksListNotifierProvider).asData?.value ?? [];
+    final blockeds =
+        ref.watch(blockedsListNotifierProvider).asData?.value ?? [];
+    final filters = deletes + requesteds + blocks + blockeds;
     return ListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),

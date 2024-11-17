@@ -1,7 +1,5 @@
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/reply.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/images/images.dart';
 import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
 import 'package:app/repository/posts/post_repository.dart';

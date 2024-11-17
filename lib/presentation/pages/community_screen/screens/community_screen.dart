@@ -15,8 +15,6 @@ import 'package:app/presentation/pages/community_screen/screens/tabs.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/providers/provider/community.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/usecase/comunity_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -215,7 +213,7 @@ class CommunityScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 if (!isMember) _buildJoinPrompt(context, ref, community),
               ],
             ),

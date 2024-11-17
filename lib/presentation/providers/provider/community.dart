@@ -73,7 +73,7 @@ class CommunityMembersNotifiier
   }
 
   Future<bool> loadMore() async {
-    DebugPrint("RES : ${timestamp}");
+    DebugPrint("RES : $timestamp");
     final list = state.asData?.value ?? [];
     final res = await ref
         .read(communityUsecaseProvider)

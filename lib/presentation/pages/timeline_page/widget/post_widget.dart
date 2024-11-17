@@ -42,7 +42,7 @@ class PostWidget extends ConsumerWidget {
     if (post.isDeletedByUser ||
         post.isDeletedByModerator ||
         post.isDeletedByAdmin) {
-      return SizedBox();
+      return const SizedBox();
     }
 
     final heartAnimationNotifier = ref.read(

@@ -1478,7 +1478,6 @@ DEPENDENCIES:
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - cloud_functions (from `.symlinks/plugins/cloud_functions/ios`)
-  - CryptoSwift
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Firebase
   - Firebase/Analytics
@@ -1759,6 +1758,6 @@ SPEC CHECKSUMS:
   vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
   webview_flutter_wkwebview: 2a23822e9039b7b1bc52e5add778e5d89ad488d1
 
-PODFILE CHECKSUM: d38a821b8c68bff1d1639f549cfc75c33e922b7d
+PODFILE CHECKSUM: 949a3778ae6eac58107560c914637671a37049ca
 
 COCOAPODS: 1.16.2

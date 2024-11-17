@@ -122,7 +122,7 @@ class ActivityTile extends ConsumerWidget {
               child: Row(
                 children: [
                   _buildActionIcon(activity.actionType),
-                  Gap(16),
+                  const Gap(16),
                   SizedBox(
                     width: 54,
                     height: 54,

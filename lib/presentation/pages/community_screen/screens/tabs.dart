@@ -1,5 +1,4 @@
 // 1. 投稿タブの実装
-import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/debug_print.dart';
@@ -25,7 +24,6 @@ import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart'
 import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
 import 'package:app/presentation/providers/provider/posts/community_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/topics/topics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -171,7 +171,7 @@ class _TagsInput extends ConsumerWidget {
             color: ThemeColor.white,
           ),
         ),
-        Gap(8),
+        const Gap(8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -195,7 +195,7 @@ class _TagsInput extends ConsumerWidget {
         ),
         if (tags.isEmpty)
           Padding(
-            padding: EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: 8),
             child: Text(
               'タグを追加してトピックを見つけやすくしましょう',
               style: textStyle.w600(

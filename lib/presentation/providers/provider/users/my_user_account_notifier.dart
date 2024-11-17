@@ -1,7 +1,6 @@
 // Package imports:
 import 'dart:io';
 
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/pages/onboarding_page/onboarding_page.dart';

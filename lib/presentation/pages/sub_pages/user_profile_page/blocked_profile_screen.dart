@@ -34,7 +34,7 @@ class BlockedProfileScreen extends ConsumerWidget {
             if (state == "blocked") ...[
               _buildBlockedInfoCard(),
             ],
-            Expanded(child: SizedBox()),
+            const Expanded(child: SizedBox()),
             if (requesteds.contains(user.userId))
               Center(
                 child: ClipRRect(
@@ -160,7 +160,7 @@ class BlockedProfileScreen extends ConsumerWidget {
             ),
             Positioned.fill(
               child: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   //color: Colors.black.withOpacity(0.5),
                   shape: BoxShape.circle,
                 ),
@@ -176,7 +176,7 @@ class BlockedProfileScreen extends ConsumerWidget {
         const Gap(16),
         Text(
           user.name,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),

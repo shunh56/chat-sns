@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:app/presentation/components/image/image.dart';
 import 'package:flutter/material.dart';

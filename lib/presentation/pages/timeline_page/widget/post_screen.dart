@@ -99,7 +99,7 @@ class PostScreen extends ConsumerWidget {
                           }
                         },
                         decoration: InputDecoration(
-                          hintText: "メッセージを入力",
+                          hintText: "コメントを入力",
                           filled: true,
                           isDense: true,
                           fillColor: ThemeColor.stroke,

@@ -1,7 +1,6 @@
 // Flutter imports:
 
 // Package imports:
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/datasource/post/algolia_post_datasource.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';

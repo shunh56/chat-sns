@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
@@ -43,6 +42,21 @@ class Phase01MainPage extends ConsumerStatefulWidget {
 class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
     with WidgetsBindingObserver {
   @override
+  void initState() {
+    super.initState();
+    _setupVoIPListener();
+    WidgetsBinding.instance.addObserver(this); // 監視を開始
+    ref.read(myAccountNotifierProvider.notifier).onOpen();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // 監視を終了
+    ref.read(myAccountNotifierProvider.notifier).onClosed(); // 最後のステータス更新
+    super.dispose();
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
@@ -67,14 +81,6 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
 
   bool showed = false;
   List<FriendInfo> _previousFriends = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _setupVoIPListener();
-    WidgetsBinding.instance.addObserver(this);
-    ref.read(myAccountNotifierProvider.notifier).onOpen();
-  }
 
   Future<void> showNewFriendDialog(UserAccount user) async {
     final themeSize = ref.watch(themeSizeProvider(context));

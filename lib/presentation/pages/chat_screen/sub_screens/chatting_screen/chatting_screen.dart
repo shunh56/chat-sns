@@ -128,7 +128,7 @@ class ChattingScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Gap(4),
+                                const Gap(4),
                                 Text(
                                   user.name,
                                   style: const TextStyle(
