@@ -2,16 +2,17 @@ const functions = require("firebase-functions");
 const { ApnsClient, Notification } = require("apns2");
 const fs = require("fs");
 
+const production = true;
 // Initialize APNs client
 const client = new ApnsClient({
   team: "CDQBCQRWL9", //"LAXS5N48FU", // Your Apple Developer Team ID
   keyId: "4TLPYQK7ZY", // Your APNs Key ID
   signingKey: Buffer.from(functions.config().voip.apn_key, "base64"), //functions.config().voip.signing_key,
   //signingKey: fs.readFileSync("./AuthKey_4TLPYQK7ZY.p8"), // Path to your .p8 key file
-  defaultTopic: "com.blank.sns.voip", // Your app's bundle ID with .voip suffix for VoIP notifications
+  defaultTopic: production ? "com.blank.sns.voip" : "com.blank.sns.dev.voip", // Your app's bundle ID with .voip suffix for VoIP notifications
   requestTimeout: 0, // Optional, default: 0 (no timeout)
   keepAlive: true, // Optional, default: 5000
-  host: "api.sandbox.push.apple.com", // Use 'api.push.apple.com' for production
+  host: production ? "api.push.apple.com" : "api.sandbox.push.apple.com", // Use 'api.push.apple.com' for production
   //host:"api.push.apple.com'"
 });
 
@@ -45,6 +46,7 @@ const sendNotification = async (data) => {
 exports.send = functions
   .region("asia-northeast1")
   .https.onCall(async (data, context) => {
+    console.log(`environment : ${production ? "production" : "development"}`);
     if (!context.auth) {
       throw new functions.https.HttpsError(
         "unauthenticated",

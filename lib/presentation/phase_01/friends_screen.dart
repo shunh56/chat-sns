@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
@@ -24,6 +25,7 @@ class FriendsScreen extends ConsumerWidget {
     final map = ref.read(allUsersNotifierProvider).asData!.value;
     friendInfos.sort((a, b) => b.engagementCount.compareTo(a.engagementCount));
     final friends = friendInfos.map((info) => map[info.userId]!).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(

@@ -21,6 +21,7 @@ import 'package:app/presentation/providers/provider/users/all_users_notifier.dar
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,18 +42,31 @@ class Phase01MainPage extends ConsumerStatefulWidget {
 
 class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
     with WidgetsBindingObserver {
+  MyAccountNotifier? _myAccountNotifier;
+
   @override
   void initState() {
     super.initState();
     _setupVoIPListener();
-    WidgetsBinding.instance.addObserver(this); // 監視を開始
-    ref.read(myAccountNotifierProvider.notifier).onOpen();
+    WidgetsBinding.instance.addObserver(this);
+    _myAccountNotifier = ref.read(myAccountNotifierProvider.notifier);
+    _myAccountNotifier?.onOpen();
+    initPlugin();
+  }
+
+  initPlugin() async {
+    final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+    if (status == TrackingStatus.notDetermined) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      await AppTrackingTransparency.requestTrackingAuthorization();
+    }
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // 監視を終了
-    ref.read(myAccountNotifierProvider.notifier).onClosed(); // 最後のステータス更新
+    // refを使用する前に_myAccountNotifierがnullでないことを確認
+    _myAccountNotifier?.onClosed();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -60,10 +74,10 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
-        ref.read(myAccountNotifierProvider.notifier).onOpen();
+        _myAccountNotifier?.onOpen();
         break;
       case AppLifecycleState.paused:
-        ref.read(myAccountNotifierProvider.notifier).onClosed();
+        _myAccountNotifier?.onClosed();
         break;
       /* case AppLifecycleState.hidden:
         ref.read(myAccountNotifierProvider.notifier).onClosed();
@@ -72,7 +86,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
         ref.read(myAccountNotifierProvider.notifier).onClosed();
         break; */
       case AppLifecycleState.detached:
-        ref.read(myAccountNotifierProvider.notifier).onClosed();
+        _myAccountNotifier?.onClosed();
         break;
       default:
         break;

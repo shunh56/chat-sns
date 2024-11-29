@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/presentation/providers/notifier/image/image_compressor_notifier.dart';
 import 'package:app/presentation/providers/notifier/image/image_cropper_notifier.dart';
 import 'package:app/presentation/providers/notifier/image/image_picker_notifier.dart';
@@ -22,6 +23,7 @@ class ImageProcessorNotifier {
   Future<File?> getIconImage() async {
     var directory = await getApplicationDocumentsDirectory();
     var path = '${directory.path}/icon_image_${1080}x${1080}.jpg';
+    DebugPrint("path : $path");
     final pickedFile =
         await ref.read(imagePickerNotifierProvider).getImageFromGallery();
     if (pickedFile == null) return null;

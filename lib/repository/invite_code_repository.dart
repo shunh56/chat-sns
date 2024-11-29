@@ -31,6 +31,9 @@ class InviteCodeRepository {
 
   //コードを調べる
   Future<InviteCode> getInviteCode(String code) async {
+    if (code == "MANUAL") {
+      return InviteCode.manual();
+    }
     final res = await _datasource.fetchInviteCode(code);
     if (!res.exists) {
       return InviteCode.notFount();

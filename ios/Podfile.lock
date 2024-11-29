@@ -1008,11 +1008,11 @@ PODS:
   - BoringSSL-GRPC/Interface (0.0.32)
   - camera_avfoundation (0.0.1):
     - Flutter
-  - cloud_firestore (4.17.5):
+  - cloud_firestore (5.5.0):
     - Firebase/Firestore (= 10.24.0)
     - firebase_core
     - Flutter
-  - cloud_functions (4.7.6):
+  - cloud_functions (5.1.5):
     - Firebase/Functions (= 10.24.0)
     - firebase_core
     - Flutter
@@ -1058,42 +1058,42 @@ PODS:
   - Firebase/Storage (10.24.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 10.24.0)
-  - firebase_analytics (10.10.7):
+  - firebase_analytics (11.3.5):
     - Firebase/Analytics (= 10.24.0)
     - firebase_core
     - Flutter
-  - firebase_auth (4.16.0):
+  - firebase_auth (5.3.3):
     - Firebase/Auth (= 10.24.0)
     - firebase_core
     - Flutter
-  - firebase_core (2.32.0):
+  - firebase_core (3.8.0):
     - Firebase/CoreOnly (= 10.24.0)
     - Flutter
-  - firebase_crashlytics (3.5.7):
+  - firebase_crashlytics (4.1.5):
     - Firebase/Crashlytics (= 10.24.0)
     - firebase_core
     - Flutter
-  - firebase_database (10.5.7):
+  - firebase_database (11.1.6):
     - Firebase/Database (= 10.24.0)
     - firebase_core
     - Flutter
-  - firebase_dynamic_links (5.5.7):
+  - firebase_dynamic_links (6.0.10):
     - Firebase/DynamicLinks (= 10.24.0)
     - firebase_core
     - Flutter
-  - firebase_messaging (14.7.10):
+  - firebase_messaging (15.1.5):
     - Firebase/Messaging (= 10.24.0)
     - firebase_core
     - Flutter
-  - firebase_performance (0.9.4-7):
+  - firebase_performance (0.10.0-10):
     - Firebase/Performance (= 10.24.0)
     - firebase_core
     - Flutter
-  - firebase_remote_config (4.4.7):
+  - firebase_remote_config (5.1.5):
     - Firebase/RemoteConfig (= 10.24.0)
     - firebase_core
     - Flutter
-  - firebase_storage (11.6.5):
+  - firebase_storage (12.3.6):
     - Firebase/Storage (= 10.24.0)
     - firebase_core
     - Flutter
@@ -1481,7 +1481,6 @@ DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Firebase
   - Firebase/Analytics
-  - Firebase/Auth
   - Firebase/Core
   - Firebase/Database
   - Firebase/Firestore
@@ -1675,21 +1674,21 @@ SPEC CHECKSUMS:
   AppAuth: 501c04eda8a8d11f179dbe8637b7a91bb7e5d2fa
   BoringSSL-GRPC: 1e2348957acdbcad360b80a264a90799984b2ba6
   camera_avfoundation: dd002b0330f4981e1bbcb46ae9b62829237459a4
-  cloud_firestore: 3c19516d70354067eef3440270730c74c9e937d1
-  cloud_functions: 901b738f07bb25af7b7ef57b438d427b9e90773a
+  cloud_firestore: 587d476fdb92158330c12ee192041e0fc5475fd2
+  cloud_functions: c892e5b19906d9365f4c0c7ae07afc9cb94eeed7
   CryptoSwift: 967f37cea5a3294d9cce358f78861652155be483
-  device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
+  device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   Firebase: 91fefd38712feb9186ea8996af6cbdef41473442
-  firebase_analytics: e2e8c18ddfbfc5c297f0ab891d45c4fa2453a8b2
-  firebase_auth: 42b0095daaa4353aa8b30c36658c8eaf41bcb05f
-  firebase_core: df85a6b65f7026761e595bb401dd96f6e6ab0801
-  firebase_crashlytics: f8fc3e76f51cce32f66c005e39b6e3621730b740
-  firebase_database: 96452fc415bc94a404e2fe39c9bfef66c02cbc41
-  firebase_dynamic_links: b9b872b953914315f32b8768dd2128ede65225df
-  firebase_messaging: 01639d613c057f442846968e072b7c31b58ee381
-  firebase_performance: 7d8332154bdc1c1bc40649e2690dfc37ca66f767
-  firebase_remote_config: 84423949e1484a5d666e3773bfae3dad9e93710a
-  firebase_storage: e303d34966d5cba2c7458d07b5a4de9d4855af02
+  firebase_analytics: 3cdc6bd22dc7372a44895605e07828058137a2be
+  firebase_auth: 1a9b00a948e7b66f2c329ee681b6695de72c5f17
+  firebase_core: 8bb004e6bd0f08468fed4abeba505c331ae804b3
+  firebase_crashlytics: 9a384ae5e94beede42f4280eea38c25d725f3b00
+  firebase_database: 1d8602c55d2c9be0d78962a1dd8f6b116b14e9ab
+  firebase_dynamic_links: 55fe3250a137f67a423fe10c85b0059a02e27ea2
+  firebase_messaging: cef8d1818aa580c7a5c0ead0fdef60efb0afed20
+  firebase_performance: a64a314e7e33aee8bb6be1b116d1bcc9382a1d5f
+  firebase_remote_config: afee2b730263b1d3c36d824e68a09fec0681e5d1
+  firebase_storage: c78f156cc44a80dfed7161b425861bd1b7daece7
   FirebaseABTesting: d87f56707159bae64e269757a6e963d490f2eebe
   FirebaseAnalytics: b5efc493eb0f40ec560b04a472e3e1a15d39ca13
   FirebaseAppCheckInterop: 6a1757cfd4067d8e00fccd14fcc1b8fd78cfac07
@@ -1716,7 +1715,7 @@ SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_callkit_incoming: 417dd1b46541cdd5d855ad795ccbe97d1c18155e
   flutter_image_compress_common: ec1d45c362c9d30a3f6a0426c297f47c52007e3e
-  flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
+  flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
   Google-Mobile-Ads-SDK: 13e6e98edfd78ad8d8a791edb927658cc260a56f
   google_mobile_ads: 2a538d8e42b1813809782792e48f8cf4374c2180
   google_sign_in_ios: 07375bfbf2620bc93a602c0e27160d6afc6ead38
@@ -1758,6 +1757,6 @@ SPEC CHECKSUMS:
   vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
   webview_flutter_wkwebview: 2a23822e9039b7b1bc52e5add778e5d89ad488d1
 
-PODFILE CHECKSUM: 949a3778ae6eac58107560c914637671a37049ca
+PODFILE CHECKSUM: f16654fdf9b53c2d0bae6c8fbf16eb8799bac151
 
 COCOAPODS: 1.16.2

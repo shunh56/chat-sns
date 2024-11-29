@@ -82,6 +82,10 @@ class InputInviteCodeScreen extends ConsumerWidget {
                                 .getInviteCode(inputText);
                             final status = code.getStatus;
                             switch (status) {
+                              case InviteCodeStatus.manual:
+                                ref.read(errorTextProvider.notifier).state =
+                                    "そのコードは使用できません(エラー)";
+                                return;
                               case InviteCodeStatus.notFound:
                                 ref.read(errorTextProvider.notifier).state =
                                     "そのコードは使用できません(NOT FOUND)";

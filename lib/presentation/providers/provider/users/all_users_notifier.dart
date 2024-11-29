@@ -22,12 +22,13 @@ class AllUsersNotifier extends _$AllUsersNotifier {
         allUsers[userId] = hiveObject.toUserAccount();
       }
     }
+
     return AsyncValue.data(allUsers);
   }
 
   Future<List<UserAccount>> getUserAccounts(List<String> userIds,
       {bool update = false}) async {
-    if (userIds.isEmpty) return [];
+    DebugPrint("get");
     Map<String, UserAccount> cache =
         state.asData != null ? state.asData!.value : {};
     List<UserAccount> list = [];
@@ -40,7 +41,7 @@ class AllUsersNotifier extends _$AllUsersNotifier {
       for (String userId in userIds) {
         final cachUser = cache[userId];
         final hiveUser = box.get(userId);
-        //TODO => このロジックだと古いユーザーは永遠に更新されない
+
         if (cachUser != null) {
           futures.add(Future.value(cachUser));
         } else if (hiveUser != null) {
@@ -58,8 +59,10 @@ class AllUsersNotifier extends _$AllUsersNotifier {
       }
     }
     await Future.wait(futures);
+
     for (var item in futures) {
       final user = (await item)!;
+
       cache[user.userId] = user;
       list.add(user);
       //アカウント切り替えのため、ConnectionTypeは使用しない

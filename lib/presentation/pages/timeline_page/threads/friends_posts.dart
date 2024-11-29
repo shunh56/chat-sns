@@ -65,7 +65,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
           color: ThemeColor.text,
           backgroundColor: ThemeColor.stroke,
           onRefresh: () async {
-            ref.read(voiceChatListNotifierProvider.notifier).refresh();
+            // ref.read(voiceChatListNotifierProvider.notifier).refresh();
             ref.read(friendsPostsNotifierProvider.notifier).refresh();
             ref
                 .read(friendsCurrentStatusPostsNotiferProvider.notifier)
@@ -73,7 +73,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
           },
           child: ListView(
             children: [
-              const VoiceChatSection(),
+              //const VoiceChatSection(),
               const CurrentStatusPostsSection(),
               /*Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),

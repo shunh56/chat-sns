@@ -4,6 +4,7 @@ import 'package:app/core/values.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
+import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
@@ -456,13 +457,8 @@ class UserBottomModelSheet {
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
                         onTap: () async {
-                          await ref
-                              .read(myAccountNotifierProvider.notifier)
-                              .onClosed();
                           Navigator.popUntil(context, (route) => route.isFirst);
-                          await Future.delayed(
-                              const Duration(milliseconds: 30));
-                          ref.read(authProvider).signOut();
+                          ref.read(authNotifierProvider).signout();
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
@@ -587,13 +583,8 @@ class UserBottomModelSheet {
                       borderRadius: BorderRadius.circular(12),
                       child: InkWell(
                         onTap: () async {
-                          await ref
-                              .read(myAccountNotifierProvider.notifier)
-                              .deleteAccount();
                           Navigator.popUntil(context, (route) => route.isFirst);
-                          await Future.delayed(
-                              const Duration(milliseconds: 30));
-                          ref.read(authProvider).signOut();
+                          ref.read(authNotifierProvider).signout();
                         },
                         borderRadius: BorderRadius.circular(12),
                         child: Container(

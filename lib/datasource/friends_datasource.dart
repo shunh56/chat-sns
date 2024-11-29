@@ -49,13 +49,11 @@ class FriendsDatasource {
   }
 
   void admitFriendRequested(String userId) {
-    check(userId);
     addFriend(userId);
   }
 
   void addFriend(String userId) {
     if (userId == _auth.currentUser!.uid) {
-      debugPrint("invitecode user and user is SAME!");
       throw Exception("Cannot add yourself as friend!");
     }
     check(userId);

@@ -47,9 +47,11 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     }
   }
 
-  void update(UserAccount user) {
-    usecase.updateUser(user);
-    ref.read(allUsersNotifierProvider.notifier).addUserAccounts([user]);
+  Future<void> update(UserAccount user) async {
+    if (user.userId == ref.read(authProvider).currentUser!.uid) {
+      usecase.updateUser(user);
+      ref.read(allUsersNotifierProvider.notifier).addUserAccounts([user]);
+    }
   }
 
   onOpen() async {
@@ -81,6 +83,9 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
   }
 
   onClosed() {
+    if (state.asData == null) {
+      return;
+    }
     final user = state.asData!.value;
     final updatedUser = user.copyWith(
       isOnline: false,
@@ -88,6 +93,16 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     );
     state = AsyncValue.data(updatedUser);
     update(updatedUser);
+  }
+
+  onSignOut() async {
+    final user = state.asData!.value;
+    final updatedUser = user.copyWith(
+      isOnline: false,
+      lastOpenedAt: Timestamp.now(),
+    );
+    await update(updatedUser);
+    state = const AsyncValue.loading();
   }
 
   //usedCodeにしようするコードを書き換える => ホームに行けるようになる

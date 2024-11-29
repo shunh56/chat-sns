@@ -49,6 +49,7 @@ class UserDatasource {
     if (createdAt != null) {
       return _firestore
           .collection(collectionName)
+          .where("username", isNotEqualTo: "null")
           .where("createdAt", isLessThan: createdAt)
           .orderBy("createdAt", descending: true)
           .limit(QUERY_LIMIT)
@@ -56,6 +57,7 @@ class UserDatasource {
     } else {
       return _firestore
           .collection(collectionName)
+          .where("username", isNotEqualTo: "null")
           .orderBy("createdAt", descending: true)
           .limit(10)
           .get();
@@ -93,7 +95,7 @@ class UserDatasource {
       DebugPrint('FirebaseException: $e');
       return null;
     } catch (e) {
-      DebugPrint('Exception: $e');
+      DebugPrint('FetchUserByUserId Exception: $e');
       return null;
     }
   }

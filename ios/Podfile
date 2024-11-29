@@ -32,7 +32,7 @@ target 'Runner' do
   # Firebase設定
   pod 'Firebase', :modular_headers => true
   pod 'Firebase/Analytics', :modular_headers => true
-  pod 'Firebase/Auth', :modular_headers => true
+  #pod 'Firebase/Auth', :modular_headers => true
   pod 'Firebase/Core', :modular_headers => true
   pod 'Firebase/Firestore', :modular_headers => true
   pod 'Firebase/Database', :modular_headers => true
@@ -116,7 +116,6 @@ post_install do |installer|
         'PERMISSION_CAMERA=1',
         'PERMISSION_MICROPHONE=1',
         'PERMISSION_PHOTOS=1',
-        'PERMISSION_LOCATION=1',
         'PERMISSION_NOTIFICATIONS=1'
       ]
     end

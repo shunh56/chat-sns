@@ -339,7 +339,11 @@ class TimelinePage extends ConsumerWidget {
                           const PublicPostsThread(),
                           const FriendsPostsThread(),
                           ...communities.map(
-                              (community) => PostsTab(community: community)),
+                            (community) => PostsTab(
+                              community: community,
+                              onHome: true,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -511,12 +515,6 @@ class TimelinePage extends ConsumerWidget {
                                 ),
                                 tabs: [
                                   Tab(
-                                    child: Text(
-                                      "友達",
-                                      style: textStyle.tabText(),
-                                    ),
-                                  ),
-                                  Tab(
                                     child: Row(
                                       children: [
                                         const Icon(
@@ -529,6 +527,12 @@ class TimelinePage extends ConsumerWidget {
                                           style: textStyle.tabText(),
                                         ),
                                       ],
+                                    ),
+                                  ),
+                                  Tab(
+                                    child: Text(
+                                      "友達",
+                                      style: textStyle.tabText(),
                                     ),
                                   ),
                                 ],

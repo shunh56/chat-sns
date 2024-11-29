@@ -1,6 +1,7 @@
 import 'package:app/core/extenstions/string_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/button/basic.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
@@ -339,9 +340,11 @@ class InputImageUrlScreen extends ConsumerWidget {
                 ontap: image == null
                     ? null
                     : () {
-                        ref.read(pageController).animateToPage(3,
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOut);
+                        ref.read(pageController).animateToPage(
+                              3,
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeInOut,
+                            );
                       },
                 enableSkip: image == null,
               ),
@@ -355,6 +358,7 @@ class InputImageUrlScreen extends ConsumerWidget {
 
 //04
 //AddOtherFriendsScreen
+
 class AddOtherFriendsScreen extends ConsumerWidget {
   const AddOtherFriendsScreen({super.key});
 
@@ -362,20 +366,32 @@ class AddOtherFriendsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final usedCode =
-        ref.read(myAccountNotifierProvider).asData!.value.usedCode!;
     final selectedOtherIds = ref.watch(selectedOtherIdsProvider);
-    getUser() async {
-      final code =
-          await ref.read(inviteCodeUsecaseProvider).getInviteCode(usedCode);
-      final user = (await ref
-              .read(allUsersNotifierProvider.notifier)
-              .getUserAccounts([code.userId]))
-          .first;
-      final otherUsers = await ref
-          .read(friendIdListNotifierProvider.notifier)
-          .getFriends(user.userId);
-      return [user, ...otherUsers];
+
+    // myAccountの状態を監視
+    final myAccountAsync = ref.watch(myAccountNotifierProvider);
+
+    // usedCodeを安全に取得
+    final usedCode = myAccountAsync.asData?.value.usedCode;
+
+    Future<List<UserAccount>?> getUser() async {
+      if (usedCode == null) return null;
+      try {
+        final code =
+            await ref.read(inviteCodeUsecaseProvider).getInviteCode(usedCode);
+        final user = (await ref
+                .read(allUsersNotifierProvider.notifier)
+                .getUserAccounts([code.userId]))
+            .firstOrNull; // firstOrNullを使用
+        if (user == null) return null;
+        final otherUsers = await ref
+            .read(friendIdListNotifierProvider.notifier)
+            .getFriends(user.userId);
+
+        return [user, ...otherUsers];
+      } catch (e) {
+        return null;
+      }
     }
 
     return Scaffold(
@@ -385,19 +401,36 @@ class AddOtherFriendsScreen extends ConsumerWidget {
             Gap(themeSize.screenHeight * 0.05),
             Text(
               "あなたの友達をタップ",
-              style: textStyle.w600(
-                fontSize: 20,
-              ),
+              style: textStyle.w600(fontSize: 20),
             ),
             const Gap(12),
             Expanded(
               child: FutureBuilder(
                 future: getUser(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return const SizedBox();
+                  // データ取得中の表示
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // データが無い場合は自動的に次の画面へ
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    // 少し遅延を入れて次の画面へ
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      ref.read(pageController).animateToPage(
+                            4,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                          );
+                    });
+                    return const Center(child: Text("友達データが見つかりませんでした"));
+                  }
+
                   final users = snapshot.data!;
                   final user = users[0];
                   final others = users.sublist(1, users.length);
+
+                  // 既存のUI表示コード
                   return Column(
                     children: [
                       Center(
@@ -499,9 +532,11 @@ class AddOtherFriendsScreen extends ConsumerWidget {
               child: BasicButton(
                 text: selectedOtherIds.isNotEmpty ? "次へ" : "スキップ",
                 ontap: () {
-                  ref.read(pageController).animateToPage(4,
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeInOut);
+                  ref.read(pageController).animateToPage(
+                        4,
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
+                      );
                 },
                 enableSkip: selectedOtherIds.isEmpty,
               ),

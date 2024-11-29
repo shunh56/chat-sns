@@ -72,6 +72,18 @@ class CommunityMembersNotifiier
         .toList());
   }
 
+  refresh() async {
+    final res =
+        await ref.read(communityUsecaseProvider).getRecentUsers(communityId);
+    final userIds = res.map((data) => data["userId"] as String).toList();
+    await ref.read(allUsersNotifierProvider.notifier).getUserAccounts(userIds);
+    final map = ref.read(allUsersNotifierProvider).asData!.value;
+    timestamp = res[res.length - 1]["joinedAt"];
+    state = AsyncValue.data(res
+        .map((data) => CommunityMember(data["joinedAt"], map[data["userId"]]!))
+        .toList());
+  }
+
   Future<bool> loadMore() async {
     DebugPrint("RES : $timestamp");
     final list = state.asData?.value ?? [];

@@ -3,6 +3,7 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/auth/signin_page.dart';
 import 'package:app/presentation/pages/auth/signup_page.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -38,7 +39,9 @@ class AuthNotifier {
       UserCredential? user = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       if (user.user != null) {
+        await _ref.read(myAccountNotifierProvider.notifier).initialize();
         await Future.delayed(const Duration(seconds: 2));
+
         return "success";
       } else {
         return "unknown_error";
@@ -58,9 +61,6 @@ class AuthNotifier {
         scopes: ['profile', 'email'],
       );
 
-      // 既存のサインインをクリア
-      await googleSignIn.signOut();
-
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -78,7 +78,9 @@ class AuthNotifier {
 
       final userCredential = await _auth.signInWithCredential(credential);
       if (userCredential.user != null) {
+        await _ref.read(myAccountNotifierProvider.notifier).initialize();
         await Future.delayed(const Duration(seconds: 2));
+
         return "success";
       } else {
         _ref.read(loginProcessProvider.notifier).state = false;
@@ -157,6 +159,7 @@ class AuthNotifier {
       final UserCredential user = await _auth.signInWithCredential(credential);
 
       if (user.user != null) {
+        await _ref.read(myAccountNotifierProvider.notifier).initialize();
         await Future.delayed(const Duration(seconds: 2));
         return "success";
       } else {
@@ -288,7 +291,10 @@ class AuthNotifier {
     }
   }
 
-  signout() {
+  signout() async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    await _ref.read(myAccountNotifierProvider.notifier).onSignOut();
+    await Future.delayed(const Duration(milliseconds: 100));
     _auth.signOut();
   }
 }

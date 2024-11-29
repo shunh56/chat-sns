@@ -31,8 +31,10 @@ import 'package:gap/gap.dart';
 import 'package:uuid/uuid.dart';
 
 class PostsTab extends ConsumerWidget {
-  const PostsTab({super.key, required this.community});
+  const PostsTab({super.key, required this.community, this.onHome = false});
   final Community community;
+  final bool onHome;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     //final postList = ref.watch(friendsPostsNotiferProvider);
@@ -74,7 +76,7 @@ class PostsTab extends ConsumerWidget {
         ),
         Positioned(
           right: 16,
-          bottom: 32,
+          bottom: onHome ? 108 : 32,
           child: FloatingActionButton(
             shape: const StadiumBorder(),
             onPressed: () {
@@ -447,97 +449,107 @@ class TopicCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final user =
-        ref.read(allUsersNotifierProvider).asData!.value[topic.userId]!;
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: Material(
-        color: ThemeColor.accent,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => TopicScreen(topic: topic)),
-            );
-          },
-          splashColor: Colors.white.withOpacity(0.05),
-          highlightColor: Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        topic.title,
-                        style: textStyle.w600(
-                          fontSize: 18,
-                          color: ThemeColor.white,
-                        ),
-                      ),
-                      const Gap(12),
-                      if (topic.tags.isNotEmpty)
-                        Wrap(
-                          children: topic.tags
-                              .map((tag) => _buildTag(tag, textStyle))
-                              .toList(),
-                        ),
-                      Row(
+    return FutureBuilder(
+      future: ref
+          .read(allUsersNotifierProvider.notifier)
+          .getUserAccounts([topic.userId]),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return SizedBox();
+        }
+        final user = snapshot.data![0];
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          child: Material(
+            color: ThemeColor.accent,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => TopicScreen(topic: topic)),
+                );
+              },
+              splashColor: Colors.white.withOpacity(0.05),
+              highlightColor: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          UserIcon(
-                            user: user,
-                            width: 20,
-                            isCircle: true,
+                          Text(
+                            topic.title,
+                            style: textStyle.w600(
+                              fontSize: 18,
+                              color: ThemeColor.white,
+                            ),
                           ),
                           const Gap(12),
-                          Text(
-                            '投稿件数 ${topic.postCount}件',
-                            style: textStyle.w400(
-                              fontSize: 14,
-                              color: ThemeColor.subText,
+                          if (topic.tags.isNotEmpty)
+                            Wrap(
+                              children: topic.tags
+                                  .map((tag) => _buildTag(tag, textStyle))
+                                  .toList(),
                             ),
-                          ),
-                          const Gap(16),
-                          Text(
-                            "最終更新 ${topic.updatedAt.xxAgo}",
-                            style: textStyle.w400(
-                              fontSize: 14,
-                              color: ThemeColor.subText,
-                            ),
+                          Row(
+                            children: [
+                              UserIcon(
+                                user: user,
+                                width: 20,
+                                isCircle: true,
+                              ),
+                              const Gap(12),
+                              Text(
+                                '投稿件数 ${topic.postCount}件',
+                                style: textStyle.w400(
+                                  fontSize: 14,
+                                  color: ThemeColor.subText,
+                                ),
+                              ),
+                              const Gap(16),
+                              Text(
+                                "最終更新 ${topic.updatedAt.xxAgo}",
+                                style: textStyle.w400(
+                                  fontSize: 14,
+                                  color: ThemeColor.subText,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                if (topic.isPro)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.pink.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'PRO',
-                      style: TextStyle(
-                        color: Colors.pink,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                    if (topic.isPro)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.pink.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          'PRO',
+                          style: TextStyle(
+                            color: Colors.pink,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

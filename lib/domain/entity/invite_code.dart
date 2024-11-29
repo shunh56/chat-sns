@@ -6,6 +6,7 @@ enum InviteCodeStatus {
   overLimit,
   usedByMe,
   valid,
+  manual,
   unknownError,
 }
 
@@ -37,6 +38,17 @@ class InviteCode {
     );
   }
 
+  factory InviteCode.manual() {
+    return InviteCode(
+      code: "MANUAL",
+      createdAt: Timestamp.now(),
+      userId: "system",
+      slot: [],
+      logs: [],
+      maxCount: 999999,
+    );
+  }
+
   factory InviteCode.notFount() {
     return InviteCode(
       code: "not_found",
@@ -64,6 +76,9 @@ class InviteCode {
     final myId = FirebaseAuth.instance.currentUser!.uid;
     if (slot.length < maxCount && !slot.contains(myId)) {
       temp = InviteCodeStatus.valid;
+    }
+    if (code == "MANUAL") {
+      temp = InviteCodeStatus.manual;
     }
     if (slot.contains(myId)) temp = InviteCodeStatus.usedByMe;
     if (slot.length >= maxCount) temp = InviteCodeStatus.overLimit;

@@ -73,14 +73,16 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSRemoteNotificationUsageDescription</key>
+	<string>新着メッセージやアップデートをお知らせするため、プッシュ通知の許可をお願いします。</string>
 	<key>NSCameraUsageDescription</key>
-	<string>このアプリでは、ユーザーがアプリ内で画像をシェアするための写真を撮影する機能と、QRコードを読み取って他のユーザーと簡単に接続できる機能を提供しています。カメラへのアクセスを許可してください。</string>
+	<string>写真の投稿とQRコードの読み取りのため、カメラの使用を許可してください。</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>マイクを使う理由・用途を記述（ここをちゃんと書かないと、Appleのレビューでリジェクトされます）</string>
+	<string>音声通話機能を利用するため、マイクの使用を許可してください。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>"このアプリでは、プロフィール画像を設定するためや、ユーザーがアプリ内で写真をシェアするためにフォトライブラリへのアクセスが必要です。フォトライブラリへのアクセスを許可してください。</string>
+	<string>画像の投稿とプロフィール設定のため、写真へのアクセスを許可してください。</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>This identifier will be used to deliver personalized ads to you.</string>
+	<string>アプリの改善とより良い体験を提供するために、データの収集を許可していただけますと幸いです。</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
@@ -256,9 +258,13 @@
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
+		<!-- バックグラウンドでのデータ更新 -->
 		<string>fetch</string>
+		<!-- VoIP通話機能 -->
 		<string>voip</string>
+		<!-- プッシュ通知 -->
 		<string>remote-notification</string>
+		<!-- バックグラウンド処理 -->
 		<string>processing</string>
 	</array>
 	<key>UILaunchStoryboardName</key>

@@ -22,7 +22,8 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
-    final me = ref.watch(myAccountNotifierProvider).asData!.value;
+    final me = ref.watch(myAccountNotifierProvider).asData?.value;
+    if (me == null) return const Scaffold();
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
