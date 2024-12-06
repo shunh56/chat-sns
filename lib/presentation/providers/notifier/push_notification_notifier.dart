@@ -46,7 +46,7 @@ class PushNotificationNotifier {
   sendFriendRequest(UserAccount user) {
     final me = ref.read(myAccountNotifierProvider).asData!.value;
     if (user.notificationData.friendRequest && user.fcmToken != null) {
-      _usecase.sendmulticast([user.fcmToken!], me.name, "フレンドリクエストが届きました。Ï");
+      _usecase.sendmulticast([user.fcmToken!], me.name, "フレンドリクエストが届きました。");
     }
   }
 
