@@ -433,96 +433,35 @@ class UserRequestButton extends ConsumerWidget {
     final range = user.privacy.requestRange;
 
     if (requesteds.contains(user.userId)) {
-      return Column(
-        children: [
-          Text(
-            "フレンドリクエストが届いています",
-            style: textStyle.w600(
-              fontSize: 12,
-              color: user.canvasTheme.profileSecondaryTextColor,
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Material(
+          color: Color.alphaBlend(
+            Colors.white.withOpacity(0.1),
+            ThemeColor.accent,
+          ),
+          child: InkWell(
+            splashColor: Colors.black.withOpacity(0.3),
+            highlightColor: Colors.transparent,
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) =>
+                    showFriendRequestDialog(context, ref, user),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+              child: Text(
+                "リクエストが届いています",
+                style: textStyle.w600(
+                  fontSize: 14,
+                  color: ThemeColor.text,
+                ),
+              ),
             ),
           ),
-          const Gap(12),
-          SizedBox(
-            child: Row(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Material(
-                      color: Colors.pink,
-                      child: InkWell(
-                        splashColor: Colors.black.withOpacity(0.3),
-                        highlightColor: Colors.transparent,
-                        onTap: () {
-                          /*if (hasNoMutualFriends && !subscribed) {
-                            showUpcomingSnackbar();
-                            UserBottomModelSheet(context)
-                                .admitNonMutualUserBottomSheet(user);
-                            return;
-                          } */
-                          ref
-                              .read(friendRequestedIdListNotifierProvider
-                                  .notifier)
-                              .admitFriendRequested(user);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Center(
-                            child: Text(
-                              "承認",
-                              style: textStyle.w600(
-                                fontSize: 14,
-                                color: ThemeColor.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const Gap(12),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Material(
-                      color: Color.alphaBlend(
-                        Colors.white.withOpacity(0.1),
-                        ThemeColor.accent,
-                      ),
-                      child: InkWell(
-                        splashColor: Colors.black.withOpacity(0.3),
-                        highlightColor: Colors.transparent,
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return showDeleteRequestDialog(
-                                  context, ref, user);
-                            },
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Center(
-                            child: Text(
-                              "削除",
-                              style: textStyle.w600(
-                                fontSize: 14,
-                                color: ThemeColor.text,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       );
     } else if (requests.contains(user.userId)) {
       return ClipRRect(
@@ -544,9 +483,9 @@ class UserRequestButton extends ConsumerWidget {
               );
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 48),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
               child: Text(
-                "フレンドリクエスト済み",
+                "リクエスト済み",
                 style: textStyle.w600(
                   fontSize: 14,
                   color: ThemeColor.text,
@@ -560,11 +499,23 @@ class UserRequestButton extends ConsumerWidget {
     if (privateMode ||
         (range == PublicityRange.friendOfFriend && !hasNoMutualFriends) ||
         (range == PublicityRange.onlyFriends)) {
-      return Text(
-        "このアカウントはプライベートです",
-        style: textStyle.w600(
-          fontSize: 14,
-          color: user.canvasTheme.profileSecondaryTextColor,
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Material(
+          color: Color.alphaBlend(
+            Colors.white.withOpacity(0.1),
+            ThemeColor.accent,
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+            child: Text(
+              "プライベートモード",
+              style: textStyle.w600(
+                fontSize: 14,
+                color: ThemeColor.text,
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -581,15 +532,115 @@ class UserRequestButton extends ConsumerWidget {
                 .sendFriendRequest(user);
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 48),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
             child: Text(
-              "リクエスト",
+              "フレンドリクエスト",
               style: textStyle.w600(
                 fontSize: 14,
                 color: Colors.white,
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class FriendRequestDialog extends ConsumerWidget {
+  const FriendRequestDialog({
+    super.key,
+    required this.user,
+  });
+
+  final UserAccount user;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'フレンドリクエスト',
+              style: textStyle.w600(
+                fontSize: 18,
+                color: ThemeColor.text,
+              ),
+            ),
+            const Gap(16),
+            Text(
+              '${user.name}さんからフレンドリクエストが届いています。',
+              textAlign: TextAlign.center,
+              style: textStyle.w400(
+                fontSize: 14,
+                color: ThemeColor.text,
+              ),
+            ),
+            const Gap(24),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      ref
+                          .read(friendRequestedIdListNotifierProvider.notifier)
+                          .deleteRequested(user);
+                      ref
+                          .read(deletesIdListNotifierProvider.notifier)
+                          .deleteUser(user);
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: ThemeColor.surface,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      '削除',
+                      style: textStyle.w600(
+                        fontSize: 14,
+                        color: ThemeColor.text,
+                      ),
+                    ),
+                  ),
+                ),
+                const Gap(12),
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      ref
+                          .read(friendRequestedIdListNotifierProvider.notifier)
+                          .admitFriendRequested(user);
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.pink,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      '承認',
+                      style: textStyle.w600(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

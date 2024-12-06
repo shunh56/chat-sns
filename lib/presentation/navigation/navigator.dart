@@ -43,7 +43,9 @@ class NavigationRouter {
       Navigator.push(
         context,
         PageTransitionMethods.slideUp(
-          const ProfileScreen(),
+          const ProfileScreen(
+            canPop: true,
+          ),
         ),
       );
     } else {
@@ -70,7 +72,7 @@ class NavigationRouter {
       context,
       MaterialPageRoute(
         builder: (_) => ChattingScreen(userId: user.userId),
-        settings: const RouteSettings(name: '/chatting_screen'), 
+        settings: const RouteSettings(name: '/chatting_screen'),
       ),
     );
   }

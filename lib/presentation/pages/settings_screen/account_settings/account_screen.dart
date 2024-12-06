@@ -19,7 +19,8 @@ class AccountScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final ascyncValue = ref.watch(myAccountNotifierProvider);
-    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    final me = ref.read(myAccountNotifierProvider).asData?.value;
+    if (me == null) return Scaffold();
 
     final accountInfo = ascyncValue.when(
       data: (me) {
@@ -82,7 +83,6 @@ class AccountScreen extends ConsumerWidget {
           ),
           child: InkWell(
             onTap: () {
-              
               /* try {
                 auth.currentUser!.updateEmail("");
               } catch (e) {
@@ -117,7 +117,6 @@ class AccountScreen extends ConsumerWidget {
           ),
           child: InkWell(
             onTap: () {
-              
               /*  try {
                 auth.currentUser!.updatePassword("");
               } catch (e) {
@@ -342,7 +341,6 @@ class AccountScreen extends ConsumerWidget {
           ),
           child: InkWell(
             onTap: () {
-              
               if (page != null) {
                 Navigator.push(
                   context,
@@ -398,7 +396,6 @@ class AccountScreen extends ConsumerWidget {
       ),
       child: InkWell(
         onTap: () {
-          
           if (page != null) {
             Navigator.push(
               context,

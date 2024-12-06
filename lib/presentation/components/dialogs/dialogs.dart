@@ -118,6 +118,33 @@ showQuitRequestDialog(
   );
 }
 
+showFriendRequestDialog(
+  BuildContext context,
+  WidgetRef ref,
+  UserAccount user,
+) {
+  return BasicDialog(
+    title: "フレンドリクエスト",
+    content: "${user.name}さんからフレンドリクエストが届いています。",
+    positiveText: "承認",
+    negativeText: "削除",
+    onPositivePressed: () {
+      ref
+          .read(friendRequestedIdListNotifierProvider.notifier)
+          .deleteRequested(user);
+      ref.read(deletesIdListNotifierProvider.notifier).deleteUser(user);
+      Navigator.pop(context);
+    },
+    onNegativePressed: () {
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (context) => showDeleteRequestDialog(context, ref, user),
+      );
+    },
+  );
+}
+
 showDeleteRequestDialog(
   BuildContext context,
   WidgetRef ref,

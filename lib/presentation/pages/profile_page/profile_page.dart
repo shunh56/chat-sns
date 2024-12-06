@@ -52,7 +52,8 @@ final privacyProvider = StateProvider((ref) => Privacy.defaultPrivacy());
 final changeProvider = StateProvider((ref) => true);
 
 class ProfileScreen extends ConsumerWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, this.canPop = false});
+  final bool canPop;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,65 +62,144 @@ class ProfileScreen extends ConsumerWidget {
     final asyncValue = ref.watch(myAccountNotifierProvider);
 
     final statusBarHeight = MediaQuery.of(context).padding.top;
-    //final canPop = Navigator.of(context).canPop();
     final height = 112.0;
     return asyncValue.when(
       data: (me) {
         final canvasTheme = me.canvasTheme;
         return Scaffold(
           backgroundColor: canvasTheme.bgColor,
-          body: DefaultTabController(
-            length: 3,
-            child: CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  expandedHeight: height,
-                  pinned: true,
-                  stretch: true,
-                  backgroundColor: canvasTheme.bgColor,
-                  iconTheme: IconThemeData(color: canvasTheme.profileTextColor),
-                  flexibleSpace: LayoutBuilder(
-                    builder:
-                        (BuildContext context, BoxConstraints constraints) {
-                      final top = constraints.biggest.height;
-                      final expandedHeight = height + statusBarHeight;
-                      // 展開率を計算（1.0が完全展開、0.0が完全収縮）
-                      final expandRatio =
-                          ((top - kToolbarHeight - statusBarHeight) /
-                                  (expandedHeight -
-                                      kToolbarHeight -
-                                      statusBarHeight))
-                              .clamp(0.0, 1.0);
+          body: Stack(
+            children: [
+              DefaultTabController(
+                length: 3,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      automaticallyImplyLeading: false,
+                      expandedHeight: height,
+                      pinned: true,
+                      stretch: true,
+                      backgroundColor: canvasTheme.bgColor,
+                      flexibleSpace: LayoutBuilder(
+                        builder:
+                            (BuildContext context, BoxConstraints constraints) {
+                          final top = constraints.biggest.height;
+                          final expandedHeight = height + statusBarHeight;
+                          // 展開率を計算（1.0が完全展開、0.0が完全収縮）
+                          final expandRatio =
+                              ((top - kToolbarHeight - statusBarHeight) /
+                                      (expandedHeight -
+                                          kToolbarHeight -
+                                          statusBarHeight))
+                                  .clamp(0.0, 1.0);
 
-                      // 展開率に基づいてアニメーションを制御
-                      return Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          // 展開時のレイアウト
-                          Opacity(
-                            opacity: expandRatio,
-                            child: SafeArea(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: themeSize.horizontalPadding,
-                                ),
-                                child: Stack(
-                                  alignment: Alignment.bottomCenter,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                          // 展開率に基づいてアニメーションを制御
+                          return Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              // 展開時のレイアウト
+                              Opacity(
+                                opacity: expandRatio,
+                                child: SafeArea(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: themeSize.horizontalPadding,
+                                    ),
+                                    child: Stack(
+                                      alignment: Alignment.bottomCenter,
                                       children: [
-                                        UserIconCanvasIcon(user: me),
-                                        const Expanded(
-                                          child: SizedBox(),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            UserIconCanvasIcon(user: me),
+                                            const Expanded(
+                                              child: SizedBox(),
+                                            ),
+                                            SizedBox(
+                                              height: kToolbarHeight,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      ref
+                                                          .read(
+                                                              canvasThemeProvider
+                                                                  .notifier)
+                                                          .state = canvasTheme;
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (_) =>
+                                                              const EditCanvasThemeScreen(),
+                                                        ),
+                                                      );
+                                                    },
+                                                    child: Icon(
+                                                      Icons.palette_outlined,
+                                                      color: canvasTheme
+                                                          .profileTextColor,
+                                                    ),
+                                                  ),
+                                                  const Gap(12),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      ProfileBottomSheet(
+                                                              context)
+                                                          .openBottomSheet(me);
+                                                    },
+                                                    child: Icon(
+                                                      Icons.settings_outlined,
+                                                      color: canvasTheme
+                                                          .profileTextColor,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          ],
                                         ),
-                                        SizedBox(
-                                          height: kToolbarHeight,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // 収縮時のレイアウト
+                              Opacity(
+                                opacity: 1 - expandRatio,
+                                child: SafeArea(
+                                  child: SizedBox(
+                                    height: kToolbarHeight,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                        left: themeSize.horizontalPadding,
+                                        right: themeSize.horizontalPadding,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Row(
+                                              children: [
+                                                UserIcon(
+                                                  user: me,
+                                                  width: 40,
+                                                  navDisabled: true,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  me.name,
+                                                  style: textStyle.w600(
+                                                    fontSize: 16,
+                                                    color: canvasTheme
+                                                        .profileTextColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Row(
                                             children: [
                                               GestureDetector(
                                                 onTap: () {
@@ -154,302 +234,273 @@ class ProfileScreen extends ConsumerWidget {
                                                 ),
                                               ),
                                             ],
-                                          ),
-                                        )
-                                      ],
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+
+                    SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          /* Padding(
+                            padding: EdgeInsets.only(
+                              left: themeSize.horizontalPadding,
+                              right: themeSize.horizontalPadding,
                             ),
-                          ),
-                          // 収縮時のレイアウト
-                          Opacity(
-                            opacity: 1 - expandRatio,
-                            child: SafeArea(
-                              child: SizedBox(
-                                height: kToolbarHeight,
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                    left: themeSize.horizontalPadding,
-                                    right: themeSize.horizontalPadding,
-                                  ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                UserIconCanvasIcon(user: me),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 12),
                                   child: Row(
                                     children: [
-                                      Expanded(
-                                        child: Row(
-                                          children: [
-                                            UserIcon(
-                                              user: me,
-                                              width: 40,
-                                              navDisabled: true,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              me.name,
-                                              style: textStyle.w600(
-                                                fontSize: 16,
-                                                color: canvasTheme
-                                                    .profileTextColor,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              ref
-                                                  .read(canvasThemeProvider
-                                                      .notifier)
-                                                  .state = canvasTheme;
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      const EditCanvasThemeScreen(),
-                                                ),
-                                              );
-                                            },
-                                            child: Icon(
-                                              Icons.palette_outlined,
-                                              color:
-                                                  canvasTheme.profileTextColor,
-                                            ),
-                                          ),
-                                          const Gap(12),
-                                          GestureDetector(
-                                            onTap: () {
-                                              ProfileBottomSheet(context)
-                                                  .openBottomSheet(me);
-                                            },
-                                            child: Icon(
-                                              Icons.settings_outlined,
-                                              color:
-                                                  canvasTheme.profileTextColor,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-
-                SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      /* Padding(
-                        padding: EdgeInsets.only(
-                          left: themeSize.horizontalPadding,
-                          right: themeSize.horizontalPadding,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            UserIconCanvasIcon(user: me),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        PageTransitionMethods.slideUp(
-                                            const QrCodeScreen()),
-                                      );
-                                    },
-                                    child: Icon(
-                                      Icons.qr_code_rounded,
-                                      color: canvasTheme.profileTextColor,
-                                    ),
-                                  ),
-                                  const Gap(12),
-                                  GestureDetector(
-                                    onTap: () {
-                                      ref
-                                          .read(canvasThemeProvider.notifier)
-                                          .state = canvasTheme;
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const EditCanvasThemeScreen(),
-                                        ),
-                                      );
-                                    },
-                                    child: Icon(
-                                      Icons.palette_outlined,
-                                      color: canvasTheme.profileTextColor,
-                                    ),
-                                  ),
-                                  const Gap(12),
-                                  GestureDetector(
-                                    onTap: () {
-                                      ProfileBottomSheet(context)
-                                          .openBottomSheet(me);
-                                    },
-                                    child: Icon(
-                                      Icons.settings_outlined,
-                                      color: canvasTheme.profileTextColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ), */
-                      Container(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          bottom: 16,
-                        ),
-                        color: canvasTheme.bgColor,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        me.name,
-                                        style: textStyle.w600(
-                                          fontSize: 24,
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            PageTransitionMethods.slideUp(
+                                                const QrCodeScreen()),
+                                          );
+                                        },
+                                        child: Icon(
+                                          Icons.qr_code_rounded,
                                           color: canvasTheme.profileTextColor,
                                         ),
                                       ),
-                                      Text(
-                                        "${me.createdAt.toDateStr}〜",
-                                        style: textStyle.w600(
-                                          fontSize: 14,
-                                          color: canvasTheme
-                                              .profileSecondaryTextColor,
+                                      const Gap(12),
+                                      GestureDetector(
+                                        onTap: () {
+                                          ref
+                                              .read(canvasThemeProvider.notifier)
+                                              .state = canvasTheme;
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const EditCanvasThemeScreen(),
+                                            ),
+                                          );
+                                        },
+                                        child: Icon(
+                                          Icons.palette_outlined,
+                                          color: canvasTheme.profileTextColor,
+                                        ),
+                                      ),
+                                      const Gap(12),
+                                      GestureDetector(
+                                        onTap: () {
+                                          ProfileBottomSheet(context)
+                                              .openBottomSheet(me);
+                                        },
+                                        child: Icon(
+                                          Icons.settings_outlined,
+                                          color: canvasTheme.profileTextColor,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
+                                )
                               ],
                             ),
-                            const Gap(12),
-                            Text(
-                              me.aboutMe,
-                              style: textStyle.w600(
-                                fontSize: 14,
-                                color: canvasTheme.profileAboutMeColor,
-                              ),
+                          ), */
+                          Container(
+                            padding: const EdgeInsets.only(
+                              left: 16,
+                              right: 16,
+                              bottom: 16,
                             ),
-                            if (me.links.isShown)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 12),
-                                child: Row(
+                            color: canvasTheme.bgColor,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
                                   children: [
-                                    if (me.links.instagram.isShown &&
-                                        me.links.instagram.path != null)
-                                      GestureDetector(
-                                        onTap: () async {
-                                          launchUrl(
-                                            Uri.parse(
-                                              me.links.instagram.url!,
-                                            ),
-                                            mode:
-                                                LaunchMode.externalApplication,
-                                          );
-                                          //showMessage("${me.links.instagram.url}");
-                                        },
-                                        child: SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: Image.asset(
-                                            me.links.instagram.assetString,
-                                            color:
-                                                canvasTheme.profileLinksColor,
-                                          ),
-                                        ),
-                                      ),
-                                    if (me.links.x.isShown &&
-                                        me.links.x.path != null)
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 12),
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            launchUrl(
-                                              Uri.parse(me.links.x.url!),
-                                              mode: LaunchMode
-                                                  .externalApplication,
-                                            );
-                                          },
-                                          child: SizedBox(
-                                            height: 18,
-                                            width: 18,
-                                            child: Image.asset(
-                                              me.links.x.assetString,
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            me.name,
+                                            style: textStyle.w600(
+                                              fontSize: 24,
                                               color:
-                                                  canvasTheme.profileLinksColor,
+                                                  canvasTheme.profileTextColor,
                                             ),
                                           ),
-                                        ),
+                                          Text(
+                                            "${me.createdAt.toDateStr}〜",
+                                            style: textStyle.w600(
+                                              fontSize: 14,
+                                              color: canvasTheme
+                                                  .profileSecondaryTextColor,
+                                            ),
+                                          ),
+                                        ],
                                       ),
+                                    ),
                                   ],
                                 ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                //tabbar
-                _buildTabBar(context, ref, me.canvasTheme),
-                SliverFillRemaining(
-                  child: TabBarView(
-                    children: [
-                      CustomScrollView(
-                        physics: const NeverScrollableScrollPhysics(),
-                        slivers: [
-                          SliverToBoxAdapter(
-                            child: Column(
-                              children: [
                                 const Gap(12),
-                                _buildCurrentStatus(
-                                    context, ref, canvasTheme, me),
-                                _buildTopFriends(context, ref, canvasTheme, me),
-                                _buildFriends(context, ref, canvasTheme, me),
+                                Text(
+                                  me.aboutMe,
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                    color: canvasTheme.profileAboutMeColor,
+                                  ),
+                                ),
+                                if (me.links.isShown)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 12),
+                                    child: Row(
+                                      children: [
+                                        if (me.links.instagram.isShown &&
+                                            me.links.instagram.path != null)
+                                          GestureDetector(
+                                            onTap: () async {
+                                              launchUrl(
+                                                Uri.parse(
+                                                  me.links.instagram.url!,
+                                                ),
+                                                mode: LaunchMode
+                                                    .externalApplication,
+                                              );
+                                              //showMessage("${me.links.instagram.url}");
+                                            },
+                                            child: SizedBox(
+                                              height: 20,
+                                              width: 20,
+                                              child: Image.asset(
+                                                me.links.instagram.assetString,
+                                                color: canvasTheme
+                                                    .profileLinksColor,
+                                              ),
+                                            ),
+                                          ),
+                                        if (me.links.x.isShown &&
+                                            me.links.x.path != null)
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(left: 12),
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                launchUrl(
+                                                  Uri.parse(me.links.x.url!),
+                                                  mode: LaunchMode
+                                                      .externalApplication,
+                                                );
+                                              },
+                                              child: SizedBox(
+                                                height: 18,
+                                                width: 18,
+                                                child: Image.asset(
+                                                  me.links.x.assetString,
+                                                  color: canvasTheme
+                                                      .profileLinksColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
                         ],
                       ),
+                    ),
 
-                      // 投稿タブ
+                    //tabbar
+                    _buildTabBar(context, ref, me.canvasTheme),
+                    SliverFillRemaining(
+                      child: TabBarView(
+                        children: [
+                          CustomScrollView(
+                            physics: const NeverScrollableScrollPhysics(),
+                            slivers: [
+                              SliverToBoxAdapter(
+                                child: Column(
+                                  children: [
+                                    const Gap(12),
+                                    _buildCurrentStatus(
+                                        context, ref, canvasTheme, me),
+                                    _buildTopFriends(
+                                        context, ref, canvasTheme, me),
+                                    _buildFriends(
+                                        context, ref, canvasTheme, me),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
 
-                      UserPostsThread(
-                          userId: ref.read(authProvider).currentUser!.uid),
-                      // アルバムタブ
-                      _buildImages(context, ref, me),
-                    ],
+                          // 投稿タブ
+
+                          UserPostsThread(
+                              userId: ref.read(authProvider).currentUser!.uid),
+                          // アルバムタブ
+                          _buildImages(context, ref, me),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              if (canPop)
+                Positioned(
+                  bottom: 32, // 下からの距離
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        height: 48,
+                        width: 48,
+                        decoration: BoxDecoration(
+                          color: ThemeColor.surface,
+                          border: Border.all(
+                            color: ThemeColor.stroke.withOpacity(0.8),
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              ThemeColor.surface,
+                              ThemeColor.surface.withOpacity(0.9),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          size: 24,
+                          color: ThemeColor.text,
+                        ),
+                      ),
+                    ),
                   ),
-                )
-              ],
-            ),
+                ),
+            ],
           ),
         );
       },
