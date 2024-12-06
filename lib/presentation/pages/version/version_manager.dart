@@ -1,4 +1,3 @@
-
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_remote_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,12 +9,15 @@ final versionStatusProvider = FutureProvider<VersionStatus>((ref) async {
     final remoteConfig = await ref.watch(remoteConfigProvider.future);
     final packageInfo = await PackageInfo.fromPlatform();
     DebugPrint("packageInfo : $packageInfo");
-    
+
     final currentVersion = AppVersion.parse(packageInfo.version);
-    final minVersion = AppVersion.parse(remoteConfig.getString('minimum_version'));
-    final latestVersion = AppVersion.parse(remoteConfig.getString('latest_version'));
-    DebugPrint("min : $minVersion , latest : $latestVersion");
-    
+    final minVersion =
+        AppVersion.parse(remoteConfig.getString('minimum_version'));
+    final latestVersion =
+        AppVersion.parse(remoteConfig.getString('latest_version'));
+    DebugPrint(
+        "current :$currentVersion,  min : $minVersion , latest : $latestVersion");
+
     if (currentVersion < minVersion) {
       return VersionStatus.requiresUpdate;
     } else if (currentVersion < latestVersion) {
@@ -70,7 +72,7 @@ class AppVersion implements Comparable<AppVersion> {
 }
 
 enum VersionStatus {
-  upToDate,        // 最新バージョン
+  upToDate, // 最新バージョン
   updateAvailable, // アップデート可能
-  requiresUpdate   // アップデート必須
+  requiresUpdate // アップデート必須
 }

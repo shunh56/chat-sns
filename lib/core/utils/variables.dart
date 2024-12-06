@@ -13,5 +13,5 @@ int tokenExpireTime = 45;
 //double earningRate = 0.7;
 bool isTokenExpiring = false;
 
-String APP_STORE_URL = "";
+String APP_STORE_URL = "https://apps.apple.com/jp/app/blank/id6737684833";
 String PLAY_STORE_URL = "";

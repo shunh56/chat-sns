@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/presentation/pages/version/version_manager.dart';
@@ -99,13 +101,14 @@ class _UpdateNotifierState extends ConsumerState<UpdateNotifier> {
   }
 
   Future<void> _openStore() async {
-    final url = Theme.of(context).platform == TargetPlatform.iOS
-        ? APP_STORE_URL
-        : PLAY_STORE_URL;
+    final url = Platform.isIOS ? APP_STORE_URL : PLAY_STORE_URL;
 
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+      await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
     }
   }
 }
