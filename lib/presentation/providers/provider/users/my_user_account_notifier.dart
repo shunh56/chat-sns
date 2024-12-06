@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/pages/onboarding_page/onboarding_page.dart';
+import 'package:app/presentation/pages/onboarding/providers/providers.dart';
 import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';

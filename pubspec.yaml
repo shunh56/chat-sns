@@ -3,7 +3,7 @@ description: A new Flutter project.
 publish_to: "none" 
 
 # bundle ID : com.blank.sns
-version: 1.0.0+8
+version: 1.0.1+1
 
 #最後のビルド番号はずっと増えていく
 #初回リリース：version: 1.0.0+1
@@ -175,7 +175,7 @@ dependencies:
   twitter_login: ^4.4.2
 
   intl: any
-  shared_preferences: ^2.3.2
+  shared_preferences: ^2.3.3
 dependency_overrides:
   intl: ^0.17.0
   flutter_lints: ^3.0.1

@@ -53,7 +53,7 @@ class ChatScreen extends ConsumerWidget {
               children: [
                 friendsListView(context, ref),
                 Gap(themeSize.verticalPaddingSmall),
-                ChatList(),
+                const ChatList(),
               ],
             ),
           ),

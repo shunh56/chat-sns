@@ -455,7 +455,7 @@ class TopicCard extends ConsumerWidget {
           .getUserAccounts([topic.userId]),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return SizedBox();
+          return const SizedBox();
         }
         final user = snapshot.data![0];
         return Container(

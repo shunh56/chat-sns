@@ -16,9 +16,8 @@ import 'package:app/presentation/pages/auth/signin_page.dart';
 import 'package:app/presentation/pages/auth/signup_page.dart';
 import 'package:app/presentation/pages/flows/onboarding/onboarding_screen.dart';
 import 'package:app/presentation/pages/flows/onboarding/shared_preferences_provider.dart';
-import 'package:app/presentation/pages/onboarding_page/awaiting_screen.dart';
-import 'package:app/presentation/pages/onboarding_page/input_invite_code_screen.dart';
-import 'package:app/presentation/pages/onboarding_page/onboarding_page.dart';
+import 'package:app/presentation/pages/onboarding/screens/onboarding_screen.dart';
+import 'package:app/presentation/pages/version/update_notifier.dart';
 import 'package:app/presentation/phase_01/main_page.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
@@ -361,8 +360,7 @@ void main() {
           overrides: [
             // firestoreProvider.overrideWithValue(FakeFirebaseFirestore()),
           ],
-          child: MyApp(isUnderMaintenance: false //isUnderMaintenance,
-              ),
+          child: MyApp(),
         ),
       );
     },
@@ -425,8 +423,8 @@ class _ScreenTrackerState extends State<ScreenTracker> {
 }
 
 class MyApp extends ConsumerWidget {
-  const MyApp({super.key, required this.isUnderMaintenance});
-  final bool isUnderMaintenance;
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
@@ -498,15 +496,9 @@ class MyApp extends ConsumerWidget {
         highlightColor: Colors.white.withOpacity(0.05),
       ),
       debugShowCheckedModeBanner: false,
-      home: isUnderMaintenance
-          ? const Scaffold(
-              body: Center(
-                child: Text(
-                  "Maintenance",
-                ),
-              ),
-            )
-          : const SplashScreen(),
+      home: const UpdateNotifier(
+        child: SplashScreen(),
+      ),
     );
   }
 }
@@ -529,10 +521,6 @@ class SplashScreen extends ConsumerWidget {
               if (user == null) {
                 return const WelcomePage();
               } else {
-                final usedCodeAsync =
-                    ref.watch(myAccountNotifierProvider.select((userAccount) {
-                  return userAccount.whenData((user) => user.usedCode);
-                }));
                 final usernameAsync =
                     ref.watch(myAccountNotifierProvider.select((userAccount) {
                   return userAccount.whenData((user) => user.username);
@@ -541,62 +529,46 @@ class SplashScreen extends ConsumerWidget {
                     ref.watch(myAccountNotifierProvider.select((userAccount) {
                   return userAccount.whenData((user) => user.accountStatus);
                 }));
-                return usedCodeAsync.when(
-                  data: (usedCode) {
-                    DebugPrint("usedCode async");
-                    switch (usedCode) {
-                      case null:
-                        return const InputInviteCodeScreen();
-                      case "WAITING":
-                        return const AwaitingScreen();
-                      default:
-                        return usernameAsync.when(
-                          data: (username) {
-                            if (username == "null") {
-                              return const OnboardingScreen();
-                            } else {
-                              return accountStatusAsync.when(
-                                data: (accountStatus) {
-                                  switch (accountStatus) {
-                                    case AccountStatus.banned:
-                                      return const Scaffold(
-                                        body: Center(
-                                          child: Text("BANNED"),
-                                        ),
-                                      );
-                                    case AccountStatus.freezed:
-                                      return const Scaffold(
-                                        body: Center(
-                                          child: Text("FREEZED"),
-                                        ),
-                                      );
-                                    case AccountStatus.deleted:
-                                      return const DeletedAccountScreen();
-                                    default:
-                                      return ref
-                                          .watch(initialOnboardingStateProvider)
-                                          .when(
-                                            data: (onboardingState) {
-                                              if (!onboardingState
-                                                  .isCompleted) {
-                                                return const OnboardingFlowScreen();
-                                              }
-                                              return const Phase01MainPage();
-                                            },
-                                            loading: () => const LoadingPage(),
-                                            error: (e, s) =>
-                                                ErrorPage(e: e, s: s),
-                                          );
-                                  }
-                                },
-                                loading: () => const LoadingPage(),
-                                error: (e, s) => ErrorPage(e: e, s: s),
+                return usernameAsync.when(
+                  data: (username) {
+                    if (username == "null") {
+                      return const OnboardingScreen();
+                    } else {
+                      return accountStatusAsync.when(
+                        data: (accountStatus) {
+                          switch (accountStatus) {
+                            case AccountStatus.banned:
+                              return const Scaffold(
+                                body: Center(
+                                  child: Text("BANNED"),
+                                ),
                               );
-                            }
-                          },
-                          loading: () => const LoadingPage(),
-                          error: (e, s) => ErrorPage(e: e, s: s),
-                        );
+                            case AccountStatus.freezed:
+                              return const Scaffold(
+                                body: Center(
+                                  child: Text("FREEZED"),
+                                ),
+                              );
+                            case AccountStatus.deleted:
+                              return const DeletedAccountScreen();
+                            default:
+                              return ref
+                                  .watch(initialOnboardingStateProvider)
+                                  .when(
+                                    data: (onboardingState) {
+                                      if (!onboardingState.isCompleted) {
+                                        return const OnboardingFlowScreen();
+                                      }
+                                      return const Phase01MainPage();
+                                    },
+                                    loading: () => const LoadingPage(),
+                                    error: (e, s) => ErrorPage(e: e, s: s),
+                                  );
+                          }
+                        },
+                        loading: () => const LoadingPage(),
+                        error: (e, s) => ErrorPage(e: e, s: s),
+                      );
                     }
                   },
                   loading: () => const LoadingPage(),

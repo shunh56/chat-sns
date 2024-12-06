@@ -11,8 +11,8 @@ import 'package:app/presentation/components/widgets/fade_transition_widget.dart'
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/blocked_profile_screen.dart';
+import 'package:app/presentation/pages/sub_pages/user_profile_page/user_posts_list.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/users_friends_screen.dart';
-import 'package:app/presentation/pages/timeline_page/threads/users_posts.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/images/images.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
@@ -59,7 +59,7 @@ class UserProfileScreen extends ConsumerWidget {
       return NotFriendScreen(user: user);
     }
     final statusBarHeight = MediaQuery.of(context).padding.top;
-    const height = 156.0;
+    const height = 112.0;
 
     /* final scrollController = ref.watch(scrollControllerProvider);
     scrollController.addListener(() {
@@ -76,54 +76,192 @@ class UserProfileScreen extends ConsumerWidget {
     }); */
     return Scaffold(
       backgroundColor: canvasTheme.bgColor,
-      body: DefaultTabController(
-        length: 3,
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: height,
-              pinned: true,
-              stretch: true,
-              backgroundColor: canvasTheme.bgColor,
-              iconTheme: IconThemeData(color: canvasTheme.profileTextColor),
-              flexibleSpace: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  final top = constraints.biggest.height;
-                  final expandedHeight = height + statusBarHeight;
-                  // 展開率を計算（1.0が完全展開、0.0が完全収縮）
-                  final expandRatio = ((top -
-                              kToolbarHeight -
-                              statusBarHeight) /
-                          (expandedHeight - kToolbarHeight - statusBarHeight))
-                      .clamp(0.0, 1.0);
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                automaticallyImplyLeading: false,
+                expandedHeight: height,
+                pinned: true,
+                stretch: true,
+                backgroundColor: canvasTheme.bgColor,
+                flexibleSpace: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    final top = constraints.biggest.height;
+                    final expandedHeight = height + statusBarHeight;
+                    // 展開率を計算（1.0が完全展開、0.0が完全収縮）
+                    final expandRatio = ((top -
+                                kToolbarHeight -
+                                statusBarHeight) /
+                            (expandedHeight - kToolbarHeight - statusBarHeight))
+                        .clamp(0.0, 1.0);
 
-                  // 展開率に基づいてアニメーションを制御
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // 展開時のレイアウト
-                      Opacity(
-                        opacity: expandRatio,
-                        child: SafeArea(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: themeSize.horizontalPadding,
+                    // 展開率に基づいてアニメーションを制御
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // 展開時のレイアウト
+                        Opacity(
+                          opacity: expandRatio,
+                          child: SafeArea(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: themeSize.horizontalPadding,
+                              ),
+                              child: Stack(
+                                alignment: Alignment.bottomCenter,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      UserIconCanvasIcon(user: user),
+                                      const Expanded(
+                                        child: SizedBox(),
+                                      ),
+                                      SizedBox(
+                                        height: kToolbarHeight,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                ref
+                                                    .read(
+                                                        navigationRouterProvider(
+                                                            context))
+                                                    .goToChat(user);
+                                              },
+                                              child: SizedBox(
+                                                height: 22,
+                                                width: 22,
+                                                child: SvgPicture.asset(
+                                                  "assets/images/icons/chat.svg",
+                                                  // ignore: deprecated_member_use
+                                                  color: canvasTheme
+                                                      .profileTextColor,
+                                                ),
+                                              ),
+                                            ),
+                                            const Gap(12),
+                                            /*GestureDetector(
+                        onTap: () {
+                          
+                        },
+                        child: Icon(
+                          shareIcon,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Gap(12), */
+                                            FocusedMenuHolder(
+                                              onPressed: () {},
+                                              menuWidth: 120,
+                                              blurSize: 0,
+                                              animateMenuItems: false,
+                                              openWithTap: true,
+                                              menuBoxDecoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(24),
+                                              ),
+                                              menuItems: <FocusedMenuItem>[
+                                                FocusedMenuItem(
+                                                  backgroundColor:
+                                                      ThemeColor.background,
+                                                  title: const Text(
+                                                    "フレンド解除",
+                                                  ),
+                                                  onPressed: () {
+                                                    UserBottomModelSheet(
+                                                            context)
+                                                        .quitFriendBottomSheet(
+                                                            user);
+                                                  },
+                                                ),
+                                                FocusedMenuItem(
+                                                  backgroundColor:
+                                                      ThemeColor.background,
+                                                  title: const Text(
+                                                    "報告",
+                                                  ),
+                                                  onPressed: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            ReportUserScreen(
+                                                                user),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                                FocusedMenuItem(
+                                                  backgroundColor:
+                                                      ThemeColor.background,
+                                                  title: const Text(
+                                                    "ブロック",
+                                                  ),
+                                                  onPressed: () {
+                                                    UserBottomModelSheet(
+                                                            context)
+                                                        .blockUserBottomSheet(
+                                                            user);
+                                                  },
+                                                ),
+                                              ],
+                                              child: Icon(
+                                                Icons.more_horiz,
+                                                color: canvasTheme
+                                                    .profileTextColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: Stack(
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                          ),
+                        ),
+                        // 収縮時のレイアウト
+                        Opacity(
+                          opacity: 1 - expandRatio,
+                          child: SafeArea(
+                            child: SizedBox(
+                              height: kToolbarHeight,
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  left: themeSize.horizontalPadding,
+                                  right: themeSize.horizontalPadding,
+                                ),
+                                child: Row(
                                   children: [
-                                    UserIconCanvasIcon(user: user),
-                                    const Expanded(
-                                      child: SizedBox(),
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          UserIcon(
+                                            user: user,
+                                            width: 40,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            user.name,
+                                            style: textStyle.w600(
+                                              fontSize: 16,
+                                              color:
+                                                  canvasTheme.profileTextColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     SizedBox(
                                       height: kToolbarHeight,
                                       child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
                                         children: [
                                           GestureDetector(
                                             onTap: () {
@@ -146,15 +284,15 @@ class UserProfileScreen extends ConsumerWidget {
                                           ),
                                           const Gap(12),
                                           /*GestureDetector(
-                      onTap: () {
-                        
-                      },
-                      child: Icon(
-                        shareIcon,
-                        color: Colors.white,
+                        onTap: () {
+                          
+                        },
+                        child: Icon(
+                          shareIcon,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    const Gap(12), */
+                      const Gap(12), */
                                           FocusedMenuHolder(
                                             onPressed: () {},
                                             menuWidth: 120,
@@ -219,278 +357,228 @@ class UserProfileScreen extends ConsumerWidget {
                                     )
                                   ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      // 収縮時のレイアウト
-                      Opacity(
-                        opacity: 1 - expandRatio,
-                        child: SafeArea(
-                          child: SizedBox(
-                            height: kToolbarHeight,
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                left: themeSize.horizontalPadding + 32,
-                                right: themeSize.horizontalPadding,
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        UserIcon(
-                                          user: user,
-                                          width: 40,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          user.name,
-                                          style: textStyle.w600(
-                                            fontSize: 16,
-                                            color: canvasTheme.profileTextColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: kToolbarHeight,
-                                    child: Row(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            ref
-                                                .read(navigationRouterProvider(
-                                                    context))
-                                                .goToChat(user);
-                                          },
-                                          child: SizedBox(
-                                            height: 22,
-                                            width: 22,
-                                            child: SvgPicture.asset(
-                                              "assets/images/icons/chat.svg",
-                                              // ignore: deprecated_member_use
-                                              color:
-                                                  canvasTheme.profileTextColor,
-                                            ),
-                                          ),
-                                        ),
-                                        const Gap(12),
-                                        /*GestureDetector(
-                      onTap: () {
-                        
-                      },
-                      child: Icon(
-                        shareIcon,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Gap(12), */
-                                        FocusedMenuHolder(
-                                          onPressed: () {},
-                                          menuWidth: 120,
-                                          blurSize: 0,
-                                          animateMenuItems: false,
-                                          openWithTap: true,
-                                          menuBoxDecoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(24),
-                                          ),
-                                          menuItems: <FocusedMenuItem>[
-                                            FocusedMenuItem(
-                                              backgroundColor:
-                                                  ThemeColor.background,
-                                              title: const Text(
-                                                "フレンド解除",
-                                              ),
-                                              onPressed: () {
-                                                UserBottomModelSheet(context)
-                                                    .quitFriendBottomSheet(
-                                                        user);
-                                              },
-                                            ),
-                                            FocusedMenuItem(
-                                              backgroundColor:
-                                                  ThemeColor.background,
-                                              title: const Text(
-                                                "報告",
-                                              ),
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (_) =>
-                                                        ReportUserScreen(user),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                            FocusedMenuItem(
-                                              backgroundColor:
-                                                  ThemeColor.background,
-                                              title: const Text(
-                                                "ブロック",
-                                              ),
-                                              onPressed: () {
-                                                UserBottomModelSheet(context)
-                                                    .blockUserBottomSheet(user);
-                                              },
-                                            ),
-                                          ],
-                                          child: Icon(
-                                            Icons.more_horiz,
-                                            color: canvasTheme.profileTextColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Container(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  bottom: 16,
-                ),
-                color: canvasTheme.bgColor,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user.name,
-                                style: textStyle.w600(
-                                  fontSize: 24,
-                                  color: canvasTheme.profileTextColor,
-                                ),
-                              ),
-                              Text(
-                                "${user.createdAt.toDateStr}〜",
-                                style: textStyle.w600(
-                                  fontSize: 14,
-                                  color: canvasTheme.profileSecondaryTextColor,
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       ],
-                    ),
-                    const Gap(12),
-                    Text(
-                      user.aboutMe,
-                      style: textStyle.w600(
-                        fontSize: 14,
-                        color: canvasTheme.profileAboutMeColor,
-                      ),
-                    ),
-                    if (user.links.isShown)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Row(
-                          children: [
-                            if (user.links.instagram.isShown &&
-                                user.links.instagram.path != null)
-                              GestureDetector(
-                                onTap: () async {
-                                  launchUrl(
-                                    Uri.parse(
-                                      user.links.instagram.url!,
-                                    ),
-                                    mode: LaunchMode.externalApplication,
-                                  );
-                                  //showMessage("${me.links.instagram.url}");
-                                },
-                                child: SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: Image.asset(
-                                    user.links.instagram.assetString,
-                                    color: canvasTheme.profileLinksColor,
+                    );
+                  },
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                  ),
+                  color: canvasTheme.bgColor,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.name,
+                                  style: textStyle.w600(
+                                    fontSize: 24,
+                                    color: canvasTheme.profileTextColor,
                                   ),
                                 ),
-                              ),
-                            if (user.links.x.isShown &&
-                                user.links.x.path != null)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 12),
-                                child: GestureDetector(
-                                  onTap: () {
+                                Text(
+                                  "${user.createdAt.toDateStr}〜",
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                    color:
+                                        canvasTheme.profileSecondaryTextColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Gap(12),
+                      Text(
+                        user.aboutMe,
+                        style: textStyle.w600(
+                          fontSize: 14,
+                          color: canvasTheme.profileAboutMeColor,
+                        ),
+                      ),
+                      if (user.links.isShown)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Row(
+                            children: [
+                              if (user.links.instagram.isShown &&
+                                  user.links.instagram.path != null)
+                                GestureDetector(
+                                  onTap: () async {
                                     launchUrl(
-                                      Uri.parse(user.links.x.url!),
+                                      Uri.parse(
+                                        user.links.instagram.url!,
+                                      ),
                                       mode: LaunchMode.externalApplication,
                                     );
+                                    //showMessage("${me.links.instagram.url}");
                                   },
                                   child: SizedBox(
-                                    height: 18,
-                                    width: 18,
+                                    height: 20,
+                                    width: 20,
                                     child: Image.asset(
-                                      user.links.x.assetString,
+                                      user.links.instagram.assetString,
                                       color: canvasTheme.profileLinksColor,
                                     ),
                                   ),
                                 ),
-                              ),
-                          ],
+                              if (user.links.x.isShown &&
+                                  user.links.x.path != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      launchUrl(
+                                        Uri.parse(user.links.x.url!),
+                                        mode: LaunchMode.externalApplication,
+                                      );
+                                    },
+                                    child: SizedBox(
+                                      height: 18,
+                                      width: 18,
+                                      child: Image.asset(
+                                        user.links.x.assetString,
+                                        color: canvasTheme.profileLinksColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
+                    ],
+                  ),
+                ),
+              ),
+              //tabbar
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      children: [
+                        const Gap(12),
+                        _buildCurrentStatus(context, ref, canvasTheme, user),
+                        _buildTopFriends(context, ref, canvasTheme, user),
+                        _buildFriends(context, ref, canvasTheme, user),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: themeSize.horizontalPadding,
+                          ),
+                          child: Text(
+                            "投稿",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: canvasTheme.profileTextColor,
+                            ),
+                          ),
+                        ),
+                        UserPostsList(userId: user.userId),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: themeSize.horizontalPadding,
+                          ),
+                          child: Text(
+                            "アルバム",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: canvasTheme.profileTextColor,
+                            ),
+                          ),
+                        ),
+                        _buildImages(context, ref, user),
+                      ],
+                    ),
+
+                    // アルバムセクション
+
+                    const SizedBox(height: 120),
+                    //_buildImages(context, ref, user),
                   ],
                 ),
               ),
-            ),
-            //tabbar
-            _buildTabBar(context, ref, canvasTheme),
-            SliverFillRemaining(
-              child: TabBarView(
-                children: [
-                  CustomScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Column(
-                          children: [
-                            const Gap(12),
-                            _buildCurrentStatus(
-                                context, ref, canvasTheme, user),
-                            _buildTopFriends(context, ref, canvasTheme, user),
-                            _buildFriends(context, ref, canvasTheme, user),
-                          ],
-                        ),
+              //_buildTabBar(context, ref, canvasTheme),
+            ],
+          ),
+          Positioned(
+            bottom: 32, // 下からの距離
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  height: 48,
+                  width: 48,
+                  decoration: BoxDecoration(
+                    color: ThemeColor.surface,
+                    border: Border.all(
+                      color: ThemeColor.stroke.withOpacity(0.8),
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        ThemeColor.surface,
+                        ThemeColor.surface.withOpacity(0.9),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  // 投稿タブ
-                  UserPostsThread(userId: user.userId),
-
-                  // アルバムタブ
-                  _buildImages(context, ref, user),
-                ],
+                  child: const Icon(
+                    Icons.close_rounded,
+                    size: 24,
+                    color: ThemeColor.text,
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
 
-    return Scaffold(
+    /*  return Scaffold(
       backgroundColor: canvasTheme.bgColor,
       body: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
@@ -730,6 +818,8 @@ class UserProfileScreen extends ConsumerWidget {
         ),
       ),
     );
+  
+   */
   }
 
   Widget _buildTabBar(
@@ -806,7 +896,7 @@ class UserProfileScreen extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: themeSize.horizontalPadding,
+        horizontal: 8,
       ),
       child: Column(
         children: [
@@ -1115,16 +1205,10 @@ class UserProfileScreen extends ConsumerWidget {
   Widget _buildTopFriends(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
     final themeSize = ref.watch(themeSizeProvider(context));
-    final imageWidth = (themeSize.screenWidth -
-                2 * themeSize.horizontalPadding -
-                canvasTheme.boxWidth * 2 -
-                32) /
-            5 -
-        8;
+    final imageWidth =
+        (themeSize.screenWidth - 2 * 8 - canvasTheme.boxWidth * 2 - 32) / 5 - 8;
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: themeSize.horizontalPadding,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         children: [
           box(
@@ -1252,9 +1336,7 @@ class UserProfileScreen extends ConsumerWidget {
     const imageRadius = 24.0;
     const stroke = 4.0;
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: themeSize.horizontalPadding,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         children: [
           box(
@@ -1392,7 +1474,6 @@ class UserProfileScreen extends ConsumerWidget {
 
   Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount user) {
     final asyncValue = ref.watch(imagesPostsNotiferProvider(user.userId));
-    final themeSize = ref.watch(themeSizeProvider(context));
 
     return asyncValue.when(
       data: (posts) {
@@ -1402,7 +1483,7 @@ class UserProfileScreen extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: mediaUrls.length,
           padding: const EdgeInsets.only(
-            top: 12,
+            top: 4,
             left: 4,
             right: 4,
           ),

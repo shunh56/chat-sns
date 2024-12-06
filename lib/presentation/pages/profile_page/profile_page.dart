@@ -61,8 +61,8 @@ class ProfileScreen extends ConsumerWidget {
     final asyncValue = ref.watch(myAccountNotifierProvider);
 
     final statusBarHeight = MediaQuery.of(context).padding.top;
-    final canPop = Navigator.of(context).canPop();
-    final height = canPop ? 156.0 : 80.0 + 32;
+    //final canPop = Navigator.of(context).canPop();
+    final height = 112.0;
     return asyncValue.when(
       data: (me) {
         final canvasTheme = me.canvasTheme;
@@ -73,6 +73,7 @@ class ProfileScreen extends ConsumerWidget {
             child: CustomScrollView(
               slivers: [
                 SliverAppBar(
+                  automaticallyImplyLeading: false,
                   expandedHeight: height,
                   pinned: true,
                   stretch: true,
@@ -170,9 +171,7 @@ class ProfileScreen extends ConsumerWidget {
                                 height: kToolbarHeight,
                                 child: Padding(
                                   padding: EdgeInsets.only(
-                                    left: canPop
-                                        ? themeSize.horizontalPadding + 32
-                                        : themeSize.horizontalPadding,
+                                    left: themeSize.horizontalPadding,
                                     right: themeSize.horizontalPadding,
                                   ),
                                   child: Row(
@@ -1186,7 +1185,7 @@ class ProfileScreen extends ConsumerWidget {
             .getUserAccounts(me.topFriends),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return SizedBox();
+            return const SizedBox();
           }
           final users = snapshot.data!;
           return Padding(

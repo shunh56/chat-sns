@@ -3,12 +3,10 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/left_message.dart';
@@ -22,11 +20,8 @@ import 'package:app/presentation/providers/provider/chats/message_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/usecase/direct_message_usecase.dart';
-import 'package:app/usecase/voice_chat_usecase.dart';
 import 'package:app/usecase/voip_usecase.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -187,6 +182,7 @@ class ChattingScreen extends ConsumerWidget {
                             size: 24,
                           ),
                         ), */
+
                         GestureDetector(
                           onTap: () async {
                             //TODO 通話を2人だけにするか、公開にするかどうか

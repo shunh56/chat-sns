@@ -73,7 +73,7 @@ android {
 
     // google-services.jsonを環境に応じて切り替える
     applicationVariants.all { variant ->
-        def devMode = dartEnvironmentVariables.FLAVOR == 'dev'
+        def devMode = false
         def targetJson = devMode ? 'google-services-dev.json' : 'google-services-prod.json'
         
         variant.preBuild.doFirst {
