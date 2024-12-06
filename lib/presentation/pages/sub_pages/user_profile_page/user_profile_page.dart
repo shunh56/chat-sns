@@ -4,7 +4,6 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
-import 'package:app/presentation/components/core/sticky_tabbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
@@ -286,7 +285,7 @@ class UserProfileScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                           ),
                           child: Text(
@@ -307,7 +306,7 @@ class UserProfileScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                           ),
                           child: Text(
@@ -634,7 +633,7 @@ class UserProfileScreen extends ConsumerWidget {
 
     final isFriend =
         friendInfos.map((item) => item.userId).contains(user.userId);
-    if (isFriend) return SizedBox();
+    if (isFriend) return const SizedBox();
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
@@ -758,7 +757,7 @@ class UserProfileScreen extends ConsumerWidget {
                 ),
               ),
             ),
-          Gap(12),
+          const Gap(12),
           FocusedMenuHolder(
             onPressed: () {},
             menuWidth: 120,
@@ -817,7 +816,7 @@ class UserProfileScreen extends ConsumerWidget {
       CanvasTheme canvasTheme, UserAccount user) {
     final themeSize = ref.watch(themeSizeProvider(context));
     return Padding(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: 8,
       ),
       child: Column(
@@ -1130,7 +1129,7 @@ class UserProfileScreen extends ConsumerWidget {
     final imageWidth =
         (themeSize.screenWidth - 2 * 8 - canvasTheme.boxWidth * 2 - 32) / 5 - 8;
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         children: [
           box(
@@ -1258,7 +1257,7 @@ class UserProfileScreen extends ConsumerWidget {
     const imageRadius = 24.0;
     const stroke = 4.0;
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         children: [
           box(

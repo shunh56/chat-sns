@@ -62,7 +62,7 @@ class ProfileScreen extends ConsumerWidget {
     final asyncValue = ref.watch(myAccountNotifierProvider);
 
     final statusBarHeight = MediaQuery.of(context).padding.top;
-    final height = 112.0;
+    const height = 112.0;
     return asyncValue.when(
       data: (me) {
         final canvasTheme = me.canvasTheme;

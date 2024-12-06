@@ -20,7 +20,7 @@ class AccountScreen extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final ascyncValue = ref.watch(myAccountNotifierProvider);
     final me = ref.read(myAccountNotifierProvider).asData?.value;
-    if (me == null) return Scaffold();
+    if (me == null) return const Scaffold();
 
     final accountInfo = ascyncValue.when(
       data: (me) {
