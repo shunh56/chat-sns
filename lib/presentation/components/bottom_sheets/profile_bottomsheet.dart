@@ -113,7 +113,7 @@ class ProfileBottomSheet {
                           Navigator.pushReplacement(
                             context,
                             PageTransitionMethods.slideUp(
-                              const EditBioScreen(),
+                              const EditProfileScreens(),
                             ),
                           );
                         },

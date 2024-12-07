@@ -1544,63 +1544,6 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildWantToDoList(BuildContext context, WidgetRef ref,
-      CanvasTheme canvasTheme, UserAccount user) {
-    return Column(
-      children: [
-        box(
-          canvasTheme,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "近いうちに行きたい・したいこと",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: canvasTheme.boxTextColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Gap(8),
-              if (user.wantToDoList.isEmpty)
-                Center(
-                  child: Text(
-                    "No Dreams",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: canvasTheme.boxSecondaryTextColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                children: user.wantToDoList
-                    .map(
-                      (item) => Container(
-                        margin: const EdgeInsets.all(4),
-                        child: Text(
-                          "・$item",
-                          overflow: TextOverflow.clip,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              )
-            ],
-          ),
-        ),
-        const Gap(12),
-      ],
-    );
-  }
 
   Widget _buildActivities(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
