@@ -3,7 +3,7 @@ description: A new Flutter project.
 publish_to: "none" 
 
 # bundle ID : com.blank.sns
-version: 1.0.2+1
+version: 1.0.2+2
 
 #最後のビルド番号はずっと増えていく
 #初回リリース：version: 1.0.0+1

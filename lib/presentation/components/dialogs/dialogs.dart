@@ -131,8 +131,7 @@ showFriendRequestDialog(
     onPositivePressed: () {
       ref
           .read(friendRequestedIdListNotifierProvider.notifier)
-          .deleteRequested(user);
-      ref.read(deletesIdListNotifierProvider.notifier).deleteUser(user);
+          .admitFriendRequested(user);
       Navigator.pop(context);
     },
     onNegativePressed: () {

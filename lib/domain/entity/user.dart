@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/value/user/gender.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -77,7 +79,7 @@ class UserAccount extends HiveObject {
   @HiveField(17)
   final List<String> wishList;
   @HiveField(18)
-  final List<String> wantToDoList;
+  final List<String> tags;
   @HiveField(19)
   final SubscriptionStatus subscriptionStatus;
   //canvas
@@ -88,6 +90,10 @@ class UserAccount extends HiveObject {
   final NotificationData notificationData;
   @HiveField(22)
   final Privacy privacy;
+  @HiveField(23)
+  final String location;
+  @HiveField(24)
+  final String job;
 
   UserAccount({
     required this.userId,
@@ -111,13 +117,15 @@ class UserAccount extends HiveObject {
     required this.currentStatus,
     required this.topFriends,
     required this.wishList,
-    required this.wantToDoList,
+    required this.tags,
     //
     required this.canvasTheme,
     required this.subscriptionStatus,
     //
     required this.notificationData,
     required this.privacy,
+    required this.location,
+    required this.job,
   });
 
   factory UserAccount.fromJson(Map<String, dynamic> json) {
@@ -151,7 +159,7 @@ class UserAccount extends HiveObject {
       topFriends: List<String>.from(json["profile"]["topFriends"]),
 
       wishList: List<String>.from(json['profile']['wishList'] ?? []),
-      wantToDoList: List<String>.from(json['profile']['wantToDoList'] ?? []),
+      tags: List<String>.from(json['profile']['tags'] ?? []),
       canvasTheme: CanvasTheme.fromJson(json["canvasTheme"]),
       subscriptionStatus: SubscriptionConverter.convertToSubScriptionStatus(
         json["subscription"],
@@ -162,6 +170,8 @@ class UserAccount extends HiveObject {
       privacy: Privacy.fromJson(
         json["privacy"],
       ),
+      location: json["profile"]["location"] ?? "", // 追加
+      job: json["profile"]["job"] ?? "",
     );
   }
 
@@ -192,7 +202,9 @@ class UserAccount extends HiveObject {
         "currentStatus": currentStatus.toJson(),
         "topFriends": topFriends,
         "wishList": wishList,
-        "wantToDoList": wantToDoList,
+        "tags": tags,
+        "location": location,
+        "job": job,
       },
       //canvas
       "canvasTheme": canvasTheme.toJson(),
@@ -223,12 +235,14 @@ class UserAccount extends HiveObject {
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
 
       wishList: [],
-      wantToDoList: [],
+      tags: [],
       canvasTheme: CanvasTheme.defaultCanvasTheme(),
       subscriptionStatus: SubscriptionStatus.none,
       //
       notificationData: NotificationData.defaultSettings(),
       privacy: Privacy.defaultPrivacy(),
+      location: "",
+      job: "",
     );
   }
 
@@ -254,12 +268,14 @@ class UserAccount extends HiveObject {
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
 
       wishList: [],
-      wantToDoList: [],
+      tags: [],
       canvasTheme: CanvasTheme.defaultCanvasTheme(),
       subscriptionStatus: SubscriptionStatus.none,
       //
       notificationData: NotificationData.defaultSettings(),
       privacy: Privacy.defaultPrivacy(),
+      location: "",
+      job: "",
     );
   }
   factory UserAccount.freezedUser(UserAccount user) {
@@ -284,12 +300,14 @@ class UserAccount extends HiveObject {
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
 
       wishList: [],
-      wantToDoList: [],
+      tags: [],
       canvasTheme: CanvasTheme.defaultCanvasTheme(),
       subscriptionStatus: SubscriptionStatus.none,
       //
       notificationData: NotificationData.defaultSettings(),
       privacy: Privacy.defaultPrivacy(),
+      location: "",
+      job: "",
     );
   }
 
@@ -315,15 +333,33 @@ class UserAccount extends HiveObject {
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
 
       wishList: [],
-      wantToDoList: [],
+      tags: [],
       canvasTheme: CanvasTheme.defaultCanvasTheme(),
       subscriptionStatus: SubscriptionStatus.none,
       //
       notificationData: NotificationData.defaultSettings(),
       privacy: Privacy.defaultPrivacy(),
+      location: "",
+      job: "",
     );
   }
 
+  static List<String> defaultAboutMeTemplates = [
+    "人生の目標は「寝ても覚めてもアイスクリーム」",
+    "趣味は考えすぎて頭から煙を出すこと",
+    "真面目に働いて不真面目に遊ぶスペシャリスト",
+    "好きな食べ物は炭水化物に炭水化物を添えたもの",
+    "運動不足を心配してたら運が不足してました",
+    "寝る前のスマホが生きがい（そして今）",
+    "天才肩こり師（経験27年）",
+    "諦めたらそこで甘いもの食べ時です",
+    "カロリーは気にしない主義（気にしたら負け）",
+    "昼寝の時間を確保するために早起きします",
+    "食べることとベッドの往復が日課です",
+    "プロ級の積読家です（読書じゃないよ積読だよ）",
+    "お布団から出られない重度の引き籠もり",
+    "休日は布団と一心同体になります",
+  ];
   factory UserAccount.create({
     required String userId,
     required String username,
@@ -353,16 +389,19 @@ class UserAccount extends HiveObject {
         gender: null,
         interestedIn: null,
       ),
-      aboutMe: "I am cringe, but I am free",
+      aboutMe: defaultAboutMeTemplates[
+          Random().nextInt(defaultAboutMeTemplates.length)],
       currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
 
       wishList: [],
-      wantToDoList: [],
+      tags: [],
       canvasTheme: CanvasTheme.defaultCanvasTheme(),
       subscriptionStatus: SubscriptionStatus.none,
       //
       notificationData: NotificationData.defaultSettings(),
       privacy: Privacy.defaultPrivacy(),
+      location: "",
+      job: "",
     );
   }
 
@@ -389,6 +428,9 @@ class UserAccount extends HiveObject {
     CanvasTheme? canvasTheme,
     NotificationData? notificationData,
     Privacy? privacy,
+    String? location,
+    String? job,
+    List<String>? tags,
   }) {
     return UserAccount(
       userId: userId,
@@ -413,12 +455,14 @@ class UserAccount extends HiveObject {
       currentStatus: currentStatus ?? this.currentStatus,
       topFriends: topFriends ?? this.topFriends,
       wishList: wishList,
-      wantToDoList: wantToDoList,
+      tags: tags ?? this.tags,
       canvasTheme: canvasTheme ?? this.canvasTheme,
       subscriptionStatus: subscriptionStatus,
       //
       notificationData: notificationData ?? this.notificationData,
       privacy: privacy ?? this.privacy,
+      location: location ?? this.location,
+      job: job ?? this.job,
     );
   }
 
@@ -452,12 +496,14 @@ class UserAccount extends HiveObject {
       topFriends: topFriends,
 
       wishList: wishList,
-      wantToDoList: wantToDoList,
+      tags: tags,
       canvasTheme: canvasTheme,
       subscriptionStatus: subscriptionStatus,
       //
       notificationData: notificationData,
       privacy: privacy,
+      location: "",
+      job: "",
     );
   }
 

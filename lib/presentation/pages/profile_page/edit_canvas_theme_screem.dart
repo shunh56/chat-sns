@@ -750,7 +750,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        Divider(
+                        /* Divider(
                           color: Colors.black.withOpacity(0.5),
                         ),
                         Row(
@@ -775,7 +775,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                               },
                             ),
                           ],
-                        ),
+                        ), */
                         /* Divider(
                           color: Colors.black.withOpacity(0.5),
                         ),

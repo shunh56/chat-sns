@@ -54,24 +54,13 @@ class UserProfileScreen extends ConsumerWidget {
 
     final statusBarHeight = MediaQuery.of(context).padding.top;
     const height = 112.0;
+    final thumbnailHeight = themeSize.screenWidth * 0.35;
 
-    /* final scrollController = ref.watch(scrollControllerProvider);
-    scrollController.addListener(() {
-      DebugPrint(
-          "${scrollController.position.userScrollDirection} , ${scrollController.position.pixels}");
-      if (scrollController.position.userScrollDirection ==
-              ScrollDirection.forward &&
-          scrollController.position.pixels <= -80) {
-        if (!popped) {
-          popped = true;
-          Navigator.popUntil(context, (route) => route.isFirst);
-        }
-      }
-    }); */
     return Scaffold(
       backgroundColor: canvasTheme.bgColor,
       body: Stack(
         children: [
+          /*
           CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -266,7 +255,6 @@ class UserProfileScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              //tabbar
               SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,7 +289,7 @@ class UserProfileScreen extends ConsumerWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    /* const SizedBox(height: 24),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -320,7 +308,7 @@ class UserProfileScreen extends ConsumerWidget {
                         ),
                         _buildImages(context, ref, user),
                       ],
-                    ),
+                    ), */
 
                     // アルバムセクション
 
@@ -329,8 +317,386 @@ class UserProfileScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              //_buildTabBar(context, ref, canvasTheme),
             ],
+          ),
+          */
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ヘッダー部分（グラデーション背景）
+                SizedBox(
+                  height: thumbnailHeight + 56,
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: thumbnailHeight,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              canvasTheme.bgColor,
+                              canvasTheme.boxBgColor,
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        child: SafeArea(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(child: SizedBox()),
+                                _buildTopActions(context, ref, user),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              // プロフィール画像
+                              UserIconCanvasIcon(user: user),
+
+                              if (user.links.isShown)
+                                Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Row(
+                                    children: [
+                                      if (user.links.instagram.isShown &&
+                                          user.links.instagram.path != null)
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 12),
+                                          child: GestureDetector(
+                                            onTap: () async {
+                                              launchUrl(
+                                                Uri.parse(
+                                                  user.links.instagram.url!,
+                                                ),
+                                                mode: LaunchMode
+                                                    .externalApplication,
+                                              );
+                                            },
+                                            child: SizedBox(
+                                              height: 24,
+                                              width: 24,
+                                              child: Image.asset(
+                                                user.links.instagram
+                                                    .assetString,
+                                                color: canvasTheme
+                                                    .profileLinksColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      if (user.links.x.isShown &&
+                                          user.links.x.path != null)
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 12),
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              launchUrl(
+                                                Uri.parse(user.links.x.url!),
+                                                mode: LaunchMode
+                                                    .externalApplication,
+                                              );
+                                            },
+                                            child: SizedBox(
+                                              height: 21,
+                                              width: 21,
+                                              child: Image.asset(
+                                                user.links.x.assetString,
+                                                color: canvasTheme
+                                                    .profileLinksColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+                //プロフィール
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ユーザー名
+                      Text(
+                        user.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '@${user.username}',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 14,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+                      // 自己紹介
+                      Text(
+                        user.aboutMe,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+                      // メタ情報
+                      Row(
+                        children: [
+                          if (user.location.isNotEmpty)
+                            Row(
+                              children: [
+                                Icon(Icons.location_on_outlined,
+                                    color: Colors.white.withOpacity(0.7),
+                                    size: 16),
+                                const SizedBox(width: 4),
+                                Text(
+                                  user.location,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                              ],
+                            ),
+                          if (user.job.isNotEmpty)
+                            Row(
+                              children: [
+                                Icon(Icons.work_outline,
+                                    color: Colors.white.withOpacity(0.7),
+                                    size: 16),
+                                const SizedBox(width: 4),
+                                Text(
+                                  user.job,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                              ],
+                            ),
+                          Icon(Icons.calendar_today,
+                              color: Colors.white.withOpacity(0.7), size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            "${user.createdAt.toDateStr}〜",
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+                      // 興味タグ
+                      if (user.tags.isNotEmpty)
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: user.tags
+                              .map(
+                                (tag) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    tag,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      _buildRequestBanner(context, ref, user),
+                    ],
+                  ),
+                ),
+
+                const Gap(24),
+
+                /*  // 共通の友達
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '共通の友達',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 40,
+                            child: Stack(
+                              children: List.generate(
+                                  4,
+                                  (index) => Positioned(
+                                        left: index * 24.0,
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: Colors.black,
+                                              width: 2,
+                                            ),
+                                            image: DecorationImage(
+                                              image: NetworkImage(me.imageUrl!),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      )).toList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+              
+                    const Gap(24), */
+
+                _buildCurrentStatus(context, ref, canvasTheme, user),
+                _buildTopFriends(context, ref, canvasTheme, user),
+                _buildFriends(context, ref, canvasTheme, user),
+                // 投稿セクション
+                const Gap(24),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: const Text(
+                    '投稿',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                UserPostsList(userId: user.userId),
+
+                /*  const SizedBox(height: 24),
+                    // 参加中のコミュニティ
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: const Text(
+                        '参加中のコミュニティ',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Gap(8),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 3,
+                      itemBuilder: (context, index) => Container(
+                        margin:
+                            const EdgeInsets.only(left: 8, right: 8, bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: NetworkImage(me.imageUrl!),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    [
+                                      'UIデザイナーズ',
+                                      'Tech Creators',
+                                      'Photography Club'
+                                    ][index],
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${[1240, 3500, 890][index]}メンバー',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+               */
+                const Gap(120),
+              ],
+            ),
           ),
           Positioned(
             bottom: 32, // 下からの距離
@@ -377,249 +743,6 @@ class UserProfileScreen extends ConsumerWidget {
         ],
       ),
     );
-
-    /*  return Scaffold(
-      backgroundColor: canvasTheme.bgColor,
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          if (notification is ScrollUpdateNotification) {
-            if (notification.dragDetails != null &&
-                notification.dragDetails!.primaryDelta != null &&
-                notification.dragDetails!.primaryDelta! > 85 &&
-                !popped) {
-              popped = true;
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-              return true;
-            }
-          }
-          return false;
-        },
-        child: ListView(
-          padding: const EdgeInsets.only(
-            top: kToolbarHeight,
-            bottom: 120,
-          ),
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                left: themeSize.horizontalPadding,
-                right: themeSize.horizontalPadding,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  UserIconCanvasIcon(user: user),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            ref
-                                .read(navigationRouterProvider(context))
-                                .goToChat(user);
-                          },
-                          child: SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: SvgPicture.asset(
-                              "assets/images/icons/chat.svg",
-                              // ignore: deprecated_member_use
-                              color: canvasTheme.profileTextColor,
-                            ),
-                          ),
-                        ),
-                        const Gap(12),
-                        /*GestureDetector(
-                      onTap: () {
-                        
-                      },
-                      child: Icon(
-                        shareIcon,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Gap(12), */
-                        FocusedMenuHolder(
-                          onPressed: () {},
-                          menuWidth: 120,
-                          blurSize: 0,
-                          animateMenuItems: false,
-                          openWithTap: true,
-                          menuBoxDecoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          menuItems: <FocusedMenuItem>[
-                            FocusedMenuItem(
-                              backgroundColor: ThemeColor.background,
-                              title: const Text(
-                                "フレンド解除",
-                              ),
-                              onPressed: () {
-                                UserBottomModelSheet(context)
-                                    .quitFriendBottomSheet(user);
-                              },
-                            ),
-                            FocusedMenuItem(
-                              backgroundColor: ThemeColor.background,
-                              title: const Text(
-                                "報告",
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ReportUserScreen(user),
-                                  ),
-                                );
-                              },
-                            ),
-                            FocusedMenuItem(
-                              backgroundColor: ThemeColor.background,
-                              title: const Text(
-                                "ブロック",
-                              ),
-                              onPressed: () {
-                                UserBottomModelSheet(context)
-                                    .blockUserBottomSheet(user);
-                              },
-                            ),
-                          ],
-                          child: Icon(
-                            Icons.more_horiz,
-                            color: canvasTheme.profileTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                left: themeSize.horizontalPadding,
-                right: themeSize.horizontalPadding,
-                bottom: 12,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.name,
-                          style: textStyle.w600(
-                            fontSize: 24,
-                            color: canvasTheme.profileTextColor,
-                          ),
-                        ),
-                        Text(
-                          "${user.createdAt.toDateStr}〜",
-                          style: textStyle.w600(
-                            fontSize: 14,
-                            color: canvasTheme.profileSecondaryTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (user.links.isShown)
-                    Row(
-                      children: [
-                        /* if (me.links.line.isShown && me.links.line.path != null)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: GestureDetector(
-                            onTap: () {
-                              launchUrl(Uri.parse(me.links.line.url!));
-                            },
-                            child: SizedBox(
-                              height: 32,
-                              width: 32,
-                              child: Image.asset(
-                                me.links.line.assetString,
-                                color: canvasTheme.profileLinksColor,
-                              ),
-                            ),
-                          ),
-                        ), */
-                        if (user.links.instagram.isShown &&
-                            user.links.instagram.path != null)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12),
-                            child: GestureDetector(
-                              onTap: () async {
-                                launchUrl(
-                                  Uri.parse(
-                                    user.links.instagram.url!,
-                                  ),
-                                  mode: LaunchMode.externalApplication,
-                                );
-                                //showMessage("${me.links.instagram.url}");
-                              },
-                              child: SizedBox(
-                                height: 26,
-                                width: 26,
-                                child: Image.asset(
-                                  user.links.instagram.assetString,
-                                  color: canvasTheme.profileLinksColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (user.links.x.isShown && user.links.x.path != null)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 12),
-                            child: GestureDetector(
-                              onTap: () {
-                                launchUrl(
-                                  Uri.parse(user.links.x.url!),
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              },
-                              child: SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: Image.asset(
-                                  user.links.x.assetString,
-                                  color: canvasTheme.profileLinksColor,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: themeSize.horizontalPadding,
-              ),
-              child: Text(
-                user.aboutMe,
-                style: textStyle.w600(
-                  fontSize: 14,
-                  color: canvasTheme.profileAboutMeColor,
-                ),
-              ),
-            ),
-            const Gap(24),
-            //_buildImages(context, ref, user),
-            _buildCurrentStatus(context, ref, canvasTheme, user),
-            _buildTopFriends(context, ref, canvasTheme, user),
-            _buildFriends(context, ref, canvasTheme, user),
-          ],
-        ),
-      ),
-    );
-  
-   */
   }
 
   Widget _buildRequestBanner(
@@ -633,99 +756,95 @@ class UserProfileScreen extends ConsumerWidget {
 
     final isFriend =
         friendInfos.map((item) => item.userId).contains(user.userId);
-    if (isFriend) return const SizedBox();
+
     return Padding(
       padding: const EdgeInsets.only(top: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FutureBuilder(
-            future: ref
-                .read(friendIdListNotifierProvider.notifier)
-                .getFriends(user.userId),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const SizedBox();
-              }
-              final users = snapshot.data!;
-              users.removeWhere((e) => !friendIds.contains(e.userId));
-              final shorten = users.length > 2;
+      child: FutureBuilder(
+        future: ref
+            .read(friendIdListNotifierProvider.notifier)
+            .getFriends(user.userId),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const SizedBox();
+          }
+          final users = snapshot.data!;
+          users.removeWhere((e) => !friendIds.contains(e.userId));
+          final shorten = users.length > 2;
 
-              return Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 24,
-                      child: Row(
-                        children: [
-                          Wrap(
-                            children: (shorten ? users.sublist(0, 2) : users)
-                                .map(
-                                  (user) => Container(
-                                    margin: const EdgeInsets.all(2),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(100),
-                                      child: Container(
-                                        color: ThemeColor.stroke,
-                                        height: 20,
-                                        width: 20,
-                                        child: user.imageUrl != null
-                                            ? CachedNetworkImage(
-                                                imageUrl: user.imageUrl!,
-                                                fadeInDuration: const Duration(
-                                                    milliseconds: 120),
-                                                imageBuilder:
-                                                    (context, imageProvider) =>
-                                                        Container(
-                                                  height: 20,
-                                                  width: 20,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.transparent,
-                                                    image: DecorationImage(
-                                                      image: imageProvider,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
+          return Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 24,
+                  child: Row(
+                    children: [
+                      Wrap(
+                        children: (shorten ? users.sublist(0, 2) : users)
+                            .map(
+                              (user) => Container(
+                                margin: const EdgeInsets.all(2),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Container(
+                                    color: ThemeColor.stroke,
+                                    height: 20,
+                                    width: 20,
+                                    child: user.imageUrl != null
+                                        ? CachedNetworkImage(
+                                            imageUrl: user.imageUrl!,
+                                            fadeInDuration: const Duration(
+                                                milliseconds: 120),
+                                            imageBuilder:
+                                                (context, imageProvider) =>
+                                                    Container(
+                                              height: 20,
+                                              width: 20,
+                                              decoration: BoxDecoration(
+                                                color: Colors.transparent,
+                                                image: DecorationImage(
+                                                  image: imageProvider,
+                                                  fit: BoxFit.cover,
                                                 ),
-                                                placeholder: (context, url) =>
-                                                    const SizedBox(),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        const SizedBox(),
-                                              )
-                                            : const Icon(
-                                                Icons.person_outline,
-                                                size: 20 * 0.8,
-                                                color: ThemeColor.accent,
                                               ),
-                                      ),
-                                    ),
+                                            ),
+                                            placeholder: (context, url) =>
+                                                const SizedBox(),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const SizedBox(),
+                                          )
+                                        : const Icon(
+                                            Icons.person_outline,
+                                            size: 20 * 0.8,
+                                            color: ThemeColor.accent,
+                                          ),
                                   ),
-                                )
-                                .toList(),
-                          ),
-                          const Gap(4),
-                          Text(
-                            "共通の友達${users.length}人",
-                            style: textStyle.w600(
-                              fontSize: 12,
-                              color: user.canvasTheme.profileSecondaryTextColor,
-                            ),
-                          ),
-                        ],
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ),
-                    ),
+                      const Gap(4),
+                      Text(
+                        "共通の友達${users.length}人",
+                        style: textStyle.w400(
+                          fontSize: 12,
+                          color: user.canvasTheme.profileAboutMeColor,
+                        ),
+                      ),
+                    ],
                   ),
-                  const Gap(12),
-                  UserRequestButton(
-                    user: user,
-                    hasNoMutualFriends: users.isEmpty,
-                  )
-                ],
-              );
-            },
-          ),
-        ],
+                ),
+              ),
+              const Gap(12),
+              if (!isFriend)
+                UserRequestButton(
+                  user: user,
+                  hasNoMutualFriends: users.isEmpty,
+                )
+            ],
+          );
+        },
       ),
     );
   }
@@ -1393,232 +1512,6 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildImages(BuildContext context, WidgetRef ref, UserAccount user) {
-    final asyncValue = ref.watch(imagesPostsNotiferProvider(user.userId));
-
-    return asyncValue.when(
-      data: (posts) {
-        final mediaUrls = posts.expand((item) => item.mediaUrls).toList();
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: mediaUrls.length,
-          padding: const EdgeInsets.only(
-            top: 4,
-            left: 8,
-            right: 8,
-          ),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            childAspectRatio: 1,
-            crossAxisSpacing: 4,
-            mainAxisSpacing: 4,
-          ),
-          itemBuilder: (context, index) {
-            //final post = posts[index];
-            return CachedImage.profileBoardImage(
-              mediaUrls[index],
-            );
-            /*  return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  PageTransitionMethods.fadeIn(
-                    VerticalScrollview(
-                      scrollToPopOption: ScrollToPopOption.both,
-                      dragToPopDirection: DragToPopDirection.toBottom,
-                      child: ImagesView(
-                        imageUrls:
-                            imageUrls.map((item) => item.imageUrl).toList(),
-                        initialIndex: index,
-                      ),
-                    ),
-                  ),
-                );
-              },
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                      left: 8,
-                      right: 8,
-                      bottom: 24,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 2,
-                          offset: const Offset(4, 4),
-                          color: Colors.black.withOpacity(0.5),
-                        )
-                      ],
-                    ),
-                    child: SizedBox(
-                      height: imageHeight * 1.2,
-                      width: imageHeight,
-                      child: CachedImage.profileBoardImage(
-                        userImage.imageUrl,
-                      ),
-                    ),
-                  ),
-                  if (userImage.isNew)
-                    const Positioned(
-                      bottom: 24,
-                      right: 8,
-                      child: GradientText(
-                        text: "NEW",
-                      ),
-                    ),
-                ],
-              ),
-            );
-          
-           */
-          },
-        );
-      },
-      error: (e, s) => Text("error : $e, $s"),
-      loading: () => const SizedBox(),
-    );
-  }
-
-/*
-  Widget _buildWishList(BuildContext context, WidgetRef ref,
-      CanvasTheme canvasTheme, UserAccount user) {
-    return Column(
-      children: [
-        box(
-          canvasTheme,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "欲しいもの",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: canvasTheme.boxTextColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Gap(8),
-              if (user.wishList.isEmpty)
-                Center(
-                  child: Text(
-                    "No WishList",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: canvasTheme.boxSecondaryTextColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ListView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                children: user.wishList
-                    .map(
-                      (item) => Container(
-                        margin: const EdgeInsets.all(4),
-                        child: Text(
-                          "・$item",
-                          overflow: TextOverflow.clip,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: canvasTheme.boxSecondaryTextColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              )
-            ],
-          ),
-        ),
-        const Gap(12),
-      ],
-    );
-  }
-
-
-  Widget _buildActivities(BuildContext context, WidgetRef ref,
-      CanvasTheme canvasTheme, UserAccount user) {
-    return box(
-      canvasTheme,
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "アクティビティ",
-            style: TextStyle(
-              fontSize: 16,
-              color: canvasTheme.boxTextColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const Gap(8),
-          FutureBuilder(
-            future: ref
-                .read(allCurrentStatusPostsNotifierProvider.notifier)
-                .getUsersPosts(user.userId),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const SizedBox();
-              }
-              final posts = snapshot.data!;
-              if (posts.isEmpty) {
-                return Center(
-                  child: Text(
-                    "No Activities",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: canvasTheme.boxSecondaryTextColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: posts.length,
-                padding: EdgeInsets.zero,
-                itemBuilder: (context, index) {
-                  final post = posts[index];
-                  return Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    /* decoration: BoxDecoration(
-                        border: Border(
-                          bottom: (index < 10 - 1)
-                              ? BorderSide(
-                                  width: 0.8,
-                                  color: Colors.black.withOpacity(0.3),
-                                )
-                              : BorderSide.none,
-                        ),
-                      ), */
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CurrentStatusPostWidgets(context, ref, post, user)
-                            .timelinePost(),
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
-          )
-        ],
-      ),
-    );
-  }
- */
   Widget box(CanvasTheme canvasTheme, Widget child) {
     return Row(
       children: [

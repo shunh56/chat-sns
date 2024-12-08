@@ -72,7 +72,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
           child: ListView(
             children: [
               //const VoiceChatSection(),
-              const CurrentStatusPostsSection(),
+              //const CurrentStatusPostsSection(),
               /*Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: card,

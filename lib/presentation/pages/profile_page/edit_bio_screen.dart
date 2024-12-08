@@ -4,21 +4,26 @@ import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
+import 'package:app/presentation/pages/profile_page/widget/profile_profile_data_widget.dart';
 import 'package:app/presentation/providers/notifier/image/image_processor.dart';
 import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 
 final iconImageStateProvider = StateProvider.autoDispose<File?>((ref) => null);
 final imageUploadingProvider = StateProvider.autoDispose((ref) => false);
+final tagsStateProvider = StateProvider.autoDispose<List<String>>((ref) {
+  final user = ref.read(myAccountNotifierProvider).value;
+  return user?.tags ?? [];
+});
 
-// 追加の状態プロバイダー
-final locationStateProvider = StateProvider.autoDispose<String>((ref) => '');
-final websiteStateProvider = StateProvider.autoDispose<String>((ref) => '');
-final interestsStateProvider =
-    StateProvider.autoDispose<List<String>>((ref) => []);
+final jobStateProvider = StateProvider.autoDispose<String>((ref) {
+  final user = ref.read(myAccountNotifierProvider).value;
+  return user?.job ?? "";
+});
 
 class EditProfileScreens extends ConsumerWidget {
   const EditProfileScreens({super.key});
@@ -33,12 +38,21 @@ class EditProfileScreens extends ConsumerWidget {
     // 状態の監視
     final name = ref.watch(nameStateProvider);
     final nameNotifier = ref.watch(nameStateProvider.notifier);
+
     final aboutMe = ref.watch(aboutMeStateProvider);
     final aboutMeNotifier = ref.watch(aboutMeStateProvider.notifier);
-    final links = ref.watch(linksStateProvider);
-    final linksNotifier = ref.watch(linksStateProvider.notifier);
+
     final location = ref.watch(locationStateProvider);
     final locationNotifier = ref.watch(locationStateProvider.notifier);
+
+    final job = ref.watch(jobStateProvider);
+    final jobNotifier = ref.watch(jobStateProvider.notifier);
+
+    final links = ref.watch(linksStateProvider);
+    final linksNotifier = ref.watch(linksStateProvider.notifier);
+
+    final tags = ref.watch(tagsStateProvider);
+    final tagsNotifier = ref.watch(tagsStateProvider.notifier);
 
     Widget buildTextField({
       required String label,
@@ -128,7 +142,7 @@ class EditProfileScreens extends ConsumerWidget {
                     initialValue: value,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: "URLを入力",
+                      hintText: "ユーザーネームを入力",
                       hintStyle: TextStyle(color: Colors.grey.shade600),
                       border: InputBorder.none,
                       isDense: true,
@@ -179,12 +193,15 @@ class EditProfileScreens extends ConsumerWidget {
                       .read(imageUploadUsecaseProvider)
                       .uploadIconImage(iconImage);
                 }
-                notifier.updateBio(
+                notifier.updateField(
                   name: name,
                   bio: bio,
                   aboutMe: aboutMe,
                   links: links,
                   imageUrl: imageUrl,
+                  tags: tags,
+                  location: location,
+                  job: job,
                 );
                 Navigator.pop(context);
               } catch (e) {
@@ -322,6 +339,140 @@ class EditProfileScreens extends ConsumerWidget {
                 hint: "場所を入力",
               ),
 
+              buildTextField(
+                label: "職種",
+                value: job,
+                onChanged: (value) => jobNotifier.state = value,
+                hint: "職種を入力",
+              ),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "タグ",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Text(
+                        "${tags.length}/3",
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ...tags.map(
+                        (tag) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: ThemeColor.accent,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                tag,
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              const Gap(4),
+                              GestureDetector(
+                                onTap: () {
+                                  final currentTags = tags;
+                                  currentTags.remove(tag);
+                                  tagsNotifier.state = currentTags;
+                                },
+                                child: const Icon(
+                                  Icons.close,
+                                  color: ThemeColor.white,
+                                  size: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (tags.length < 3)
+                        GestureDetector(
+                          onTap: () async {
+                            final controller = TextEditingController();
+                            final result = await showDialog<String>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                backgroundColor: Colors.grey.shade900,
+                                title: const Text(
+                                  'タグを追加',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                content: TextField(
+                                  autofocus: true,
+                                  style: const TextStyle(color: Colors.white),
+                                  controller: controller,
+                                  decoration: InputDecoration(
+                                    hintText: 'タグを入力',
+                                    hintStyle:
+                                        TextStyle(color: Colors.grey.shade600),
+                                  ),
+                                  onSubmitted: (value) =>
+                                      Navigator.of(context).pop(value),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: const Text('キャンセル'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(
+                                      controller.text,
+                                    ),
+                                    child: const Text('追加'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            DebugPrint("result : $result");
+                            if (result != null && result.isNotEmpty) {
+                              if (tags.length < 3 && !tags.contains(result)) {
+                                final newTags =
+                                    List<String>.from([...tags, result]);
+                                tagsNotifier.state = newTags;
+                              }
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: ThemeColor.accent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text('+ タグを追加'),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+
+              Gap(12),
               // SNSリンク
               const Text(
                 "ソーシャルリンク",

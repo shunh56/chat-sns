@@ -148,7 +148,6 @@ class TimelinePage extends ConsumerWidget {
                             delegate: SliverChildListDelegate(
                               [
                                 Container(
-                                  height: kToolbarHeight,
                                   padding: EdgeInsets.symmetric(
                                     horizontal: themeSize.horizontalPadding,
                                   ),
@@ -258,6 +257,7 @@ class TimelinePage extends ConsumerWidget {
                                     ],
                                   ),
                                 ),
+                                Gap(12),
                               ],
                             ),
                           ),
@@ -267,9 +267,8 @@ class TimelinePage extends ConsumerWidget {
                               TabBar(
                                 isScrollable: true,
                                 onTap: (val) {},
-                                padding: EdgeInsets.symmetric(
-                                    horizontal:
-                                        themeSize.horizontalPadding - 4),
+                                padding:
+                                    EdgeInsets.symmetric(horizontal: 8 - 4),
                                 indicator: BoxDecoration(
                                   color: ThemeColor.button,
                                   borderRadius: BorderRadius.circular(100),
@@ -482,9 +481,8 @@ class TimelinePage extends ConsumerWidget {
                               TabBar(
                                 isScrollable: true,
                                 onTap: (val) {},
-                                padding: EdgeInsets.symmetric(
-                                    horizontal:
-                                        themeSize.horizontalPadding - 4),
+                                padding:
+                                    EdgeInsets.symmetric(horizontal: 8 - 4),
                                 indicator: BoxDecoration(
                                   color: ThemeColor.button,
                                   borderRadius: BorderRadius.circular(100),

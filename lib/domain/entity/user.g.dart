@@ -75,18 +75,20 @@ class UserAccountAdapter extends TypeAdapter<UserAccount> {
       currentStatus: fields[15] as CurrentStatus,
       topFriends: (fields[16] as List).cast<String>(),
       wishList: (fields[17] as List).cast<String>(),
-      wantToDoList: (fields[18] as List).cast<String>(),
+      tags: (fields[18] as List).cast<String>(),
       canvasTheme: fields[20] as CanvasTheme,
       subscriptionStatus: fields[19] as SubscriptionStatus,
       notificationData: fields[21] as NotificationData,
       privacy: fields[22] as Privacy,
+      location: fields[23] as String,
+      job: fields[24] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserAccount obj) {
     writer
-      ..writeByte(23)
+      ..writeByte(25)
       ..writeByte(0)
       ..write(obj.userId)
       ..writeByte(1)
@@ -124,7 +126,7 @@ class UserAccountAdapter extends TypeAdapter<UserAccount> {
       ..writeByte(17)
       ..write(obj.wishList)
       ..writeByte(18)
-      ..write(obj.wantToDoList)
+      ..write(obj.tags)
       ..writeByte(19)
       ..write(obj.subscriptionStatus)
       ..writeByte(20)
@@ -132,7 +134,11 @@ class UserAccountAdapter extends TypeAdapter<UserAccount> {
       ..writeByte(21)
       ..write(obj.notificationData)
       ..writeByte(22)
-      ..write(obj.privacy);
+      ..write(obj.privacy)
+      ..writeByte(23)
+      ..write(obj.location)
+      ..writeByte(24)
+      ..write(obj.job);
   }
 
   @override

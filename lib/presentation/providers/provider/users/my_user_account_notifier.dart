@@ -54,6 +54,70 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     }
   }
 
+  Future<void> updateField({
+    String? name,
+    Bio? bio,
+    String? aboutMe,
+    Links? links,
+    String? imageUrl,
+    List<String>? tags,
+    List<String>? topFriends,
+    CurrentStatus? currentStatus,
+    Privacy? privacy,
+    NotificationData? notificationData,
+    CanvasTheme? canvasTheme,
+    bool? isOnline,
+    String? fcmToken,
+    String? voipToken,
+    String? usedCode,
+    AccountStatus? accountStatus,
+    String? location,
+    String? job,
+  }) async {
+    final user = state.asData!.value;
+    // もし前回と現在のステータスが異なる場合、ポストを作成
+    if (currentStatus != null && user.currentStatus != currentStatus) {
+      ref.read(currentStatusPostUsecaseProvider).addPost(
+            user.currentStatus.toJson(),
+            currentStatus.toJson(),
+          );
+    }
+
+    // 新しいユーザー状態を作成
+    final updatedUser = user.copyWith(
+      name: name,
+      bio: bio,
+      aboutMe: aboutMe,
+      links: links,
+      imageUrl: imageUrl,
+      tags: tags,
+      topFriends: topFriends,
+      currentStatus: currentStatus,
+      privacy: privacy,
+      notificationData: notificationData,
+      canvasTheme: canvasTheme,
+      isOnline: isOnline,
+      fcmToken: fcmToken,
+      voipToken: voipToken,
+      usedCode: usedCode,
+      accountStatus: accountStatus,
+      lastOpenedAt: isOnline != null ? Timestamp.now() : null,
+      location: location,
+      job: job,
+    );
+
+    // 状態を更新
+    state = AsyncValue.data(updatedUser);
+
+    // Firestoreを更新
+    if (updatedUser.userId == ref.read(authProvider).currentUser!.uid) {
+      await usecase.updateUser(updatedUser);
+      ref
+          .read(allUsersNotifierProvider.notifier)
+          .addUserAccounts([updatedUser]);
+    }
+  }
+
   onOpen() async {
     final user = state.asData!.value;
     await Future.delayed(const Duration(milliseconds: 50));

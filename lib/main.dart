@@ -334,6 +334,8 @@ void main() {
       );
 
       await Hive.initFlutter();
+      //Hiveを変更した時
+      //await Hive.deleteBoxFromDisk('userAccount');
       HiveBoxes.registerAdapters();
       await HiveBoxes.openBoxes();
 
