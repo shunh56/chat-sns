@@ -1,88 +1,60 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 enum InviteCodeStatus {
   notFound,
   overLimit,
   usedByMe,
   valid,
-  manual,
   unknownError,
 }
 
 class InviteCode {
-  final String code;
+  final String id;
   final Timestamp createdAt;
   final String userId;
-  final List<String> slot;
   final List<Map<String, dynamic>> logs;
-  final int maxCount;
+  final String? usedCode; // 自分が使用した招待コードのID
 
   InviteCode({
-    required this.code,
+    required this.id,
     required this.createdAt,
     required this.userId,
-    required this.slot,
     required this.logs,
-    required this.maxCount,
+    this.usedCode,
   });
 
   factory InviteCode.fromJson(Map<String, dynamic> json) {
     return InviteCode(
-      code: json["id"],
+      id: json["id"],
       createdAt: json["createdAt"],
       userId: json["userId"],
-      slot: List<String>.from(json["slot"]),
       logs: List<Map<String, dynamic>>.from(json["logs"] ?? []),
-      maxCount: json["maxCount"],
-    );
-  }
-
-  factory InviteCode.manual() {
-    return InviteCode(
-      code: "MANUAL",
-      createdAt: Timestamp.now(),
-      userId: "system",
-      slot: [],
-      logs: [],
-      maxCount: 999999,
+      usedCode: json["usedCode"],
     );
   }
 
   factory InviteCode.notFount() {
     return InviteCode(
-      code: "not_found",
+      id: "not_found",
       createdAt: Timestamp.now(),
       userId: "",
-      slot: [],
       logs: [],
-      maxCount: 0,
     );
   }
 
   factory InviteCode.init() {
     return InviteCode(
-      code: "",
+      id: "",
       createdAt: Timestamp.now(),
       userId: "",
-      slot: [],
       logs: [],
-      maxCount: 0,
     );
   }
 
   InviteCodeStatus get getStatus {
-    InviteCodeStatus temp = InviteCodeStatus.unknownError;
     final myId = FirebaseAuth.instance.currentUser!.uid;
-    if (slot.length < maxCount && !slot.contains(myId)) {
-      temp = InviteCodeStatus.valid;
-    }
-    if (code == "MANUAL") {
-      temp = InviteCodeStatus.manual;
-    }
-    if (slot.contains(myId)) temp = InviteCodeStatus.usedByMe;
-    if (slot.length >= maxCount) temp = InviteCodeStatus.overLimit;
-    if (code == "not_found") temp = InviteCodeStatus.notFound;
-    return temp;
+    if (id == "not_found") return InviteCodeStatus.notFound;
+    if (userId == myId) return InviteCodeStatus.usedByMe;
+    return InviteCodeStatus.valid;
   }
 }

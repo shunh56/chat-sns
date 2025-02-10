@@ -1,20 +1,21 @@
 import 'dart:async';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/main.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/chat_screen/chat_screen.dart';
-import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
-import 'package:app/presentation/pages/community_screen/community_tab_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
+import 'package:app/presentation/phase_01/search_users_screen.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
@@ -22,6 +23,7 @@ import 'package:app/presentation/providers/provider/users/friends_notifier.dart'
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,11 +49,29 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
   @override
   void initState() {
     super.initState();
+
     _setupVoIPListener();
+    configureVoiceCall(); // ここに追加
     WidgetsBinding.instance.addObserver(this);
     _myAccountNotifier = ref.read(myAccountNotifierProvider.notifier);
     _myAccountNotifier?.onOpen();
     initPlugin();
+  }
+
+  configureData() async {
+    final users = await FirebaseFirestore.instance.collection("users").get();
+    for (var user in users.docs) {
+      final friends = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.id)
+          .collection("friends")
+          .get();
+      final friendIds = friends.docs.map((doc) => doc.id).toList();
+      FirebaseFirestore.instance
+          .collection("friends")
+          .doc(user.id)
+          .set({"data": friendIds});
+    }
   }
 
   initPlugin() async {
@@ -94,7 +114,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
   }
 
   bool showed = false;
-  List<FriendInfo> _previousFriends = [];
+  List<String> _previousFriends = [];
 
   Future<void> showNewFriendDialog(UserAccount user) async {
     final themeSize = ref.watch(themeSizeProvider(context));
@@ -225,17 +245,16 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
   @override
   Widget build(BuildContext context) {
     //return NativeInlinePage();
-    ref.listen(friendIdListNotifierProvider, (prev, next) {
+    ref.listen(friendIdsStreamNotifier, (prev, next) {
       next.whenData((friendInfos) {
-        List<FriendInfo> newFriends = friendInfos
-            .where((friend) =>
-                !_previousFriends.any((prev) => prev.userId == friend.userId))
+        List<String> newFriends = friendInfos
+            .where((friend) => !_previousFriends.any((prev) => prev == friend))
             .toList();
         if (newFriends.isNotEmpty && _previousFriends.isNotEmpty) {
           final user = ref
               .read(allUsersNotifierProvider)
               .asData!
-              .value[newFriends.first.userId]!;
+              .value[newFriends.first]!;
           showNewFriendDialog(user);
         }
         _previousFriends = friendInfos;
@@ -353,36 +372,32 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
 
                       return InkWell(
                         borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ChattingScreen(userId: user.userId),
-                            ),
-                          );
-                        },
                         splashColor: ThemeColor.accent,
                         highlightColor: ThemeColor.white.withOpacity(0.1),
                         child: Center(
                           child: Padding(
                             padding: const EdgeInsets.all(4),
                             child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
                               onTap: () {
+                                DebugPrint("TAP");
                                 ref
                                     .read(navigationRouterProvider(context))
                                     .goToChat(user);
                               },
                               onLongPress: () {
+                                DebugPrint("LONG PRESS");
                                 ref
                                     .read(navigationRouterProvider(context))
-                                    .goToProfile(user);
+                                    .goToChat(user);
                               },
                               child: Stack(
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: UserIcon(user: user),
+                                    child: UserIcon(
+                                      user: user,
+                                    ),
                                   ),
                                   if (overview.isNotSeen)
                                     const Positioned(
@@ -409,20 +424,32 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
           ),
         ),
       ),
-      body: IndexedStack(
-        index: ref.watch(bottomNavIndexProvider),
-        children: const [
-          TimelinePage(),
-          CommunityTabScreen(),
-          Scaffold(),
-          ChatScreen(),
-          //ThreadsScreen(),
-          //SearchScreen(),
-          ProfileScreen(),
-          //ThreadsScreen(),
-          // PlaygroundScreen(),
-          //PovScreen(),
-          //InboxScreen(),
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: ref.watch(bottomNavIndexProvider),
+            children: const [
+              //FollowingScreen(),
+              //0
+              TimelinePage(),
+              //1
+              //CommunityTabScreen(),
+              SearchUsersScreen(),
+              //2
+
+              //3
+              ChatScreen(),
+              //4
+              //ThreadsScreen(),
+              //SearchScreen(),
+              ProfileScreen(),
+              //ThreadsScreen(),
+              // PlaygroundScreen(),
+              //PovScreen(),
+              //InboxScreen(),
+            ],
+          ),
+          const HeartAnimationArea(),
         ],
       ),
       bottomNavigationBar: ShaderWidget(
@@ -433,7 +460,25 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
           child: const BottomBar(),
         ),
       ),
-      //floatingActionButton: ref.watch(bottomNavIndexProvider) == 0 ? fab : null,
+      floatingActionButton: ref.watch(bottomNavIndexProvider) == 0
+          ? FloatingActionButton(
+              heroTag: "create_post",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  PageTransitionMethods.slideUp(
+                    const CreatePostScreen(),
+                  ),
+                );
+              },
+              backgroundColor: ThemeColor.highlight,
+              child: const Icon(
+                Icons.edit,
+                color: ThemeColor.white,
+                size: 30,
+              ),
+            )
+          : null,
     );
   }
 
@@ -453,32 +498,31 @@ class BottomBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
     return BottomNavigationBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
       type: BottomNavigationBarType.fixed,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
+      showSelectedLabels: true,
+      showUnselectedLabels: true,
+      selectedItemColor: Colors.white, // 選択されたアイテムの色を設定
+      unselectedItemColor: ThemeColor.button.withOpacity(0.3), //
+      selectedLabelStyle: textStyle.w600(fontSize: 11),
+      unselectedLabelStyle: textStyle.w600(fontSize: 11),
       onTap: (value) {
-        if (value == 2) {
-          Navigator.push(
-            context,
-            PageTransitionMethods.slideUp(
-              const CreatePostScreen(),
-            ),
-          );
-          //PostBottomModelSheet(context).openPostMenu();
-        }
         ref.watch(bottomNavIndexProvider.notifier).changeIndex(context, value);
       },
+      currentIndex: ref.watch(bottomNavIndexProvider),
       items: [
         _bottomNavItem(context, ref, "ホーム", 0, "assets/images/icons/home.svg"),
         _bottomNavItem(
-            context, ref, "コミュニティ", 1, "assets/images/icons/friends.svg"),
-        _bottomNavItem(context, ref, "投稿", 2, "assets/images/icons/send.svg"),
-        _bottomNavItem(context, ref, "チャット", 3, "assets/images/icons/chat.svg"),
+            context, ref, "探す", 1, "assets/images/icons/search_normal.svg"),
+        //_bottomNavItem(context, ref, "投稿", 2, "assets/images/icons/send.svg"),
         _bottomNavItem(
-            context, ref, "アカウント", 4, "assets/images/icons/profile.svg"),
+            context, ref, "ソーシャル", 2, "assets/images/icons/chat.svg"),
+        _bottomNavItem(
+            context, ref, "プロフィール", 3, "assets/images/icons/profile.svg"),
       ],
     );
   }
@@ -510,7 +554,7 @@ class BottomBar extends ConsumerWidget {
           ),
           (() {
             switch (index) {
-              case (3):
+              case (2):
                 final dms =
                     ref.watch(dmOverviewListNotifierProvider).asData?.value ??
                         [];
@@ -530,12 +574,13 @@ class BottomBar extends ConsumerWidget {
 
                 return Visibility(
                   visible: flag,
-                  child: Positioned(
+                  child: const Positioned(
                     top: 0, // 上部の位置を調整
                     right: 0, // 右側の位置を調整
+
                     child: CircleAvatar(
                       radius: 4, // サイズを小さくする
-                      backgroundColor: Theme.of(context).colorScheme.error,
+                      backgroundColor: Colors.blue,
                     ),
                   ),
                 );

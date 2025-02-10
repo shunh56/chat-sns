@@ -12,25 +12,23 @@ class InviteCodeUsecase {
   final InviteCodeRepository _repository;
   InviteCodeUsecase(this._repository);
 
-  //CREATE
   Future<InviteCode> generateInviteCode() async {
     return await _repository.generateInviteCode();
   }
 
-  //READ
-  //自分のコードを探してなかったら作成できる
   Future<InviteCode> getMyCode() async {
     return await _repository.getMyCode();
   }
 
-  //コードを調べる
   Future<InviteCode> getInviteCode(String code) async {
     return await _repository.getInviteCode(code);
   }
-  //UPDATE
 
-  useCode(String code) {
-    return _repository.useCode(code);
+  Future<InviteCode> getUsedInviteCode() async {
+    return await _repository.getUsedInviteCode();
   }
-  //DELETE
+
+  Future<void> useCode(String code) async {
+    return await _repository.useCode(code);
+  }
 }

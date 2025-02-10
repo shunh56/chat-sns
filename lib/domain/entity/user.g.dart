@@ -82,13 +82,14 @@ class UserAccountAdapter extends TypeAdapter<UserAccount> {
       privacy: fields[22] as Privacy,
       location: fields[23] as String,
       job: fields[24] as String,
+      friendIds: (fields[25] as List).cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, UserAccount obj) {
     writer
-      ..writeByte(25)
+      ..writeByte(26)
       ..writeByte(0)
       ..write(obj.userId)
       ..writeByte(1)
@@ -138,7 +139,9 @@ class UserAccountAdapter extends TypeAdapter<UserAccount> {
       ..writeByte(23)
       ..write(obj.location)
       ..writeByte(24)
-      ..write(obj.job);
+      ..write(obj.job)
+      ..writeByte(25)
+      ..write(obj.friendIds);
   }
 
   @override

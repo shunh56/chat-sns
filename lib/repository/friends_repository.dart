@@ -1,5 +1,4 @@
 import 'package:app/datasource/friends_datasource.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final friendsRepositoryProvider = Provider(
@@ -13,65 +12,21 @@ class FriendsRepository {
 
   FriendsRepository(this._datasource);
 
-  //CREATE
-  sendFriendRequest(String userId) {
-    return _datasource.sendFriendRequest(userId);
+  Stream<List<String>> streamFriends() {
+    final res = _datasource.streamFriends();
+    return res.map((snap) => List<String>.from(snap.data()?["data"] ?? []));
   }
 
-  void admitFriendRequested(String userId) {
-    return _datasource.admitFriendRequested(userId);
+  Future<List<String>> getFriendIds(String userId) async {
+    final res = await _datasource.fetchFriendIds(userId);
+    return List<String>.from(res.data()?["data"] ?? []);
   }
 
-  void addFriend(String userId) {
+  addFriend(String userId) {
     return _datasource.addFriend(userId);
   }
 
-  void addEngagement(String userId) {
-    _datasource.addEngagement(userId);
-  }
-
-  //READ
-  Stream<List<String>> streamFriendRequesteds() {
-    final stream = _datasource.streamFriendRequesteds();
-    return stream.map((event) => event.docs.map((doc) => doc.id).toList());
-  }
-
-  Stream<List<String>> streamFriendRequests() {
-    final stream = _datasource.streamFriendRequests();
-    return stream.map((event) => event.docs.map((doc) => doc.id).toList());
-  }
-
-  Stream<List<FriendInfo>> streamFriends() {
-    final stream = _datasource.streamFriends();
-    return stream.map((event) => event.docs.map(
-          (doc) {
-            final json = doc.data();
-            return FriendInfo(
-              createdAt: json["createdAt"],
-              userId: json["userId"],
-              engagementCount: json["engagementCount"] ?? 0,
-            );
-          },
-        ).toList());
-  }
-
-  Future<List<String>> getFriends(String userId) async {
-    final res = await _datasource.fetchFriends(userId);
-    return res.docs.map((doc) => doc.id).toList();
-  }
-
-  //UPDATE
-
-  //DELETE
-  void cancelRequest(String userId) {
-    return _datasource.deleteRequest(userId);
-  }
-
-  void deleteRequested(String userId) {
-    return _datasource.deleteRequested(userId);
-  }
-
-  void deleteFriend(String userId) {
+  deleteFriend(String userId) {
     return _datasource.deleteFriend(userId);
   }
 

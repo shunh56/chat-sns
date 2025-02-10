@@ -1,9 +1,7 @@
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/usecase/activities_usecase.dart';
 import 'package:app/usecase/posts/current_status_post_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -49,7 +47,7 @@ class AllCurrentStatusPostsNotifier extends _$AllCurrentStatusPostsNotifier {
   }
 
   incrementLikeCount(UserAccount user, CurrentStatusPost post) {
-    Map<String, CurrentStatusPost> cache =
+    /* Map<String, CurrentStatusPost> cache =
         state.asData != null ? state.asData!.value : {};
     cache[post.id]!.likeCount += 1;
     state = AsyncValue.data(cache);
@@ -61,7 +59,7 @@ class AllCurrentStatusPostsNotifier extends _$AllCurrentStatusPostsNotifier {
       ref
           .read(pushNotificationNotifierProvider)
           .sendCurrentStatusPostReaction(user, "currentStatusPostLike");
-    }
+    } */
   }
 
   getPosts(List<String> ids) async {

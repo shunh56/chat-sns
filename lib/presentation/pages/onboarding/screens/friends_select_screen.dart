@@ -1,4 +1,4 @@
-import 'package:app/core/utils/theme.dart';
+/*import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/pages/onboarding/providers/providers.dart';
@@ -40,7 +40,8 @@ class AddOtherFriendsScreen extends ConsumerWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primary),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(ThemeColor.primary),
                     ),
                   );
                 }
@@ -48,9 +49,9 @@ class AddOtherFriendsScreen extends ConsumerWidget {
                 if (!snapshot.hasData || snapshot.data == null) {
                   Future.delayed(const Duration(milliseconds: 100), () {
                     ref.read(pageControllerProvider).nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
                   });
                   return const SizedBox();
                 }
@@ -94,13 +95,16 @@ class AddOtherFriendsScreen extends ConsumerWidget {
                             ),
                             child: InkWell(
                               onTap: () {
-                                final list = List<String>.from(selectedOtherIds);
+                                final list =
+                                    List<String>.from(selectedOtherIds);
                                 if (list.contains(friend.userId)) {
                                   list.remove(friend.userId);
                                 } else {
                                   list.add(friend.userId);
                                 }
-                                ref.read(selectedOtherIdsProvider.notifier).state = list;
+                                ref
+                                    .read(selectedOtherIdsProvider.notifier)
+                                    .state = list;
                               },
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(
@@ -128,16 +132,19 @@ class AddOtherFriendsScreen extends ConsumerWidget {
                                       height: 24,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: selectedOtherIds.contains(friend.userId)
+                                        color: selectedOtherIds
+                                                .contains(friend.userId)
                                             ? ThemeColor.primary
                                             : ThemeColor.surface,
                                         border: Border.all(
-                                          color: selectedOtherIds.contains(friend.userId)
+                                          color: selectedOtherIds
+                                                  .contains(friend.userId)
                                               ? ThemeColor.primary
                                               : ThemeColor.stroke,
                                         ),
                                       ),
-                                      child: selectedOtherIds.contains(friend.userId)
+                                      child: selectedOtherIds
+                                              .contains(friend.userId)
                                           ? const Icon(
                                               Icons.check,
                                               size: 16,
@@ -163,9 +170,9 @@ class AddOtherFriendsScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               ref.read(pageControllerProvider).nextPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColor.primary,
@@ -190,7 +197,7 @@ class AddOtherFriendsScreen extends ConsumerWidget {
     );
   }
 
-  Future<List<UserAccount>?> _getFriends(WidgetRef ref, String? usedCode) async {
+  /*Future<List<UserAccount>?> _getFriends(WidgetRef ref, String? usedCode) async {
     if (usedCode == null) return null;
     try {
       final code = await ref.read(inviteCodeUsecaseProvider).getInviteCode(usedCode);
@@ -206,5 +213,6 @@ class AddOtherFriendsScreen extends ConsumerWidget {
     } catch (e) {
       return null;
     }
-  }
+  } */
 }
+ */

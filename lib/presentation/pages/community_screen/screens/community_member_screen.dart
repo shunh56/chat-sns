@@ -19,7 +19,8 @@ class CommunityMemberScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final asyncValue = ref.watch(communityMembersNotifierProvider);
+    final asyncValue =
+        ref.watch(communityMembersNotifierProvider(community.id));
     final scrollController = ScrollController();
     /*scrollController.addListener(() async {
       if (scrollController.position.pixels >
@@ -47,7 +48,7 @@ class CommunityMemberScreen extends ConsumerWidget {
             backgroundColor: ThemeColor.accent,
             onRefresh: () async {
               await ref
-                  .read(communityMembersNotifierProvider.notifier)
+                  .read(communityMembersNotifierProvider(community.id).notifier)
                   .refresh();
             },
             child: ListView.builder(

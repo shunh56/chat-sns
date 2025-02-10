@@ -19,6 +19,16 @@ class ActivitiesDatasource {
 
   final collectionName = "activites";
 
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamActivity() {
+    return _firestore
+        .collection("users")
+        .doc(_auth.currentUser!.uid)
+        .collection(collectionName)
+        .orderBy("updatedAt", descending: true)
+        .limit(1)
+        .snapshots();
+  }
+
   Future<QuerySnapshot<Map<String, dynamic>>> getRecentActivities() async {
     return await _firestore
         .collection("users")
@@ -27,6 +37,20 @@ class ActivitiesDatasource {
         .orderBy("updatedAt", descending: true)
         .limit(QUERY_LIMIT)
         .get();
+  }
+
+  Future<void> readActivities() async {
+    final query = await _firestore
+        .collection("users")
+        .doc(_auth.currentUser!.uid)
+        .collection(collectionName)
+        //.where("isSeen", isEqualTo: false)
+        .get();
+    for (var doc in query.docs) {
+      doc.reference.update({
+        "isSeen": true,
+      });
+    }
   }
 
   addLikeToPost(String userId, String postId) async {
@@ -44,11 +68,13 @@ class ActivitiesDatasource {
         "actionType": "postLike",
         "userIds": [_auth.currentUser!.uid],
         "updatedAt": Timestamp.now(),
+        "isSeen": false,
       });
     } else {
       snapshot.reference.update({
         "userIds": FieldValue.arrayUnion([_auth.currentUser!.uid]),
         "updatedAt": Timestamp.now(),
+        "isSeen": false,
       });
     }
   }
@@ -68,11 +94,13 @@ class ActivitiesDatasource {
         "actionType": "postComment",
         "userIds": [_auth.currentUser!.uid],
         "updatedAt": Timestamp.now(),
+        "isSeen": false,
       });
     } else {
       snapshot.reference.update({
         "userIds": FieldValue.arrayUnion([_auth.currentUser!.uid]),
         "updatedAt": Timestamp.now(),
+        "isSeen": false,
       });
     }
   }
@@ -92,11 +120,13 @@ class ActivitiesDatasource {
         "actionType": "currentStatusPostLike",
         "userIds": [_auth.currentUser!.uid],
         "updatedAt": Timestamp.now(),
+        "isSeen": false,
       });
     } else {
       snapshot.reference.update({
         "userIds": FieldValue.arrayUnion([_auth.currentUser!.uid]),
         "updatedAt": Timestamp.now(),
+        "isSeen": false,
       });
     }
   }

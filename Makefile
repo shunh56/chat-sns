@@ -16,9 +16,17 @@ dev-release:
 	@echo "Starting dev release build..."
 	$(FLUTTER) run --release $(DART_DEFINE_DEV)
 
+dev-android-release:
+	@echo "Starting Android dev release build..."
+	$(FLUTTER) run --flavor dev --release $(DART_DEFINE_DEV)
+
 build-dev:
 	@echo "Building dev IPA..."
 	$(FLUTTER) build ipa --release $(DART_DEFINE_DEV)
+
+build-android-dev:
+	@echo "Building Android dev App Bundle..."
+	$(FLUTTER) build appbundle --flavor dev --release $(DART_DEFINE_DEV)
 
 prod-debug:
 	@echo "Starting prod debug build..."
@@ -32,9 +40,18 @@ prod-release:
 	@echo "Starting prod release build..."
 	$(FLUTTER) run --release $(DART_DEFINE_PROD)
 
+prod-android-release:
+	@echo "Starting Android prod release build..."
+	$(FLUTTER) run --flavor prod --release $(DART_DEFINE_PROD)
+
 build-prod:
 	@echo "Building prod IPA..."
 	$(FLUTTER) build ipa --release $(DART_DEFINE_PROD)
+
+
+build-android-prod:
+	@echo "Building Android prod App Bundle..."
+	$(FLUTTER) build appbundle --flavor prod --release $(DART_DEFINE_PROD)
 
 dev: dev-debug
 prod: prod-debug

@@ -2,15 +2,19 @@ import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/message_overview.dart';
+import 'package:app/domain/entity/relation.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
+import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/create_chat_screen.dart';
+import 'package:app/presentation/pages/sub_pages/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -22,208 +26,305 @@ class ChatScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: themeSize.appbarHeight,
-        centerTitle: false,
-        title: Text(
-          "チャット",
-          style: textStyle.appbarText(japanese: true),
+    final tabWidth = themeSize.screenWidth / 5;
+    final dms = ref.watch(dmOverviewListNotifierProvider).asData?.value ?? [];
+    bool flag = false;
+    for (var dm in dms) {
+      final q = dm.userInfoList.where(
+          (item) => item.userId == ref.read(authProvider).currentUser!.uid);
+      if (q.isNotEmpty) {
+        final myInfo = q.first;
+        if (myInfo.lastOpenedAt.compareTo(dm.updatedAt) < 0) {
+          flag = true;
+        }
+      } else {
+        flag = true;
+      }
+    }
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          toolbarHeight: themeSize.appbarHeight,
+          centerTitle: false,
+          title: Text(
+            "ソーシャル",
+            style: textStyle.appbarText(japanese: true),
+          ),
         ),
-        actions: [
-          Gap(themeSize.horizontalPadding),
-        ],
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              color: ThemeColor.background,
+              child: TabBar(
+                isScrollable: true,
+                labelColor: ThemeColor.text,
+                tabAlignment: TabAlignment.start,
+                unselectedLabelColor: ThemeColor.subText,
+                indicatorColor: ThemeColor.highlight,
+                dividerColor: Colors.transparent,
+                indicatorWeight: 0,
+                indicator: GradientTabIndicator(
+                  colors: const [
+                    ThemeColor.highlight,
+                    Colors.cyan,
+                  ],
+                  weight: 2,
+                  width: tabWidth,
+                  radius: 8,
+                ),
+                tabs: [
+                  Tab(
+                    child: SizedBox(
+                      width: tabWidth,
+                      child: Center(
+                        child: Text(
+                          "フォロー中",
+                          style: textStyle.w600(fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Tab(
+                    child: SizedBox(
+                      width: tabWidth,
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "メッセージ",
+                              style: textStyle.w600(fontSize: 14),
+                            ),
+                            if (flag)
+                              const Padding(
+                                padding: EdgeInsets.only(left: 4),
+                                child: CircleAvatar(
+                                  radius: 4, // サイズを小さくする
+                                  backgroundColor: Colors.blue,
+                                ),
+                              )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  const FollowingList(),
+                  Stack(
+                    children: [
+                      ListView(
+                        padding: EdgeInsets.only(
+                            top: themeSize.verticalPaddingSmall),
+                        children: const [
+                          ChatList(),
+                        ],
+                      ),
+                      Positioned(
+                        right: 12,
+                        bottom: 12,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 96),
+                          child: FloatingActionButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const CreateChatsScreen(),
+                                ),
+                              );
+                            },
+                            backgroundColor: ThemeColor.highlight,
+                            child: const Icon(
+                              Icons.edit_outlined,
+                              color: ThemeColor.white,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+}
+
+class FollowingList extends ConsumerWidget {
+  const FollowingList({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    final List<Relation> followingRelations =
+        ref.watch(followingListNotifierProvider).asData?.value ??
+            []; //ref.watch(followersListNotifierProvider).asData?.value ?? []
+    final userIds = followingRelations.map((_) => _.userId).toList();
+    return followingRelations.isEmpty
+        ? _buildEmptyState(textStyle)
+        : FutureBuilder(
+            future: ref
+                .read(allUsersNotifierProvider.notifier)
+                .getUserAccounts(userIds),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return ListTile(
+                  leading: const Icon(
+                    Icons.error_outline,
+                    color: ThemeColor.error,
+                  ),
+                  title: Text(
+                    'エラーが発生しました',
+                    style: textStyle.w400(
+                      fontSize: 14,
+                      color: ThemeColor.error,
+                    ),
+                  ),
+                );
+              }
+
+              if (!snapshot.hasData) {
+                return ListTile(
+                  leading: const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                  title: Text(
+                    'Loading...',
+                    style: textStyle.w400(fontSize: 14),
+                  ),
+                );
+              }
+              final users = snapshot.data ?? [];
+              users.sort((a, b) => b.lastOpenedAt.compareTo(a.lastOpenedAt));
+              return ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.only(
+                  top: themeSize.verticalPaddingSmall,
+                  bottom: 120,
+                ),
+                itemCount: users.length,
+                itemBuilder: (context, index) => UserTile(
+                  user: users[index],
+                ),
+              );
+            },
+          );
+  }
+
+  Widget _buildEmptyState(ThemeTextStyle textStyle) {
+    const message = 'フォローしているユーザーはいません';
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: themeSize.horizontalPadding),
-            child: Text(
-              "フレンドとのチャットはここからできるよ！",
-              style: textStyle.w400(color: ThemeColor.subText),
+          Icon(
+            Icons.person_outline,
+            size: 48,
+            color: ThemeColor.text.withOpacity(0.5),
+          ),
+          const Gap(16),
+          Text(
+            message,
+            style: textStyle.w400(
+              fontSize: 14,
+              color: ThemeColor.text.withOpacity(0.7),
             ),
           ),
-          Gap(themeSize.verticalSpaceSmall),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                friendsListView(context, ref),
-                Gap(themeSize.verticalPaddingSmall),
-                const ChatList(),
-              ],
-            ),
-          ),
+          const Gap(120),
         ],
       ),
     );
   }
+}
 
-  Widget friendsListView(BuildContext context, WidgetRef ref) {
+class UserTile extends ConsumerWidget {
+  const UserTile({
+    super.key,
+    required this.user,
+  });
+
+  final UserAccount user;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final asyncValue = ref.watch(friendIdListNotifierProvider);
-    return asyncValue.when(
-      data: (friendInfos) {
-        final friendIds = friendInfos.map((item) => item.userId).toList();
-        List<UserAccount> users = ref
-            .read(allUsersNotifierProvider)
-            .asData!
-            .value
-            .values
-            .where((user) => friendIds.contains(user.userId))
-            .toList();
-        //4時間以内のユーザーのみ表示
-        users.removeWhere((user) =>
-            DateTime.now().difference(user.lastOpenedAt.toDate()).inHours > 4);
-        // status => online => lastOpenedAt順
-        users.sort((a, b) {
-          if (a.currentStatus.updatedRecently &&
-              !b.currentStatus.updatedRecently) {
-            return -1;
-          }
-          if (!a.currentStatus.updatedRecently &&
-              b.currentStatus.updatedRecently) {
-            return 1;
-          }
-          if (a.greenBadge && !b.greenBadge) {
-            return -1;
-          }
-          if (!a.greenBadge && b.greenBadge) {
-            return 1;
-          }
-          return b.lastOpenedAt.compareTo(a.lastOpenedAt);
-        });
-        if (users.isEmpty) {
-          return const SizedBox();
-        }
-        return Padding(
-          padding: EdgeInsets.only(top: themeSize.verticalPaddingSmall),
-          child: SizedBox(
-            height: 92,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: users.length,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              itemBuilder: (context, index) {
-                final user = users[index];
-                return GestureDetector(
-                  onTap: () {
-                    ref
-                        .read(navigationRouterProvider(context))
-                        .goToProfile(user);
-                  },
-                  onLongPress: () {
-                    ref.read(navigationRouterProvider(context)).goToChat(user);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: ThemeColor.accent,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: ThemeColor.stroke,
-                        width: 0.4,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              child: CachedImage.userIcon(
-                                user.imageUrl,
-                                user.name,
-                                30,
-                              ),
-                            ),
-                            // online and 10mins
-                            (user.greenBadge)
-                                ? Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 2,
-                                        color: ThemeColor.background,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const CircleAvatar(
-                                      radius: 8,
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  )
-                                //blue status
-                                : DateTime.now()
-                                            .difference(
-                                                user.lastOpenedAt.toDate())
-                                            .inHours <
-                                        4
-                                    ? Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                          border: Border.all(
-                                            width: 2,
-                                            color: ThemeColor.background,
-                                          ),
-                                          color: ThemeColor.highlight,
-                                        ),
-                                        child: Text(
-                                          user.lastOpenedAt.xxStatus,
-                                          style: const TextStyle(
-                                            fontSize: 8,
-                                            fontWeight: FontWeight.w600,
-                                            color: ThemeColor.white,
-                                          ),
-                                        ),
-                                      )
-                                    : const SizedBox(),
-                          ],
-                        ),
-                        if (user.currentStatus.updatedRecently)
-                          Container(
-                            constraints: const BoxConstraints(maxWidth: 180),
-                            padding: const EdgeInsets.only(left: 12),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user.name,
-                                  style: textStyle.w600(
-                                    fontSize: 14,
-                                    color: ThemeColor.text,
-                                  ),
-                                ),
-                                const Gap(4),
-                                Text(
-                                  user.currentStatus.bubbles.first,
-                                  style: textStyle.w400(
-                                    color: ThemeColor.subText,
-                                  ),
-                                ),
-                              ],
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Material(
+        color: ThemeColor.accent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            ref.read(navigationRouterProvider(context)).goToChat(user);
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                UserIcon(
+                  user: user,
+                  width: 60,
+                  isCircle: true,
+                ),
+                const Gap(18),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Gap(4),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: ThemeColor.text,
+                              height: 1,
                             ),
                           ),
-                      ],
-                    ),
+                          const Gap(4),
+                          Text(
+                            user.badgeStatus,
+                            style: textStyle.w600(
+                              color: user.greenBadge
+                                  ? Colors.green
+                                  : ThemeColor.subText,
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
-        );
-      },
-      error: (e, s) => const SizedBox(),
-      loading: () => const SizedBox(),
+        ),
+      ),
     );
   }
 }
@@ -256,7 +357,7 @@ class ChatList extends ConsumerWidget {
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 120),
+          padding: const EdgeInsets.only(bottom: 180),
           itemCount: list.length,
           itemBuilder: (context, index) {
             return ChatTile(overview: list[index]);
@@ -300,7 +401,9 @@ class ChatTile extends ConsumerWidget {
             backgroundColor: Colors.grey[900],
             title: Row(
               children: [
-                UserIcon(user: user),
+                UserIcon(
+                  user: user,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -414,38 +517,30 @@ class ChatTile extends ConsumerWidget {
       },
       splashColor: ThemeColor.accent,
       highlightColor: ThemeColor.stroke,
-      child: Padding(
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         child: Row(
           children: [
-            UserIcon(user: user, width: 54),
+            UserIcon(
+              user: user,
+              width: 60,
+              isCircle: true,
+            ),
             const Gap(12),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          user.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textStyle.w600(
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        "・${overview.lastMessage.createdAt.xxAgo}",
-                        style: textStyle.w600(
-                          color: ThemeColor.subText,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    user.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textStyle.w600(
+                      fontSize: 17,
+                    ),
                   ),
-                  const Gap(2),
+                  const Gap(4),
                   Text(
                     overview.lastMessage.text,
                     maxLines: 1,
@@ -458,15 +553,271 @@ class ChatTile extends ConsumerWidget {
                 ],
               ),
             ),
-            const Gap(24),
-            if (unseenCheck)
-              const CircleAvatar(
-                radius: 4,
-                backgroundColor: Colors.blue,
-              ),
+            const Gap(18),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  overview.lastMessage.createdAt.xxAgo,
+                  style: textStyle.w400(
+                    fontSize: 11,
+                    color: ThemeColor.subText,
+                  ),
+                ),
+                const Gap(12),
+                CircleAvatar(
+                  radius: 4,
+                  backgroundColor:
+                      unseenCheck ? Colors.blue : Colors.transparent,
+                ),
+              ],
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class FollowingUsers extends ConsumerWidget {
+  const FollowingUsers({
+    super.key,
+    required this.builder,
+  });
+
+  // UIを構築するためのコールバック関数
+  final Widget Function(List<Relation> followings) builder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final blockes = ref.watch(blocksListNotifierProvider).asData?.value ?? [];
+    final blockeds =
+        ref.watch(blockedsListNotifierProvider).asData?.value ?? [];
+    final filters =
+        blockes + blockeds + [ref.read(authProvider).currentUser!.uid];
+    return ref.watch(followingListNotifierProvider).when(
+          data: (followings) {
+            followings
+                .removeWhere((relation) => filters.contains(relation.userId));
+            return builder(followings);
+          },
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          error: (error, stackTrace) => Center(
+            child: Text('エラーが発生しました: $error'),
+          ),
+        );
+  }
+}
+
+class FollowingOnlineListView extends ConsumerWidget {
+  const FollowingOnlineListView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    return FollowingUsers(
+      builder: (followings) {
+        if (followings.isEmpty) {
+          return const SizedBox();
+        }
+        final userIds = followings.map((relation) => relation.userId).toList();
+        return FutureBuilder(
+            future: ref
+                .read(allUsersNotifierProvider.notifier)
+                .getUserAccounts(userIds),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return ListTile(
+                  leading: const Icon(
+                    Icons.error_outline,
+                    color: ThemeColor.error,
+                  ),
+                  title: Text(
+                    'エラーが発生しました',
+                    style: textStyle.w400(
+                      fontSize: 14,
+                      color: ThemeColor.error,
+                    ),
+                  ),
+                );
+              }
+
+              if (!snapshot.hasData) {
+                return ListTile(
+                  leading: const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                  title: Text(
+                    'Loading...',
+                    style: textStyle.w400(fontSize: 14),
+                  ),
+                );
+              }
+              final users = snapshot.data!;
+              //4時間以内のユーザーのみ表示
+              users.removeWhere((user) =>
+                  DateTime.now()
+                      .difference(user.lastOpenedAt.toDate())
+                      .inHours >
+                  4);
+              // status => online => lastOpenedAt順
+              users.sort((a, b) {
+                if (a.currentStatus.updatedRecently &&
+                    !b.currentStatus.updatedRecently) {
+                  return -1;
+                }
+                if (!a.currentStatus.updatedRecently &&
+                    b.currentStatus.updatedRecently) {
+                  return 1;
+                }
+                if (a.greenBadge && !b.greenBadge) {
+                  return -1;
+                }
+                if (!a.greenBadge && b.greenBadge) {
+                  return 1;
+                }
+                return b.lastOpenedAt.compareTo(a.lastOpenedAt);
+              });
+              if (users.isEmpty) {
+                return const SizedBox();
+              }
+              return Padding(
+                padding: EdgeInsets.only(top: themeSize.verticalPaddingSmall),
+                child: SizedBox(
+                  height: 92,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: users.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    itemBuilder: (context, index) {
+                      final user = users[index];
+                      return GestureDetector(
+                        onTap: () {
+                          ref
+                              .read(navigationRouterProvider(context))
+                              .goToChat(user);
+                        },
+                        onLongPress: () {
+                          ref
+                              .read(navigationRouterProvider(context))
+                              .goToProfile(user);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color: ThemeColor.accent,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: ThemeColor.stroke,
+                              width: 0.4,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Stack(
+                                alignment: Alignment.bottomRight,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    child: CachedImage.userIcon(
+                                      user.imageUrl,
+                                      user.name,
+                                      30,
+                                    ),
+                                  ),
+                                  // online and 10mins
+                                  (user.greenBadge)
+                                      ? Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              width: 2,
+                                              color: ThemeColor.background,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const CircleAvatar(
+                                            radius: 8,
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        )
+                                      //blue status
+                                      : DateTime.now()
+                                                  .difference(user.lastOpenedAt
+                                                      .toDate())
+                                                  .inHours <
+                                              4
+                                          ? Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(100),
+                                                border: Border.all(
+                                                  width: 2,
+                                                  color: ThemeColor.background,
+                                                ),
+                                                color: ThemeColor.highlight,
+                                              ),
+                                              child: Text(
+                                                user.lastOpenedAt.xxStatus,
+                                                style: const TextStyle(
+                                                  fontSize: 8,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: ThemeColor.white,
+                                                ),
+                                              ),
+                                            )
+                                          : const SizedBox(),
+                                ],
+                              ),
+                              if (user.currentStatus.updatedRecently)
+                                Container(
+                                  constraints:
+                                      const BoxConstraints(maxWidth: 180),
+                                  padding: const EdgeInsets.only(left: 12),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        user.name,
+                                        style: textStyle.w600(
+                                          fontSize: 14,
+                                          color: ThemeColor.text,
+                                        ),
+                                      ),
+                                      const Gap(4),
+                                      Text(
+                                        user.currentStatus.bubbles.first,
+                                        style: textStyle.w400(
+                                          color: ThemeColor.subText,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              );
+            });
+      },
     );
   }
 }

@@ -9,11 +9,14 @@ import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
-import 'package:app/presentation/pages/profile_page/edit_canvas_theme_screem.dart';
+import 'package:app/presentation/pages/profile_page/edit_bio_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/edit_top_friends.dart';
+import 'package:app/presentation/pages/sub_pages/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/user_posts_list.dart';
 import 'package:app/presentation/phase_01/friends_screen.dart';
+import 'package:app/presentation/providers/provider/followers_list_notifier.dart';
+import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -29,8 +32,6 @@ final canvasThemeProvider =
     StateProvider((ref) => CanvasTheme.defaultCanvasTheme());
 
 final nameStateProvider = StateProvider((ref) => "");
-final jobStateProvider = StateProvider((ref) => "");
-final locationStateProvider = StateProvider<String>((ref) => '');
 final tagsStateProvider = StateProvider<List<String>>((ref) => []);
 final usernameStateProvider = StateProvider((ref) => "");
 final bioStateProvider = StateProvider((ref) => Bio.defaultBio());
@@ -66,7 +67,8 @@ class ProfileScreen extends ConsumerWidget {
 
     return asyncValue.when(
       data: (me) {
-        final canvasTheme = me.canvasTheme;
+        final canvasTheme = CanvasTheme.defaultCanvasTheme();
+        //final canvasTheme = me.canvasTheme;
         return Scaffold(
           backgroundColor: canvasTheme.bgColor,
           body: Stack(
@@ -112,7 +114,7 @@ class ProfileScreen extends ConsumerWidget {
                                     ),
                                     Row(
                                       children: [
-                                        GestureDetector(
+                                        /* GestureDetector(
                                           onTap: () {
                                             ref
                                                 .read(canvasThemeProvider
@@ -131,7 +133,7 @@ class ProfileScreen extends ConsumerWidget {
                                             color: canvasTheme.profileTextColor,
                                           ),
                                         ),
-                                        const Gap(12),
+                                        const Gap(12), */
                                         GestureDetector(
                                           onTap: () {
                                             ProfileBottomSheet(context)
@@ -227,7 +229,7 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     //プロフィール
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -241,110 +243,187 @@ class ProfileScreen extends ConsumerWidget {
                               color: Colors.white,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
+                              height: 1.1,
                             ),
                           ),
-                          Text(
+                          /*Text(
                             '@${me.username}',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.7),
                               fontSize: 14,
                             ),
-                          ),
+                          ), */
 
-                          const SizedBox(height: 12),
                           // 自己紹介
-                          Text(
-                            me.aboutMe,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
 
-                          const SizedBox(height: 12),
-                          // メタ情報
-                          Row(
-                            children: [
-                              if (me.location.isNotEmpty)
-                                Row(
-                                  children: [
-                                    Icon(Icons.location_on_outlined,
-                                        color: Colors.white.withOpacity(0.7),
-                                        size: 16),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      me.location,
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.7),
-                                        fontSize: 14,
-                                      ),
+                          me.aboutMe.isNotEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 12),
+                                  child: Text(
+                                    me.aboutMe,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
                                     ),
-                                    const SizedBox(width: 16),
-                                  ],
-                                ),
-                              if (me.job.isNotEmpty)
-                                Row(
-                                  children: [
-                                    Icon(Icons.work_outline,
-                                        color: Colors.white.withOpacity(0.7),
-                                        size: 16),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      me.job,
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.7),
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                  ],
-                                ),
-                              Icon(Icons.calendar_today,
-                                  color: Colors.white.withOpacity(0.7),
-                                  size: 16),
-                              const SizedBox(width: 4),
-                              Text(
-                                "${me.createdAt.toDateStr}〜",
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 16),
-                          // 興味タグ
-                          if (me.tags.isNotEmpty)
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: me.tags
-                                  .map(
-                                    (tag) => Container(
+                                  ),
+                                )
+                              : Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 12,
+                                    bottom: 8,
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      final me = ref
+                                          .watch(myAccountNotifierProvider)
+                                          .asData!
+                                          .value;
+                                      ref
+                                          .read(nameStateProvider.notifier)
+                                          .state = me.name;
+                                      ref
+                                          .read(usernameStateProvider.notifier)
+                                          .state = me.username;
+                                      ref
+                                          .read(bioStateProvider.notifier)
+                                          .state = me.bio;
+                                      ref
+                                          .read(aboutMeStateProvider.notifier)
+                                          .state = me.aboutMe;
+                                      ref
+                                          .read(linksStateProvider.notifier)
+                                          .state = me.links;
+                                      Navigator.push(
+                                        context,
+                                        PageTransitionMethods.slideUp(
+                                          const EditProfileScreens(),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
+                                        horizontal: 24,
+                                        vertical: 8,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(16),
+                                        color: me.canvasTheme.boxBgColor,
+                                        borderRadius:
+                                            BorderRadius.circular(100),
                                       ),
                                       child: Text(
-                                        tag,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
+                                        "プロフィールを入力しよう！",
+                                        style: textStyle.w600(
+                                          color: me.canvasTheme.boxTextColor,
                                         ),
                                       ),
                                     ),
-                                  )
-                                  .toList(),
+                                  ),
+                                ),
+
+                          // メタ情報
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Wrap(
+                              spacing: 12,
+                              runSpacing: 4,
+                              children: [
+                                if (me.location.isNotEmpty)
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.location_on_outlined,
+                                        color: Colors.white.withOpacity(0.7),
+                                        size: 16,
+                                      ),
+                                      const Gap(2),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 0),
+                                        child: Text(
+                                          me.location,
+                                          style: textStyle.w400(
+                                            color:
+                                                Colors.white.withOpacity(0.7),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                if (me.job.isNotEmpty)
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.work_outline,
+                                        color: Colors.white.withOpacity(0.7),
+                                        size: 16,
+                                      ),
+                                      const Gap(2),
+                                      Text(
+                                        me.job,
+                                        style: textStyle.w400(
+                                          color: Colors.white.withOpacity(0.7),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                    ],
+                                  ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today,
+                                      color: Colors.white.withOpacity(0.7),
+                                      size: 14,
+                                    ),
+                                    const Gap(4),
+                                    Text(
+                                      "${me.createdAt.toDateStr}〜",
+                                      style: textStyle.w400(
+                                        color: Colors.white.withOpacity(0.7),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // 興味タグ
+                          if (me.tags.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: me.tags
+                                    .map(
+                                      (tag) => Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                        child: Text(
+                                          tag,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
                             ),
                         ],
                       ),
                     ),
-                    const Gap(24),
 
                     /*  // 共通の友達
                     Container(
@@ -397,11 +476,17 @@ class ProfileScreen extends ConsumerWidget {
               
                     const Gap(24), */
 
-                    _buildCurrentStatus(context, ref, canvasTheme, me),
+                    /* _buildCurrentStatus(context, ref, canvasTheme, me),
                     _buildTopFriends(context, ref, canvasTheme, me),
                     _buildFriends(context, ref, canvasTheme, me),
                     // 投稿セクション
-                    const Gap(24),
+                    const Gap(24), */
+                    const Gap(12),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: FollowStatsSection(),
+                    ),
+                    const Gap(18),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: const Text(
@@ -1055,11 +1140,10 @@ class ProfileScreen extends ConsumerWidget {
   Widget _buildFriends(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount me) {
     final themeSize = ref.watch(themeSizeProvider(context));
-
     const displayCount = 5;
     const imageRadius = 24.0;
     const stroke = 4.0;
-    final asyncValue = ref.watch(friendIdListNotifierProvider);
+    final friendIds = ref.watch(friendIdsProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
@@ -1080,16 +1164,11 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const Gap(8),
-                asyncValue.when(
-                  data: (friendInfos) {
-                    friendInfos.sort((a, b) =>
-                        b.engagementCount.compareTo(a.engagementCount));
-                    final friendIds = friendInfos.map((item) => item.userId);
-
+                Builder(
+                  builder: (context) {
                     final userIds = friendIds
                         .where((userId) => !me.topFriends.contains(userId))
                         .toList();
-
                     final map =
                         ref.read(allUsersNotifierProvider).asData!.value;
 
@@ -1178,8 +1257,6 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     );
                   },
-                  error: (e, s) => const SizedBox(),
-                  loading: () => const SizedBox(),
                 ),
               ],
             ),
@@ -1316,6 +1393,79 @@ class VerticalScrollview extends StatelessWidget {
       scrollToPopOption: scrollToPopOption,
       dragToPopDirection: dragToPopDirection,
       child: child,
+    );
+  }
+}
+
+class FollowStatsSection extends ConsumerWidget {
+  const FollowStatsSection({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+
+    final followings =
+        ref.watch(followingListNotifierProvider).asData?.value ?? [];
+    final followers =
+        ref.watch(followersListNotifierProvider).asData?.value ?? [];
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => UserFFScreen(
+                user: ref.read(myAccountNotifierProvider).asData!.value),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            _buildStat(
+              context: context,
+              count: followers.length,
+              label: 'フォロワー',
+              textStyle: textStyle,
+            ),
+            const Gap(24),
+            _buildStat(
+              context: context,
+              count: followings.length,
+              label: 'フォロー中',
+              textStyle: textStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStat({
+    required BuildContext context,
+    required int count,
+    required String label,
+    required ThemeTextStyle textStyle,
+  }) {
+    return Row(
+      children: [
+        Text(
+          count.toString(),
+          style: textStyle.w600(fontSize: 16),
+        ),
+        const Gap(4),
+        Text(
+          label,
+          style: textStyle.w400(
+            fontSize: 12,
+            color: ThemeColor.text.withOpacity(0.7),
+          ),
+        ),
+      ],
     );
   }
 }

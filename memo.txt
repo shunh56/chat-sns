@@ -121,3 +121,10 @@ export PATH="/Applications/Android Studio.app/Contents/jre/Contents/Home/bin:$PA
 
 dart flavors
 https://zenn.dev/altiveinc/articles/separating-environments-in-flutter-old-edition#firebase%E5%AF%BE%E5%BF%9C-(ios)
+
+
+
+
+
+
+android google sign in => SHA1 8b:ec:78:9a:44:98:50:74:e0:50:86:fc:83:9c:d0:ef:e5:db:21:c4を追加するとできる

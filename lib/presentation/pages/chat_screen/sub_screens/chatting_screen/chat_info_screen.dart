@@ -1,4 +1,4 @@
-import 'package:app/core/extenstions/timestamp_extenstion.dart';
+/*import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
@@ -26,11 +26,8 @@ class ChatInfoScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final user = ref.watch(allUsersNotifierProvider).asData!.value[userId]!;
-    final queue = ref
-        .watch(friendIdListNotifierProvider)
-        .asData!
-        .value
-        .where((item) => item.userId == user.userId);
+    final friendIds = ref.watch(friendIdsProvider);
+
     final mutes = ref.watch(mutesListNotifierProvider).asData?.value ?? [];
     final isMuted = mutes.contains(user.userId);
     return DefaultTabController(
@@ -241,12 +238,11 @@ class ChatInfoScreen extends ConsumerWidget {
     final isMuted = mutes.contains(user.userId);
     return Column(
       children: [
-       
         UserIcon(
-                            user: user,
-                            width: 72,
-                            isCircle: true,
-                          ),
+          user: user,
+          width: 72,
+          isCircle: true,
+        ),
         const Gap(12),
         Text(
           user.name,
@@ -433,3 +429,4 @@ class ChatInfoScreen extends ConsumerWidget {
     );
   }
 }
+ */

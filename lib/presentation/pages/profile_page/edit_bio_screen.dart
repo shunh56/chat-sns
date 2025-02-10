@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:app/core/utils/debug_print.dart';
+import 'package:app/core/utils/permissions/photo_permission.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
+import 'package:app/presentation/components/dialogs/dialogs.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
-import 'package:app/presentation/pages/profile_page/widget/profile_profile_data_widget.dart';
 import 'package:app/presentation/providers/notifier/image/image_processor.dart';
 import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -18,6 +19,11 @@ final imageUploadingProvider = StateProvider.autoDispose((ref) => false);
 final tagsStateProvider = StateProvider.autoDispose<List<String>>((ref) {
   final user = ref.read(myAccountNotifierProvider).value;
   return user?.tags ?? [];
+});
+
+final locationStateProvider = StateProvider.autoDispose<String>((ref) {
+  final user = ref.read(myAccountNotifierProvider).value;
+  return user?.location ?? "";
 });
 
 final jobStateProvider = StateProvider.autoDispose<String>((ref) {
@@ -286,6 +292,22 @@ class EditProfileScreens extends ConsumerWidget {
                       bottom: 0,
                       child: GestureDetector(
                         onTap: () async {
+                          bool isGranted =
+                              await PhotoPermissionsHandler().isGranted;
+                          if (!isGranted) {
+                            await PhotoPermissionsHandler().request();
+                            bool permitted =
+                                await PhotoPermissionsHandler().isGranted;
+                            if (!permitted) {
+                              showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    showGalleryPermissionDialog(context, ref),
+                              );
+
+                              return;
+                            }
+                          }
                           final imageFile = await ref
                               .read(imageProcessorNotifierProvider)
                               .getIconImage();
@@ -388,14 +410,12 @@ class EditProfileScreens extends ConsumerWidget {
                             children: [
                               Text(
                                 tag,
-                                style: TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Colors.white),
                               ),
                               const Gap(4),
                               GestureDetector(
                                 onTap: () {
-                                  final currentTags = tags;
-                                  currentTags.remove(tag);
-                                  tagsNotifier.state = currentTags;
+                                  tagsNotifier.state = [...tags]..remove(tag);
                                 },
                                 child: const Icon(
                                   Icons.close,
@@ -472,7 +492,7 @@ class EditProfileScreens extends ConsumerWidget {
                 ],
               ),
 
-              Gap(12),
+              const Gap(12),
               // SNSリンク
               const Text(
                 "ソーシャルリンク",

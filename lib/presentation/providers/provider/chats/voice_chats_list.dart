@@ -11,7 +11,6 @@ final voiceChatListNotifierProvider = StateNotifierProvider.autoDispose<
     VoiceChatListNotifier, AsyncValue<List<VoiceChat>>>(
   (ref) => VoiceChatListNotifier(
     ref,
-    ref.watch(friendIdListNotifierProvider),
     ref.watch(voiceChatUsecaseProvider),
   )..init(),
 );
@@ -19,39 +18,29 @@ final voiceChatListNotifierProvider = StateNotifierProvider.autoDispose<
 class VoiceChatListNotifier extends StateNotifier<AsyncValue<List<VoiceChat>>> {
   VoiceChatListNotifier(
     this._ref,
-    this.asyncValue,
     this._usecase,
   ) : super(
           const AsyncValue.loading(),
         );
 
   final Ref _ref;
-  final AsyncValue<List<FriendInfo>> asyncValue;
+
   final VoiceChatUsecase _usecase;
 
   init() async {
     List<VoiceChat> vcs = [];
-    asyncValue.maybeWhen(
-      data: (friendIds) async {
-        if (vcs.isNotEmpty) return;
-        vcs = await _usecase.getFriendsVoiceChats(
-            friendIds.map((item) => item.userId).toList());
-        final uniqueVcs = {for (var vc in vcs) vc.id: vc}.values.toList();
-        if (mounted) {
-          state = AsyncValue.data(uniqueVcs);
-        }
-
-        return;
-      },
-      orElse: () => null,
-    );
+    final friendIds = _ref.read(friendIdsProvider);
+    if (vcs.isNotEmpty) return;
+    vcs = await _usecase.getFriendsVoiceChats(friendIds);
+    final uniqueVcs = {for (var vc in vcs) vc.id: vc}.values.toList();
+    if (mounted) {
+      state = AsyncValue.data(uniqueVcs);
+    }
   }
 
   refresh() async {
-    final friendIds =
-        _ref.read(friendIdListNotifierProvider).asData?.value ?? [];
-    final voiceChats = await _usecase
-        .getFriendsVoiceChats(friendIds.map((item) => item.userId).toList());
+    final friendIds = _ref.read(friendIdsProvider);
+    final voiceChats = await _usecase.getFriendsVoiceChats(friendIds);
     state = AsyncValue.data(voiceChats);
   }
 }

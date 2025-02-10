@@ -1,5 +1,6 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/core/values.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/images_widget.dart';
@@ -123,7 +124,7 @@ class CreatePostScreen extends ConsumerWidget {
                   ],
                 ),
               )),
-              _buildPublicityLabel(ref),
+              if (postPrivacyMode) _buildPublicityLabel(ref),
               const Gap(8),
               const PostContentMenu(),
             ],

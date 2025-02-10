@@ -16,6 +16,9 @@ class PostUsecase {
   final Ref _ref;
   final PostRepository _repository;
   PostUsecase(this._ref, this._repository);
+  Future<Post> getPost(String postId) async {
+    return await _repository.getPost(postId);
+  }
 
   Future<List<Post>> getPosts() async {
     return await _repository.getPosts();

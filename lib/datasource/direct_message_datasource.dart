@@ -21,15 +21,27 @@ class DirectMessageDatasource {
   final Ref _ref;
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
+
+  final qLimit = 20;
+  DocumentSnapshot? lastDocument;
   DirectMessageDatasource(this._ref, this._auth, this._firestore);
-  Future<QuerySnapshot<Map<String, dynamic>>> fetchMessages(String id) async {
-    return await _firestore
+
+  Future<QuerySnapshot<Map<String, dynamic>>> fetchMessages(
+    String id, {
+    Timestamp? lastTimestamp,
+  }) async {
+    Query<Map<String, dynamic>> query = _firestore
         .collection("direct_messages")
         .doc(id)
         .collection("messages")
         .orderBy("createdAt", descending: true)
-        .limit(50)
-        .get();
+        .limit(qLimit);
+
+    if (lastTimestamp != null) {
+      query = query.startAfter([lastTimestamp]);
+    }
+
+    return await query.get();
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> streamMessages(String id) {

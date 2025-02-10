@@ -5,7 +5,6 @@ import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.da
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';

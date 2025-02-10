@@ -1,5 +1,5 @@
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/pages/sub_pages/user_profile_page/user_custom_post.dart';
+import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/provider/posts/user_posts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,7 +31,8 @@ class _UserPostsListState extends ConsumerState<UserPostsList>
             final post = list[index];
             return Column(
               children: [
-                CustomPostWidget(postRef: post),
+                PostWidget(postRef: post),
+                //CustomPostWidget(postRef: post),
               ],
             );
           },

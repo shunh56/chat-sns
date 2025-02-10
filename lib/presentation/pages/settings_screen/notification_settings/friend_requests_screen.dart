@@ -27,7 +27,7 @@ class FriendRequestNotificationScreen extends ConsumerWidget {
         appBar: AppBar(
           centerTitle: true,
           title: Text(
-            "フレンド申請",
+            "フォロー",
             style: textStyle.w600(fontSize: 16),
           ),
         ),
@@ -40,7 +40,7 @@ class FriendRequestNotificationScreen extends ConsumerWidget {
             children: [
               SettingTile(
                 title: "通知をオン",
-                explanation: "この設定をオンにすると、フレンドの投稿時に通知を受け取ります。",
+                explanation: "この設定をオンにすると、フォローされた時に通知を受け取ります。",
                 value: notificationData.friendRequest,
                 onChanged: (val) {
                   notificationDataNotifier.state = notificationData.copyWith(

@@ -307,7 +307,8 @@ class UserIconCanvasIcon extends ConsumerWidget {
   final CanvasTheme? theme;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canvasTheme = theme ?? user.canvasTheme;
+    final canvasTheme = CanvasTheme.defaultCanvasTheme();
+    //final canvasTheme = theme ?? user.canvasTheme;
     const double imageHeight = 80.0;
     return Container(
       padding: EdgeInsets.all(canvasTheme.iconStrokeWidth),

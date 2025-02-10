@@ -1,19 +1,18 @@
 import 'package:app/core/utils/theme.dart';
+import 'package:app/main.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
-import 'package:app/presentation/pages/profile_page/invite_code_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/settings_screen/account_settings/account_screen.dart';
 import 'package:app/presentation/pages/settings_screen/contact_screen.dart';
 import 'package:app/presentation/pages/settings_screen/debug_report_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/direct_messages_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/friend_requests_screen.dart';
-import 'package:app/presentation/pages/settings_screen/privacy_settings/friend_requests_screen.dart';
-import 'package:app/presentation/pages/settings_screen/privacy_settings/private_mode_screen.dart';
-import 'package:app/presentation/phase_01/friend_requesteds_screen.dart';
+import 'package:app/presentation/pages/version/version_manager.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -56,25 +55,41 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 page: const AccountScreen(),
               ),
-              _buildTile(
+              /*  _buildTile(
                 context,
                 _tileContent(
                   Icons.people_outline_rounded,
                   "フレンド申請",
                 ),
                 page: const FriendRequestedsScreen(),
-              ),
-              _buildBottomTile(
+              ), */
+              /*_buildBottomTile(
                 context,
                 _tileContent(
                   Icons.confirmation_num_outlined,
                   "招待コード",
                 ),
                 page: const InviteCodeScreen(),
-              ),
+              ), */
             ],
           ),
-          const Gap(32),
+          /* const Gap(32),
+          _buildContainer(
+            "招待",
+            [
+              _buildTopTile(
+                context,
+                _tileContent(Icons.lock_outline, "機能の解放"),
+                page: const MileStoneScreen(),
+              ),
+              _buildBottomTile(
+                context,
+                _tileContent(Icons.confirmation_num_outlined, "招待コートを使用"),
+                page: const UseInviteCodeScreen(),
+              ),
+            ],
+          ), */
+          /*const Gap(32),
           _buildContainer(
             "プライバシー設定",
             [
@@ -108,7 +123,7 @@ class SettingsScreen extends ConsumerWidget {
                 },
               ),
             ],
-          ),
+          ), */
           const Gap(32),
           _buildContainer(
             "通知設定",
@@ -151,7 +166,7 @@ class SettingsScreen extends ConsumerWidget {
               ), */
               _buildBottomTile(
                 context,
-                _tileContent(Icons.people_outline_rounded, "フレンド申請"),
+                _tileContent(Icons.people_outline_rounded, "フォロー"),
                 page: const FriendRequestNotificationScreen(),
                 function: () {
                   ref.read(notificationDataProvider.notifier).state =
@@ -257,6 +272,8 @@ class SettingsScreen extends ConsumerWidget {
                   showArrow: false),
             ),
           ),
+          const Gap(32),
+          _infoFooter(context, ref),
           const Gap(32),
         ],
       ),
@@ -407,6 +424,92 @@ class SettingsScreen extends ConsumerWidget {
         },
         child: child,
       ),
+    );
+  }
+
+  Widget _infoFooter(BuildContext context, WidgetRef ref) {
+    return FutureBuilder<VersionStatus>(
+      future: ref.watch(versionStatusProvider.future),
+      builder: (context, versionSnapshot) {
+        return FutureBuilder<PackageInfo>(
+          future: PackageInfo.fromPlatform(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const SizedBox();
+            final info = snapshot.data!;
+            final isUpdateAvailable =
+                versionSnapshot.data == VersionStatus.updateAvailable;
+            final isUpdateRequired =
+                versionSnapshot.data == VersionStatus.requiresUpdate;
+
+            return Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/icons/icon_circle_bg_white.png',
+                      height: 24,
+                      width: 24,
+                    ),
+                    const Gap(8),
+                    Text(
+                      info.appName,
+                      style: const TextStyle(
+                        color: ThemeColor.text,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const Gap(8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Version ${info.version}",
+                      style: TextStyle(
+                        color: ThemeColor.text.withOpacity(0.7),
+                        fontSize: 14,
+                      ),
+                    ),
+                    if (isUpdateAvailable || isUpdateRequired) ...[
+                      const Gap(8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isUpdateRequired ? Colors.red : Colors.orange,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          isUpdateRequired ? "アップデートが必要です" : "新しいバージョンがあります",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                if (flavor == "dev") ...[
+                  const Gap(4),
+                  Text(
+                    info.packageName,
+                    style: TextStyle(
+                      color: ThemeColor.text.withOpacity(0.5),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

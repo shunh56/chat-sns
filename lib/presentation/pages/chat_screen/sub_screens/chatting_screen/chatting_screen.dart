@@ -2,46 +2,49 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/left_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/right_message.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/widgets/server_message.dart';
-import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/chats/message_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/followers_list_notifier.dart';
+import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/usecase/direct_message_usecase.dart';
 import 'package:app/usecase/voip_usecase.dart';
 import 'package:flutter/material.dart';
-
-// Package imports:
+import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 //import 'package:nomiboo/presentation/providers/direct_messages/dm_notifier.dart';
-final randInt = Random().nextInt(6);
 
 final inputTextProvider = StateProvider.autoDispose((ref) => "");
 final controllerProvider =
     Provider.autoDispose((ref) => TextEditingController());
+final scrollConrtollerProvider =
+    Provider.autoDispose((ref) => ScrollController());
 
-class ChattingScreen extends ConsumerWidget {
+class ChattingScreen extends HookConsumerWidget {
   const ChattingScreen({super.key, required this.userId});
   final String userId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
 
     final topPadding = MediaQuery.of(context).viewPadding.top;
     final user = ref.read(allUsersNotifierProvider).asData!.value[userId]!;
@@ -141,32 +144,21 @@ class ChattingScreen extends ConsumerWidget {
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                user.isOnline ||
-                                        DateTime.now()
-                                                .difference(
-                                                    user.lastOpenedAt.toDate())
-                                                .inMinutes <
-                                            3
-                                    ? const Text(
-                                        "オンライン",
-                                        style: TextStyle(
-                                          fontSize: 12,
+                                user.greenBadge
+                                    ? Text(
+                                        user.badgeStatus,
+                                        style: textStyle.w400(
+                                          fontSize: 11,
                                           color: Colors.green,
                                         ),
                                       )
-                                    : DateTime.now()
-                                                .difference(
-                                                    user.lastOpenedAt.toDate())
-                                                .inDays <
-                                            1
-                                        ? Text(
-                                            "${user.lastOpenedAt.xxAgo}にオンライン",
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: ThemeColor.white,
-                                            ),
-                                          )
-                                        : const SizedBox(),
+                                    : Text(
+                                        user.badgeStatus,
+                                        style: textStyle.w400(
+                                          fontSize: 11,
+                                          color: ThemeColor.subText,
+                                        ),
+                                      )
                               ],
                             ),
                           ),
@@ -185,42 +177,51 @@ class ChattingScreen extends ConsumerWidget {
 
                         GestureDetector(
                           onTap: () async {
-                            //TODO 通話を2人だけにするか、公開にするかどうか
-                            /* 
-                    final functions = FirebaseFunctions.instanceFor(
-                        region: "asia-northeast1");
-                    final HttpsCallable callable = functions
-                        .httpsCallable('pushNotification-sendPushNotification');
-                    final fcmToken = user.fcmToken;
-                    if (fcmToken == null) {
-                      showMessage("NO FCM TOKEN");
-                      return;
-                    }
-                    final me =
-                        ref.read(myAccountNotifierProvider).asData!.value;
-                    try {
-                      final result = await callable.call({
-                        'token': fcmToken,
-                        'title': 'appName',
-                        'body': 'sending notification',
-                        'metaData': "data",
-                      });
-                      showMessage("push notification response : ${result.data}");
-                      DebugPrint("response : ${result.data}");
-                    } catch (e) {
-                      showMessage("push notification error : $e");
-                      DebugPrint("error : $e");
-                    } */
+                            HapticFeedback.mediumImpact();
+                            final followings = ref
+                                    .watch(followingListNotifierProvider)
+                                    .asData
+                                    ?.value ??
+                                [];
+                            final followers = ref
+                                    .watch(followersListNotifierProvider)
+                                    .asData
+                                    ?.value ??
+                                [];
 
-                            final vc = await ref
-                                .read(voipUsecaseProvider)
-                                .callUser(user);
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => VoiceChatScreen(id: vc.id),
-                              ),
-                            );
+                            final isFollowing = followings
+                                .any((follow) => follow.userId == user.userId);
+                            final isFollowed = followers
+                                .any((follow) => follow.userId == user.userId);
+                            final isMutualFollow = isFollowing && isFollowed;
+                            final blockeds = ref
+                                    .watch(blockedsListNotifierProvider)
+                                    .asData
+                                    ?.value ??
+                                [];
+                            final blocks = ref
+                                    .watch(blocksListNotifierProvider)
+                                    .asData
+                                    ?.value ??
+                                [];
+                            final filters = blocks + blockeds;
+                            if (filters.contains(user.userId)) {
+                              showMessage("エラーが起きました。");
+                              return;
+                            }
+                            if (isMutualFollow) {
+                              final vc = await ref
+                                  .read(voipUsecaseProvider)
+                                  .callUser(user);
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => VoiceChatScreen(id: vc.id),
+                                ),
+                              );
+                            } else {
+                              showMessage("相互フォローでないと通話はできません。");
+                            }
                           },
                           child: const Icon(
                             Icons.phone,
@@ -251,78 +252,104 @@ class ChattingScreen extends ConsumerWidget {
     final messageList = ref.watch(messageListNotifierProvider(userId));
     final user = ref.read(allUsersNotifierProvider).asData!.value[userId]!;
 
+    final scrollController = ref.watch(scrollConrtollerProvider);
+    final notifier = ref.read(messageListNotifierProvider(userId).notifier);
+
+    useEffect(() {
+      void onScroll() {
+        if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent) {
+          notifier.loadMore();
+        }
+      }
+
+      scrollController.addListener(onScroll);
+      return () => scrollController.removeListener(onScroll);
+    }, [scrollController]);
+
     return messageList.when(
       data: (data) {
-        bool isShort = data.length < 20;
+        // bool isShort = data.length < 20;
+        bool showLoadMore =
+            ref.watch(messageListNotifierProvider(userId).notifier).hasMore;
+
         return ListView.builder(
           reverse: true,
-          itemCount: data.length + (isShort ? 1 : 0),
+          itemCount: data.length + 1,
+          controller: scrollController,
           padding: EdgeInsets.only(
             top: topPadding + themeSize.appbarHeight + 12,
-            bottom: 0,
+            bottom: 12,
           ),
           itemBuilder: (context, index) {
-            if (isShort && index == data.length) {
-              List<String> messages = [
-                "お待たせしました！${user.name}さんとのチャットの舞台が開幕です。さぁ、メッセージの交換を始めましょう！",
-                "おっす！ここからが${user.name}さんとのチャットのスタート地点。面白い会話をガンガン繰り広げよう！",
-                "${user.name}さんとのチャットの魔法が始まるよ！この先にはどんな会話が待っているのか、楽しみだね。",
-                "${user.name}さんとのチャットの時間がやってきました。さあ、楽しいおしゃべりを始めましょう！",
-                "新しい物語の始まりだ！ここからチャットの冒険がスタートします。さぁ、話を続けよう！",
-                "${user.name}さんとのチャットの世界へようこそ！ここからが本格的な会話の始まりだ。楽しんでね！"
-              ];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        ref
-                            .read(navigationRouterProvider(context))
-                            .goToProfile(user);
-                      },
-                      child: CachedImage.userIcon(
-                        user.imageUrl,
-                        user.name,
-                        48,
-                      ),
-                    ),
-                    const Gap(8),
-                    Text(
-                      user.name,
-                      style: const TextStyle(
-                        color: ThemeColor.text,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      messages[randInt],
-                      style: const TextStyle(
-                        color: ThemeColor.icon,
-                      ),
-                    )
-                  ],
-                ),
-              );
-            }
-            final message = data[index];
+            // 最後のアイテム（リストの一番上）がローディングインジケーター
+            if (index == data.length) {
+              if (showLoadMore) {
+                return const SizedBox();
+              } else {
+                List<String> messages = [
+                  "お待たせしました！${user.name}さんとのチャットの舞台が開幕です。さぁ、メッセージの交換を始めましょう！",
+                  "おっす！ここからが${user.name}さんとのチャットのスタート地点。面白い会話をガンガン繰り広げよう！",
+                  "${user.name}さんとのチャットの魔法が始まるよ！この先にはどんな会話が待っているのか、楽しみだね。",
+                  "${user.name}さんとのチャットの時間がやってきました。さあ、楽しいおしゃべりを始めましょう！",
+                  "新しい物語の始まりだ！ここからチャットの冒険がスタートします。さぁ、話を続けよう！",
+                  "${user.name}さんとのチャットの世界へようこそ！ここからが本格的な会話の始まりだ。楽しんでね！"
+                ];
+                final randInt = Random().nextInt(messages.length);
 
+                return Container(
+                  margin:
+                      const EdgeInsets.only(bottom: 12, left: 12, right: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          ref
+                              .read(navigationRouterProvider(context))
+                              .goToProfile(user);
+                        },
+                        child: CachedImage.userIcon(
+                          user.imageUrl,
+                          user.name,
+                          48,
+                        ),
+                      ),
+                      const Gap(8),
+                      Text(
+                        user.name,
+                        style: const TextStyle(
+                          color: ThemeColor.text,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        messages[randInt],
+                        style: const TextStyle(
+                          color: ThemeColor.icon,
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              }
+            }
+
+            // 最初のメッセージの場合（リストの一番下）
+
+            // 通常のメッセージ
+            final message = data[index];
             if (message.senderId != ref.watch(authProvider).currentUser!.uid) {
               if (message is CurrentStatusMessage) {
-                return LeftCurrentStatusMessage(
-                  message: message,
-                  user: user,
-                );
+                return const SizedBox();
               }
               return LeftMessage(message: message, user: user);
             } else {
               if (message.senderId ==
                   ref.watch(authProvider).currentUser!.uid) {
                 if (message is CurrentStatusMessage) {
-                  return RightCurrentStatusMessage(
-                      message: message, user: user);
+                  return const SizedBox();
                 }
                 return RightMessage(message: message, user: user);
               } else {
@@ -332,12 +359,8 @@ class ChattingScreen extends ConsumerWidget {
           },
         );
       },
-      error: (e, s) {
-        return const Text("error");
-      },
-      loading: () {
-        return const Center(child: CircularProgressIndicator());
-      },
+      error: (e, s) => Center(child: Text("error : $e, $s")),
+      loading: () => const Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -357,328 +380,145 @@ class BottomTextField extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final controller = ref.watch(controllerProvider);
-    final friendIds =
-        ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
-    final requestIds =
-        ref.watch(friendRequestIdListNotifierProvider).asData?.value ?? [];
-    final requestedIds =
-        ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom + 24;
 
+    // フォロー関連の状態取得
+    final followings =
+        ref.watch(followingListNotifierProvider).asData?.value ?? [];
+    final followers =
+        ref.watch(followersListNotifierProvider).asData?.value ?? [];
+    final isFollowing =
+        followings.any((follow) => follow.userId == user.userId);
+    final isFollowed = followers.any((follow) => follow.userId == user.userId);
+    final isMutualFollow = isFollowing && isFollowed;
+
+    // ブロック関連の状態取得
+    final blocks = ref.watch(blocksListNotifierProvider).asData?.value ?? [];
+    final blockeds =
+        ref.watch(blockedsListNotifierProvider).asData?.value ?? [];
+    final isBlocking = blocks.any((userId) => userId == user.userId);
+    final isBlocked = blockeds.any((userId) => userId == user.userId);
+
+    // アカウント削除状態の確認
     if (user.accountStatus == AccountStatus.deleted) {
-      return Container(
-        width: MediaQuery.sizeOf(context).width,
-        padding: EdgeInsets.only(
-          top: 12,
-          left: 16,
-          right: 16,
-          bottom: MediaQuery.of(context).viewPadding.bottom,
-        ),
-        decoration: const BoxDecoration(
-          color: ThemeColor.accent,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "メッセージができません。",
-              style: TextStyle(
-                color: ThemeColor.text,
-                fontWeight: FontWeight.w600,
+      return _buildMessageContainer(
+        context: context,
+        title: "メッセージができません。",
+        message: "このユーザーはアカウントを削除したため、現在このユーザーとチャットをすることはできません。",
+        ref: ref,
+        user: user,
+      );
+    }
+
+    // ブロック状態の確認
+    if (isBlocking || isBlocked) {
+      final message = isBlocking
+          ? "このユーザーをブロックしているため、メッセージを送信することができません。"
+          : "このユーザーからブロックされているため、メッセージを送信することができません。";
+      return _buildMessageContainer(
+        context: context,
+        title: "メッセージができません。",
+        message: message,
+        ref: ref,
+        user: user,
+      );
+    }
+
+    // 相互フォロー状態に基づくメッセージ入力フィールドの表示
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      padding: EdgeInsets.only(
+        top: 8,
+        left: 16,
+        right: 16,
+        bottom: bottomPadding,
+      ),
+      decoration: BoxDecoration(
+        color: isMutualFollow ? null : ThemeColor.highlight.withOpacity(0.1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isMutualFollow) ...[
+            const Gap(12),
+            Text(
+              "${user.name}さんにメッセージを送る",
+              style: textStyle.w600(
                 fontSize: 16,
+                color: ThemeColor.text,
               ),
             ),
             const Gap(12),
             Text(
-              "このユーザーはアカウントを削除したため、現在このユーザーとチャットをすることはできません。",
-              style: TextStyle(
+              "${user.name}さんと相互フォローではないので、メッセージは相手のリクエスト一覧に届きます。思いやりを持ったメッセージを心がけましょう。",
+              style: textStyle.w400(
                 color: ThemeColor.text.withOpacity(0.7),
-                fontSize: 12,
+                height: 1.8,
               ),
             ),
             const Gap(16),
-            Material(
-              color: ThemeColor.stroke,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  ref
-                      .read(dmOverviewListNotifierProvider.notifier)
-                      .leaveChat(user);
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: const Center(
-                    child: Text(
-                      "閉じる",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            )
           ],
-        ),
-      );
-    }
-    if (friendIds.map((item) => item.userId).contains(user.userId)) {
-      return Container(
-        width: MediaQuery.sizeOf(context).width,
-        padding: EdgeInsets.only(
-          top: 8,
-          left: 16,
-          right: 16,
-          bottom: bottomPadding,
-        ),
-        child: TextField(
-          controller: controller,
-          keyboardType: TextInputType.multiline,
-          minLines: 1,
-          maxLines: 6,
-          style: textStyle.w600(
-            fontSize: 14,
-          ),
-          onChanged: (value) {
-            ref.read(inputTextProvider.notifier).state = value;
-          },
-          decoration: InputDecoration(
-            hintText: "メッセージを入力",
-            filled: true,
-            isDense: true,
-            fillColor: ThemeColor.stroke,
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            hintStyle: textStyle.w400(
-              fontSize: 14,
-              color: ThemeColor.subText,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 12,
-            ),
-            suffixIcon: ref.watch(inputTextProvider).isNotEmpty
-                ? GestureDetector(
-                    onTap: () async {
-                      final text = ref.read(inputTextProvider);
-                      ref.read(dmUsecaseProvider).sendMessage(text, user);
-                      ref
-                          .read(pushNotificationNotifierProvider)
-                          .sendDm(user, text);
-                      controller.clear();
-                      ref.read(inputTextProvider.notifier).state = "";
-                    },
-                    child: const Icon(
-                      Icons.send,
-                      color: ThemeColor.highlight,
-                    ),
-                  )
-                : const SizedBox(),
-          ),
-        ),
-      );
-    }
-    if (requestedIds.contains(user.userId)) {
-      return Container(
-          width: MediaQuery.sizeOf(context).width,
-          padding: EdgeInsets.only(
-            top: 12,
-            left: 16,
-            right: 16,
-            bottom: bottomPadding,
-          ),
-          decoration: BoxDecoration(
-            color: ThemeColor.highlight.withOpacity(0.3),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "フレンドリクエストを許可しますか？",
-                style: TextStyle(
-                  color: ThemeColor.text,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
+          TextField(
+            controller: controller,
+            keyboardType: TextInputType.multiline,
+            minLines: 1,
+            maxLines: 6,
+            maxLength: 400,
+            style: textStyle.w600(fontSize: 13),
+            onChanged: (value) {
+              ref.read(inputTextProvider.notifier).state = value;
+            },
+            decoration: InputDecoration(
+              hintText: "${user.name}へメッセージを入力",
+              counterText: "",
+              filled: true,
+              fillColor: ThemeColor.stroke,
+              border: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(20),
               ),
-              const Gap(12),
-              Text(
-                "フレンドリクエストを許可すると、チャット一覧に追加され、ユーザーとチャットを行うことができます。",
-                style: TextStyle(
-                  color: ThemeColor.text.withOpacity(0.7),
-                  fontSize: 12,
-                ),
+              hintStyle: textStyle.w400(
+                fontSize: 13,
+                color: ThemeColor.subText,
               ),
-              const Gap(16),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ReportUserScreen(user),
-                          ),
-                        );
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 12,
+                horizontal: 12,
+              ),
+              suffixIcon: ref.watch(inputTextProvider).isNotEmpty
+                  ? GestureDetector(
+                      onTap: () async {
+                        final text = ref.read(inputTextProvider);
+                        ref.read(dmUsecaseProvider).sendMessage(text, user);
+                        if (isMutualFollow || true) {
+                          ref
+                              .read(pushNotificationNotifierProvider)
+                              .sendDm(user, text);
+                        }
+
+                        controller.clear();
+                        ref.read(inputTextProvider.notifier).state = "";
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: ThemeColor.error.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: const Center(
-                          child: Text(
-                            "報告",
-                            style: TextStyle(
-                              color: ThemeColor.beige,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
+                      child: const Icon(
+                        Icons.send,
+                        color: ThemeColor.highlight,
                       ),
-                    ),
-                  ),
-                  const Gap(8),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        ref
-                            .read(dmOverviewListNotifierProvider.notifier)
-                            .leaveChat(user);
-                        ref
-                            .read(
-                                friendRequestedIdListNotifierProvider.notifier)
-                            .deleteRequested(user);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: ThemeColor.error.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: const Center(
-                          child: Text(
-                            "削除",
-                            style: TextStyle(
-                              color: ThemeColor.beige,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Gap(8),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        ref
-                            .read(
-                                friendRequestedIdListNotifierProvider.notifier)
-                            .admitFriendRequested(user);
-                        ref
-                            .read(dmOverviewListNotifierProvider.notifier)
-                            .joinChat(user);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blueAccent.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: const Center(
-                          child: Text(
-                            "許可",
-                            style: TextStyle(
-                              color: ThemeColor.beige,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ));
-    }
-    if (requestIds.contains(user.userId)) {
-      return Container(
-        width: MediaQuery.sizeOf(context).width,
-        padding: EdgeInsets.only(
-          top: 12,
-          left: 16,
-          right: 16,
-          bottom: bottomPadding,
-        ),
-        decoration: BoxDecoration(
-          color: ThemeColor.highlight.withOpacity(0.3),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "フレンドリクエストを送信しました。",
-              style: TextStyle(
-                color: ThemeColor.text,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
+                    )
+                  : const SizedBox(),
             ),
-            const Gap(12),
-            Text(
-              "ユーザーがフレンドリクエストを許可すると、チャット一覧に追加され、ユーザーとチャットを行うことができます。",
-              style: TextStyle(
-                color: ThemeColor.text.withOpacity(0.7),
-                fontSize: 12,
-              ),
-            ),
-            const Gap(16),
-            GestureDetector(
-              onTap: () {
-                ref
-                    .read(dmOverviewListNotifierProvider.notifier)
-                    .leaveChat(user);
-                ref
-                    .read(friendRequestIdListNotifierProvider.notifier)
-                    .cancelFriendRequest(user.userId);
-                Navigator.pop(context);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: ThemeColor.highlight,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: const Center(
-                  child: Text(
-                    "フレンドリクエストを取り消す",
-                    style: TextStyle(
-                      color: ThemeColor.beige,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      );
-    }
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageContainer({
+    required BuildContext context,
+    required String title,
+    required String message,
+    required WidgetRef ref,
+    required UserAccount user,
+  }) {
     return Container(
       width: MediaQuery.sizeOf(context).width,
       padding: EdgeInsets.only(
@@ -687,15 +527,15 @@ class BottomTextField extends ConsumerWidget {
         right: 16,
         bottom: MediaQuery.of(context).viewPadding.bottom,
       ),
-      decoration: BoxDecoration(
-        color: ThemeColor.highlight.withOpacity(0.3),
+      decoration: const BoxDecoration(
+        color: ThemeColor.accent,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            "メッセージができません。",
-            style: TextStyle(
+          Text(
+            title,
+            style: const TextStyle(
               color: ThemeColor.text,
               fontWeight: FontWeight.w600,
               fontSize: 16,
@@ -703,31 +543,34 @@ class BottomTextField extends ConsumerWidget {
           ),
           const Gap(12),
           Text(
-            "このユーザーとはフレンドではないため、現在このユーザーとチャットをすることはできません。",
+            message,
             style: TextStyle(
               color: ThemeColor.text.withOpacity(0.7),
               fontSize: 12,
             ),
           ),
           const Gap(16),
-          GestureDetector(
-            onTap: () {
-              ref.read(dmOverviewListNotifierProvider.notifier).leaveChat(user);
-              Navigator.pop(context);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: ThemeColor.highlight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: const Center(
-                child: Text(
-                  "閉じる",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+          Material(
+            color: ThemeColor.stroke,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                ref
+                    .read(dmOverviewListNotifierProvider.notifier)
+                    .leaveChat(user);
+                Navigator.pop(context);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: const Center(
+                  child: Text(
+                    "閉じる",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),

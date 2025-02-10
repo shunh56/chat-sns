@@ -13,8 +13,12 @@ class UserUsecase {
   final UserRepository _repository;
   UserUsecase(this._repository);
 
-  Future<List<UserAccount>> getOnlineUsers({Timestamp? lastOpenedAt}) async {
-    return await _repository.getOnlineUsers(lastOpenedAt: lastOpenedAt);
+  Future<List<UserAccount>> getOnlineUsers() async {
+    return await _repository.getOnlineUsers();
+  }
+
+  Future<List<UserAccount>> getRecentUsers() async {
+    return await _repository.getRecentUsers();
   }
 
   Future<List<UserAccount>> getNewUsers({Timestamp? createdAt}) async {
@@ -30,9 +34,15 @@ class UserUsecase {
     return _repository.getUserByUserId(userId);
   }
 
-  createUser(
-    UserAccount user,
-  ) {
+  Future<List<UserAccount>> searchUserByName(String name) async {
+    return _repository.searchUserByName(name);
+  }
+
+  Future<List<UserAccount>> searchUserByUsername(String username) async {
+    return _repository.searchUserByUsername(username);
+  }
+
+  createUser(UserAccount user) {
     _repository.createUser(user.toJson());
   }
 

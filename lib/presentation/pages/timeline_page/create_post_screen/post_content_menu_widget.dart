@@ -2,6 +2,7 @@ import 'package:app/core/utils/permissions/camera_permission.dart';
 import 'package:app/core/utils/permissions/photo_permission.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
+import 'package:app/presentation/components/dialogs/dialogs.dart';
 import 'package:app/presentation/providers/notifier/image/image_processor.dart';
 import 'package:app/presentation/providers/state/create_post/core.dart';
 import 'package:flutter/material.dart';
@@ -26,19 +27,28 @@ class PostContentMenu extends ConsumerWidget {
         children: [
           GestureDetector(
             onTap: () async {
+              //
+              if (imageList.length >= 4) {
+                showMessage("5枚以上投稿する場合はプレミアムでなければなりません。");
+                return;
+              }
+
+              //
               bool isGranted = await PhotoPermissionsHandler().isGranted;
               if (!isGranted) {
                 await PhotoPermissionsHandler().request();
                 bool permitted = await PhotoPermissionsHandler().isGranted;
                 if (!permitted) {
-                  showMessage("写真へのアクセスが制限されています。");
+                  showDialog(
+                    context: context,
+                    builder: (context) =>
+                        showGalleryPermissionDialog(context, ref),
+                  );
+
                   return;
                 }
               }
-              if (imageList.length >= 4) {
-                showMessage("5枚以上投稿する場合はプレミアムでなければなりません。");
-                return;
-              }
+
               primaryFocus?.unfocus();
               final compressedImageFile =
                   await ref.read(imageProcessorNotifierProvider).getPostImage();

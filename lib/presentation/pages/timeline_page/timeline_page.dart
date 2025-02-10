@@ -1,16 +1,17 @@
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
 import 'package:app/presentation/components/core/sticky_tabbar.dart';
 import 'package:app/presentation/pages/activies_screen/activities_screen.dart';
+import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/community_screen/screens/tabs.dart';
 import 'package:app/presentation/pages/new_screen.dart';
+import 'package:app/presentation/pages/timeline_page/threads/following_posts.dart';
 import 'package:app/presentation/pages/timeline_page/threads/friends_posts.dart';
 import 'package:app/presentation/pages/timeline_page/threads/public_posts.dart';
 import 'package:app/presentation/phase_01/main_page.dart';
 import 'package:app/presentation/phase_01/search_screen.dart';
-import 'package:app/presentation/providers/provider/community.dart';
+import 'package:app/presentation/providers/provider/activities_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
@@ -31,8 +32,8 @@ class TimelinePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    //final themeSize = ref.watch(themeSizeProvider(context));
+
     //final asyncValue = ref.watch(myAccountNotifierProvider);
 
     /*   final chatIcon = GestureDetector(
@@ -127,114 +128,114 @@ class TimelinePage extends ConsumerWidget {
     );
     */
 
-    final joinedCommunities = ref.watch(joinedCommunitiesProvider);
+    //final joinedCommunities = ref.watch(joinedCommunitiesProvider);
 
-    return Scaffold(
+    return const Scaffold(
       body: SafeArea(
         maintainBottomViewPadding: true,
         child: Stack(
           children: [
-            joinedCommunities.maybeWhen(
+            DefaultTabs(),
+            /* joinedCommunities.maybeWhen(
               data: (communities) {
-                return DefaultTabController(
-                  length: 2 + communities.length,
-                  child: Scaffold(
-                    body: NestedScrollView(
-                      controller: ref.watch(timelineScrollController),
-                      headerSliverBuilder:
-                          (BuildContext context, bool innerBoxIsScrolled) {
-                        return [
-                          SliverList(
-                            delegate: SliverChildListDelegate(
-                              [
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: themeSize.horizontalPadding,
+                return Communitytabs(communities: communities);
+              },
+              orElse: () {
+                return const DefaultTabs();
+              },
+            ), */
+
+            //heart animation
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DefaultTabs extends ConsumerWidget {
+  const DefaultTabs({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: NestedScrollView(
+          controller: ref.watch(timelineScrollController),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return [
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    Container(
+                      height: kToolbarHeight,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: themeSize.horizontalPadding,
+                      ),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              scaffoldKey.currentState?.openDrawer();
+                            },
+                            onDoubleTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const NewScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              appName,
+                              style: textStyle.appbarText(),
+                            ),
+                          ),
+                          const Expanded(child: SizedBox()),
+                          // subscriptionLogo,
+                          const Gap(12),
+                          const ActivityIcon(), /*  const Gap(12),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SearchScreen(),
+                                ),
+                              );
+                            },
+                            child: Stack(
+                              children: [
+                                SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: SvgPicture.asset(
+                                    "assets/images/icons/friends.svg",
+                                    // ignore: deprecated_member_use
+                                    color: ThemeColor.icon,
                                   ),
-                                  child: Row(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          scaffoldKey.currentState
-                                              ?.openDrawer();
-                                        },
-                                        onDoubleTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => const NewScreen(),
-                                            ),
-                                          );
-                                        },
-                                        child: Text(
-                                          appName,
-                                          style: textStyle.appbarText(),
-                                        ),
-                                      ),
-                                      const Expanded(child: SizedBox()),
-                                      // subscriptionLogo,
-                                      const Gap(12),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const ActivitiesScreen(),
-                                            ),
-                                          );
-                                        },
-                                        child: const Icon(
-                                          Icons.notifications_outlined,
-                                          color: ThemeColor.icon,
-                                        ),
-                                      ),
-                                      const Gap(12),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const SearchScreen(),
-                                            ),
-                                          );
-                                        },
-                                        child: Stack(
-                                          children: [
-                                            SizedBox(
-                                              height: 24,
-                                              width: 24,
-                                              child: SvgPicture.asset(
-                                                "assets/images/icons/friends.svg",
-                                                // ignore: deprecated_member_use
-                                                color: ThemeColor.icon,
-                                              ),
-                                            ),
-                                            Visibility(
-                                              visible: (ref
-                                                          .watch(
-                                                              friendRequestedIdListNotifierProvider)
-                                                          .asData
-                                                          ?.value ??
-                                                      [])
-                                                  .isNotEmpty,
-                                              child: Positioned(
-                                                top: 0,
-                                                right: 0,
-                                                child: CircleAvatar(
-                                                  radius: 4,
-                                                  backgroundColor:
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .error,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      /*
+                                ),
+                                Visibility(
+                                  visible: (ref.watch(requestedIdsProvider))
+                                      .isNotEmpty,
+                                  child: Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: CircleAvatar(
+                                      radius: 4,
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ), */
+                          /*
 
                                   GestureDetector(
                                     onTap: () {
@@ -254,304 +255,263 @@ class TimelinePage extends ConsumerWidget {
                                   ),
                                   const Gap(12),
                                   chatIcon, */
-                                    ],
-                                  ),
-                                ),
-                                Gap(12),
-                              ],
-                            ),
-                          ),
-                          SliverPersistentHeader(
-                            pinned: true,
-                            delegate: StickyTabBarDelegete(
-                              TabBar(
-                                isScrollable: true,
-                                onTap: (val) {},
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: 8 - 4),
-                                indicator: BoxDecoration(
-                                  color: ThemeColor.button,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                tabAlignment: TabAlignment.start,
-                                indicatorPadding: const EdgeInsets.only(
-                                  left: 4,
-                                  right: 4,
-                                  top: 5,
-                                  bottom: 7,
-                                ),
-                                labelPadding:
-                                    const EdgeInsets.symmetric(horizontal: 24),
-                                indicatorSize: TabBarIndicatorSize.tab,
-                                labelColor: ThemeColor.background,
-                                unselectedLabelColor:
-                                    Colors.white.withOpacity(0.3),
-                                dividerColor: ThemeColor.background,
-                                splashFactory: NoSplash.splashFactory,
-                                overlayColor:
-                                    WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) {
-                                    // Use the default focused overlay color
-                                    return states.contains(WidgetState.focused)
-                                        ? null
-                                        : Colors.transparent;
-                                  },
-                                ),
-                                tabs: [
-                                  Tab(
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          size: 18,
-                                          Icons.public_rounded,
-                                        ),
-                                        const Gap(4),
-                                        Text(
-                                          "公開",
-                                          style: textStyle.tabText(),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Tab(
-                                    child: Text(
-                                      "友達",
-                                      style: textStyle.tabText(),
-                                    ),
-                                  ),
-                                  ...communities.map(
-                                    (community) => Tab(
-                                      child: Text(
-                                        community.name,
-                                        style: textStyle.tabText(),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ];
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: StickyTabBarDelegete(
+                  TabBar(
+                    isScrollable: true,
+                    onTap: (val) {},
+                    padding: const EdgeInsets.symmetric(horizontal: 8 - 4),
+                    indicator: BoxDecoration(
+                      color: ThemeColor.button,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    tabAlignment: TabAlignment.start,
+                    indicatorPadding: const EdgeInsets.only(
+                      left: 4,
+                      right: 4,
+                      top: 5,
+                      bottom: 7,
+                    ),
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 24),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: ThemeColor.background,
+                    unselectedLabelColor: Colors.white.withOpacity(0.3),
+                    dividerColor: ThemeColor.background,
+                    splashFactory: NoSplash.splashFactory,
+                    overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                      (Set<WidgetState> states) {
+                        // Use the default focused overlay color
+                        return states.contains(WidgetState.focused)
+                            ? null
+                            : Colors.transparent;
                       },
-                      body: TabBarView(
+                    ),
+                    tabs: [
+                      Tab(
+                        child: Row(
+                          children: [
+                            const Icon(
+                              size: 18,
+                              Icons.public_rounded,
+                            ),
+                            const Gap(4),
+                            Text(
+                              "全て",
+                              style: textStyle.tabText(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "フォロー",
+                          style: textStyle.tabText(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ];
+          },
+          body: const TabBarView(children: [
+            PublicPostsThread(),
+            FollowingPostsThread(),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class Communitytabs extends ConsumerWidget {
+  const Communitytabs({super.key, required this.communities});
+  final List<Community> communities;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    return DefaultTabController(
+      length: 2 + communities.length,
+      child: Scaffold(
+        body: NestedScrollView(
+          controller: ref.watch(timelineScrollController),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return [
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: themeSize.horizontalPadding,
+                      ),
+                      child: Row(
                         children: [
-                          const PublicPostsThread(),
-                          const FriendsPostsThread(),
-                          ...communities.map(
-                            (community) => PostsTab(
-                              community: community,
-                              onHome: true,
+                          GestureDetector(
+                            onTap: () {
+                              scaffoldKey.currentState?.openDrawer();
+                            },
+                            onDoubleTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const NewScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              appName,
+                              style: textStyle.appbarText(),
+                            ),
+                          ),
+                          const Expanded(child: SizedBox()),
+                          // subscriptionLogo,
+                          const Gap(12),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ActivitiesScreen(),
+                                ),
+                              );
+                            },
+                            child: const Icon(
+                              Icons.notifications_outlined,
+                              color: ThemeColor.icon,
+                            ),
+                          ),
+                          const Gap(12),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SearchScreen(),
+                                ),
+                              );
+                            },
+                            child: Stack(
+                              children: [
+                                SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: SvgPicture.asset(
+                                    "assets/images/icons/friends.svg",
+                                    // ignore: deprecated_member_use
+                                    color: ThemeColor.icon,
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: (ref.watch(requestedIdsProvider))
+                                      .isNotEmpty,
+                                  child: Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: CircleAvatar(
+                                      radius: 4,
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                );
-              },
-              orElse: () {
-                return DefaultTabController(
-                  length: 2,
-                  child: Scaffold(
-                    body: NestedScrollView(
-                      controller: ref.watch(timelineScrollController),
-                      headerSliverBuilder:
-                          (BuildContext context, bool innerBoxIsScrolled) {
-                        return [
-                          SliverList(
-                            delegate: SliverChildListDelegate(
-                              [
-                                Container(
-                                  height: kToolbarHeight,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: themeSize.horizontalPadding,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          scaffoldKey.currentState
-                                              ?.openDrawer();
-                                        },
-                                        onDoubleTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => const NewScreen(),
-                                            ),
-                                          );
-                                        },
-                                        child: Text(
-                                          appName,
-                                          style: textStyle.appbarText(),
-                                        ),
-                                      ),
-                                      const Expanded(child: SizedBox()),
-                                      // subscriptionLogo,
-                                      const Gap(12),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const ActivitiesScreen(),
-                                            ),
-                                          );
-                                        },
-                                        child: const Icon(
-                                          Icons.notifications_outlined,
-                                          color: ThemeColor.icon,
-                                        ),
-                                      ),
-                                      const Gap(12),
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const SearchScreen(),
-                                            ),
-                                          );
-                                        },
-                                        child: Stack(
-                                          children: [
-                                            SizedBox(
-                                              height: 24,
-                                              width: 24,
-                                              child: SvgPicture.asset(
-                                                "assets/images/icons/friends.svg",
-                                                // ignore: deprecated_member_use
-                                                color: ThemeColor.icon,
-                                              ),
-                                            ),
-                                            Visibility(
-                                              visible: (ref
-                                                          .watch(
-                                                              friendRequestedIdListNotifierProvider)
-                                                          .asData
-                                                          ?.value ??
-                                                      [])
-                                                  .isNotEmpty,
-                                              child: Positioned(
-                                                top: 0,
-                                                right: 0,
-                                                child: CircleAvatar(
-                                                  radius: 4,
-                                                  backgroundColor:
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .error,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      /*
-
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const FootprintedsScreen(),
-                                        ),
-                                      );
-                                    },
-                                    child: const Icon(
-                                      size: 24,
-                                      Icons.visibility_rounded,
-                                      color: ThemeColor.icon,
-                                    ),
-                                  ),
-                                  const Gap(12),
-                                  chatIcon, */
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SliverPersistentHeader(
-                            pinned: true,
-                            delegate: StickyTabBarDelegete(
-                              TabBar(
-                                isScrollable: true,
-                                onTap: (val) {},
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: 8 - 4),
-                                indicator: BoxDecoration(
-                                  color: ThemeColor.button,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                                tabAlignment: TabAlignment.start,
-                                indicatorPadding: const EdgeInsets.only(
-                                  left: 4,
-                                  right: 4,
-                                  top: 5,
-                                  bottom: 7,
-                                ),
-                                labelPadding:
-                                    const EdgeInsets.symmetric(horizontal: 24),
-                                indicatorSize: TabBarIndicatorSize.tab,
-                                labelColor: ThemeColor.background,
-                                unselectedLabelColor:
-                                    Colors.white.withOpacity(0.3),
-                                dividerColor: ThemeColor.background,
-                                splashFactory: NoSplash.splashFactory,
-                                overlayColor:
-                                    WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) {
-                                    // Use the default focused overlay color
-                                    return states.contains(WidgetState.focused)
-                                        ? null
-                                        : Colors.transparent;
-                                  },
-                                ),
-                                tabs: [
-                                  Tab(
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          size: 18,
-                                          Icons.public_rounded,
-                                        ),
-                                        const Gap(4),
-                                        Text(
-                                          "公開",
-                                          style: textStyle.tabText(),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Tab(
-                                    child: Text(
-                                      "友達",
-                                      style: textStyle.tabText(),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ];
-                      },
-                      body: const TabBarView(children: [
-                        PublicPostsThread(),
-                        FriendsPostsThread(),
-                      ]),
+                    const Gap(12),
+                  ],
+                ),
+              ),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: StickyTabBarDelegete(
+                  TabBar(
+                    isScrollable: true,
+                    onTap: (val) {},
+                    padding: const EdgeInsets.symmetric(horizontal: 8 - 4),
+                    indicator: BoxDecoration(
+                      color: ThemeColor.button,
+                      borderRadius: BorderRadius.circular(100),
                     ),
+                    tabAlignment: TabAlignment.start,
+                    indicatorPadding: const EdgeInsets.only(
+                      left: 4,
+                      right: 4,
+                      top: 5,
+                      bottom: 7,
+                    ),
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 24),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: ThemeColor.background,
+                    unselectedLabelColor: Colors.white.withOpacity(0.3),
+                    dividerColor: ThemeColor.background,
+                    splashFactory: NoSplash.splashFactory,
+                    overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                      (Set<WidgetState> states) {
+                        // Use the default focused overlay color
+                        return states.contains(WidgetState.focused)
+                            ? null
+                            : Colors.transparent;
+                      },
+                    ),
+                    tabs: [
+                      Tab(
+                        child: Row(
+                          children: [
+                            const Icon(
+                              size: 18,
+                              Icons.public_rounded,
+                            ),
+                            const Gap(4),
+                            Text(
+                              "全て",
+                              style: textStyle.tabText(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "フォロー",
+                          style: textStyle.tabText(),
+                        ),
+                      ),
+                      ...communities.map(
+                        (community) => Tab(
+                          child: Text(
+                            community.name,
+                            style: textStyle.tabText(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
-
-            //heart animation
-            const HeartAnimationArea(),
-          ],
+                ),
+              ),
+            ];
+          },
+          body: TabBarView(
+            children: [
+              const PublicPostsThread(),
+              const FriendsPostsThread(),
+              ...communities.map(
+                (community) => PostsTab(
+                  community: community,
+                  onHome: true,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -563,7 +523,6 @@ class HeartAnimationArea extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    DebugPrint("HEART ANIMATION");
     final visible = ref.watch(visibleProvider);
     final angle = ref.watch(angleProvider);
     final size = ref.watch(sizeProvider);
@@ -602,5 +561,67 @@ class HeartAnimationArea extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+class ActivityIcon extends ConsumerWidget {
+  const ActivityIcon({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncValue = ref.watch(activitiesListNotifierProvider);
+    final notifier = ref.read(activitiesListNotifierProvider.notifier);
+    return asyncValue.maybeWhen(data: (data) {
+      final unseenMark = data.any((item) => !item.isSeen);
+      return Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 2),
+            child: GestureDetector(
+              onTap: () {
+                notifier.readActivities();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ActivitiesScreen(),
+                  ),
+                );
+              },
+              child: const Icon(
+                Icons.notifications_outlined,
+                color: ThemeColor.icon,
+              ),
+            ),
+          ),
+          if (unseenMark)
+            Positioned(
+              top: 0, // 上部の位置を調整
+              right: 0, // 右側の位置を調整
+              child: CircleAvatar(
+                radius: 4, // サイズを小さくする
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            ),
+        ],
+      );
+    }, orElse: () {
+      return Padding(
+        padding: const EdgeInsets.only(right: 2),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ActivitiesScreen(),
+              ),
+            );
+          },
+          child: const Icon(
+            Icons.notifications_outlined,
+            color: ThemeColor.icon,
+          ),
+        ),
+      );
+    });
   }
 }

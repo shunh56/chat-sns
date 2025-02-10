@@ -6,7 +6,6 @@ import 'package:app/presentation/components/dialogs/voice_chat_dialogs.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/providers/provider/chats/voice_chats_list.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -16,38 +15,29 @@ class VoiceChatSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncValue = ref.watch(friendIdListNotifierProvider);
-    //final themeSize = ref.watch(themeSizeProvider(context));
-    final listView = asyncValue.when(
-      data: (friendIds) {
-        final vcAsyncValue = ref.watch(voiceChatListNotifierProvider);
-        return vcAsyncValue.when(
-          data: (vcList) {
-            if (vcList.isEmpty) return const SizedBox();
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: SizedBox(
-                height: 56,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: vcList.length,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  itemBuilder: (context, index) {
-                    final vc = vcList[index];
-                    return _buildVoiceChatCard(context, ref, vc);
-                  },
-                ),
-              ),
-            );
-          },
-          error: (e, s) => const SizedBox(),
-          loading: () => const SizedBox(),
+    final vcAsyncValue = ref.watch(voiceChatListNotifierProvider);
+    return vcAsyncValue.when(
+      data: (vcList) {
+        if (vcList.isEmpty) return const SizedBox();
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: SizedBox(
+            height: 56,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: vcList.length,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              itemBuilder: (context, index) {
+                final vc = vcList[index];
+                return _buildVoiceChatCard(context, ref, vc);
+              },
+            ),
+          ),
         );
       },
       error: (e, s) => const SizedBox(),
       loading: () => const SizedBox(),
     );
-    return listView;
   }
 
   Widget _buildVoiceChatCard(

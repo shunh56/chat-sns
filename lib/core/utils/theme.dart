@@ -9,7 +9,7 @@ class Images {
 
 class ThemeColor {
   // 背景色のグラデーション
-  static const background = Color(0xFF121212); // メイン背景色
+  static const background = Color(0xFF141414); // メイン背景色
   static const surface = Color(0xFF1E1E1E); // カード・要素の背景
   static const accent = Color(0xFF1E1E1E); // 要素の強調背景
 

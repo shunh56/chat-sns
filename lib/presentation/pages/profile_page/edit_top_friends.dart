@@ -19,9 +19,7 @@ class EditTopFriendsScreen extends HookConsumerWidget {
     final notifier = ref.read(myAccountNotifierProvider.notifier);
     final topFriends = ref.watch(topFriendsProvider);
     final topFriendsNotifier = ref.watch(topFriendsProvider.notifier);
-    final friendInfos =
-        ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
-    final friendIds = friendInfos.map((item) => item.userId).toList();
+    final friendIds = ref.watch(friendIdsProvider);
     final imageWidth =
         (themeSize.screenWidth - 2 * themeSize.horizontalPadding) / 5 - 8;
     final users = ref.watch(allUsersNotifierProvider).asData!.value;

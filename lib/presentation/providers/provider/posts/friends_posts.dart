@@ -43,13 +43,12 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   Future<void> initialize() async {
     final myId = ref.read(authProvider).currentUser!.uid;
     List<PostBase> posts = [];
-    final asyncValue = ref.read(friendIdListNotifierProvider);
+    final asyncValue = ref.read(friendIdsStreamNotifier);
     asyncValue.maybeWhen(
-      data: (infos) async {
+      data: (friendIds) async {
         if (initialized) return;
         initialized = true;
         List<Future<List<PostBase>>> futures = [];
-        final friendIds = infos.map((info) => info.userId).toList();
         final userIds = [...friendIds, myId];
         futures.add(postUsecase.getPostFromUserIds(userIds));
         //futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
@@ -84,10 +83,7 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
     List<PostBase> posts = [];
     List<Future<List<PostBase>>> futures = [];
     final myId = ref.read(authProvider).currentUser!.uid;
-    final friendIds =
-        (ref.read(friendIdListNotifierProvider).asData?.value ?? [])
-            .map((info) => info.userId)
-            .toList();
+    final friendIds = ref.read(friendIdsProvider);
     final userIds = [...friendIds, myId];
     futures.add(postUsecase.getPostFromUserIds(userIds));
     //futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
@@ -112,7 +108,7 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   }
 
   Future<void> load() async {
-    if (ref.read(friendIdListNotifierProvider).asData!.value.length > 30) {
+    if (ref.read(friendIdsProvider).length > 30) {
       final cache = state.asData?.value ?? [];
       final list = await fetch(page: (cache.length) ~/ hitsPerPage);
       state = AsyncValue.data([...cache, ...list]);
@@ -122,8 +118,8 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   Future<List<PostBase>> fetch({int page = 0}) async {
     final myId = ref.read(authProvider).currentUser!.uid;
     List<PostBase> posts = [];
-    final infos = ref.read(friendIdListNotifierProvider).asData?.value ?? [];
-    final friendIds = infos.map((info) => info.userId).toList();
+
+    final friendIds = ref.read(friendIdsProvider);
 
     List<Future<List<PostBase>>> futures = [];
     futures.add(getMyCurrentStatusPosts());
@@ -158,7 +154,7 @@ class FriendsPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
   }
 }
 
-final friendsCurrentStatusPostsNotiferProvider =
+/*final friendsCurrentStatusPostsNotiferProvider =
     StateNotifierProvider.autoDispose<FriendsCurrentStatusPostsNotifier,
         AsyncValue<Map<String, List<CurrentStatusPost>>>>((ref) {
   return FriendsCurrentStatusPostsNotifier(
@@ -252,8 +248,8 @@ class FriendsCurrentStatusPostsNotifier
     }
   }
 }
-
-final friendFriendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
+ */
+/*final friendFriendsPostsNotiferProvider = StateNotifierProvider.autoDispose<
     FriendFriendsPostsNotifier, AsyncValue<List<Post>>>((ref) {
   return FriendFriendsPostsNotifier(
     ref,
@@ -307,7 +303,7 @@ class FriendFriendsPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
   }
 }
 
-
+ */
 /*
 final maybeFriendIdsNotiferProvider = StateNotifierProvider.autoDispose<
     MaybeFriendIdsNotifier, AsyncValue<List<String>>>((ref) {

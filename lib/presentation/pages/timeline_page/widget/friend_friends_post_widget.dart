@@ -41,11 +41,9 @@ class FriendFriendsPostWidget extends ConsumerWidget {
       heartAnimationNotifierProvider,
     );
     final mutualIds =
-        ref.watch(friendFriendsMapNotifierProvider)[user.userId] ?? {};
-    final myFriendIds =
-        (ref.watch(friendIdListNotifierProvider).asData?.value ?? [])
-            .map((info) => info.userId)
-            .toList();
+        ref.watch(friendsGraphProvider).asData?.value[user.userId] ?? [];
+    final friendIds = ref.watch(friendIdsProvider);
+
     final mutualFriends = ref
         .read(allUsersNotifierProvider)
         .asData!
@@ -53,7 +51,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
         .values
         .where((e) => mutualIds.contains(e.userId))
         .toList();
-    mutualFriends.removeWhere((e) => !myFriendIds.contains(e.userId));
+    mutualFriends.removeWhere((e) => !friendIds.contains(e.userId));
     final shorten = mutualFriends.length > 2;
     final shortenCount = mutualFriends.length - 2;
     return Padding(
@@ -64,7 +62,9 @@ class FriendFriendsPostWidget extends ConsumerWidget {
         },
         onDoubleTapDown: (details) {
           HapticFeedback.mediumImpact();
-          ref.read(allPostsNotifierProvider.notifier).incrementLikeCount(user,post);
+          ref
+              .read(allPostsNotifierProvider.notifier)
+              .incrementLikeCount(user, post);
           heartAnimationNotifier.showHeart(
             context,
             details.globalPosition.dx,
@@ -328,7 +328,7 @@ class FriendFriendsPostWidget extends ConsumerWidget {
           if (post.replyCount > 0)
             GestureDetector(
               onTap: () {
-                PostBottomModelSheet(context).openReplies(user,post);
+                PostBottomModelSheet(context).openReplies(user, post);
               },
               child: Row(
                 children: [

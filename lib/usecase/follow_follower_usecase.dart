@@ -1,4 +1,4 @@
-/*// Project imports:
+import 'package:app/domain/entity/relation.dart';
 import 'package:app/repository/follow_follower_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,26 +9,23 @@ final ffUsecaseProvider = Provider(
 );
 
 class FFUsecase {
-  FFUsecase(this._repository);
   final FFRepository _repository;
-  Future<List<String>> getFollowings({String? userId}) {
-    return _repository.getFollowings(userId: userId);
+
+  FFUsecase(this._repository);
+
+  Future<List<Relation>> getFollowings({String? userId}) async {
+    return await _repository.getFollowings(userId: userId);
   }
 
-  Future<List<String>> getFollowers({String? userId}) {
-    return _repository.getFollowers(userId: userId);
+  Future<List<Relation>> getFollowers({String? userId}) async {
+    return await _repository.getFollowers(userId: userId);
   }
 
-  Stream<List<String>> streamFollowers() {
-    return _repository.streamFollowers();
-  }
-
-  Future<void> followUser(String userId) {
+  followUser(String userId) {
     return _repository.followUser(userId);
   }
 
-  Future<void> unfollowUser(String userId) {
+  unfollowUser(String userId) {
     return _repository.unfollowUser(userId);
   }
 }
- */

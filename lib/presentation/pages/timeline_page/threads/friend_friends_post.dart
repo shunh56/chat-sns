@@ -1,4 +1,4 @@
-import 'package:app/core/utils/theme.dart';
+/*import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/share_widget.dart';
 import 'package:app/presentation/pages/timeline_page/widget/friend_friends_post_widget.dart';
 import 'package:app/presentation/providers/provider/posts/friends_posts.dart';
@@ -69,3 +69,4 @@ class _FriendFriendsPostsThreadState
     );
   }
 }
+ */

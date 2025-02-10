@@ -1,97 +1,41 @@
-import 'dart:async';
-import 'dart:collection';
-
-import 'package:app/core/utils/debug_print.dart';
-import 'package:app/datasource/local/hive/friends_map.dart';
+import 'package:app/datasource/relation_datasouce.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/provider/users/relations_notifier.dart';
 import 'package:app/usecase/friends_usecase.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
 
-class FriendInfo {
-  final Timestamp createdAt;
-  final String userId;
-  final int engagementCount;
-  FriendInfo({
-    required this.createdAt,
-    required this.userId,
-    required this.engagementCount,
-  });
-}
-
-final friendIdListNotifierProvider = StateNotifierProvider.autoDispose<
-    FriendIdListNotifier, AsyncValue<List<FriendInfo>>>((ref) {
-  return FriendIdListNotifier(
-    ref,
-    ref.watch(friendsUsecaseProvider),
-  )..initialize();
+final friendIdsStreamNotifier = StreamProvider.autoDispose((ref) {
+  return ref
+      .read(friendsUsecaseProvider)
+      .streamFriends(); //.map((list) => list);
 });
 
-class FriendIdListNotifier extends StateNotifier<AsyncValue<List<FriendInfo>>> {
-  FriendIdListNotifier(this._ref, this.usecase)
-      : super(const AsyncValue<List<FriendInfo>>.loading());
-  final Ref _ref;
-  final FriendsUsecase usecase;
-  StreamSubscription<List<FriendInfo>>? _subscription;
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
-  }
+final friendIdsProvider = Provider.autoDispose<List<String>>(
+  (ref) => ref.watch(friendIdsStreamNotifier).maybeWhen(
+        data: (data) => data,
+        orElse: () => [],
+      ),
+);
 
-  void initialize() async {
-    Stream<List<FriendInfo>> stream = usecase.streamFriends();
-    _subscription = stream.listen((infos) async {
-      final friendIds = infos.map((info) => info.userId).toList();
-      updateFriendFriends(_ref.read(authProvider).currentUser!.uid, friendIds);
-      await _ref
-          .read(allUsersNotifierProvider.notifier)
-          .getUserAccounts(friendIds, update: true);
-      _ref.read(myAccountNotifierProvider.notifier).checkTopFriends(friendIds);
-      if (mounted) {
-        state = AsyncValue.data(infos);
-      }
-    });
+final friendsGraphProvider = FutureProvider.autoDispose((ref) async {
+  Map<String, List<String>> graph = {};
+  final v = ref.watch(friendIdsProvider);
+  graph.addAll({ref.read(authProvider).currentUser!.uid: v});
+  for (String vi in v) {
+    List<String> vj = await ref.read(friendsUsecaseProvider).getFriendIds(vi);
+    graph.addAll({vi: vj});
   }
+  return graph;
+});
 
-  addFriend(String userId) {
-    usecase.addFriend(userId);
-  }
+final maybeFriends = FutureProvider.autoDispose((ref) async {
+  final graph = ref.watch(friendsGraphProvider).asData?.value ?? {};
+  return graph.entries.expand((e) => e.value).toSet().toList();
+});
 
-  void addEngagement(UserAccount user) {
-    usecase.addEngagement(user.userId);
-  }
-
-  void deleteFriend(UserAccount user) async {
-    _ref.read(myAccountNotifierProvider.notifier).removeTopFriends(user);
-    usecase.deleteFriend(user.userId);
-  }
-
-  Future<List<UserAccount>> getFriends(String userId) async {
-    final userIds = await usecase.getFriends(userId);
-    updateFriendFriends(userId, userIds);
-    return await _ref
-        .read(allUsersNotifierProvider.notifier)
-        .getUserAccounts(userIds);
-  }
-
-  updateFriendFriends(String userId, List<String> userIds) {
-    HiveBoxes.box().put(userId, userIds);
-    _ref
-        .read(friendFriendsMapNotifierProvider.notifier)
-        .addFriendFriends(userId, userIds);
-  }
-}
-
-final deletesIdListNotifierProvider =
-    StateNotifierProvider<DeletesIdListNotifier, AsyncValue<List<String>>>(
-        (ref) {
+final deletesIdListNotifierProvider = StateNotifierProvider.autoDispose<
+    DeletesIdListNotifier, AsyncValue<List<String>>>((ref) {
   return DeletesIdListNotifier(
     ref.watch(friendsUsecaseProvider),
   )..initialize();
@@ -119,7 +63,32 @@ class DeletesIdListNotifier extends StateNotifier<AsyncValue<List<String>>> {
   }
 }
 
-final friendRequestIdListNotifierProvider = StateNotifierProvider.autoDispose<
+final relationStreamProvider = StreamProvider.autoDispose<RelationInfo>((ref) {
+  return ref
+      .read(relationDatasourceProvider)
+      .streamRelation()
+      .map((doc) => RelationInfo.fromJson(doc.data()!));
+});
+
+final requestIdsProvider = Provider.autoDispose<List<String>>((ref) {
+  return ref.watch(relationStreamProvider.select((val) {
+    return val.maybeWhen(
+      data: (relation) => relation.requests,
+      orElse: () => [],
+    );
+  }));
+});
+
+final requestedIdsProvider = Provider.autoDispose<List<String>>((ref) {
+  return ref.watch(relationStreamProvider.select((val) {
+    return val.maybeWhen(
+      data: (relation) => relation.requesteds,
+      orElse: () => [],
+    );
+  }));
+});
+
+/*final friendRequestIdListNotifierProvider = StateNotifierProvider.autoDispose<
     FriendRequestIdListNotifier, AsyncValue<List<String>>>((ref) {
   //TODO ondisposeでfirestore streamを破棄する
   //ref.onDispose(() => cancelToken.cancel());
@@ -223,84 +192,8 @@ class FriendRequestedIdListNotifier
   }
 }
 
-final friendFriendsMapNotifierProvider = StateNotifierProvider.autoDispose<
-    FriendFriendsMapNotifier, Map<String, Set<String>>>((ref) {
-  return FriendFriendsMapNotifier()..initialize();
-});
+ */
 
-class FriendFriendsMapNotifier extends StateNotifier<Map<String, Set<String>>> {
-  FriendFriendsMapNotifier() : super(const {});
-
-  final Box<List<String>> box = HiveBoxes.box();
-
-  void initialize() async {
-    final map = Map<String, Set<String>>.from(state);
-    final keys = box.keys;
-    for (var userId in keys) {
-      final userIds = box.get(userId) ?? [];
-      map[userId] = userIds.toSet();
-      state = map;
-    }
-  }
-
-  addFriendFriends(String userId, List<String> userIds) {
-    final map = Map<String, Set<String>>.from(state);
-    map[userId] = userIds.toSet();
-    state = map;
-  }
-}
-
-final relationNotifier = Provider(
-  (ref) => RelationNotifier(ref),
-);
-
-class RelationNotifier {
-  final Ref ref;
-  RelationNotifier(this.ref);
-
-  Map<String, Set<String>> _getMap() {
-    final map = Map<String, Set<String>>.from(
-        ref.read(friendFriendsMapNotifierProvider));
-    return map;
-  }
-
-  Map<String, int> getDistanceMap({String? userId}) {
-    final map = _getMap();
-    Map<String, int> dist = {};
-    final q = Queue<String>();
-    final start = userId ?? ref.read(authProvider).currentUser!.uid;
-    dist[start] = 0;
-    q.add(start);
-    while (q.isNotEmpty) {
-      String v = q.removeFirst();
-      for (String nv in map[v] ?? {}) {
-        if (dist[nv] == null) {
-          dist[nv] = dist[v]! + 1;
-          q.add(nv);
-        }
-      }
-    }
-    return dist;
-  }
-
-  List<String> getMaybeFriends() {
-    final dist = getDistanceMap();
-    final list = dist.entries
-        .where((item) => item.value == 2)
-        .map((item) => item.key)
-        .toList();
-    list.removeWhere((userId) => getMutualIds(userId).isEmpty);
-    final map = _getMap();
-    list.sort((a, b) => (map[a] ?? {}).length.compareTo((map[b] ?? {}).length));
-    return list;
-  }
-
-  List<String> getMutualIds(String userId) {
-    final dist01 = getDistanceMap();
-    final dist02 = getDistanceMap(userId: userId);
-    return dist01.entries
-        .where((item) => item.value == 1 && dist02[item.key] == 1)
-        .map((item) => item.key)
-        .toList();
-  }
-}
+////
+///
+///

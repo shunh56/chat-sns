@@ -2,10 +2,6 @@
 import 'dart:async';
 
 import 'package:app/domain/entity/activities.dart';
-import 'package:app/domain/entity/posts/current_status_post.dart';
-import 'package:app/domain/entity/posts/post.dart';
-import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
-import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/usecase/activities_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,24 +23,44 @@ class ActivitiesListNotifier extends StateNotifier<AsyncValue<List<Activity>>> {
 
   final Ref ref;
   final ActivitiesUsecase usecase;
+  StreamSubscription? _subscription;
 
   Future<void> initialize() async {
     final list = await usecase.getRecentActivities();
     state = AsyncValue.data(list);
-    final posts = list
-        .where((e) =>
-            e.actionType == ActionType.postLike ||
-            e.actionType == ActionType.postComment)
-        .map((e) => e.post as Post)
-        .toList();
-    final currentStatusPosts = list
-        .where((e) => e.actionType == ActionType.currentStatusPostLike)
-        .map((e) => e.post as CurrentStatusPost)
-        .toList();
+    startStream();
+  }
 
-    ref.read(allPostsNotifierProvider.notifier).addPosts(posts);
-    ref
-        .read(allCurrentStatusPostsNotifierProvider.notifier)
-        .addPosts(currentStatusPosts);
+  startStream() {
+    _subscription = usecase.streamActivity().listen((snapshot) {
+      if (snapshot.isEmpty) return;
+      final latest = snapshot.first;
+      final currentActivities = state.value ?? [];
+      currentActivities.removeWhere((activity) => activity.id == latest.id);
+      // 重複を避けて最新メッセージを追加
+      state = AsyncValue.data([latest, ...currentActivities]);
+    });
+  }
+
+  refresh() {
+    initialize();
+  }
+
+  void readActivity(Activity activity) {
+    final cache = state.asData?.value ?? [];
+    final updatedCache = cache
+        .map((e) => e.id == activity.id ? e.copyWith(isSeen: true) : e)
+        .toList();
+    state = AsyncValue.data(updatedCache);
+  }
+
+  readActivities() async {
+    usecase.readActivities();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 }

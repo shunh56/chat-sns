@@ -118,7 +118,7 @@ class RightMessage extends ConsumerWidget {
                     child: Text(
                       message.text,
                       style: textStyle.w500(
-                        fontSize: 15,
+                        fontSize: 14,
                         color: ThemeColor.white,
                       ),
                     ),

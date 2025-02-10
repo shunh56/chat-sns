@@ -9,11 +9,11 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
+import 'package:app/presentation/pages/community_screen/components/components.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/community_screen/model/room.dart';
 import 'package:app/presentation/pages/community_screen/model/topic.dart';
 import 'package:app/presentation/pages/community_screen/screens/community_member_screen.dart';
-import 'package:app/presentation/pages/community_screen/screens/community_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/create_topics_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/room_screen.dart';
 import 'package:app/presentation/pages/community_screen/screens/topic_screen.dart';
@@ -1146,7 +1146,8 @@ class InfoTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final asyncValue = ref.watch(communityMembersNotifierProvider);
+    final asyncValue =
+        ref.watch(communityMembersNotifierProvider(community.id));
 
     return ListView(
       padding: const EdgeInsets.only(left: 12, right: 12, bottom: 60),
@@ -1216,7 +1217,7 @@ class InfoTab extends ConsumerWidget {
           ),
         ),
         const Gap(24),
-        _buildSection(
+        /* _buildSection(
           context,
           ref,
           title: 'コミュニティルール',
@@ -1225,7 +1226,7 @@ class InfoTab extends ConsumerWidget {
                 .map((rule) => _buildRule(context, ref, rule))
                 .toList(),
           ),
-        ),
+        ), */
         const Gap(24),
         /*FutureBuilder(
             future: ref

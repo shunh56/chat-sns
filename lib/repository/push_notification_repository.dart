@@ -1,5 +1,5 @@
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/datasource/push_notification_datasource.dart';
+import 'package:app/domain/entity/user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final pushNotificationRepositoryProvider = Provider(
@@ -11,19 +11,35 @@ final pushNotificationRepositoryProvider = Provider(
 class PushNotificationRepository {
   final PushNotificationDatasource _datasource;
   PushNotificationRepository(this._datasource);
-  sendDm(String fcmToken, String title, String body) {
-    _datasource.sendNotification(fcmToken, title, body);
+
+  sendCallNotification(
+    UserAccount user,
+    UserAccount me,
+  ) async {
+    try {
+      await _datasource.sendCallNotification(
+        user.fcmToken!,
+        //  '${me.name}',
+        //  '着信が来ました。',
+        me.name,
+        me.imageUrl,
+      );
+    } on NotificationException {
+      rethrow;
+    } catch (e) {
+      throw NotificationException('通知の送信に失敗しました');
+    }
   }
 
-  sendReaction(String fcmToken, String title, String body) {
-    DebugPrint("SENDING REACTION!!");
-    _datasource.sendNotification(fcmToken, title, body);
+  sendPushNotification(String fcmToken, String title, String body) async {
+    try {
+      await _datasource.sendPushNotification(fcmToken, title, body);
+    } on NotificationException {
+      rethrow;
+    } catch (e) {
+      throw NotificationException('通知の送信に失敗しました');
+    }
   }
-
-  sendCurrentStatusPost() {}
-  sendPost() {}
-  sendVoiceChat() {}
-  sendFriendReqeust() {}
 
   sendmulticast(List<String> fcmTokens, String title, String body) {
     _datasource.sendMultiNotification(fcmTokens, title, body);

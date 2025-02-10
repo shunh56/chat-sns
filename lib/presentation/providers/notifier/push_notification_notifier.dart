@@ -27,19 +27,11 @@ class PushNotificationNotifier {
   }
 
   sendPostReaction(UserAccount user, String type) {
-    final me = ref.read(myAccountNotifierProvider).asData!.value;
     if (type == "postLike") {
-      _usecase.sendReaction(user, me.name, "あなたの投稿にいいねしました。");
+      _usecase.sendPostLike(user);
     }
     if (type == "postComment") {
-      _usecase.sendReaction(user, me.name, "あなたの投稿にコメントしました。");
-    }
-  }
-
-  sendCurrentStatusPostReaction(UserAccount user, String type) {
-    final me = ref.read(myAccountNotifierProvider).asData!.value;
-    if (type == "currentStatusPostLike") {
-      _usecase.sendReaction(user, me.name, "あなたのステータスにいいねしました。");
+      _usecase.sendPostComment(user);
     }
   }
 
@@ -50,60 +42,5 @@ class PushNotificationNotifier {
     }
   }
 
-/*  sendCurrentStatusPost() {
-    final me = ref.read(myAccountNotifierProvider).asData!.value;
-    final friendIds = ref
-        .read(friendIdListNotifierProvider)
-        .asData!
-        .value
-        .map((item) => item.userId)
-        .toList();
-    final friends = ref
-        .watch(allUsersNotifierProvider)
-        .asData!
-        .value
-        .values
-        .where((user) => friendIds.contains(user.userId))
-        .toList();
-    return _usecase.sendPost(friends, "${me.name}がステータスを更新しました。");
-  }
-
-  uploadPost() {
-    final me = ref.read(myAccountNotifierProvider).asData!.value;
-    final friendIds = ref
-        .read(friendIdListNotifierProvider)
-        .asData!
-        .value
-        .map((item) => item.userId)
-        .toList();
-    final friends = ref
-        .watch(allUsersNotifierProvider)
-        .asData!
-        .value
-        .values
-        .where((user) => friendIds.contains(user.userId))
-        .toList();
-    return _usecase.sendPost(friends, "${me.name}が投稿をしました。");
-  }
- */
-
   sendVoiceChat() {}
-  sendFriendReqeust() {}
-
-  /*sendMulticast() {
-    final friendIds = ref
-        .read(friendIdListNotifierProvider)
-        .asData!
-        .value
-        .map((item) => item.userId)
-        .toList();
-    final friends = ref
-        .watch(allUsersNotifierProvider)
-        .asData!
-        .value
-        .values
-        .where((user) => friendIds.contains(user.userId))
-        .toList();
-    return _usecase.sendmulticast(friends, "TITLE", "THIS IS BODY");
-  } */
 }

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/value/user/gender.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -95,6 +96,9 @@ class UserAccount extends HiveObject {
   @HiveField(24)
   final String job;
 
+  @HiveField(25)
+  final List<String> friendIds;
+
   UserAccount({
     required this.userId,
     required this.createdAt,
@@ -126,6 +130,7 @@ class UserAccount extends HiveObject {
     required this.privacy,
     required this.location,
     required this.job,
+    required this.friendIds,
   });
 
   factory UserAccount.fromJson(Map<String, dynamic> json) {
@@ -172,6 +177,7 @@ class UserAccount extends HiveObject {
       ),
       location: json["profile"]["location"] ?? "", // 追加
       job: json["profile"]["job"] ?? "",
+      friendIds: json["friendIds"] ?? [],
     );
   }
 
@@ -213,104 +219,6 @@ class UserAccount extends HiveObject {
     };
   }
 
-  factory UserAccount.deletedUser(UserAccount user) {
-    return UserAccount(
-      userId: user.userId,
-      createdAt: Timestamp.now(),
-      lastOpenedAt: Timestamp.now(),
-      isOnline: false,
-      //
-      usedCode: user.usedCode,
-      fcmToken: null,
-      voipToken: null,
-      accountStatus: AccountStatus.deleted,
-      deviceInfo: null,
-      //
-      name: "削除済みユーザー",
-      username: user.username,
-      imageUrl: null,
-      links: Links.defaultLinks(),
-      bio: Bio.defaultBio(),
-      aboutMe: "",
-      currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
-
-      wishList: [],
-      tags: [],
-      canvasTheme: CanvasTheme.defaultCanvasTheme(),
-      subscriptionStatus: SubscriptionStatus.none,
-      //
-      notificationData: NotificationData.defaultSettings(),
-      privacy: Privacy.defaultPrivacy(),
-      location: "",
-      job: "",
-    );
-  }
-
-  factory UserAccount.bannedUser(UserAccount user) {
-    return UserAccount(
-      userId: user.userId,
-      createdAt: Timestamp.now(),
-      lastOpenedAt: Timestamp.now(),
-      isOnline: false,
-      //
-      usedCode: user.usedCode,
-      fcmToken: null,
-      voipToken: null,
-      accountStatus: AccountStatus.banned,
-      deviceInfo: null,
-      //
-      name: "永久凍結済みユーザー",
-      username: user.username,
-      imageUrl: null,
-      links: Links.defaultLinks(),
-      bio: Bio.defaultBio(),
-      aboutMe: "",
-      currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
-
-      wishList: [],
-      tags: [],
-      canvasTheme: CanvasTheme.defaultCanvasTheme(),
-      subscriptionStatus: SubscriptionStatus.none,
-      //
-      notificationData: NotificationData.defaultSettings(),
-      privacy: Privacy.defaultPrivacy(),
-      location: "",
-      job: "",
-    );
-  }
-  factory UserAccount.freezedUser(UserAccount user) {
-    return UserAccount(
-      userId: user.userId,
-      createdAt: Timestamp.now(),
-      lastOpenedAt: Timestamp.now(),
-      isOnline: false,
-      //
-      usedCode: user.usedCode,
-      fcmToken: null,
-      voipToken: null,
-      accountStatus: AccountStatus.freezed,
-      deviceInfo: null,
-      //
-      name: "凍結済みユーザー",
-      username: user.username,
-      imageUrl: null,
-      links: Links.defaultLinks(),
-      bio: Bio.defaultBio(),
-      aboutMe: "",
-      currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
-
-      wishList: [],
-      tags: [],
-      canvasTheme: CanvasTheme.defaultCanvasTheme(),
-      subscriptionStatus: SubscriptionStatus.none,
-      //
-      notificationData: NotificationData.defaultSettings(),
-      privacy: Privacy.defaultPrivacy(),
-      location: "",
-      job: "",
-    );
-  }
-
   factory UserAccount.nullUser() {
     return UserAccount(
       userId: FirebaseAuth.instance.currentUser!.uid,
@@ -341,6 +249,7 @@ class UserAccount extends HiveObject {
       privacy: Privacy.defaultPrivacy(),
       location: "",
       job: "",
+      friendIds: [],
     );
   }
 
@@ -360,50 +269,6 @@ class UserAccount extends HiveObject {
     "お布団から出られない重度の引き籠もり",
     "休日は布団と一心同体になります",
   ];
-  factory UserAccount.create({
-    required String userId,
-    required String username,
-    required String name,
-    String? imageUrl,
-  }) {
-    return UserAccount(
-      userId: userId,
-      createdAt: Timestamp.fromDate(DateTime.now()),
-      lastOpenedAt: Timestamp.fromDate(DateTime.now()),
-      isOnline: false,
-      //
-      usedCode: null,
-      fcmToken: null,
-      voipToken: null,
-      accountStatus: AccountStatus.normal,
-      deviceInfo: null,
-      //
-      name: name,
-      username: username,
-      imageUrl: imageUrl,
-      //
-      links: Links.defaultLinks(),
-      bio: Bio(
-        age: null,
-        birthday: null,
-        gender: null,
-        interestedIn: null,
-      ),
-      aboutMe: defaultAboutMeTemplates[
-          Random().nextInt(defaultAboutMeTemplates.length)],
-      currentStatus: CurrentStatus.defaultCurrentStatus(), topFriends: [],
-
-      wishList: [],
-      tags: [],
-      canvasTheme: CanvasTheme.defaultCanvasTheme(),
-      subscriptionStatus: SubscriptionStatus.none,
-      //
-      notificationData: NotificationData.defaultSettings(),
-      privacy: Privacy.defaultPrivacy(),
-      location: "",
-      job: "",
-    );
-  }
 
   UserAccount copyWith({
     Timestamp? lastOpenedAt,
@@ -431,6 +296,7 @@ class UserAccount extends HiveObject {
     String? location,
     String? job,
     List<String>? tags,
+    List<String>? friendIds,
   }) {
     return UserAccount(
       userId: userId,
@@ -463,6 +329,7 @@ class UserAccount extends HiveObject {
       privacy: privacy ?? this.privacy,
       location: location ?? this.location,
       job: job ?? this.job,
+      friendIds: friendIds ?? this.friendIds,
     );
   }
 
@@ -491,7 +358,8 @@ class UserAccount extends HiveObject {
       //
       links: links,
       bio: bio,
-      aboutMe: aboutMe,
+      aboutMe: defaultAboutMeTemplates[
+          Random().nextInt(defaultAboutMeTemplates.length)],
       currentStatus: currentStatus,
       topFriends: topFriends,
 
@@ -504,6 +372,7 @@ class UserAccount extends HiveObject {
       privacy: privacy,
       location: "",
       job: "",
+      friendIds: [],
     );
   }
 
@@ -516,7 +385,19 @@ class UserAccount extends HiveObject {
 
   bool get greenBadge {
     return isOnline &&
-        DateTime.now().difference(lastOpenedAt.toDate()).inMinutes < 10;
+        DateTime.now().difference(lastOpenedAt.toDate()).inMinutes < 3;
+  }
+
+  String get badgeStatus {
+    if (greenBadge) {
+      return "オンライン";
+    } else {
+      if (DateTime.now().difference(lastOpenedAt.toDate()).inHours < 8) {
+        return "${lastOpenedAt.xxAgo}にオンライン";
+      } else {
+        return "最終ログイン: ${lastOpenedAt.xxAgo}";
+      }
+    }
   }
 
   bool get isAdmin {

@@ -12,9 +12,19 @@ class ActivitiesRepository {
   final ActivitiesDatasource _datasource;
   ActivitiesRepository(this._datasource);
 
+  Stream<List<Activity>> streamActivity() {
+    final res = _datasource.streamActivity();
+    return res.map((stream) =>
+        stream.docs.map((doc) => Activity.fromJson(doc.data())).toList());
+  }
+
   Future<List<Activity>> getRecentActivities() async {
     final res = await _datasource.getRecentActivities();
     return res.docs.map((doc) => Activity.fromJson(doc.data())).toList();
+  }
+
+  Future<void> readActitivies() async {
+    return _datasource.readActivities();
   }
 
   addLikeToPost(String userId, String postId) async {

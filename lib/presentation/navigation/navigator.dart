@@ -9,7 +9,6 @@ import 'package:app/presentation/pages/timeline_page/current_status_post_screen.
 import 'package:app/presentation/pages/timeline_page/widget/post_screen.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,14 +30,6 @@ class NavigationRouter {
     await ref
         .read(allUsersNotifierProvider.notifier)
         .updateUserAccount(user.userId);
-    if ((ref
-        .read(friendIdListNotifierProvider)
-        .asData!
-        .value
-        .map((info) => info.userId)
-        .contains(user.userId))) {
-      ref.read(friendIdListNotifierProvider.notifier).addEngagement(user);
-    }
     if (user.userId == myId) {
       Navigator.push(
         context,
@@ -59,22 +50,24 @@ class NavigationRouter {
     }
   }
 
-  goToChat(UserAccount user) {
-    if ((ref
-        .read(friendIdListNotifierProvider)
-        .asData!
-        .value
-        .map((info) => info.userId)
-        .contains(user.userId))) {
-      ref.read(friendIdListNotifierProvider.notifier).addEngagement(user);
+  goToChat(UserAccount user, {bool replace = false}) {
+    if (replace) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChattingScreen(userId: user.userId),
+          settings: const RouteSettings(name: '/chatting_screen'),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChattingScreen(userId: user.userId),
+          settings: const RouteSettings(name: '/chatting_screen'),
+        ),
+      );
     }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChattingScreen(userId: user.userId),
-        settings: const RouteSettings(name: '/chatting_screen'),
-      ),
-    );
   }
 
   goToCurrentStatusPost(CurrentStatusPost post, UserAccount user,

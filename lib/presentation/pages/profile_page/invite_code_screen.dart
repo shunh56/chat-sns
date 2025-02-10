@@ -23,11 +23,7 @@ class InviteCodeScreen extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(myAccountNotifierProvider);
-
-    final friendIds =
-        (ref.watch(friendIdListNotifierProvider).asData?.value ?? [])
-            .map((info) => info.userId)
-            .toList();
+    final friendIds = ref.watch(friendIdsProvider);
     final myIcon = asyncValue.when(
       data: (me) {
         return UserIcon(user: me);
@@ -69,23 +65,29 @@ class InviteCodeScreen extends ConsumerWidget {
                       children: [
                         Opacity(
                           opacity:
-                              inviteCode.getStatus == InviteCodeStatus.valid
+                              inviteCode.getStatus == InviteCodeStatus.valid ||
+                                      inviteCode.getStatus ==
+                                          InviteCodeStatus.usedByMe
                                   ? 1
                                   : 0.3,
                           child: Text(
-                            inviteCode.code,
+                            inviteCode.id,
                             style: textStyle.w600(
                               fontSize: 16,
                             ),
                           ),
                         ),
                         Visibility(
-                          visible:
-                              inviteCode.getStatus == InviteCodeStatus.valid,
+                          visible: inviteCode.getStatus ==
+                                  InviteCodeStatus.valid ||
+                              inviteCode.getStatus == InviteCodeStatus.usedByMe,
                           child: GestureDetector(
                             onTap: () {
                               Clipboard.setData(
-                                  ClipboardData(text: inviteCode.code));
+                                ClipboardData(
+                                  text: inviteCode.id,
+                                ),
+                              );
                               showMessage("招待コードをコピーしました");
                             },
                             child: const Padding(
@@ -105,76 +107,7 @@ class InviteCodeScreen extends ConsumerWidget {
                 const Expanded(
                   child: SizedBox(),
                 ),
-                (() {
-                  switch (inviteCode.getStatus) {
-                    case (InviteCodeStatus.valid):
-                      return Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "有効",
-                                    style: textStyle.w600(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text:
-                                        " (あと${inviteCode.maxCount - inviteCode.slot.length}人)",
-                                    style: textStyle.w600(
-                                      fontSize: 10,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    case (InviteCodeStatus.overLimit):
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: ThemeColor.stroke,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          "使用済み",
-                          style: textStyle.w600(
-                            fontSize: 14,
-                          ),
-                        ),
-                      );
-                    case (InviteCodeStatus.unknownError):
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: ThemeColor.error,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          "エラー",
-                          style: textStyle.w600(
-                            fontSize: 14,
-                          ),
-                        ),
-                      );
-                    default:
-                      return const SizedBox();
-                  }
-                }())
+                _buildStatusWidget(inviteCode.getStatus, textStyle)
               ],
             ),
             const Gap(24),
@@ -182,9 +115,11 @@ class InviteCodeScreen extends ConsumerWidget {
               child: FutureBuilder(
                 future: ref
                     .read(allUsersNotifierProvider.notifier)
-                    .getUserAccounts(inviteCode.slot),
+                    .getUserAccounts(inviteCode.logs
+                        .map((e) => e["userId"] as String)
+                        .toList()),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
+                  if (!snapshot.hasData || inviteCode.logs.isEmpty) {
                     return const Center(
                       child: Text("使用したユーザーはいません"),
                     );
@@ -206,9 +141,8 @@ class InviteCodeScreen extends ConsumerWidget {
                         itemCount: users.length,
                         itemBuilder: (context, index) {
                           final user = users[index];
-                          final log = inviteCode.logs
-                              .where((item) => item["userId"] == user.userId)
-                              .first;
+                          final log = inviteCode.logs.firstWhere(
+                              (item) => item["userId"] == user.userId);
                           final usedAt = log["createdAt"] as Timestamp;
                           return GestureDetector(
                             onTap: () {
@@ -296,165 +230,74 @@ class InviteCodeScreen extends ConsumerWidget {
                 },
               ),
             ),
-
-            /*    SizedBox(
-              width: double.infinity,
-              child: Column(
-                children: [
-                  const Gap(48),
-                  Transform.rotate(
-                    angle: -pi / 48,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: me.canvasTheme.boxBgColor,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.5),
-                            offset: const Offset(18, 18),
-                            spreadRadius: 4,
-                            blurRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: DottedBorder(
-                        color: me
-                            .canvasTheme.boxTextColor, //color of dotted/dash line
-                        strokeWidth: 3, //thickness of dash/dots
-                        dashPattern: const [24, 8],
-                        radius: const Radius.circular(12),
-                        borderType: BorderType.RRect,
-                        child: Container(
-                          width: themeSize.screenWidth * 0.66,
-                          height: themeSize.screenHeight * 0.5,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                appName,
-                                style: TextStyle(
-                                  color: me.canvasTheme.boxSecondaryTextColor,
-                                  fontSize: 24,
-                                ),
-                              ),
-                              const Expanded(child: SizedBox()),
-                              Stack(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: myIcon,
-                                  ),
-                                  Positioned(
-                                    right: 0,
-                                    bottom: 0,
-                                    child: Transform.rotate(
-                                      angle: -pi / 6,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(12),
-                                          color: me.canvasTheme.bgColor,
-                                        ),
-                                        child: Icon(
-                                          color: me.canvasTheme.profileTextColor,
-                                          Icons.confirmation_num_outlined,
-                                          size: 32,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Expanded(child: SizedBox()),
-                              GestureDetector(
-                                onLongPress: () {
-                                  HapticFeedback.mediumImpact();
-                                  board.setData(
-                                      ClipboardData(text: inviteCode.code));
-                                  showMessage("招待コードをコピーしました");
-                                },Clip
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 16),
-                                  child: DottedBorder(
-                                    color: me.canvasTheme
-                                        .boxTextColor, //color of dotted/dash line
-                                    strokeWidth: 3, //thickness of dash/dots
-                                    dashPattern: const [24, 8],
-                                    radius: const Radius.circular(8),
-                                    borderType: BorderType.RRect,
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          inviteCode.code,
-                                          style: TextStyle(
-                                            fontSize: 32,
-                                            color: me.canvasTheme
-                                                .boxSecondaryTextColor,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: SizedBox(),
-                  ),
-                  FutureBuilder(
-                    future: ref
-                        .read(allUsersNotifierProvider.notifier)
-                        .getUserAccounts(inviteCode.slot),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return SizedBox();
-                      }
-        
-                      final users = snapshot.data!;
-                      const imageHeight = 48.0;
-                      return SizedBox(
-                        height: imageHeight + 8.4,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.symmetric(horizontal: 12 - 4),
-                          itemCount: users.length,
-                          itemBuilder: (context, index) {
-                            final user = users[index];
-                            return UserIcon(
-                              user:user,
-                              width: imageHeight,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(
-                    height: 48,
-                  ),
-                ],
-              ),
-            ),
-          */
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildStatusWidget(InviteCodeStatus status, ThemeTextStyle textStyle) {
+    switch (status) {
+      case InviteCodeStatus.valid:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            "有効",
+            style: textStyle.w600(
+              fontSize: 14,
+              color: Colors.white,
+            ),
+          ),
+        );
+      case InviteCodeStatus.usedByMe:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.green,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            "自分の招待コード",
+            style: textStyle.w600(
+              fontSize: 14,
+              color: Colors.white,
+            ),
+          ),
+        );
+      case InviteCodeStatus.overLimit:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: ThemeColor.stroke,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            "使用済み",
+            style: textStyle.w600(
+              fontSize: 14,
+            ),
+          ),
+        );
+      case InviteCodeStatus.unknownError:
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: ThemeColor.error,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            "エラー",
+            style: textStyle.w600(
+              fontSize: 14,
+            ),
+          ),
+        );
+      default:
+        return const SizedBox();
+    }
   }
 }

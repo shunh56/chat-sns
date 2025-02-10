@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:app/core/utils/permissions/photo_permission.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/dialogs/dialogs.dart';
 import 'package:app/presentation/pages/onboarding/providers/providers.dart';
 import 'package:app/presentation/providers/notifier/image/image_processor.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +34,20 @@ class InputImageUrlScreen extends ConsumerWidget {
           const SizedBox(height: 40),
           GestureDetector(
             onTap: () async {
+              bool isGranted = await PhotoPermissionsHandler().isGranted;
+              if (!isGranted) {
+                await PhotoPermissionsHandler().request();
+                bool permitted = await PhotoPermissionsHandler().isGranted;
+                if (!permitted) {
+                  showDialog(
+                    context: context,
+                    builder: (context) =>
+                        showGalleryPermissionDialog(context, ref),
+                  );
+
+                  return;
+                }
+              }
               final pickedFile =
                   await ref.read(imageProcessorNotifierProvider).getIconImage();
               if (pickedFile != null) {

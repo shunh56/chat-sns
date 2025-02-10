@@ -124,18 +124,31 @@ class AllUsersNotifier extends _$AllUsersNotifier {
 
   //
   Future<List<UserAccount>> getOnlineUsers({Timestamp? lastOpenedAt}) async {
-    final users = await ref
-        .read(userUsecaseProvider)
-        .getOnlineUsers(lastOpenedAt: lastOpenedAt);
+    final users = await ref.read(userUsecaseProvider).getOnlineUsers();
     addUserAccounts(users);
 
-    return users;
+    final res = filterUsers(users);
+    return res;
+  }
+
+  Future<List<UserAccount>> getRecentUsers() async {
+    final users = await ref.read(userUsecaseProvider).getRecentUsers();
+    addUserAccounts(users);
+    final res = filterUsers(users);
+    return res;
   }
 
   Future<List<UserAccount>> getNewUsers({Timestamp? createdAt}) async {
     final users =
         await ref.read(userUsecaseProvider).getNewUsers(createdAt: createdAt);
     addUserAccounts(users);
-    return users;
+    final res = filterUsers(users);
+    return res;
+  }
+
+  Future<List<UserAccount>> filterUsers(List<UserAccount> users) async {
+    final filteredUsers =
+        users.where((user) => user.username != "null").toList();
+    return filteredUsers;
   }
 }

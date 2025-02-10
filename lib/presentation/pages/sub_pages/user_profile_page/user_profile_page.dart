@@ -4,20 +4,21 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
-import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/others/report_user_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/blocked_profile_screen.dart';
+import 'package:app/presentation/pages/sub_pages/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/user_posts_list.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/users_friends_screen.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
-import 'package:app/presentation/providers/provider/images/images.dart';
+import 'package:app/presentation/providers/provider/followers_list_notifier.dart';
+import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/usecase/friends_usecase.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:gap/gap.dart';
@@ -41,7 +42,7 @@ class UserProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final canvasTheme = user.canvasTheme;
+    final canvasTheme = CanvasTheme.defaultCanvasTheme();
     final blocks = ref.watch(blocksListNotifierProvider).asData?.value ?? [];
     final blockeds =
         ref.watch(blockedsListNotifierProvider).asData?.value ?? [];
@@ -60,6 +61,9 @@ class UserProfileScreen extends ConsumerWidget {
       backgroundColor: canvasTheme.bgColor,
       body: Stack(
         children: [
+          SizedBox(
+            height: themeSize.screenHeight,
+          ),
           /*
           CustomScrollView(
             slivers: [
@@ -349,7 +353,7 @@ class UserProfileScreen extends ConsumerWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(child: SizedBox()),
+                                const Expanded(child: SizedBox()),
                                 _buildTopActions(context, ref, user),
                               ],
                             ),
@@ -358,6 +362,7 @@ class UserProfileScreen extends ConsumerWidget {
                       ),
                       Positioned(
                         bottom: 0,
+                        width: themeSize.screenWidth,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Row(
@@ -400,31 +405,56 @@ class UserProfileScreen extends ConsumerWidget {
                                         ),
                                       if (user.links.x.isShown &&
                                           user.links.x.path != null)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 12),
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              launchUrl(
-                                                Uri.parse(user.links.x.url!),
-                                                mode: LaunchMode
-                                                    .externalApplication,
-                                              );
-                                            },
-                                            child: SizedBox(
-                                              height: 21,
-                                              width: 21,
-                                              child: Image.asset(
-                                                user.links.x.assetString,
-                                                color: canvasTheme
-                                                    .profileLinksColor,
-                                              ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            launchUrl(
+                                              Uri.parse(user.links.x.url!),
+                                              mode: LaunchMode
+                                                  .externalApplication,
+                                            );
+                                          },
+                                          child: SizedBox(
+                                            height: 21,
+                                            width: 21,
+                                            child: Image.asset(
+                                              user.links.x.assetString,
+                                              color:
+                                                  canvasTheme.profileLinksColor,
                                             ),
                                           ),
                                         ),
                                     ],
                                   ),
                                 ),
+                              const Expanded(child: SizedBox()),
+                              _buildFollowButton(),
+
+                              /*
+                              const Gap(12),
+                              GestureDetector(
+                                onTap: () {
+                                  ref
+                                      .read(navigationRouterProvider(context))
+                                      .goToChat(user);
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.all(9),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: SizedBox(
+                                    height: 19,
+                                    width: 19,
+                                    child: SvgPicture.asset(
+                                      "assets/images/icons/chat.svg",
+                                      // ignore: deprecated_member_use
+                                      color: canvasTheme.profileTextColor,
+                                    ),
+                                  ),
+                                ),
+                              ), */
                             ],
                           ),
                         ),
@@ -433,7 +463,7 @@ class UserProfileScreen extends ConsumerWidget {
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 //プロフィール
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -441,117 +471,156 @@ class UserProfileScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // ユーザー名
-                      Text(
-                        user.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '@${user.username}',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 14,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-                      // 自己紹介
-                      Text(
-                        user.aboutMe,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-                      // メタ情報
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          if (user.location.isNotEmpty)
-                            Row(
-                              children: [
-                                Icon(Icons.location_on_outlined,
-                                    color: Colors.white.withOpacity(0.7),
-                                    size: 16),
-                                const SizedBox(width: 4),
-                                Text(
-                                  user.location,
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                              ],
-                            ),
-                          if (user.job.isNotEmpty)
-                            Row(
-                              children: [
-                                Icon(Icons.work_outline,
-                                    color: Colors.white.withOpacity(0.7),
-                                    size: 16),
-                                const SizedBox(width: 4),
-                                Text(
-                                  user.job,
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                              ],
-                            ),
-                          Icon(Icons.calendar_today,
-                              color: Colors.white.withOpacity(0.7), size: 16),
-                          const SizedBox(width: 4),
                           Text(
-                            "${user.createdAt.toDateStr}〜",
+                            user.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              height: 1.1,
+                            ),
+                          ),
+                          /* Gap(4),
+                          Text(
+                            '@${user.username}',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.7),
                               fontSize: 14,
                             ),
-                          ),
+                          ), */
                         ],
                       ),
 
-                      const SizedBox(height: 16),
-                      // 興味タグ
-                      if (user.tags.isNotEmpty)
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: user.tags
-                              .map(
-                                (tag) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
+                      // const SizedBox(height: 12),
+                      // 自己紹介
+                      if (user.aboutMe.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Text(
+                            user.aboutMe,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+
+                      // メタ情報
+
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Wrap(
+                          spacing: 12,
+                          runSpacing: 4,
+                          children: [
+                            if (user.location.isNotEmpty)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.location_on_outlined,
+                                    color: Colors.white.withOpacity(0.7),
+                                    size: 16,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    tag,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
+                                  const Gap(2),
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 0),
+                                    child: Text(
+                                      user.location,
+                                      style: textStyle.w400(
+                                        color: Colors.white.withOpacity(0.7),
+                                      ),
                                     ),
                                   ),
+                                ],
+                              ),
+                            if (user.job.isNotEmpty)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.work_outline,
+                                    color: Colors.white.withOpacity(0.7),
+                                    size: 16,
+                                  ),
+                                  const Gap(2),
+                                  Text(
+                                    user.job,
+                                    style: textStyle.w400(
+                                      color: Colors.white.withOpacity(0.7),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                ],
+                              ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.calendar_today,
+                                  color: Colors.white.withOpacity(0.7),
+                                  size: 14,
                                 ),
-                              )
-                              .toList(),
+                                const Gap(4),
+                                Text(
+                                  "${user.createdAt.toDateStr}〜",
+                                  style: textStyle.w400(
+                                    color: Colors.white.withOpacity(0.7),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      _buildRequestBanner(context, ref, user),
+                      ),
+
+                      // 興味タグ
+                      if (user.tags.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: user.tags
+                                .map(
+                                  (tag) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Text(
+                                      tag,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+
+                      //_buildRequestBanner(context, ref, user),
                     ],
                   ),
                 ),
 
-                const Gap(24),
+                const Gap(12),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: FollowStatsSection(
+                    user: user,
+                  ),
+                ),
+                const Gap(18),
 
                 /*  // 共通の友達
                     Container(
@@ -604,15 +673,15 @@ class UserProfileScreen extends ConsumerWidget {
               
                     const Gap(24), */
 
-                _buildCurrentStatus(context, ref, canvasTheme, user),
+                /*_buildCurrentStatus(context, ref, canvasTheme, user),
                 _buildTopFriends(context, ref, canvasTheme, user),
-                _buildFriends(context, ref, canvasTheme, user),
+                _buildFriends(context, ref, canvasTheme, user), */
+                //const Gap(24),
                 // 投稿セクション
-                const Gap(24),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: const Text(
-                    '投稿',
+                    "投稿",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -702,46 +771,170 @@ class UserProfileScreen extends ConsumerWidget {
             bottom: 32, // 下からの距離
             left: 0,
             right: 0,
-            child: Center(
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  height: 48,
-                  width: 48,
-                  decoration: BoxDecoration(
-                    color: ThemeColor.surface,
-                    border: Border.all(
-                      color: ThemeColor.stroke.withOpacity(0.8),
-                      width: 1.5,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        ThemeColor.surface,
-                        ThemeColor.surface.withOpacity(0.9),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+            child: (ref.watch(followingListNotifierProvider).asData?.value ??
+                        [])
+                    .map((_) => _.userId)
+                    .contains(user.userId)
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            ref
+                                .read(navigationRouterProvider(context))
+                                .goToChat(user);
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "メッセージを送る",
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.edit_outlined,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            height: 48,
+                            width: 48,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: ThemeColor.stroke.withOpacity(0.8),
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  ThemeColor.stroke,
+                                  ThemeColor.background,
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              size: 24,
+                              color: ThemeColor.text,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Gap(12),
                     ],
+                  )
+                : Center(
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        height: 48,
+                        width: 48,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: ThemeColor.stroke.withOpacity(0.8),
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              ThemeColor.stroke,
+                              ThemeColor.background,
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          size: 24,
+                          color: ThemeColor.text,
+                        ),
+                      ),
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.close_rounded,
-                    size: 24,
-                    color: ThemeColor.text,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFollowButton() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final themeSize = ref.watch(themeSizeProvider(context));
+        final textStyle = ThemeTextStyle(themeSize: themeSize);
+        final notifier = ref.read(followingListNotifierProvider.notifier);
+        final isFollowing = notifier.isFollowing(user.userId);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Material(
+            color: isFollowing ? Colors.blue : ThemeColor.white,
+            borderRadius: BorderRadius.circular(100),
+            child: InkWell(
+              onTap: () {
+                if (!isFollowing) {
+                  notifier.followUser(user);
+                } else {
+                  notifier.unfollowUser(user);
+                }
+              },
+              borderRadius: BorderRadius.circular(100),
+              child: Container(
+                width: 108,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    !isFollowing ? 'フォロー' : 'フォロー中',
+                    style: textStyle.w600(
+                      fontSize: 14,
+                      color: isFollowing
+                          ? ThemeColor.white
+                          : ThemeColor.background,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -749,119 +942,127 @@ class UserProfileScreen extends ConsumerWidget {
       BuildContext context, WidgetRef ref, UserAccount user) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-
-    final friendInfos =
-        ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
-    final friendIds = friendInfos.map((item) => item.userId);
-
-    final isFriend =
-        friendInfos.map((item) => item.userId).contains(user.userId);
+    final friendIds = ref.watch(friendIdsProvider);
+    final isFriend = friendIds.contains(user.userId);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 8),
       child: FutureBuilder(
-        future: ref
-            .read(friendIdListNotifierProvider.notifier)
-            .getFriends(user.userId),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const SizedBox();
-          }
-          final users = snapshot.data!;
-          users.removeWhere((e) => !friendIds.contains(e.userId));
-          final shorten = users.length > 2;
-
-          return Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 24,
-                  child: Row(
-                    children: [
-                      Wrap(
-                        children: (shorten ? users.sublist(0, 2) : users)
-                            .map(
-                              (user) => Container(
-                                margin: const EdgeInsets.all(2),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: Container(
-                                    color: ThemeColor.stroke,
-                                    height: 20,
-                                    width: 20,
-                                    child: user.imageUrl != null
-                                        ? CachedNetworkImage(
-                                            imageUrl: user.imageUrl!,
-                                            fadeInDuration: const Duration(
-                                                milliseconds: 120),
-                                            imageBuilder:
-                                                (context, imageProvider) =>
-                                                    Container(
-                                              height: 20,
-                                              width: 20,
-                                              decoration: BoxDecoration(
-                                                color: Colors.transparent,
-                                                image: DecorationImage(
-                                                  image: imageProvider,
-                                                  fit: BoxFit.cover,
+          future: ref.read(friendsUsecaseProvider).getFriendIds(user.userId),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Text("HELLO?");
+            }
+            if (snapshot.hasError) {
+              return Text("error : ${snapshot.error}");
+            }
+            final userIds = snapshot.data!;
+            return FutureBuilder(
+              future: ref
+                  .read(allUsersNotifierProvider.notifier)
+                  .getUserAccounts(userIds),
+              builder: (context, snapshots) {
+                if (!snapshots.hasData) {
+                  return const SizedBox();
+                }
+                if (snapshots.hasError) {
+                  return Text("error : ${snapshots.error}");
+                }
+                final users = snapshots.data!;
+                users.removeWhere((e) => !friendIds.contains(e.userId));
+                final shorten = users.length > 2;
+                return Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 24,
+                        child: Row(
+                          children: [
+                            Wrap(
+                              children: (shorten ? users.sublist(0, 2) : users)
+                                  .map(
+                                    (user) => Container(
+                                      margin: const EdgeInsets.all(2),
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(100),
+                                        child: Container(
+                                          color: ThemeColor.stroke,
+                                          height: 20,
+                                          width: 20,
+                                          child: user.imageUrl != null
+                                              ? CachedNetworkImage(
+                                                  imageUrl: user.imageUrl!,
+                                                  fadeInDuration:
+                                                      const Duration(
+                                                          milliseconds: 120),
+                                                  imageBuilder: (context,
+                                                          imageProvider) =>
+                                                      Container(
+                                                    height: 20,
+                                                    width: 20,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.transparent,
+                                                      image: DecorationImage(
+                                                        image: imageProvider,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  placeholder: (context, url) =>
+                                                      const SizedBox(),
+                                                  errorWidget:
+                                                      (context, url, error) =>
+                                                          const SizedBox(),
+                                                )
+                                              : const Icon(
+                                                  Icons.person_outline,
+                                                  size: 20 * 0.8,
+                                                  color: ThemeColor.accent,
                                                 ),
-                                              ),
-                                            ),
-                                            placeholder: (context, url) =>
-                                                const SizedBox(),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    const SizedBox(),
-                                          )
-                                        : const Icon(
-                                            Icons.person_outline,
-                                            size: 20 * 0.8,
-                                            color: ThemeColor.accent,
-                                          ),
-                                  ),
-                                ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                            const Gap(4),
+                            Text(
+                              "共通の友達${users.length}人",
+                              style: textStyle.w400(
+                                fontSize: 12,
+                                color: user.canvasTheme.profileAboutMeColor,
                               ),
-                            )
-                            .toList(),
-                      ),
-                      const Gap(4),
-                      Text(
-                        "共通の友達${users.length}人",
-                        style: textStyle.w400(
-                          fontSize: 12,
-                          color: user.canvasTheme.profileAboutMeColor,
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              const Gap(12),
-              if (!isFriend)
-                UserRequestButton(
-                  user: user,
-                  hasNoMutualFriends: users.isEmpty,
-                )
-            ],
-          );
-        },
-      ),
+                    ),
+                    const Gap(12),
+                    if (!isFriend)
+                      UserRequestButton(
+                        user: user,
+                        hasNoMutualFriends: users.isEmpty,
+                      )
+                  ],
+                );
+              },
+            );
+          }),
     );
   }
 
   Widget _buildTopActions(
       BuildContext context, WidgetRef ref, UserAccount user) {
-    final canvasTheme = user.canvasTheme;
-    final friendInfos =
-        ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
-    final isFriend =
-        friendInfos.map((item) => item.userId).contains(user.userId);
+    final canvasTheme = CanvasTheme.defaultCanvasTheme();
+    //final friendIds = ref.watch(friendIdsProvider);
+    const isFriend = false; //friendIds.contains(user.userId);
 
     return SizedBox(
       height: kToolbarHeight,
       child: Row(
         children: [
-          if (isFriend)
+          /*if (isFriend)
             GestureDetector(
               onTap: () {
                 ref.read(navigationRouterProvider(context)).goToChat(user);
@@ -875,7 +1076,7 @@ class UserProfileScreen extends ConsumerWidget {
                   color: canvasTheme.profileTextColor,
                 ),
               ),
-            ),
+            ), */
           const Gap(12),
           FocusedMenuHolder(
             onPressed: () {},
@@ -1394,115 +1595,129 @@ class UserProfileScreen extends ConsumerWidget {
                 ),
                 const Gap(8),
                 FutureBuilder(
-                  future: ref
-                      .read(friendIdListNotifierProvider.notifier)
-                      .getFriends(user.userId),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const SizedBox();
-                    }
-                    final friends = snapshot.data!;
-                    final users = friends
-                        .where((item) => !user.topFriends.contains(item.userId))
-                        .toList();
-                    if (users.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text(
-                            user.topFriends.isNotEmpty
-                                ? "TOP10に全てのフレンドがいます"
-                                : "フレンドはいません。",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: canvasTheme.boxSecondaryTextColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    List<Widget> stack = [];
-                    for (int i = 0; i < min(displayCount, users.length); i++) {
-                      stack.add(
-                        Positioned(
-                          left: i * (imageRadius * 3 / 2),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                width: stroke,
-                                color: Color.alphaBlend(
-                                  Colors.black.withOpacity(0.05),
-                                  canvasTheme.boxBgColor,
+                    future: ref
+                        .read(friendsUsecaseProvider)
+                        .getFriendIds(user.userId),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const SizedBox();
+                      }
+                      final userIds = snapshot.data!;
+                      return FutureBuilder(
+                        future: ref
+                            .read(allUsersNotifierProvider.notifier)
+                            .getUserAccounts(userIds),
+                        builder: (context, snapshots) {
+                          if (!snapshots.hasData) {
+                            return const SizedBox();
+                          }
+                          final friends = snapshots.data!;
+                          final users = friends
+                              .where((item) =>
+                                  !user.topFriends.contains(item.userId))
+                              .toList();
+                          if (users.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8),
+                                child: Text(
+                                  user.topFriends.isNotEmpty
+                                      ? "TOP10に全てのフレンドがいます"
+                                      : "フレンドはいません。",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: canvasTheme.boxSecondaryTextColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
+                            );
+                          }
+
+                          List<Widget> stack = [];
+                          for (int i = 0;
+                              i < min(displayCount, users.length);
+                              i++) {
+                            stack.add(
+                              Positioned(
+                                left: i * (imageRadius * 3 / 2),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      width: stroke,
+                                      color: Color.alphaBlend(
+                                        Colors.black.withOpacity(0.05),
+                                        canvasTheme.boxBgColor,
+                                      ),
+                                    ),
+                                  ),
+                                  child: UserIcon(
+                                    user: users[i],
+                                    width: imageRadius * 2,
+                                    isCircle: true,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => UsersFriendsScreen(
+                                    user: user,
+                                    friends: friends,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.black.withOpacity(0.05),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  SizedBox(
+                                    width: (imageRadius * 2 + stroke) +
+                                        (min(displayCount, users.length) - 1) *
+                                            (imageRadius * 3 / 2),
+                                    height: imageRadius * 2,
+                                    child: Stack(
+                                      alignment: Alignment.centerLeft,
+                                      children: stack,
+                                    ),
+                                  ),
+                                  const Expanded(child: SizedBox()),
+                                  Text(
+                                    friends.length.toString(),
+                                    style: TextStyle(
+                                      color: canvasTheme.boxSecondaryTextColor,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const Gap(4),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    color: canvasTheme.boxSecondaryTextColor,
+                                    size: 20,
+                                  )
+                                ],
+                              ),
                             ),
-                            child: UserIcon(
-                              user: users[i],
-                              width: imageRadius * 2,
-                              isCircle: true,
-                            ),
-                          ),
-                        ),
+                          );
+                        },
                       );
-                    }
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => UsersFriendsScreen(
-                              user: user,
-                              friends: friends,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.black.withOpacity(0.05),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            SizedBox(
-                              width: (imageRadius * 2 + stroke) +
-                                  (min(displayCount, users.length) - 1) *
-                                      (imageRadius * 3 / 2),
-                              height: imageRadius * 2,
-                              child: Stack(
-                                alignment: Alignment.centerLeft,
-                                children: stack,
-                              ),
-                            ),
-                            const Expanded(child: SizedBox()),
-                            Text(
-                              friends.length.toString(),
-                              style: TextStyle(
-                                color: canvasTheme.boxSecondaryTextColor,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const Gap(4),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              color: canvasTheme.boxSecondaryTextColor,
-                              size: 20,
-                            )
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                    }),
               ],
             ),
           ),
@@ -1541,10 +1756,9 @@ class NotFriendScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final canvasTheme = user.canvasTheme;
-    final friendInfos =
-        ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
-    final friendIds = friendInfos.map((item) => item.userId);
+    final canvasTheme = CanvasTheme.defaultCanvasTheme();
+
+    final friendIds = ref.watch(friendIdsProvider);
     const imageHeight = 108.0;
 
     return Scaffold(
@@ -1680,111 +1894,202 @@ class NotFriendScreen extends ConsumerWidget {
               const Gap(4),
               FutureBuilder(
                   future: ref
-                      .read(friendIdListNotifierProvider.notifier)
-                      .getFriends(user.userId),
+                      .read(friendsUsecaseProvider)
+                      .getFriendIds(user.userId),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const SizedBox();
                     }
-                    final users = snapshot.data!;
-                    users.removeWhere((e) => !friendIds.contains(e.userId));
-                    final shorten = users.length > 2;
+                    final userIds = snapshot.data!;
+                    return FutureBuilder(
+                        future: ref
+                            .read(allUsersNotifierProvider.notifier)
+                            .getUserAccounts(userIds),
+                        builder: (context, snapshots) {
+                          if (!snapshots.hasData) {
+                            return const SizedBox();
+                          }
+                          final users = snapshots.data!;
+                          users.removeWhere(
+                              (e) => !friendIds.contains(e.userId));
+                          final shorten = users.length > 2;
 
-                    return FadeTransitionWidget(
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: 24,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                          return FadeTransitionWidget(
+                            child: Column(
                               children: [
-                                Wrap(
-                                  children: (shorten
-                                          ? users.sublist(0, 2)
-                                          : users)
-                                      .map(
-                                        (user) => Container(
-                                          margin: const EdgeInsets.all(2),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(100),
-                                            child: Container(
-                                              color: ThemeColor.stroke,
-                                              height: 20,
-                                              width: 20,
-                                              child: user.imageUrl != null
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: user.imageUrl!,
-                                                      fadeInDuration:
-                                                          const Duration(
-                                                              milliseconds:
-                                                                  120),
-                                                      imageBuilder: (context,
-                                                              imageProvider) =>
-                                                          Container(
-                                                        height: 20,
-                                                        width: 20,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .transparent,
-                                                          image:
-                                                              DecorationImage(
-                                                            image:
-                                                                imageProvider,
-                                                            fit: BoxFit.cover,
+                                SizedBox(
+                                  height: 24,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Wrap(
+                                        children: (shorten
+                                                ? users.sublist(0, 2)
+                                                : users)
+                                            .map(
+                                              (user) => Container(
+                                                margin: const EdgeInsets.all(2),
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100),
+                                                  child: Container(
+                                                    color: ThemeColor.stroke,
+                                                    height: 20,
+                                                    width: 20,
+                                                    child: user.imageUrl != null
+                                                        ? CachedNetworkImage(
+                                                            imageUrl:
+                                                                user.imageUrl!,
+                                                            fadeInDuration:
+                                                                const Duration(
+                                                                    milliseconds:
+                                                                        120),
+                                                            imageBuilder: (context,
+                                                                    imageProvider) =>
+                                                                Container(
+                                                              height: 20,
+                                                              width: 20,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .transparent,
+                                                                image:
+                                                                    DecorationImage(
+                                                                  image:
+                                                                      imageProvider,
+                                                                  fit: BoxFit
+                                                                      .cover,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            placeholder: (context,
+                                                                    url) =>
+                                                                const SizedBox(),
+                                                            errorWidget: (context,
+                                                                    url,
+                                                                    error) =>
+                                                                const SizedBox(),
+                                                          )
+                                                        : const Icon(
+                                                            Icons
+                                                                .person_outline,
+                                                            size: 20 * 0.8,
+                                                            color: ThemeColor
+                                                                .accent,
                                                           ),
-                                                        ),
-                                                      ),
-                                                      placeholder:
-                                                          (context, url) =>
-                                                              const SizedBox(),
-                                                      errorWidget: (context,
-                                                              url, error) =>
-                                                          const SizedBox(),
-                                                    )
-                                                  : const Icon(
-                                                      Icons.person_outline,
-                                                      size: 20 * 0.8,
-                                                      color: ThemeColor.accent,
-                                                    ),
-                                            ),
-                                          ),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                      ),
+                                      const Gap(4),
+                                      Text(
+                                        "共通の友達${users.length}人",
+                                        style: textStyle.w600(
+                                          fontSize: 12,
+                                          color: user.canvasTheme
+                                              .profileSecondaryTextColor,
                                         ),
-                                      )
-                                      .toList(),
-                                ),
-                                const Gap(4),
-                                Text(
-                                  "共通の友達${users.length}人",
-                                  style: textStyle.w600(
-                                    fontSize: 12,
-                                    color: user
-                                        .canvasTheme.profileSecondaryTextColor,
+                                      ),
+                                    ],
                                   ),
                                 ),
+                                const Gap(24),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        themeSize.horizontalPaddingLarge,
+                                  ),
+                                  child: UserRequestButton(
+                                    user: user,
+                                    hasNoMutualFriends: users.isEmpty,
+                                  ),
+                                )
                               ],
                             ),
-                          ),
-                          const Gap(24),
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: themeSize.horizontalPaddingLarge,
-                            ),
-                            child: UserRequestButton(
-                              user: user,
-                              hasNoMutualFriends: users.isEmpty,
-                            ),
-                          )
-                        ],
-                      ),
-                    );
+                          );
+                        });
                   }),
               Gap(themeSize.screenHeight * 0.3),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class FollowStatsSection extends ConsumerWidget {
+  const FollowStatsSection({super.key, required this.user});
+
+  final UserAccount user;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+
+    final followings =
+        ref.watch(userFollowingsProvider(user.userId)).asData?.value ?? [];
+    final followers =
+        ref.watch(userFollowersProvider(user.userId)).asData?.value ?? [];
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => UserFFScreen(user: user),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            _buildStat(
+              context: context,
+              count: followers.length,
+              label: 'フォロワー',
+              textStyle: textStyle,
+            ),
+            const Gap(24),
+            _buildStat(
+              context: context,
+              count: followings.length,
+              label: 'フォロー中',
+              textStyle: textStyle,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStat({
+    required BuildContext context,
+    required int count,
+    required String label,
+    required ThemeTextStyle textStyle,
+  }) {
+    final canvasTheme = CanvasTheme.defaultCanvasTheme();
+    return Row(
+      children: [
+        Text(
+          count.toString(),
+          style:
+              textStyle.w600(fontSize: 16, color: canvasTheme.profileTextColor),
+        ),
+        const Gap(4),
+        Text(
+          label,
+          style: textStyle.w400(
+            fontSize: 12,
+            color: canvasTheme.profileTextColor,
+          ),
+        ),
+      ],
     );
   }
 }

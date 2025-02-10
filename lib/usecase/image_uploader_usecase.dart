@@ -4,6 +4,7 @@ import 'package:app/core/utils/debug_print.dart';
 import 'package:app/main.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,11 +65,12 @@ class ImageUploadUsecase {
     }
   }
 
-  Future<String> _uploadIPostImage(File imageFile, String id, int index) async {
+  Future<String> _uploadImage(
+      File imageFile, String path, String id, int index) async {
     Reference ref = _storage
         .ref("photos")
         .child(_auth.currentUser!.uid)
-        .child("posts")
+        .child(path)
         .child("${id}_$index");
     UploadTask uploadTask = ref.putFile(imageFile);
     TaskSnapshot snap = await uploadTask;
@@ -96,7 +98,7 @@ class ImageUploadUsecase {
     List<Future<String>> imageUrlFutures = [];
     for (var i = 0; i < files.length; i++) {
       final file = files[i];
-      imageUrlFutures.add(_uploadIPostImage(file, id, i));
+      imageUrlFutures.add(_uploadImage(file, "posts", id, i));
     }
     await Future.wait(imageUrlFutures);
     List<String> urls = [];
@@ -105,5 +107,53 @@ class ImageUploadUsecase {
       urls.add(url);
     }
     return urls;
+  }
+
+  //ルームで画像を送信する
+  Future<List<String>> uploadRoomImages(String id, List<File> files) async {
+    List<Future<String>> imageUrlFutures = [];
+    for (var i = 0; i < files.length; i++) {
+      final file = files[i];
+      imageUrlFutures.add(_uploadImage(file, "rooms", id, i));
+    }
+    await Future.wait(imageUrlFutures);
+    List<String> urls = [];
+    for (int i = 0; i < imageUrlFutures.length; i++) {
+      final url = await imageUrlFutures[i];
+      urls.add(url);
+    }
+    return urls;
+  }
+
+  Future<List<String>> uploadCommunityImages(
+      String communityId, List<File> files) async {
+    List<Future<String>> imageUrlFutures = [];
+    for (var i = 0; i < files.length; i++) {
+      final file = files[i];
+      imageUrlFutures.add(_uploadImage(file, "communities", communityId, i));
+    }
+    await Future.wait(imageUrlFutures);
+    List<String> urls = [];
+    for (int i = 0; i < imageUrlFutures.length; i++) {
+      final url = await imageUrlFutures[i];
+      urls.add(url);
+    }
+    return urls;
+  }
+
+  //Community
+  Future<String> uploadCommunityThumbnailImage(
+    String communityId,
+    File imageFile,
+  ) async {
+    Reference ref = _storage
+        .ref("communities")
+        .child(communityId)
+        .child("thumbnail")
+        .child(Timestamp.now().millisecondsSinceEpoch.toString());
+    UploadTask uploadTask = ref.putFile(imageFile);
+    TaskSnapshot snap = await uploadTask;
+    String downloadUrl = await snap.ref.getDownloadURL();
+    return downloadUrl;
   }
 }

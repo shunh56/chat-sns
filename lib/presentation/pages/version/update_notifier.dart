@@ -39,9 +39,7 @@ class _UpdateNotifierState extends ConsumerState<UpdateNotifier> {
   Future<void> _checkVersion() async {
     try {
       final status = await ref.read(versionStatusProvider.future);
-
       if (!mounted) return;
-
       switch (status) {
         case VersionStatus.requiresUpdate:
           _showForceUpdateDialog();

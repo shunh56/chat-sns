@@ -21,8 +21,8 @@ class BlockedProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final requesteds =
-        ref.watch(friendRequestedIdListNotifierProvider).asData?.value ?? [];
+    //final requests = ref.watch(requestIdsProvider);
+    final requesteds = ref.watch(requestedIdsProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('プロフィール'),

@@ -1,5 +1,6 @@
 import 'package:app/datasource/direct_message_datasource.dart';
 import 'package:app/domain/entity/message.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final dmRepositoryProvider = Provider(
@@ -15,16 +16,26 @@ class DirectMessageRepository {
     this._dmDatasource,
   );
 
-  Future<List<CoreMessage>> getMessages(String id) async {
-    final query = await _dmDatasource.fetchMessages(id);
-    return query.docs.map((e) {
-      final type = e.data()['type'];
-      if (type == "currentStatus_reply") {
-        return CurrentStatusMessage.fromJson(e.data());
-      } else {
-        return Message.fromJson(e.data());
-      }
-    }).toList();
+  Future<List<CoreMessage>> getMessages(
+    String id, {
+    Timestamp? lastTimestamp,
+  }) async {
+    final query = await _dmDatasource.fetchMessages(
+      id,
+      lastTimestamp: lastTimestamp,
+    );
+    if (query.docs.isNotEmpty) {
+      return query.docs.map((e) {
+        final type = e.data()['type'];
+        if (type == "currentStatus_reply") {
+          return CurrentStatusMessage.fromJson(e.data());
+        } else {
+          return Message.fromJson(e.data());
+        }
+      }).toList();
+    } else {
+      return [];
+    }
   }
 
   Stream<List<CoreMessage>> streamMessages(String id) {

@@ -13,8 +13,13 @@ class UserRepository {
   final UserDatasource _datasource;
   UserRepository(this._datasource);
 
-  Future<List<UserAccount>> getOnlineUsers({Timestamp? lastOpenedAt}) async {
-    final res = await _datasource.getOnlineUsers(lastOpenedAt: lastOpenedAt);
+  Future<List<UserAccount>> getOnlineUsers() async {
+    final res = await _datasource.getOnlineUsers();
+    return res.docs.map((doc) => UserAccount.fromJson(doc.data())).toList();
+  }
+
+  Future<List<UserAccount>> getRecentUsers() async {
+    final res = await _datasource.getRecentUsers();
     return res.docs.map((doc) => UserAccount.fromJson(doc.data())).toList();
   }
 
@@ -39,6 +44,16 @@ class UserRepository {
     } else {
       return null;
     }
+  }
+
+  Future<List<UserAccount>> searchUserByName(String name) async {
+    final res = await _datasource.searchUserByName(name);
+    return res.docs.map((doc) => UserAccount.fromJson(doc.data())).toList();
+  }
+
+  Future<List<UserAccount>> searchUserByUsername(String username) async {
+    final res = await _datasource.searchUserByUsername(username);
+    return res.docs.map((doc) => UserAccount.fromJson(doc.data())).toList();
   }
 
   createUser(Map<String, dynamic> json) {

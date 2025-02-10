@@ -79,25 +79,29 @@ exports.sendPushNotification = functions
     }
   });
 
-exports.sendCall = functions
+
+˝ */
+
+exports.sendCallNotification = functions
   .region("asia-northeast1")
   .https.onCall(async (params, context) => {
-    if (!context.auth) {
+    console.log(params);
+    const { fcmToken, data } = params;
+    if (!fcmToken) {
       throw new functions.https.HttpsError(
-        "unauthenticated",
-        "User must be logged in to send VoIP push."
+        "invalid-argument",
+        "FCM token is required."
       );
     }
-    const { token, userId, name, imageUrl, dateTime } = params;
-    console.log("messageData : ", params);
+
     const message = {
-      token,
-      //notification: { title, body },
+      token: fcmToken,
+
       data: {
-        userId: userId,
-        name: name,
-        imageUrl: imageUrl,
-        dateTime: dateTime,
+        userId: data.userId,
+        name: data.name,
+        imageUrl: data.imageUrl,
+        dateTime: data.dateTime,
         type: "call",
       },
       android: {
@@ -119,46 +123,22 @@ exports.sendCall = functions
     };
     try {
       await admin.messaging().send(message);
-      return { success: true, message: "Notification sent successfully" };
-    } catch (e) {
-      console.error("Error sending notification:", e);
-      return { success: false, message: e.toString() };
+      console.log("Notification sent successfully:", response);
+      return {
+        success: true,
+        messageId: response,
+      };
+    } catch (error) {
+      console.error("Error sending notification:", error);
+      throw new functions.https.HttpsError(
+        "internal",
+        "Error sending notification",
+        error
+      );
     }
   });
-˝ */
 
-async function sendNotifications(tokens, message) {
-  try {
-    const response = await admin.messaging().sendEachForMulticast({
-      tokens: tokens,
-      ...message,
-    });
-    console.log(`${response.successCount} messages were sent successfully`);
-
-    const failedTokens = response.responses.reduce((acc, resp, idx) => {
-      if (!resp.success) {
-        console.log(
-          `Error code: ${resp.error.code}, message: ${resp.error.message}`
-        );
-        if (
-          resp.error.code === "messaging/invalid-registration-token" ||
-          resp.error.code === "messaging/registration-token-not-registered"
-        ) {
-          acc.push(tokens[idx]);
-        }
-      }
-      return acc;
-    }, []);
-
-    if (failedTokens.length > 0) {
-      console.log("List of invalid tokens: ", failedTokens);
-      // TODO: Implement logic to remove invalid tokens from the database
-    }
-  } catch (error) {
-    console.error(`Error sending notifications for event ${eventId}:`, error);
-  }
-}
-exports.sendNotification = functions
+exports.sendPushNotification = functions
   .region("asia-northeast1")
   .https.onCall(async (data, context) => {
     console.log(data);
@@ -255,80 +235,33 @@ exports.sendMulticast = functions
         },
       },
     };
-    return sendNotifications(fcmTokens, message);
-
-    const messages = fcmTokens.map((token) => ({
-      token,
-      notification: {
-        title: notification.title,
-        body: notification.body,
-      },
-    }));
-
     try {
-      const response = await admin.messaging().sendAll(messages);
-      console.log("Notifications sent successfully:", response);
-      return {
-        success: true,
-        sentCount: response.successCount,
-        failedCount: response.failureCount,
-      };
+      const response = await admin.messaging().sendEachForMulticast({
+        tokens: tokens,
+        ...message,
+      });
+      console.log(`${response.successCount} messages were sent successfully`);
+
+      const failedTokens = response.responses.reduce((acc, resp, idx) => {
+        if (!resp.success) {
+          console.log(
+            `Error code: ${resp.error.code}, message: ${resp.error.message}`
+          );
+          if (
+            resp.error.code === "messaging/invalid-registration-token" ||
+            resp.error.code === "messaging/registration-token-not-registered"
+          ) {
+            acc.push(tokens[idx]);
+          }
+        }
+        return acc;
+      }, []);
+
+      if (failedTokens.length > 0) {
+        console.log("List of invalid tokens: ", failedTokens);
+        // TODO: Implement logic to remove invalid tokens from the database
+      }
     } catch (error) {
-      console.error("Error sending notifications:", error);
-      throw new functions.https.HttpsError(
-        "internal",
-        "Error sending notifications",
-        error
-      );
+      console.error(`Error sending notifications for event ${eventId}:`, error);
     }
   });
-
-/*const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-admin.initializeApp();
-
-exports.sendMulticastNotification = functions.https.onCall((data, context) => {
-    const payload = {
-        notification: {
-            title: data.title || "Default Title", // 通知のタイトル
-            body: data.body || "Default Body", // 通知の内容
-            sound: "default", // 通知音の設定
-        },
-        data: {
-            key1: data.key1 || "", // カスタムデータフィールド1
-            key2: data.key2 || "", // カスタムデータフィールド2
-        },
-        android: {
-            priority: "high", // Androidの優先度
-            notification: {
-                clickAction: data.clickAction || "FLUTTER_NOTIFICATION_CLICK", // クリックアクション
-                color: "#FF0000", // 通知の色
-            },
-        },
-        apns: {
-            payload: {
-                aps: {
-                    sound: "default", // iOSの通知音
-                    badge: 1, // iOSのバッジ数
-                },
-            },
-        },
-    };
-
-    const multicastMessage = {
-        tokens: data.tokens, // 複数のデバイストークン
-        ...payload,
-    };
-
-    return admin.messaging().sendEachForMulticast(multicastMessage)
-        .then((response) => {
-            const successCount = response.successCount;
-            const failureCount = response.failureCount;
-            console.log(`Successfully sent ${successCount} messages, ${failureCount} messages failed.`);
-            return { successCount, failureCount };
-        })
-        .catch((error) => {
-            console.log("Error sending message:", error);
-            return { success: false };
-        });
-}); */

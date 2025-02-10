@@ -25,9 +25,13 @@ class ActivitiesUsecase {
     this._currentStatusPostRepository,
   );
 
+  Stream<List<Activity>> streamActivity() {
+    return _repository.streamActivity();
+  }
+
   Future<List<Activity>> getRecentActivities() async {
     final list = await _repository.getRecentActivities();
-    for (var e in list) {
+    /*for (var e in list) {
       if (e.actionType == ActionType.postLike ||
           e.actionType == ActionType.postComment) {
         final post = await _postRepository.getPost(e.refId);
@@ -36,8 +40,12 @@ class ActivitiesUsecase {
         final post = await _currentStatusPostRepository.getPost(e.refId);
         e.post = post;
       }
-    }
+    } */
     return list;
+  }
+
+  Future<void> readActivities() {
+    return _repository.readActitivies();
   }
 
   addLikeToPost(UserAccount user, Post post) async {

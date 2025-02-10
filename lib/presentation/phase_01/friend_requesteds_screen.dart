@@ -13,27 +13,22 @@ class FriendRequestedsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final asyncValue = ref.watch(friendRequestedIdListNotifierProvider);
-    final listView = asyncValue.when(
-      data: (userIds) {
-        if (userIds.isEmpty) {
-          return const Center(
+
+    final requesteds = ref.watch(requestedIdsProvider);
+    final listView = (requesteds.isEmpty)
+        ? const Center(
             child: Text("フレンドリクエストはありません"),
+          )
+        : ListView.builder(
+            itemCount: requesteds.length,
+            itemBuilder: (context, index) {
+              String userId = requesteds[index];
+              final user =
+                  ref.watch(allUsersNotifierProvider).asData!.value[userId]!;
+              return UserRequestWidget(user: user);
+            },
           );
-        }
-        return ListView.builder(
-          itemCount: userIds.length,
-          itemBuilder: (context, index) {
-            String userId = userIds[index];
-            final user =
-                ref.watch(allUsersNotifierProvider).asData!.value[userId]!;
-            return UserRequestWidget(user: user);
-          },
-        );
-      },
-      error: (e, s) => const SizedBox(),
-      loading: () => const SizedBox(),
-    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(

@@ -21,9 +21,8 @@ class EditNowWithScreen extends HookConsumerWidget {
     final currentStatus = ref.watch(currentStatusStateProvider);
     final currentStatusNotifier =
         ref.watch(currentStatusStateProvider.notifier);
-    final friendInfos =
-        ref.watch(friendIdListNotifierProvider).asData?.value ?? [];
-    final friendIds = friendInfos.map((item) => item.userId).toList();
+    final friendIds = ref.watch(friendIdsProvider);
+
     final imageWidth =
         (themeSize.screenWidth - 2 * themeSize.horizontalPadding) / 5 - 8;
     5;

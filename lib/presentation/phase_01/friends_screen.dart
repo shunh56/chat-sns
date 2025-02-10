@@ -20,10 +20,9 @@ class FriendsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final friendInfos = ref.read(friendIdListNotifierProvider).asData!.value;
+    final friendIds = ref.watch(friendIdsProvider);
     final map = ref.read(allUsersNotifierProvider).asData!.value;
-    friendInfos.sort((a, b) => b.engagementCount.compareTo(a.engagementCount));
-    final friends = friendInfos.map((info) => map[info.userId]!).toList();
+    final friends = friendIds.map((userId) => map[userId]!).toList();
 
     return Scaffold(
       appBar: AppBar(

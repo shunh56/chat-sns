@@ -2,13 +2,15 @@ import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/activities.dart';
-import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/providers/provider/activities_list_notifier.dart';
+import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/usecase/posts/post_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -72,7 +74,13 @@ class ActivitiesScreen extends ConsumerWidget {
           style: textStyle.appbarText(isSmall: true),
         ),
       ),
-      body: listView,
+      body: RefreshIndicator(
+        backgroundColor: ThemeColor.accent,
+        onRefresh: () async {
+          ref.read(activitiesListNotifierProvider.notifier).refresh();
+        },
+        child: listView,
+      ),
     );
   }
 }
@@ -92,22 +100,31 @@ class ActivityTile extends ConsumerWidget {
         .values
         .where((user) => activity.userIds.contains(user.userId))
         .toList();
+    if (users.isEmpty) return const SizedBox();
     if (users.length > 2) {
       users = users.sublist(0, 2);
     }
+
     return InkWell(
       splashColor: ThemeColor.stroke,
       highlightColor: Colors.white.withOpacity(0.1),
-      onTap: () {
-        if (activity.actionType == ActionType.postLike ||
-            activity.actionType == ActionType.postComment) {
-          ref
-              .read(navigationRouterProvider(context))
-              .goToPost(activity.post as Post, me);
-        } else {
-          ref
-              .read(navigationRouterProvider(context))
-              .goToCurrentStatusPost(activity.post as CurrentStatusPost, me);
+      onTap: () async {
+        ref
+            .read(activitiesListNotifierProvider.notifier)
+            .readActivity(activity);
+        try {
+          if (activity.actionType == ActionType.postLike ||
+              activity.actionType == ActionType.postComment) {
+            final post =
+                await ref.read(postUsecaseProvider).getPost(activity.refId);
+            activity.post = post;
+            ref.read(allPostsNotifierProvider.notifier).addPosts([post]);
+            ref
+                .read(navigationRouterProvider(context))
+                .goToPost(activity.post as Post, me);
+          }
+        } catch (e) {
+          showErrorSnackbar(error: e);
         }
       },
       child: Container(
@@ -154,39 +171,54 @@ class ActivityTile extends ConsumerWidget {
                   ),
                   const Gap(12),
                   Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: activity.userIds.length > 1
-                                ? "${users[0].name}さん、他${activity.userIds.length - 1}人"
-                                : "${users[0].name}さん",
-                            style: textStyle.w600(
-                              fontSize: 14,
-                            ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: activity.userIds.length > 1
+                                    ? "${users[0].name}さん、他${activity.userIds.length - 1}人"
+                                    : "${users[0].name}さん",
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                ),
+                              ),
+                              TextSpan(
+                                text: contentText(
+                                  activity.actionType,
+                                ),
+                                style: activity.isSeen
+                                    ? textStyle.w400(
+                                        fontSize: 13,
+                                        color: Colors.white.withOpacity(0.7),
+                                      )
+                                    : textStyle.w600(
+                                        fontSize: 14,
+                                      ),
+                              ),
+                            ],
                           ),
-                          TextSpan(
-                            text: contentText(
-                              activity.actionType,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              activity.updatedAt.xxAgo,
+                              style: textStyle.w400(
+                                fontSize: 10,
+                                color: ThemeColor.subText,
+                              ),
                             ),
-                            style: textStyle.w400(
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        )
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-            const Gap(12),
-            Text(
-              activity.updatedAt.xxAgo,
-              style: textStyle.w400(
-                color: ThemeColor.subText,
-              ),
-            )
           ],
         ),
       ),

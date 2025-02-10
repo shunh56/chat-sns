@@ -1,27 +1,17 @@
-import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/user_icon.dart';
-import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
-import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
-import 'package:app/presentation/pages/timeline_page/widget/current_status_story_tile.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
+import 'package:app/presentation/providers/provider/posts/following_posts.dart';
 import 'package:app/presentation/providers/provider/posts/friends_posts.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:gap/gap.dart';
 
 //final refreshController = Provider((ref) => RefreshController());
 
@@ -64,10 +54,10 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
           backgroundColor: ThemeColor.stroke,
           onRefresh: () async {
             // ref.read(voiceChatListNotifierProvider.notifier).refresh();
-            ref.read(friendsPostsNotifierProvider.notifier).refresh();
-            ref
+            ref.read(followingPostsNotifierProvider.notifier).refresh();
+            /*ref
                 .read(friendsCurrentStatusPostsNotiferProvider.notifier)
-                .refresh();
+                .refresh(); */
           },
           child: ListView(
             children: [
@@ -575,7 +565,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
   }
 }
 
-class CurrentStatusPostsSection extends ConsumerStatefulWidget {
+/*class CurrentStatusPostsSection extends ConsumerStatefulWidget {
   const CurrentStatusPostsSection({super.key});
 
   @override
@@ -602,9 +592,9 @@ class _CurrentStatusPostsSectionState
     return asyncValue.when(
       data: (data) {
         final userIds = data.keys.where((userId) => userId != myId).toList();
-        final friendInfos =
-            ref.read(friendIdListNotifierProvider).asData!.value;
-        userIds.sort((a, b) {
+        final friendIds = ref.watch(friendIdsProvider);
+
+        /*userIds.sort((a, b) {
           final aSeen = data[a]!.first.isSeen;
           final bSeen = data[b]!.first.isSeen;
           if (aSeen != bSeen) {
@@ -619,7 +609,7 @@ class _CurrentStatusPostsSectionState
               .first
               .engagementCount;
           return bEngament.compareTo(aEngament);
-        });
+        }); */
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
@@ -1025,3 +1015,4 @@ class CurrentStatusStories extends ConsumerWidget {
     );
   }
 }
+ */

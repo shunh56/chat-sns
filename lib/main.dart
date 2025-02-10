@@ -11,7 +11,9 @@ import 'package:app/core/values.dart';
 import 'package:app/datasource/local/hive/friends_map.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/firebase_options.dart';
+import 'package:app/notification_service.dart';
 import 'package:app/presentation/components/core/shader.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/account_status_screen/banned_screen.dart';
 import 'package:app/presentation/pages/account_status_screen/deleted_screen.dart';
 import 'package:app/presentation/pages/account_status_screen/freezed_screen.dart';
@@ -20,7 +22,9 @@ import 'package:app/presentation/pages/auth/signup_page.dart';
 import 'package:app/presentation/pages/flows/onboarding/onboarding_screen.dart';
 import 'package:app/presentation/pages/flows/onboarding/shared_preferences_provider.dart';
 import 'package:app/presentation/pages/onboarding/screens/onboarding_screen.dart';
+import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/pages/version/update_notifier.dart';
+import 'package:app/presentation/pages/version/version_manager.dart';
 import 'package:app/presentation/phase_01/main_page.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
@@ -39,23 +43,19 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 //import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gap/gap.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:uuid/uuid.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const flavor = String.fromEnvironment('FLAVOR');
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  DebugPrint("Handling a background message: ${message.messageId}");
-  //TODO 時差は命取りなので、送信時との時間差が5秒以内であれば鳴らす
   HapticFeedback.vibrate();
   final data = message.data;
   if (data['type'] == "call") {
@@ -63,24 +63,34 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final imageUrl = data['imageUrl'];
     final dateTime = DateTime.parse(data['dateTime']);
     if (DateTime.now().difference(dateTime).inSeconds.abs() < 5) {
-      showIncomingCall(name, imageUrl);
+      NotificationService.showIncomingCall(name, imageUrl);
     }
   }
 }
 
-const AndroidNotificationChannel channel = AndroidNotificationChannel(
-  'high_importance_channel', // id
-  'High Importance Notifications', // title  // description
-  importance: Importance.max,
-  enableVibration: true,
-  playSound: true,
-);
+Future<void> _firebaseMessagingForegroundHandler(RemoteMessage message) async {
+  final data = message.data;
+  final type = data['type'];
+  showMessage("data : $data");
+  //アプリ内widgetとして通知を表示する
+  /*switch (type) {
+    case 'call':
+      await NotificationService.showCallNotification(
+        callerName: data['name'] ?? 'Unknown',
+        callerImage: data['imageUrl'],
+        callId: data['callId'],
+      );
+      break;
+    default:
+      await NotificationService.showPushNotification(
+        title: message.notification?.title ?? '',
+        body: message.notification?.body ?? '',
+        payload: data,
+      );
+  } */
+}
 
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
-configureSystem() async {
-  DebugPrint("FLAVOR : $flavor");
+void configureSystem() {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
     SystemUiOverlay.top,
     SystemUiOverlay.bottom,
@@ -121,188 +131,6 @@ Future<void> initializeFirebaseApp() async {
   }
 }
 
-configureNotification() async {
-  final messaging = FirebaseMessaging.instance;
-
-  await messaging.requestPermission(
-    alert: true,
-    announcement: false,
-    //TODO 数字の変更がうまくできないため、一旦なしにする
-    badge: false,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-  );
-  await messaging.setForegroundNotificationPresentationOptions(
-    alert: false,
-    badge: false,
-    sound: false,
-  );
-
-  FirebaseMessaging.onMessage.listen(
-    (RemoteMessage message) async {
-      DebugPrint(
-          '通知を検出: ${message.notification?.title} - ${message.notification?.body}');
-      if (message.notification != null) {
-        HapticFeedback.vibrate();
-      }
-      final data = message.data;
-      if (data['type'] == "call") {
-        final name = data["name"] ?? "name";
-        final imageUrl = data['imageUrl'];
-        final dateTime = DateTime.parse(data['dateTime']);
-        if (DateTime.now().difference(dateTime).inSeconds.abs() < 5) {
-          showIncomingCall(name, imageUrl);
-        }
-      }
-    },
-  );
-  FirebaseMessaging.onMessageOpenedApp.listen(
-    (message) {
-      DebugPrint(
-          'アプリ起動中通知を検出: ${message.notification?.title} - ${message.notification?.body}');
-      switch (message.data['action']) {
-        case 'push_notification':
-          break;
-        default:
-          break;
-      }
-    },
-  );
-
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>()
-      ?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-}
-
-showIncomingCall(String name, String? imageUrl) async {
-  final params = CallKitParams(
-    id: const Uuid().v4(),
-    nameCaller: name,
-    appName: appName,
-    // avatar: 'https://i.pravatar.cc/100',
-    avatar: imageUrl,
-    handle: '',
-    type: 0,
-    duration: 30000,
-    textAccept: '応答',
-    textDecline: '拒否',
-
-    missedCallNotification: const NotificationParams(
-      //showNotification: false,
-      callbackText: "かけ直す",
-      subtitle: "不在着信",
-      //isShowCallback: false,
-      //count: 1,
-    ),
-    //extra: <String, dynamic>{'userId': '1a2b3c4d'},
-    // headers: <String, dynamic>{'apiKey': 'Abc@123!'},
-    android: AndroidParams(
-      isCustomNotification: true,
-      isShowLogo: true,
-      missedCallNotificationChannelName: appName,
-      incomingCallNotificationChannelName: appName,
-      ringtonePath: 'system_ringtone_default',
-      backgroundColor: '#404040',
-      // backgroundUrl: 'https://i.pravatar.cc/500',
-      actionColor: '#4CAF50',
-      isImportant: true,
-      isShowFullLockedScreen: true,
-    ),
-    ios: const IOSParams(
-      iconName: null, //'CallKitLogo',
-      handleType: 'generic',
-      supportsVideo: false,
-      maximumCallGroups: 2,
-      maximumCallsPerCallGroup: 1,
-      audioSessionMode: 'default',
-      audioSessionActive: true,
-      audioSessionPreferredSampleRate: 44100.0,
-      audioSessionPreferredIOBufferDuration: 0.005,
-      supportsDTMF: true,
-      supportsHolding: true,
-      supportsGrouping: false,
-      supportsUngrouping: false,
-      ringtonePath: 'system_ringtone_default',
-    ),
-  );
-  await FlutterCallkitIncoming.showCallkitIncoming(params);
-}
-
-configureVoiceCall() async {
-  FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
-    //print("callEvent: ${event?.body}");
-    //print("eventType : ${event?.event}");
-    switch (event!.event) {
-      case Event.actionCallIncoming:
-        // TODO: received an incoming call
-        break;
-      case Event.actionCallStart:
-        // TODO: started an outgoing call
-        // TODO: show screen calling in Flutter
-        break;
-      case Event.actionCallAccept:
-        // TODO: accepted an incoming call
-        // TODO: show screen calling in Flutter
-        // await FlutterCallkitIncoming.endCall(event.body['id']);
-        await Future.delayed(const Duration(milliseconds: 30));
-        //showMessage("action accepted, closing voip");
-        /* navigatorKey.currentState?.push(
-          MaterialPageRoute(
-            builder: (_) => const Scaffold(
-              body: Center(
-                child: Text("VOICE CALL SCREEN"),
-              ),
-            ),
-          ),
-        ); */
-        break;
-      case Event.actionCallDecline:
-        // TODO: declined an incoming call
-        await FlutterCallkitIncoming.endCall(event.body['id']);
-        break;
-      case Event.actionCallEnded:
-        // TODO: ended an incoming/outgoing call
-        await FlutterCallkitIncoming.endCall(event.body['id']);
-        break;
-      case Event.actionCallTimeout:
-        // TODO: missed an incoming call
-        await FlutterCallkitIncoming.endCall(event.body['id']);
-        break;
-      case Event.actionCallCallback:
-        // TODO: only Android - click action `Call back` from missed call notification
-        break;
-      case Event.actionCallToggleHold:
-        // TODO: only iOS
-        break;
-      case Event.actionCallToggleMute:
-        // TODO: only iOS
-        break;
-      case Event.actionCallToggleDmtf:
-        // TODO: only iOS
-        break;
-      case Event.actionCallToggleGroup:
-        // TODO: only iOS
-        break;
-      case Event.actionCallToggleAudioSession:
-        // TODO: only iOS
-        break;
-      case Event.actionDidUpdateDevicePushTokenVoip:
-        // TODO: only iOS
-        break;
-      case Event.actionCallCustom:
-        // TODO: for custom action
-        break;
-    }
-  });
-}
-
 /*configureSwiftMethodChannel() {
   const platform = MethodChannel('com.blank.sns/voip');
   platform.setMethodCallHandler(_handleVoIPCall);
@@ -318,32 +146,47 @@ Future<void> _handleVoIPCall(MethodCall call) async {
 }
  */
 void main() {
-  DebugPrint("main()");
   runZonedGuarded<Future<void>>(
     () async {
+      // initialize
       WidgetsFlutterBinding.ensureInitialized();
       await MobileAds.instance.initialize();
+
       //1. initialize system
-      await configureSystem();
+      configureSystem();
 
       //2. initialize firebase
       await initializeFirebaseApp();
 
+      //3. initialize Notification
+      await NotificationService.initialize();
       FirebaseMessaging.onBackgroundMessage(
         _firebaseMessagingBackgroundHandler,
       );
+      FirebaseMessaging.onMessage.listen(
+        _firebaseMessagingForegroundHandler,
+      );
+      final initialMessage =
+          await FirebaseMessaging.instance.getInitialMessage();
+      if (initialMessage != null) {
+        // 通知タップ時の処理を実行
+        NotificationService.handleNotificationTap(initialMessage);
+      }
 
+      //4. configure local DB
       await Hive.initFlutter();
-      //Hiveを変更した時
-      //await Hive.deleteBoxFromDisk('userAccount');
+      final prefs = await SharedPreferences.getInstance();
+      final internalVersionStr = prefs.getString('current_version') ?? "1.0.0";
+      final lastVersion = AppVersion.parse(internalVersionStr);
+      final packageInfo = await PackageInfo.fromPlatform();
+      final currentVersion = AppVersion.parse(packageInfo.version);
+      if (lastVersion < currentVersion) {
+        await Hive.deleteBoxFromDisk('userAccount');
+      }
+      prefs.setString("current_version", packageInfo.version);
+
       HiveBoxes.registerAdapters();
       await HiveBoxes.openBoxes();
-
-      //3. initialize notification
-      configureNotification();
-
-      //methodChannelhandler
-      //configureSwiftMethodChannel();
 
       if (!kDebugMode) {
         await FirebaseCrashlytics.instance
@@ -359,7 +202,6 @@ void main() {
             .recordFlutterError(errorDetails, fatal: true);
       };
 
-      DebugPrint("runApp");
       runApp(
         const ProviderScope(
           overrides: [
@@ -425,6 +267,80 @@ class _ScreenTrackerState extends State<ScreenTracker> {
   Widget build(BuildContext context) {
     return widget.child;
   }
+}
+
+configureVoiceCall() async {
+  FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
+    //print("callEvent: ${event?.body}");
+    //print("eventType : ${event?.event}");
+    switch (event!.event) {
+      case Event.actionCallIncoming:
+        // TODO: received an incoming call
+        break;
+      case Event.actionCallStart:
+        // TODO: started an outgoing call
+        // TODO: show screen calling in Flutter
+        break;
+      case Event.actionCallAccept:
+      showMessage("id(uuid) : ${event.body['id']}\ncallId : ${event.body['extra']['id']}");
+        await FlutterCallkitIncoming.endCall(event.body['id']);
+        await Future.delayed(const Duration(milliseconds: 30));
+        // 通話画面への遷移
+        if (navigatorKey.currentState != null) {
+          // extra データから通話に必要な情報を取得
+          final callId = event.body['extra']?['id'] as String?;
+          final uuid = event.body['id'] as String?;
+          if (callId != null) {
+            navigatorKey.currentState!.push(
+              MaterialPageRoute(
+                builder: (_) => VoiceChatScreen(
+                  id: callId,
+                  uuid: uuid ?? '',
+                ),
+              ),
+            );
+          }
+        }
+        break;
+
+      case Event.actionCallDecline:
+        // TODO: declined an incoming call
+        await FlutterCallkitIncoming.endCall(event.body['id']);
+        break;
+      case Event.actionCallEnded:
+        // TODO: ended an incoming/outgoing call
+        await FlutterCallkitIncoming.endCall(event.body['id']);
+        break;
+      case Event.actionCallTimeout:
+        // TODO: missed an incoming call
+        await FlutterCallkitIncoming.endCall(event.body['id']);
+        break;
+      case Event.actionCallCallback:
+        // TODO: only Android - click action `Call back` from missed call notification
+        break;
+      case Event.actionCallToggleHold:
+        // TODO: only iOS
+        break;
+      case Event.actionCallToggleMute:
+        // TODO: only iOS
+        break;
+      case Event.actionCallToggleDmtf:
+        // TODO: only iOS
+        break;
+      case Event.actionCallToggleGroup:
+        // TODO: only iOS
+        break;
+      case Event.actionCallToggleAudioSession:
+        // TODO: only iOS
+        break;
+      case Event.actionDidUpdateDevicePushTokenVoip:
+        // TODO: only iOS
+        break;
+      case Event.actionCallCustom:
+        // TODO: for custom action
+        break;
+    }
+  });
 }
 
 class MyApp extends ConsumerWidget {

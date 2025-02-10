@@ -38,17 +38,17 @@ class NewUsersNotifier extends StateNotifier<AsyncValue<List<UserAccount>>> {
   }
 }
 
-final onlineUsersNotifierProvider =
-    StateNotifierProvider<OnlineUsersNotifier, AsyncValue<List<UserAccount>>>(
+final recentUsersNotifierProvider =
+    StateNotifierProvider<RecentUsersNotifier, AsyncValue<List<UserAccount>>>(
         (ref) {
-  return OnlineUsersNotifier(
+  return RecentUsersNotifier(
     ref,
   )..initialize();
 });
 
 /// State
-class OnlineUsersNotifier extends StateNotifier<AsyncValue<List<UserAccount>>> {
-  OnlineUsersNotifier(
+class RecentUsersNotifier extends StateNotifier<AsyncValue<List<UserAccount>>> {
+  RecentUsersNotifier(
     this.ref,
   ) : super(const AsyncValue.loading());
 
@@ -56,7 +56,7 @@ class OnlineUsersNotifier extends StateNotifier<AsyncValue<List<UserAccount>>> {
 
   Future<void> initialize() async {
     final res =
-        await ref.read(allUsersNotifierProvider.notifier).getOnlineUsers();
+        await ref.read(allUsersNotifierProvider.notifier).getRecentUsers();
     state = AsyncValue.data(res);
   }
 
@@ -70,7 +70,7 @@ class OnlineUsersNotifier extends StateNotifier<AsyncValue<List<UserAccount>>> {
 
   refresh() async {
     final res =
-        await ref.read(allUsersNotifierProvider.notifier).getOnlineUsers();
+        await ref.read(allUsersNotifierProvider.notifier).getRecentUsers();
     state = AsyncValue.data(res);
   }
 }

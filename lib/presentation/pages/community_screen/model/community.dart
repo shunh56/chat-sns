@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class Community {
   final String id;
@@ -6,17 +7,12 @@ class Community {
   final String description;
   final String thumbnailImageUrl;
   final int memberCount;
-  final int dailyActiveUsers;
-  final int weeklyActiveUsers;
-  final int monthlyActiveUsers;
-  final int totalPosts;
-  final int dailyPosts;
-  final int topicsCount;
+  final int messageCount;
   final Timestamp createdAt;
   final Timestamp updatedAt;
-  final List<String> rules;
   final List<String> moderators;
-  final int? dailyNewMembers;
+  final String userId;
+  final List<String> tags;
 
   Community({
     required this.id,
@@ -24,37 +20,37 @@ class Community {
     required this.description,
     required this.thumbnailImageUrl,
     required this.memberCount,
-    required this.dailyActiveUsers,
-    required this.weeklyActiveUsers,
-    required this.monthlyActiveUsers,
-    required this.totalPosts,
-    required this.dailyPosts,
-    required this.topicsCount,
+    required this.messageCount,
     required this.createdAt,
     required this.updatedAt,
-    required this.rules,
     required this.moderators,
-    this.dailyNewMembers,
-  });
+    required this.userId,
+    required this.tags,
+  }) {
+    // データの整合性チェック
+    if (id.isEmpty) throw ArgumentError('id cannot be empty');
+    if (name.isEmpty) throw ArgumentError('name cannot be empty');
+    if (description.isEmpty) throw ArgumentError('description cannot be empty');
+    if (thumbnailImageUrl.isEmpty) throw ArgumentError('thumbnailImageUrl cannot be empty');
+    if (memberCount < 0) throw ArgumentError('memberCount cannot be negative');
+    if (messageCount < 0) throw ArgumentError('messageCount cannot be negative');
+    if (moderators.isEmpty) throw ArgumentError('moderators list cannot be empty');
+    if (userId.isEmpty) throw ArgumentError('userId cannot be empty');
+  }
 
   factory Community.fromJson(Map<String, dynamic> json) {
     return Community(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      thumbnailImageUrl: json['thumbnailImageUrl'] as String,
-      memberCount: json['memberCount'] as int,
-      dailyActiveUsers: json['dailyActiveUsers'] as int,
-      weeklyActiveUsers: json['weeklyActiveUsers'] as int,
-      monthlyActiveUsers: json['monthlyActiveUsers'] as int,
-      totalPosts: json['totalPosts'] as int,
-      dailyPosts: json['dailyPosts'] as int,
-      topicsCount: json['topicsCount'] as int,
-      createdAt: json['createdAt'] as Timestamp,
-      updatedAt: json['updatedAt'] as Timestamp,
-      rules: List<String>.from(json['rules'] as List),
-      moderators: List<String>.from(json['moderators'] as List),
-      dailyNewMembers: json['dailyNewMembers'] as int?,
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      thumbnailImageUrl: json['thumbnailImageUrl'] as String? ?? '',
+      memberCount: json['memberCount'] as int? ?? 0,
+      messageCount: json['messageCount'] as int? ?? 0,
+      createdAt: json['createdAt'] as Timestamp? ?? Timestamp.now(),
+      updatedAt: json['updatedAt'] as Timestamp? ?? Timestamp.now(),
+      moderators: (json['moderators'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      userId: json['userId'] as String? ?? '',
+      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
     );
   }
 
@@ -65,38 +61,27 @@ class Community {
       'description': description,
       'thumbnailImageUrl': thumbnailImageUrl,
       'memberCount': memberCount,
-      'dailyActiveUsers': dailyActiveUsers,
-      'weeklyActiveUsers': weeklyActiveUsers,
-      'monthlyActiveUsers': monthlyActiveUsers,
-      'totalPosts': totalPosts,
-      'dailyPosts': dailyPosts,
-      'topicsCount': topicsCount,
+      'messageCount': messageCount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
-      'rules': rules,
       'moderators': moderators,
-      'dailyNewMembers': dailyNewMembers,
+      'userId': userId,
+      'tags': tags,
     };
   }
 
-  // データのコピーを作成するメソッド
   Community copyWith({
     String? id,
     String? name,
     String? description,
     String? thumbnailImageUrl,
     int? memberCount,
-    int? dailyActiveUsers,
-    int? weeklyActiveUsers,
-    int? monthlyActiveUsers,
-    int? totalPosts,
-    int? dailyPosts,
-    int? topicsCount,
+    int? messageCount,
     Timestamp? createdAt,
     Timestamp? updatedAt,
-    List<String>? rules,
     List<String>? moderators,
-    int? dailyNewMembers,
+    String? userId,
+    List<String>? tags,
   }) {
     return Community(
       id: id ?? this.id,
@@ -104,27 +89,32 @@ class Community {
       description: description ?? this.description,
       thumbnailImageUrl: thumbnailImageUrl ?? this.thumbnailImageUrl,
       memberCount: memberCount ?? this.memberCount,
-      dailyActiveUsers: dailyActiveUsers ?? this.dailyActiveUsers,
-      weeklyActiveUsers: weeklyActiveUsers ?? this.weeklyActiveUsers,
-      monthlyActiveUsers: monthlyActiveUsers ?? this.monthlyActiveUsers,
-      totalPosts: totalPosts ?? this.totalPosts,
-      dailyPosts: dailyPosts ?? this.dailyPosts,
-      topicsCount: topicsCount ?? this.topicsCount,
+      messageCount: messageCount ?? this.messageCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      rules: rules ?? this.rules,
-      moderators: moderators ?? this.moderators,
-      dailyNewMembers: dailyNewMembers ?? this.dailyNewMembers,
+      moderators: moderators ?? List.from(this.moderators),
+      userId: userId ?? this.userId,
+      tags: tags ?? List.from(this.tags),
     );
   }
 
-  // toString()メソッドのオーバーライド（デバッグ用）
   @override
   String toString() {
-    return 'Community(id: $id, name: $name, memberCount: $memberCount)';
+    return 'Community{'
+        'id: $id, '
+        'name: $name, '
+        'description: $description, '
+        'thumbnailImageUrl: $thumbnailImageUrl, '
+        'memberCount: $memberCount, '
+        'messageCount: $messageCount, '
+        'createdAt: ${createdAt.toDate()}, '
+        'updatedAt: ${updatedAt.toDate()}, '
+        'moderators: $moderators, '
+        'userId: $userId, '
+        'tags: $tags'
+        '}';
   }
 
-  // equals演算子のオーバーライド
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -134,33 +124,28 @@ class Community {
         other.description == description &&
         other.thumbnailImageUrl == thumbnailImageUrl &&
         other.memberCount == memberCount &&
-        other.dailyActiveUsers == dailyActiveUsers &&
-        other.weeklyActiveUsers == weeklyActiveUsers &&
-        other.monthlyActiveUsers == monthlyActiveUsers &&
-        other.totalPosts == totalPosts &&
-        other.dailyPosts == dailyPosts &&
-        other.topicsCount == topicsCount &&
+        other.messageCount == messageCount &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
-        other.dailyNewMembers == dailyNewMembers;
+        listEquals(other.moderators, moderators) &&
+        other.userId == userId &&
+        listEquals(other.tags, tags);
   }
 
-  // hashCodeのオーバーライド
   @override
   int get hashCode {
-    return id.hashCode ^
-        name.hashCode ^
-        description.hashCode ^
-        thumbnailImageUrl.hashCode ^
-        memberCount.hashCode ^
-        dailyActiveUsers.hashCode ^
-        weeklyActiveUsers.hashCode ^
-        monthlyActiveUsers.hashCode ^
-        totalPosts.hashCode ^
-        dailyPosts.hashCode ^
-        topicsCount.hashCode ^
-        createdAt.hashCode ^
-        updatedAt.hashCode ^
-        dailyNewMembers.hashCode;
+    return Object.hash(
+      id,
+      name,
+      description,
+      thumbnailImageUrl,
+      memberCount,
+      messageCount,
+      createdAt,
+      updatedAt,
+      Object.hashAll(moderators),
+      userId,
+      Object.hashAll(tags),
+    );
   }
 }

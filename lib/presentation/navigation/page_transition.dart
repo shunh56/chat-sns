@@ -1,5 +1,4 @@
 // Flutter imports:
-import 'package:app/core/utils/debug_print.dart';
 import 'package:flutter/material.dart';
 
 class PageTransitionMethods {
@@ -16,7 +15,6 @@ class PageTransitionMethods {
 
   //slide up
   static Route slideUp(Widget page) {
-    DebugPrint("SLIDE UP");
     return PageRouteBuilder(
       opaque: false,
       pageBuilder: (context, animation, secondaryAnimation) => page,

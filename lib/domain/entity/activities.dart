@@ -7,7 +7,7 @@ class Activity {
   final ActionType actionType;
   final List<String> userIds;
   final Timestamp updatedAt;
-
+  final bool isSeen;
   late final PostBase post;
 
   Activity({
@@ -16,6 +16,7 @@ class Activity {
     required this.actionType,
     required this.userIds,
     required this.updatedAt,
+    required this.isSeen,
   });
 
   factory Activity.fromJson(Map<String, dynamic> json) {
@@ -25,6 +26,18 @@ class Activity {
       actionType: ActionTypeConverter.fromString(json["actionType"]),
       userIds: List<String>.from(json["userIds"]),
       updatedAt: json["updatedAt"],
+      isSeen: json["isSeen"] ?? false,
+    );
+  }
+
+  Activity copyWith({bool? isSeen}) {
+    return Activity(
+      id: id,
+      refId: refId,
+      actionType: actionType,
+      userIds: userIds,
+      updatedAt: updatedAt,
+      isSeen: isSeen ?? this.isSeen,
     );
   }
 }

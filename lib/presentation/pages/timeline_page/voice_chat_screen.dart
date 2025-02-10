@@ -12,6 +12,7 @@ import 'package:app/presentation/components/dialogs/voice_chat_dialogs.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/providers/provider/chats/voice_chats_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/provider/firebase/firebase_funcrtions.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/state/count_down.dart';
 import 'package:app/usecase/voice_chat_usecase.dart';
@@ -171,9 +172,10 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
       ref.read(animationDoneProvider.notifier).state = true;
       return;
     }
-    final functions = FirebaseFunctions.instanceFor(region: "asia-northeast1");
+
     final HttpsCallable callable =
-        functions.httpsCallable('agora-generateAgoraToken');
+        ref.read(httpsCallableProvider).agoraTokenGenerator();
+
     try {
       // Retrieve or request microphone permission
       await [Permission.microphone].request();

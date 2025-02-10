@@ -7,7 +7,7 @@ import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/usecase/friends_usecase.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,8 +105,9 @@ class UserBottomModelSheet {
                             return cnt == (count + 1);
                           });
                           ref
-                              .read(friendIdListNotifierProvider.notifier)
-                              .deleteFriend(user);
+                              .read(friendsUsecaseProvider)
+                              .deleteFriend(user.userId);
+
                           ref
                               .read(dmOverviewListNotifierProvider.notifier)
                               .leaveChat(user);

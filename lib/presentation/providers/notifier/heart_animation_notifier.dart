@@ -54,7 +54,7 @@ class HeartAnimationNotifier {
 
     // 初期位置とサイズを設定
     xPosNotifier.state = x - 36;
-    yPosNotifier.state = y - 48 - themeSize.appbarHeight;
+    yPosNotifier.state = y - themeSize.appbarHeight;
     sizeNotifier.state = 72.0;
     await Future.delayed(const Duration(milliseconds: 30));
     visibleNotifier.state = true;

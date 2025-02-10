@@ -3,20 +3,27 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_funcrtions.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/usecase/push_notification_usecase.dart';
 import 'package:app/usecase/voice_chat_usecase.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final voipUsecaseProvider =
-    Provider((ref) => VoipUsecase(ref, ref.watch(functionsProvider)));
+final voipUsecaseProvider = Provider(
+  (ref) => VoipUsecase(
+    ref,
+    ref.watch(pushNotificationUsecaseProvider),
+    ref.watch(functionsProvider),
+  ),
+);
 
 class VoipUsecase {
   final Ref _ref;
+  final PushNotificationUsecase _pushNotificationUsecase;
   final FirebaseFunctions _functions;
-  VoipUsecase(this._ref, this._functions);
+
+  VoipUsecase(this._ref, this._pushNotificationUsecase, this._functions);
   callUser(UserAccount user) async {
-    final fcmCallable = _functions.httpsCallable('pushNotification-sendCall');
-    final voipCallable = _functions.httpsCallable('voip-send');
+    final voipCallable = _ref.read(httpsCallableProvider).voip();
     final me = _ref.read(myAccountNotifierProvider).asData!.value;
     final voipToken = user.voipToken;
     final fcmToken = user.fcmToken;
@@ -38,19 +45,7 @@ class VoipUsecase {
       }
     } else {
       if (fcmToken != null) {
-        try {
-          DebugPrint("sending fcm notification");
-          final result = await fcmCallable.call({
-            'token': fcmToken,
-            'userId': me.userId,
-            'name': me.name,
-            'imageUrl': me.imageUrl,
-            'dateTime': DateTime.now().toString(),
-          });
-          DebugPrint("response : ${result.data}");
-        } catch (e) {
-          DebugPrint("error : $e");
-        }
+        await _pushNotificationUsecase.sendCallNotification(user);
       }
     }
     return vc;

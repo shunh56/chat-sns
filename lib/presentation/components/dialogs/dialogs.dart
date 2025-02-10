@@ -2,8 +2,11 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/usecase/friends_usecase.dart';
+import 'package:app/usecase/relation_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class BasicDialog extends ConsumerWidget {
   const BasicDialog({
@@ -110,9 +113,7 @@ showQuitRequestDialog(
     title: "リクエストをキャンセル",
     content: "${user.name}へのフレンドリクエストをキャンセルしてよろしいですか？",
     onPositivePressed: () {
-      ref
-          .read(friendRequestIdListNotifierProvider.notifier)
-          .cancelFriendRequest(user.userId);
+      ref.read(relationUsecaseProvider).deleteRequest(user.userId);
       Navigator.pop(context);
     },
   );
@@ -129,9 +130,9 @@ showFriendRequestDialog(
     positiveText: "承認",
     negativeText: "削除",
     onPositivePressed: () {
-      ref
-          .read(friendRequestedIdListNotifierProvider.notifier)
-          .admitFriendRequested(user);
+      ref.read(relationUsecaseProvider).deleteRequested(user.userId);
+      ref.read(friendsUsecaseProvider).addFriend(user.userId);
+
       Navigator.pop(context);
     },
     onNegativePressed: () {
@@ -154,14 +155,30 @@ showDeleteRequestDialog(
     content: "${user.name}からのフレンドリクエストを削除してよろしいですか？",
     positiveText: "削除",
     onPositivePressed: () {
-      ref
-          .read(friendRequestedIdListNotifierProvider.notifier)
-          .deleteRequested(user);
+      ref.read(relationUsecaseProvider).deleteRequested(user.userId);
       ref.read(deletesIdListNotifierProvider.notifier).deleteUser(user);
       Navigator.pop(context);
     },
   );
 }
+
+showGalleryPermissionDialog(
+  BuildContext context,
+  WidgetRef ref,
+) {
+  return BasicDialog(
+    title: "写真へのアクセス",
+    content: "写真を選択するには、写真へのアクセス許可が必要です。",
+    positiveText: "設定へ",
+    onPositivePressed: () {
+      Navigator.pop(context);
+      openAppSettings(); // 設定画面を開く
+    },
+  );
+}
+
+
+
 
 
 

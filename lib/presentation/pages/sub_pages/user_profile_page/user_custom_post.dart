@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/core/values.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
@@ -19,6 +20,7 @@ import 'package:app/presentation/providers/provider/users/all_users_notifier.dar
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:overscroll_pop/overscroll_pop.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -99,24 +101,26 @@ class CustomPostWidget extends ConsumerWidget {
                                       user.name,
                                       style: textStyle.w600(
                                         color: canvasTheme.boxTextColor,
-                                        fontSize: 15,
+                                        fontSize: 14,
                                         height: 1.0,
                                       ),
                                     ),
                                     const Gap(4),
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 2),
-                                      child: Icon(
-                                        size: 12,
-                                        post.isPublic
-                                            ? Icons.public_outlined
-                                            : Icons.lock_outline,
-                                        color: canvasTheme.boxTextColor,
+                                    if (postPrivacyMode)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 2),
+                                        child: Icon(
+                                          size: 12,
+                                          post.isPublic
+                                              ? Icons.public_outlined
+                                              : Icons.lock_outline,
+                                          color: canvasTheme.boxTextColor,
+                                        ),
                                       ),
-                                    ),
+                                    const Expanded(child: SizedBox()),
                                     Text(
-                                      "・${post.createdAt.xxAgo}",
-                                      style: textStyle.w600(
+                                      post.createdAt.xxAgo,
+                                      style: textStyle.w400(
                                         fontSize: 12,
                                         color: canvasTheme.boxTextColor,
                                       ),
@@ -287,47 +291,67 @@ class CustomPostWidget extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (post.replyCount > 0)
-              GestureDetector(
-                onTap: () {
-                  PostBottomModelSheet(context).openReplies(user, post);
-                },
-                child: Row(
-                  children: [
-                    Text(
-                      post.replyCount.toString(),
-                      style: textStyle.numText(
-                        fontSize: 16,
-                        color: user.canvasTheme.boxTextColor,
-                      ),
-                    ),
-                    const Gap(4),
-                    Text(
-                      "コメント",
-                      style: textStyle.w600(
-                        color: user.canvasTheme.boxTextColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            if (post.likeCount > 0)
-              Row(
+            const Gap(12 + 44.4 + 8),
+            Expanded(
+              child: Row(
                 children: [
-                  const Gap(18),
-                  GradientText(
-                    text: post.likeCount.toString(),
-                  ),
-                  const Gap(4),
-                  Text(
-                    "いいね",
-                    style: textStyle.w600(
-                      color: user.canvasTheme.boxTextColor,
+                  if (post.likeCount > 0)
+                    Row(
+                      children: [
+                        GradientText(
+                          text: post.likeCount.toString(),
+                        ),
+                        const Gap(8),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Icon(
+                            Icons.favorite_border_rounded,
+                            color: user.canvasTheme.boxTextColor,
+                            size: 20,
+                          ),
+                        ),
+                        const Gap(60),
+                        /*
+                    Text(
+                      "いいね",
+                      style: textStyle.w600(color: ThemeColor.subText),
                     ),
-                  ),
+                    */
+                      ],
+                    ),
+                  if (post.replyCount > 0)
+                    GestureDetector(
+                      onTap: () {
+                        PostBottomModelSheet(context).openReplies(user, post);
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            post.replyCount.toString(),
+                            style: textStyle.numText(
+                              fontSize: 16,
+                              color: user.canvasTheme.boxTextColor,
+                            ),
+                          ),
+                          const Gap(8),
+                          SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: SvgPicture.asset(
+                              "assets/images/icons/chat.svg",
+                              color: user.canvasTheme.boxTextColor,
+                            ),
+                          ),
+                          /* Text(
+                        "コメント",
+                        style: textStyle.w600(color: ThemeColor.subText),
+                      ), */
+                        ],
+                      ),
+                    ),
                 ],
               ),
-            const Gap(18),
+            ),
             GestureDetector(
               onTap: () {
                 PostBottomModelSheet(context).openPostAction(post, user);
@@ -415,7 +439,7 @@ class BuildText extends ConsumerWidget {
       if (match.start > start) {
         spans.add(TextSpan(
           text: text.substring(start, match.start),
-          style: textStyle.w400(fontSize: 16),
+          style: textStyle.w400(fontSize: 14),
         ));
       }
 
@@ -426,7 +450,7 @@ class BuildText extends ConsumerWidget {
           text: url,
           style: textStyle.w400(
             color: Colors.blue,
-            fontSize: 16,
+            fontSize: 14,
             underline: true,
           ),
           recognizer: TapGestureRecognizer()..onTap = () => _launchURL(url),
@@ -442,7 +466,7 @@ class BuildText extends ConsumerWidget {
         TextSpan(
           text: text.substring(start),
           style: textStyle.w400(
-            fontSize: 16,
+            fontSize: 14,
             color: canvasTheme.boxSecondaryTextColor,
           ),
         ),

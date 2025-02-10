@@ -10,6 +10,7 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
@@ -46,10 +47,10 @@ android {
 
     defaultConfig {
         multiDexEnabled true
-        applicationId = "com.blank.sns"
+        //applicationId = devMode?"com.blank.sns.dev":"com.blank.sns"
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutterVersionCode.toInteger()
+        versionCode = 10//flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
 
@@ -62,6 +63,25 @@ android {
        }
     }
 
+
+    flavorDimensions "environment"
+    productFlavors {
+        dev {
+            dimension "environment"
+            applicationId "com.blank.sns.dev"
+            buildConfigField "String", "FLAVOR_NAME", "\"dev\""
+            resValue "string", "app_name", "BLANK DEV"  // 開発版のアプリ名
+
+        }
+        prod {
+            dimension "environment"
+            applicationId "com.blank.sns"
+            buildConfigField "String", "FLAVOR_NAME", "\"prod\""
+            resValue "string", "app_name", "BLANK"  // 本番版のアプリ名
+           
+        }
+    }
+
     buildTypes {
         release {
             signingConfig signingConfigs.release
@@ -69,12 +89,16 @@ android {
             minifyEnabled true
             shrinkResources true
         }
+        debug {
+            // デバッグビルドの設定
+        }
     }
 
     // google-services.jsonを環境に応じて切り替える
     applicationVariants.all { variant ->
-        def devMode = false
-        def targetJson = devMode ? 'google-services-dev.json' : 'google-services-prod.json'
+
+        def flavorName = variant.flavorName
+        def targetJson = flavorName == 'dev' ? 'google-services-dev.json' : 'google-services-prod.json'
         
         variant.preBuild.doFirst {
             copy {

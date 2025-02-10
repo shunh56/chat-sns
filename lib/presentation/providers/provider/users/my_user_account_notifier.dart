@@ -4,12 +4,13 @@ import 'dart:io';
 import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/pages/onboarding/providers/providers.dart';
+import 'package:app/usecase/friends_usecase.dart';
 import 'package:app/usecase/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/usecase/invite_code_usecase.dart';
 import 'package:app/usecase/posts/current_status_post_usecase.dart';
+import 'package:app/usecase/relation_usecase.dart';
 import 'package:app/usecase/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -172,7 +173,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
   //usedCodeにしようするコードを書き換える => ホームに行けるようになる
   useInviteCode(InviteCode code) {
     final user = state.asData!.value;
-    final updatedUser = user.copyWith(usedCode: code.code);
+    final updatedUser = user.copyWith(usedCode: code.id);
     state = AsyncValue.data(updatedUser);
     update(updatedUser);
   }
@@ -199,7 +200,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
           .getInviteCode(user.usedCode!);
       if (code.getStatus == InviteCodeStatus.valid) {
         ref.read(inviteCodeUsecaseProvider).useCode(user.usedCode!);
-        ref.read(friendIdListNotifierProvider.notifier).addFriend(code.userId);
+        ref.read(friendsUsecaseProvider).addFriend(code.userId);
       }
     }
     final String userId = ref.watch(authProvider).currentUser!.uid;
@@ -224,9 +225,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
       for (String userId in otherIds) {
         final otherUser =
             ref.read(allUsersNotifierProvider).asData!.value[userId]!;
-        ref
-            .read(friendRequestIdListNotifierProvider.notifier)
-            .sendFriendRequest(otherUser);
+        ref.read(relationUsecaseProvider).sendRequest(otherUser.userId);
       }
     }
   }
@@ -256,6 +255,20 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     state = AsyncValue.data(updatedUser);
     update(updatedUser);
   }
+
+  /*addFriend(String userId) {
+    final me = state.asData!.value;
+    final temp = me.friendIds.toSet();
+    temp.add(userId);
+    final friendIds = List<String>.from(temp);
+    final updatedUser = me.copyWith(friendIds: friendIds);
+    ref.read(firestoreProvider).collection("users").doc(userId).update({
+      "friends": FieldValue.arrayUnion([
+        ref.read(authProvider).currentUser!.uid,
+      ])
+    });
+    update(updatedUser);
+  } */
 
   updateTopFriends(
     List<String> topFriends,

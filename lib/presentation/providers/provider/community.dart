@@ -1,36 +1,39 @@
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/usecase/comunity_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final communityNotifierProvider =
-    StateNotifierProvider<CommunityNotifiier, AsyncValue<Community?>>((ref) {
-  return CommunityNotifiier(
-    ref,
-    ref.watch(communityUsecaseProvider),
-  )..initialize();
+final joinedCommunitiesProvider =
+    StreamProvider.autoDispose<List<Community>>((ref) {
+  final usecase = ref.watch(communityUsecaseProvider);
+  return usecase.streamJoinedCommunities();
 });
 
-/// State
-class CommunityNotifiier extends StateNotifier<AsyncValue<Community?>> {
-  CommunityNotifiier(
-    this.ref,
-    this.usecase,
-  ) : super(const AsyncValue.loading());
+// 参加中のコミュニティのIDリストを管理するプロバイダー
+// これを使って参加/退会ボタンの状態を管理
+final joinedCommunityIdsProvider =
+    FutureProvider.autoDispose<List<String>>((ref) {
+  return ref.watch(joinedCommunitiesProvider).when(
+        data: (communities) => communities.map((c) => c.id).toList(),
+        error: (_, __) => [],
+        loading: () => [],
+      );
+});
 
-  final Ref ref;
-  final String communityId = "student_life";
-  final CommunityUsecase usecase;
+// 人気のコミュニティプロバイダー
+final popularCommunitiesProvider = FutureProvider<List<Community>>((ref) async {
+  final usecase = ref.watch(communityUsecaseProvider);
+  return await usecase.getPopularCommunities();
+});
 
-  Future<void> initialize() async {
-    final res = await usecase.getCommunityFromId(communityId);
-    state = AsyncValue.data(res);
-  }
-}
+// 新規のコミュニティプロバイダー
+final newCommunitiesProvider = FutureProvider<List<Community>>((ref) async {
+  final usecase = ref.watch(communityUsecaseProvider);
+  return await usecase.getNewCommunities();
+});
 
 class CommunityMember {
   final Timestamp joinedAt;
@@ -39,10 +42,13 @@ class CommunityMember {
   CommunityMember(this.joinedAt, this.user);
 }
 
-final communityMembersNotifierProvider = StateNotifierProvider<
-    CommunityMembersNotifiier, AsyncValue<List<CommunityMember>>>((ref) {
+final communityMembersNotifierProvider = StateNotifierProvider.family<
+    CommunityMembersNotifiier,
+    AsyncValue<List<CommunityMember>>,
+    String>((ref, communityId) {
   return CommunityMembersNotifiier(
     ref,
+    communityId,
     ref.watch(communityUsecaseProvider),
   )..initialize();
 });
@@ -52,24 +58,32 @@ class CommunityMembersNotifiier
     extends StateNotifier<AsyncValue<List<CommunityMember>>> {
   CommunityMembersNotifiier(
     this.ref,
+    this.communityId,
     this.usecase,
   ) : super(const AsyncValue.loading());
 
   final Ref ref;
-  final String communityId = "student_life";
+  final String communityId;
   final CommunityUsecase usecase;
   Timestamp timestamp = Timestamp.now();
 
   Future<void> initialize() async {
-    final res =
-        await ref.read(communityUsecaseProvider).getRecentUsers(communityId);
-    final userIds = res.map((data) => data["userId"] as String).toList();
-    await ref.read(allUsersNotifierProvider.notifier).getUserAccounts(userIds);
-    final map = ref.read(allUsersNotifierProvider).asData!.value;
-    timestamp = res[res.length - 1]["joinedAt"];
-    state = AsyncValue.data(res
-        .map((data) => CommunityMember(data["joinedAt"], map[data["userId"]]!))
-        .toList());
+    try {
+      final res =
+          await ref.read(communityUsecaseProvider).getRecentUsers(communityId);
+      final userIds = res.map((data) => data["userId"] as String).toList();
+      await ref
+          .read(allUsersNotifierProvider.notifier)
+          .getUserAccounts(userIds);
+      final map = ref.read(allUsersNotifierProvider).asData!.value;
+      timestamp = res[res.length - 1]["joinedAt"];
+      state = AsyncValue.data(res
+          .map(
+              (data) => CommunityMember(data["joinedAt"], map[data["userId"]]!))
+          .toList());
+    } catch (e) {
+      state = const AsyncValue.data([]);
+    }
   }
 
   refresh() async {
@@ -102,159 +116,5 @@ class CommunityMembersNotifiier
           (data) => CommunityMember(data["joinedAt"], map[data["userId"]]!))
     ]);
     return true;
-  }
-}
-
-final joinedCommunitiesProvider = StateNotifierProvider<
-    JoinedCommunitiesNotifier, AsyncValue<List<Community>>>((ref) {
-  return JoinedCommunitiesNotifier(ref);
-});
-
-class JoinedCommunitiesNotifier
-    extends StateNotifier<AsyncValue<List<Community>>> {
-  final Ref ref;
-
-  JoinedCommunitiesNotifier(this.ref) : super(const AsyncValue.loading()) {
-    _init();
-  }
-
-  void _init() {
-    final user = ref.read(authProvider).currentUser;
-    if (user == null) {
-      state = const AsyncValue.data([]);
-      return;
-    }
-
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('joinedCommunities')
-        .snapshots()
-        .listen(
-      (snapshot) async {
-        try {
-          final communityIds = snapshot.docs.map((doc) => doc.id).toList();
-          if (communityIds.isEmpty) {
-            state = const AsyncValue.data([]);
-            return;
-          }
-
-          final communities = await Future.wait(
-            communityIds.map((id) => FirebaseFirestore.instance
-                .collection('communities')
-                .doc(id)
-                .get()
-                .then((doc) => Community.fromJson(doc.data()!))),
-          );
-
-          state = AsyncValue.data(communities);
-        } catch (error, stackTrace) {
-          state = AsyncValue.error(error, stackTrace);
-        }
-      },
-      onError: (error, stackTrace) {
-        state = AsyncValue.error(error, stackTrace);
-      },
-    );
-  }
-
-  Future<void> refresh() async {
-    _init();
-  }
-
-  Future<void> joinCommunity(Community community) async {
-    String communityId = community.id;
-    final user = ref.read(authProvider).currentUser;
-    if (user == null) return;
-
-    final batch = FirebaseFirestore.instance.batch();
-
-    // コミュニティのメンバーに追加
-    final memberRef = FirebaseFirestore.instance
-        .collection('communities')
-        .doc(communityId)
-        .collection('members')
-        .doc(user.uid);
-
-    batch.set(memberRef, {
-      'joinedAt': FieldValue.serverTimestamp(),
-    });
-
-    // ユーザーの参加コミュニティに追加
-    final userCommRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('joinedCommunities')
-        .doc(communityId);
-
-    batch.set(userCommRef, {
-      'joinedAt': FieldValue.serverTimestamp(),
-    });
-
-    // コミュニティのメンバー数を更新
-    final commRef =
-        FirebaseFirestore.instance.collection('communities').doc(communityId);
-
-    batch.update(commRef, {
-      'memberCount': FieldValue.increment(1),
-    });
-
-    try {
-      await batch.commit();
-      final list = List<Community>.from(state.asData?.value ?? []);
-      list.add(community);
-      state = AsyncValue.data(list);
-      // コミュニティデータの更新を通知
-      //ref.invalidate(communityNotifierProvider(communityId));
-    } catch (e) {
-      // エラーハンドリング
-      throw Exception('コミュニティへの参加に失敗しました');
-    }
-  }
-
-  Future<void> leaveCommunity(Community community) async {
-    String communityId = community.id;
-    final user = ref.read(authProvider).currentUser;
-    if (user == null) return;
-
-    final batch = FirebaseFirestore.instance.batch();
-
-    // コミュニティのメンバーから削除
-    final memberRef = FirebaseFirestore.instance
-        .collection('communities')
-        .doc(communityId)
-        .collection('members')
-        .doc(user.uid);
-
-    batch.delete(memberRef);
-
-    // ユーザーの参加コミュニティから削除
-    final userCommRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('joinedCommunities')
-        .doc(communityId);
-
-    batch.delete(userCommRef);
-
-    // コミュニティのメンバー数を更新
-    final commRef =
-        FirebaseFirestore.instance.collection('communities').doc(communityId);
-
-    batch.update(commRef, {
-      'memberCount': FieldValue.increment(-1),
-    });
-
-    try {
-      await batch.commit();
-      final list = List<Community>.from(state.asData?.value ?? []);
-      list.removeWhere((e) => e.id == community.id);
-      state = AsyncValue.data(list);
-      // コミュニティデータの更新を通知
-      // ref.invalidate(communityNotifierProvider(communityId));
-    } catch (e) {
-      // エラーハンドリング
-      throw Exception('コミュニティからの退会に失敗しました');
-    }
   }
 }
