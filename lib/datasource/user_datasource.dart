@@ -30,8 +30,8 @@ class UserDatasource {
   }
 
   Future<QuerySnapshot<Map<String, dynamic>>> getRecentUsers() async {
-    final floor = Timestamp.fromDate(
-        DateTime.now().subtract(const Duration(minutes: 30)));
+    /* final floor = Timestamp.fromDate(
+        DateTime.now().subtract(const Duration(minutes: 30))); */
     return _firestore
         .collection(collectionName)
         //.where("lastOpenedAt", isGreaterThan: floor)
