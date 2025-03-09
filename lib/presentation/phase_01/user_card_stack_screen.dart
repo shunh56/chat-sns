@@ -60,6 +60,7 @@ class UserCardStackScreen extends ConsumerStatefulWidget {
 
 class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen> {
   late SwiperController _controller;
+  final Set<String> seenUserIds = {};
 
   @override
   void initState() {
@@ -98,15 +99,39 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen> {
                 // カードスワイパー
                 Swiper(
                   controller: _controller,
-                  itemCount: widget.users.length,
-                  itemBuilder: (context, index) =>
-                      _buildCard(widget.users[index]),
+                  itemCount: 10000,
+                  itemBuilder: (context, index) {
+                    final filteredUsers = widget.users
+                        .where((user) => !seenUserIds.contains(user.userId))
+                        .toList();
+
+                    if (filteredUsers.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "すべてのカードをスワイプし終わりました",
+                          style: TextStyle(fontSize: 20, color: Colors.white),
+                        ),
+                      );
+                    }
+
+                    final userIndex = index % filteredUsers.length;
+                    return _buildCard(filteredUsers[userIndex]);
+                  },
                   itemWidth: MediaQuery.of(context).size.width * 0.9,
                   itemHeight: MediaQuery.of(context).size.height * 0.66,
                   layout: SwiperLayout.STACK,
                   axisDirection: AxisDirection.right,
                   onIndexChanged: (index) {
-                    ref.read(userCardStackProvider.notifier).setIndex(index);
+                    final filteredUsers = widget.users
+                        .where((user) => !seenUserIds.contains(user.userId))
+                        .toList();
+                    if (filteredUsers.isNotEmpty) {
+                      final userIndex = index % filteredUsers.length;
+                      seenUserIds.add(filteredUsers[userIndex].userId);
+                      ref
+                            .read(userCardStackProvider.notifier)
+                            .setIndex(index);
+                    }
                   },
                 ),
 
