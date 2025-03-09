@@ -168,4 +168,22 @@ class ThemeTextStyle {
       fontFamily: japanese ? primary : null,
     );
   }
+
+  TextStyle custom({
+    Color color = ThemeColor.text,
+    double fontSize = 12.0,
+    FontWeight fontWeight = FontWeight.w400,
+    double? height,
+    TextDecoration? decoration,
+    bool japanese = true,
+  }) {
+    return TextStyle(
+      color: color,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      fontFamily: japanese ? primary : null,
+      height: height,
+      decoration: decoration,
+    );
+  }
 }
