@@ -18,6 +18,7 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1';
 const AI_MODEL = 'google/gemini-2.0-pro-exp-02-05:free'; // 使用するモデルを指定
 
+
 // ファイル拡張子のフィルタリング（レビュー対象）
 const REVIEW_FILE_EXTENSIONS = [
   '.js', '.jsx', '.ts', '.tsx', 
@@ -35,11 +36,7 @@ const EXCLUDED_DIRECTORIES = [
   'ios/Pods', 'android/.gradle' // プラットフォーム固有の依存関係ディレクトリ
 ];
 
-// GitHub APIクライアントの初期化
-let octokit;
-(async () => {
-  octokit = await createOctokit(GITHUB_TOKEN);
-})();
+// GitHub APIクライアントの初期化はmain関数内で行う
 
 async function main() {
   try {
