@@ -363,7 +363,7 @@ async function getAISummary(filenames) {
       "AI要約の取得中にエラーが発生しました:",
       error.response?.data || error.message
     );
-    return "⚠️ AI要約の生成中にエラーが発生しました。詳細はログを確認してください。";
+    return "AI要約の生成中にエラーが発生しました。詳細はログを確認してください。";
   }
 }
 
