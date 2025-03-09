@@ -15,9 +15,8 @@ let octokit;
 
 // OpenRouter API 関連の設定
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1';
-const AI_MODEL = 'google/gemini-2.0-pro-exp-02-05:free'; // 使用するモデルを指定
-
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const AI_MODEL = 'anthropic/claude-3-5-sonnet'; // 使用するモデルを指定
 
 // ファイル拡張子のフィルタリング（レビュー対象）
 const REVIEW_FILE_EXTENSIONS = [
@@ -271,9 +270,38 @@ async function getAIReview(filename, content) {
       }
     );
     
-    return response.data.choices[0].message.content;
+    // レスポンスの構造を確認し、安全にアクセス
+    if (response.data && 
+        response.data.choices && 
+        Array.isArray(response.data.choices) && 
+        response.data.choices.length > 0 && 
+        response.data.choices[0].message && 
+        response.data.choices[0].message.content) {
+      // レスポンスの構造を確認し、安全にアクセス
+    if (response.data && 
+        response.data.choices && 
+        Array.isArray(response.data.choices) && 
+        response.data.choices.length > 0 && 
+        response.data.choices[0].message && 
+        response.data.choices[0].message.content) {
+      return response.data.choices[0].message.content;
+    } else {
+      console.log('APIレスポンスの形式が想定と異なります:', JSON.stringify(response.data));
+      return '⚠️ AIレビューの生成中に問題が発生しました。APIからの応答の形式が想定と異なります。詳細はログを確認してください。';
+    }
+
+    } else {
+      console.log('APIレスポンスの形式が想定と異なります:', JSON.stringify(response.data));
+      return '⚠️ AIレビューの生成中に問題が発生しました。APIからの応答の形式が想定と異なります。詳細はログを確認してください。';
+    }
+
   } catch (error) {
     console.error('AIレビューの取得中にエラーが発生しました:', error.response?.data || error.message);
+    // デバッグ情報を出力
+    if (error.response) {
+      console.error('API応答の詳細:', JSON.stringify(error.response.data, null, 2));
+      console.error('ステータスコード:', error.response.status);
+    }
     return '⚠️ AIレビューの生成中にエラーが発生しました。詳細はログを確認してください。';
   }
 }
@@ -304,18 +332,22 @@ async function getAISummary(filenames) {
   }
   
   try {
+    console.log('PRの全体要約を要求中...');
+    
+    // Geminiモデル用のメッセージ形式を使用
     const response = await axios.post(
       OPENROUTER_API_URL,
       {
         model: AI_MODEL,
         messages: [
           {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: `このプルリクエストには以下のファイルが含まれています：\n${filenames.join('\n')}\n\n全体的な評価と改善のアドバイスをお願いします。`
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `システム指示: ${systemPrompt}\n\nこのプルリクエストには以下のファイルが含まれています：\n${filenames.join('\n')}\n\n全体的な評価と改善のアドバイスをお願いします。`
+              }
+            ]
           }
         ],
         max_tokens: 1000
@@ -324,14 +356,34 @@ async function getAISummary(filenames) {
         headers: {
           'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://github.com/actions'
+          'HTTP-Referer': 'https://github.com/actions',
+          'X-Title': 'GitHub Actions AI Code Review'
         }
       }
     );
     
+    // レスポンスの構造を検証
+    if (response.data && 
+        response.data.choices && 
+        Array.isArray(response.data.choices) && 
+        response.data.choices.length > 0 && 
+        response.data.choices[0].message && 
+        response.data.choices[0].message.content) {
+      console.log('PR要約が正常に生成されました');
+      return response.data.choices[0].message.content;
+    } else {
+      console.log('APIレスポンスの形式が予期しない構造です:', JSON.stringify(response.data, null, 2));
+      return '⚠️ AI要約の生成中に問題が発生しました。APIからの応答の形式が想定と異なります。';
+    }
+    
     return response.data.choices[0].message.content;
   } catch (error) {
     console.error('AI要約の取得中にエラーが発生しました:', error.response?.data || error.message);
+    // デバッグ情報を出力
+    if (error.response) {
+      console.error('API応答の詳細:', JSON.stringify(error.response.data, null, 2));
+      console.error('ステータスコード:', error.response.status);
+    }
     return '⚠️ AI要約の生成中にエラーが発生しました。詳細はログを確認してください。';
   }
 }
