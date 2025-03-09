@@ -476,33 +476,39 @@ class UserProfileScreen extends ConsumerWidget {
                         children: [
                           Text(
                             user.name,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: textStyle.w600(
                               fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                              color: ThemeColor.white,
                               height: 1.1,
                             ),
                           ),
-                          /* Gap(4),
-                          Text(
-                            '@${user.username}',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 14,
-                            ),
-                          ), */
+                          Gap(8),
+                          if (!user.greenBadge)
+                            Text(
+                              user.badgeStatus,
+                              style: textStyle.w600(
+                                color: ThemeColor.subText,
+                              ),
+                            )
                         ],
                       ),
 
-                      // const SizedBox(height: 12),
+                      const Gap(4),
+                      Text(
+                        "@" + user.username,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: ThemeColor.subText,
+                        ),
+                      ),
                       // 自己紹介
                       if (user.aboutMe.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 12),
                           child: Text(
                             user.aboutMe,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: textStyle.w500(
+                              color: ThemeColor.white,
                               fontSize: 14,
                             ),
                           ),
@@ -511,7 +517,7 @@ class UserProfileScreen extends ConsumerWidget {
                       // メタ情報
 
                       Padding(
-                        padding: const EdgeInsets.only(top: 10),
+                        padding: const EdgeInsets.only(top: 12),
                         child: Wrap(
                           spacing: 12,
                           runSpacing: 4,
@@ -522,7 +528,7 @@ class UserProfileScreen extends ConsumerWidget {
                                 children: [
                                   Icon(
                                     Icons.location_on_outlined,
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: ThemeColor.subText,
                                     size: 16,
                                   ),
                                   const Gap(2),
@@ -531,7 +537,7 @@ class UserProfileScreen extends ConsumerWidget {
                                     child: Text(
                                       user.location,
                                       style: textStyle.w400(
-                                        color: Colors.white.withOpacity(0.7),
+                                        color: ThemeColor.subText,
                                       ),
                                     ),
                                   ),
@@ -543,17 +549,16 @@ class UserProfileScreen extends ConsumerWidget {
                                 children: [
                                   Icon(
                                     Icons.work_outline,
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: ThemeColor.subText,
                                     size: 16,
                                   ),
                                   const Gap(2),
                                   Text(
                                     user.job,
                                     style: textStyle.w400(
-                                      color: Colors.white.withOpacity(0.7),
+                                      color: ThemeColor.subText,
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
                                 ],
                               ),
                             Row(
@@ -561,14 +566,14 @@ class UserProfileScreen extends ConsumerWidget {
                               children: [
                                 Icon(
                                   Icons.calendar_today,
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: ThemeColor.subText,
                                   size: 14,
                                 ),
                                 const Gap(4),
                                 Text(
                                   "${user.createdAt.toDateStr}〜",
                                   style: textStyle.w400(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: ThemeColor.subText,
                                   ),
                                 ),
                               ],
@@ -580,7 +585,7 @@ class UserProfileScreen extends ConsumerWidget {
                       // 興味タグ
                       if (user.tags.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(top: 10),
+                          padding: const EdgeInsets.only(top: 12),
                           child: Wrap(
                             spacing: 8,
                             runSpacing: 8,
@@ -679,7 +684,7 @@ class UserProfileScreen extends ConsumerWidget {
                 //const Gap(24),
                 // 投稿セクション
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: const Text(
                     "投稿",
                     style: TextStyle(

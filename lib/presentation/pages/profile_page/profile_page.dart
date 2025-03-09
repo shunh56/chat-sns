@@ -239,11 +239,18 @@ class ProfileScreen extends ConsumerWidget {
                           // ユーザー名
                           Text(
                             me.name,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: textStyle.w600(
                               fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                              color: ThemeColor.white,
                               height: 1.1,
+                            ),
+                          ),
+                          const Gap(4),
+                          Text(
+                            "@" + me.username,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: ThemeColor.subText,
                             ),
                           ),
                           /*Text(
@@ -261,8 +268,8 @@ class ProfileScreen extends ConsumerWidget {
                                   padding: const EdgeInsets.only(top: 12),
                                   child: Text(
                                     me.aboutMe,
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style: textStyle.w500(
+                                      color: ThemeColor.white,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -322,7 +329,7 @@ class ProfileScreen extends ConsumerWidget {
 
                           // メタ情報
                           Padding(
-                            padding: const EdgeInsets.only(top: 10),
+                            padding: const EdgeInsets.only(top: 12),
                             child: Wrap(
                               spacing: 12,
                               runSpacing: 4,
@@ -333,7 +340,7 @@ class ProfileScreen extends ConsumerWidget {
                                     children: [
                                       Icon(
                                         Icons.location_on_outlined,
-                                        color: Colors.white.withOpacity(0.7),
+                                        color: ThemeColor.subText,
                                         size: 16,
                                       ),
                                       const Gap(2),
@@ -343,8 +350,7 @@ class ProfileScreen extends ConsumerWidget {
                                         child: Text(
                                           me.location,
                                           style: textStyle.w400(
-                                            color:
-                                                Colors.white.withOpacity(0.7),
+                                            color: ThemeColor.subText,
                                           ),
                                         ),
                                       ),
@@ -356,17 +362,16 @@ class ProfileScreen extends ConsumerWidget {
                                     children: [
                                       Icon(
                                         Icons.work_outline,
-                                        color: Colors.white.withOpacity(0.7),
+                                        color: ThemeColor.subText,
                                         size: 16,
                                       ),
                                       const Gap(2),
                                       Text(
                                         me.job,
                                         style: textStyle.w400(
-                                          color: Colors.white.withOpacity(0.7),
+                                          color: ThemeColor.subText,
                                         ),
                                       ),
-                                      const SizedBox(width: 16),
                                     ],
                                   ),
                                 Row(
@@ -374,14 +379,14 @@ class ProfileScreen extends ConsumerWidget {
                                   children: [
                                     Icon(
                                       Icons.calendar_today,
-                                      color: Colors.white.withOpacity(0.7),
+                                      color: ThemeColor.subText,
                                       size: 14,
                                     ),
                                     const Gap(4),
                                     Text(
                                       "${me.createdAt.toDateStr}〜",
                                       style: textStyle.w400(
-                                        color: Colors.white.withOpacity(0.7),
+                                        color: ThemeColor.subText,
                                       ),
                                     ),
                                   ],
@@ -393,7 +398,7 @@ class ProfileScreen extends ConsumerWidget {
                           // 興味タグ
                           if (me.tags.isNotEmpty)
                             Padding(
-                              padding: const EdgeInsets.only(top: 10),
+                              padding: const EdgeInsets.only(top: 12),
                               child: Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
@@ -488,7 +493,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     const Gap(18),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: const Text(
                         '投稿',
                         style: TextStyle(

@@ -182,7 +182,12 @@ class PostScreen extends ConsumerWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                UserIconPostIcon(user: user),
+                UserIcon(
+                  user: user,
+                  width: 40,
+                  isCircle: true,
+                ),
+                /*  UserIconPostIcon(user: user), */
                 const Gap(12),
                 Expanded(
                   child: Row(
@@ -203,13 +208,13 @@ class PostScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 const Gap(4),
-                                Icon(
+                                /*Icon(
                                   size: 12,
                                   post.isPublic
                                       ? Icons.public_outlined
                                       : Icons.lock_outline,
                                   color: Colors.white,
-                                ),
+                                ), */
                                 Text(
                                   "・${post.createdAt.xxAgo}",
                                   style: textStyle.w600(

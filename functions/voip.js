@@ -2,7 +2,9 @@ const functions = require("firebase-functions");
 const { ApnsClient, Notification } = require("apns2");
 const fs = require("fs");
 
+// APP STOREにアップされると本番環境となる
 const production = true;
+
 // Initialize APNs client
 const client = new ApnsClient({
   team: "CDQBCQRWL9", //"LAXS5N48FU", // Your Apple Developer Team ID

@@ -287,7 +287,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
       extendBody: true,
       key: scaffoldKey,
       drawer: Drawer(
-        width: 80,
+        width: 92,
         clipBehavior: Clip.none,
         backgroundColor: ThemeColor.accent,
         child: SafeArea(

@@ -1,5 +1,6 @@
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/main.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_funcrtions.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -31,13 +32,12 @@ class VoipUsecase {
         await _ref.read(voiceChatUsecaseProvider).createVoiceChat("VOICE CALL");
     if (voipToken != null) {
       try {
-        DebugPrint("sending voip notification");
         final result = await voipCallable.call({
           'tokens': [voipToken],
           'name': me.name,
           'id': vc.id,
         });
-        showMessage("voip response : ${result.data}");
+
         DebugPrint("response : ${result.data}");
       } catch (e) {
         showMessage("voip notification error : $e");

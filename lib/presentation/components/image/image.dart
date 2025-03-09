@@ -57,6 +57,27 @@ class CachedImage {
     );
   }
 
+  static usersCard(String imageUrl) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: CachedNetworkImage(
+        imageUrl: imageUrl,
+        fadeInDuration: const Duration(milliseconds: 120),
+        imageBuilder: (context, imageProvider) => Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            image: DecorationImage(
+              image: imageProvider,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        placeholder: (context, url) => const SizedBox(),
+        errorWidget: (context, url, error) => const SizedBox(),
+      ),
+    );
+  }
+
   static userImage(String imageUrl, double imageWidth) {
     return SizedBox(
       width: imageWidth,

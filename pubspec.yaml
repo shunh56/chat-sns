@@ -147,6 +147,7 @@ dependencies:
   blurhash_dart: ^1.2.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  card_swiper: ^3.0.1
 
   image: any
   path_provider: any
@@ -180,6 +181,7 @@ dependency_overrides:
   camera_android_camerax: ^0.6.7
   camera: ^0.11.0
   http: ^0.13.0
+  
 
 dev_dependencies:
   flutter_test:
@@ -207,6 +209,8 @@ flutter:
     - assets/images/
     - assets/images/icons/
     - assets/images/stickers/sunglass_babies/
+    - assets/images/community/
+
   fonts:
     - family: NotoSansJP
       fonts:
