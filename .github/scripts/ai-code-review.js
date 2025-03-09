@@ -1,5 +1,5 @@
 // ESM形式でインポート
-import { createOctokit } from './octo-helper.js';
+import { createOctokit } from './octokit-helper.js';
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
@@ -15,8 +15,9 @@ let octokit;
 
 // OpenRouter API 関連の設定
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const AI_MODEL = 'anthropic/claude-3-5-sonnet'; // 使用するモデルを指定
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1';
+const AI_MODEL = 'google/gemini-2.0-pro-exp-02-05:free'; // 使用するモデルを指定
+
 
 // ファイル拡張子のフィルタリング（レビュー対象）
 const REVIEW_FILE_EXTENSIONS = [
