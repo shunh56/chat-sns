@@ -8,6 +8,7 @@ import 'package:app/presentation/pages/settings_screen/debug_report_screen.dart'
 import 'package:app/presentation/pages/settings_screen/notification_settings/direct_messages_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/friend_requests_screen.dart';
 import 'package:app/presentation/pages/version/version_manager.dart';
+import 'package:app/presentation/providers/provider/theme_provider.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +23,11 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final me = ref.watch(myAccountNotifierProvider).asData?.value;
+
     if (me == null) return const Scaffold();
+
+    final isDarkMode = ref.watch(isDarkModeProvider);
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -176,6 +181,45 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const Gap(32),
+          _buildContainer(
+            "表示設定",
+            [
+              _buildTopTile(
+                context,
+                _tileContent(
+                  isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                  "ダークモード",
+                  showArrow: false,
+                  trailing: SizedBox(
+                    height: 28,
+                    child: Switch(
+                      value: isDarkMode,
+                      onChanged: (value) {
+                        if (true) {
+                          //TODO  Currently Only Dark Mode
+                          ref.read(isDarkModeProvider.notifier).state = value;
+                        }
+                      },
+                      trackOutlineColor: WidgetStateColor.transparent,
+                      inactiveTrackColor: ThemeColor.stroke,
+                      inactiveThumbColor: Colors.white,
+                      activeColor: Colors.white,
+                      activeTrackColor: Colors.greenAccent,
+                    ),
+                  ),
+                ),
+              ),
+              _buildBottomTile(
+                context,
+                _tileContent(
+                  Icons.font_download_outlined,
+                  "フォントサイズ",
+                ),
+                // フォントサイズ設定画面への遷移はここに実装
+              ),
+            ],
+          ),
+          Gap(32),
           /*  _buildContainer(
             "サブスクリプション設定",
             [
@@ -284,6 +328,7 @@ class SettingsScreen extends ConsumerWidget {
     IconData icon,
     String text, {
     bool showArrow = true,
+    Widget? trailing,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
@@ -308,7 +353,9 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
-          if (showArrow)
+          if (trailing != null)
+            trailing
+          else if (showArrow)
             const Icon(
               Icons.arrow_forward_ios_rounded,
               color: ThemeColor.white,
