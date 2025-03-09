@@ -1,5 +1,5 @@
 // ESM形式でインポート
-import { createOctokit } from './octokit-helper.js';
+import { createOctokit } from './octo-helper.js';
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
@@ -15,9 +15,8 @@ let octokit;
 
 // OpenRouter API 関連の設定
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1';
-const AI_MODEL = 'google/gemini-2.0-pro-exp-02-05:free'; // 使用するモデルを指定
-
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const AI_MODEL = 'anthropic/claude-3-5-sonnet'; // 使用するモデルを指定
 
 // ファイル拡張子のフィルタリング（レビュー対象）
 const REVIEW_FILE_EXTENSIONS = [
@@ -86,44 +85,68 @@ async function handlePullRequest(owner, repo, eventData) {
   }
   
   // 各ファイルの内容を取得してレビュー
+  let reviewedFiles = [];
+  
   for (const file of filesToReview) {
-    // ファイルの内容を取得
-    const { data: fileContent } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path: file.filename,
-      ref: eventData.pull_request.head.sha
-    });
-    
-    // Base64デコード
-    const content = Buffer.from(fileContent.content, 'base64').toString();
-    
-    // AIにレビューを依頼
-    const review = await getAIReview(file.filename, content);
-    
-    // PRにコメントを追加
-    await octokit.pulls.createReviewComment({
-      owner,
-      repo,
-      pull_number: pullNumber,
-      body: review,
-      commit_id: eventData.pull_request.head.sha,
-      path: file.filename,
-      line: getFirstChangedLine(file)
-    });
-    
-    console.log(`ファイル ${file.filename} のレビューを投稿しました`);
+    try {
+      // ファイルの内容を取得
+      const { data: fileContent } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path: file.filename,
+        ref: eventData.pull_request.head.sha
+      });
+      
+      // コンテンツが取得できた場合のみ処理を続行
+      if (fileContent) {
+        // ファイルの内容を取得（バイナリかテキストかに応じて処理）
+        let content = '';
+        if (typeof fileContent === 'string') {
+          content = fileContent;
+        } else if (fileContent.content) {
+          content = Buffer.from(fileContent.content, 'base64').toString();
+        } else {
+          console.log(`ファイル ${file.filename} の内容形式が不明です`);
+          continue;
+        }
+        
+        // AIにレビューを依頼
+        const review = await getAIReview(file.filename, content);
+        
+        // PRにコメントを追加
+        await octokit.pulls.createReviewComment({
+          owner,
+          repo,
+          pull_number: pullNumber,
+          body: review,
+          commit_id: eventData.pull_request.head.sha,
+          path: file.filename,
+          line: getFirstChangedLine(file)
+        });
+        
+        console.log(`ファイル ${file.filename} のレビューを投稿しました`);
+        reviewedFiles.push(file.filename);
+      } else {
+        console.log(`ファイル ${file.filename} の内容を取得できませんでした`);
+      }
+    } catch (error) {
+      console.error(`ファイル ${file.filename} の処理中にエラーが発生しました:`, error.message);
+    }
   }
   
   // 全体的な要約コメントを追加
-  if (filesToReview.length > 0) {
-    const summary = await getAISummary(filesToReview.map(f => f.filename));
-    await octokit.issues.createComment({
-      owner,
-      repo,
-      issue_number: pullNumber,
-      body: `## AIレビュー要約\n\n${summary}`
-    });
+  if (reviewedFiles.length > 0) {
+    try {
+      const summary = await getAISummary(reviewedFiles);
+      await octokit.issues.createComment({
+        owner,
+        repo,
+        issue_number: pullNumber,
+        body: `## AIレビュー要約\n\n${summary}`
+      });
+    } catch (error) {
+      console.error('要約コメントの投稿中にエラーが発生しました:', error.message);
+    }
   }
 }
 
@@ -152,23 +175,32 @@ async function handleCommit(owner, repo) {
   
   // 各ファイルの内容を取得してレビュー（コミットの場合はGitHub上にコメントできないため、コンソール出力のみ）
   for (const file of filesToReview) {
-    // ファイルの内容を取得
-    const { data: fileContent } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path: file.filename,
-      ref: GITHUB_SHA
-    });
-    
-    // Base64デコード
-    const content = Buffer.from(fileContent.content, 'base64').toString();
-    
-    // AIにレビューを依頼
-    const review = await getAIReview(file.filename, content);
-    
-    console.log(`\n===== ${file.filename} のレビュー =====\n`);
-    console.log(review);
-    console.log('\n=====================================\n');
+    try {
+      // ファイルの内容を取得
+      const { data: fileContent } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path: file.filename,
+        ref: GITHUB_SHA
+      });
+      
+      // コンテンツが取得できた場合のみ処理を続行
+      if (fileContent && fileContent.content) {
+        // Base64デコード
+        const content = Buffer.from(fileContent.content, 'base64').toString();
+        
+        // AIにレビューを依頼
+        const review = await getAIReview(file.filename, content);
+        
+        console.log(`\n===== ${file.filename} のレビュー =====\n`);
+        console.log(review);
+        console.log('\n=====================================\n');
+      } else {
+        console.log(`\n⚠️ ${file.filename} の内容を取得できませんでした\n`);
+      }
+    } catch (error) {
+      console.error(`ファイル ${file.filename} の処理中にエラーが発生しました:`, error.message);
+    }
   }
 }
 
