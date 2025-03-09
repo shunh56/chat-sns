@@ -25,10 +25,21 @@ jobs:
           node-version: '18'
           
       - name: Install dependencies
-        run: npm install @octokit/rest axios
+
+        run: npm install @octokit/core axios
+
+      - name: Create package.json for ESM
+        run: |
+          echo '{
+            "name": "ai-code-review",
+            "version": "1.0.0",
+            "type": "module",
+            "private": true
+          }' > .github/scripts/package.json
 
       - name: Run AI Code Review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: node .github/scripts/ai-code-review.js
+

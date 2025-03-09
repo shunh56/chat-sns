@@ -1,13 +1,17 @@
-const { Octokit } = require('@octokit/rest');
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+// ESM形式でインポート
+import { createOctokit } from './octokit-helper.js';
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
 // GitHub 関連の環境変数
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_EVENT_PATH = process.env.GITHUB_EVENT_PATH;
 const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
 const GITHUB_SHA = process.env.GITHUB_SHA;
+
+// Octokitインスタンス
+let octokit;
 
 // OpenRouter API 関連の設定
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -19,23 +23,30 @@ const REVIEW_FILE_EXTENSIONS = [
   '.js', '.jsx', '.ts', '.tsx', 
   '.py', '.rb', '.go', '.java', 
   '.php', '.c', '.cpp', '.cs', 
-  '.swift', '.kt', '.rs'
+  '.swift', '.kt', '.rs',
+  '.dart', '.yaml', '.json' // Flutter/Dartプロジェクト用に追加
 ];
 
 // 除外するディレクトリ
 const EXCLUDED_DIRECTORIES = [
   'node_modules', 'vendor', 'dist', 'build', 
-  '.git', '.github', 'bin', 'obj'
+  '.git', '.github', 'bin', 'obj',
+  '.dart_tool', '.fvm', '.pub-cache', // Flutter固有のキャッシュディレクトリ
+  'ios/Pods', 'android/.gradle' // プラットフォーム固有の依存関係ディレクトリ
 ];
 
 // GitHub APIクライアントの初期化
-const octokit = new Octokit({
-  auth: GITHUB_TOKEN
-});
+let octokit;
+(async () => {
+  octokit = await createOctokit(GITHUB_TOKEN);
+})();
 
 async function main() {
   try {
     console.log('AI Code Review を開始します...');
+    
+    // Octokitの初期化を待機
+    octokit = await createOctokit(GITHUB_TOKEN);
     
     // イベントデータの読み込み
     const eventData = JSON.parse(fs.readFileSync(GITHUB_EVENT_PATH, 'utf8'));
@@ -167,6 +178,43 @@ async function handleCommit(owner, repo) {
 async function getAIReview(filename, content) {
   console.log(`ファイル ${filename} のAIレビューを要求中...`);
   
+  // ファイル拡張子に基づいてプロンプトを調整
+  const fileExtension = path.extname(filename).toLowerCase();
+  let systemPrompt = ''; 
+  
+  if (fileExtension === '.dart') {
+    // Dart/Flutterファイル向けのプロンプト
+    systemPrompt = 'あなたは優秀なFlutterおよびDart開発者であり、コードレビュアーです。提供されるコードを詳細に分析し、以下の点に注目してください：\n' +
+                  '- Dartコードの品質と可読性\n' +
+                  '- Flutterのパフォーマンスに関する問題（不要なリビルド、非効率なWidget構造など）\n' +
+                  '- 状態管理のベストプラクティス（Provider, Riverpod, BLoC, GetXなど）\n' +
+                  '- UI/UXの改善点（レスポンシブ設計、アクセシビリティなど）\n' +
+                  '- Dartの言語機能の適切な活用（null safety, extension methodsなど）\n' +
+                  '- Flutterのパッケージ管理とプロジェクト構成\n' +
+                  '- テスト可能性とテストコードのレビュー\n' +
+                  '- Flutter固有のセキュリティ問題や懸念点\n\n' +
+                  'レビューは簡潔かつ具体的で、対応可能な改善点を含めてください。コードスニペットで具体的な修正例を示すと役立ちます。';
+  } else if (fileExtension === '.yaml' && filename.includes('pubspec')) {
+    // pubspec.yamlファイル向けのプロンプト
+    systemPrompt = 'あなたは優秀なFlutterプロジェクト管理の専門家およびコードレビュアーです。このpubspec.yamlファイルを詳細に分析し、以下の点に注目してください：\n' +
+                  '- 依存関係のバージョン管理の問題（バージョン制約、互換性など）\n' +
+                  '- 使用されていない可能性のある依存関係\n' +
+                  '- 重複または競合する依存関係\n' +
+                  '- セキュリティリスクのある古いバージョンの依存関係\n' +
+                  '- Flutter固有の設定の問題（assets, fonts, platformsなど）\n' +
+                  '- package構成に関するベストプラクティス\n\n' +
+                  'レビューは簡潔かつ具体的で、対応可能な改善点を含めてください。';
+  } else {
+    // その他のファイル向けの一般的なプロンプト
+    systemPrompt = 'あなたは優秀なプログラマーおよびコードレビュアーです。提供されるコードを詳細に分析し、以下の点に注目してください：\n' +
+                  '- コードの品質と可読性\n' +
+                  '- パフォーマンスの問題\n' +
+                  '- セキュリティの脆弱性\n' +
+                  '- ベストプラクティスからの逸脱\n' +
+                  '- 改善の提案\n\n' +
+                  'レビューは簡潔かつ具体的で、対応可能な改善点を含めてください。';
+  }
+  
   try {
     const response = await axios.post(
       OPENROUTER_API_URL,
@@ -175,13 +223,7 @@ async function getAIReview(filename, content) {
         messages: [
           {
             role: 'system',
-            content: 'あなたは優秀なプログラマーおよびコードレビュアーです。提供されるコードを詳細に分析し、以下の点に注目してください：\n' +
-                     '- コードの品質と可読性\n' +
-                     '- パフォーマンスの問題\n' +
-                     '- セキュリティの脆弱性\n' +
-                     '- ベストプラクティスからの逸脱\n' +
-                     '- 改善の提案\n\n' +
-                     'レビューは簡潔かつ具体的で、対応可能な改善点を含めてください。'
+            content: systemPrompt
           },
           {
             role: 'user',
@@ -209,6 +251,28 @@ async function getAIReview(filename, content) {
 async function getAISummary(filenames) {
   console.log('PRの全体要約を要求中...');
   
+  // Flutterファイルが含まれているかをチェック
+  const hasDartFiles = filenames.some(filename => filename.endsWith('.dart'));
+  const hasPubspecFile = filenames.some(filename => filename.includes('pubspec.yaml'));
+  
+  let systemPrompt = '';
+  
+  if (hasDartFiles || hasPubspecFile) {
+    // Flutterプロジェクトの場合、特化したプロンプトを使用
+    systemPrompt = 'あなたは優秀なFlutter/Dart開発者およびコードレビュアーです。このプルリクエストの全体的な評価を行い、以下の観点から分析してください：\n' + 
+                   '- 全体的なコード品質とFlutterのベストプラクティスへの準拠\n' +
+                   '- アーキテクチャと設計パターンの一貫性（MVVM, Clean Architectureなど）\n' +
+                   '- パフォーマンス最適化の機会\n' +
+                   '- コード再利用性と保守性\n' +
+                   '- UI/UXの一貫性と改善点\n' +
+                   '- テスト戦略と改善点\n' +
+                   '- セキュリティの懸念事項\n\n' +
+                   'この変更がプロジェクト全体に与える影響と、優先すべき改善点について言及してください。';
+  } else {
+    // 一般的なシステムプロンプト
+    systemPrompt = 'あなたは優秀なプログラマーおよびコードレビュアーです。このプルリクエストの全体的な評価と要約を提供してください。';
+  }
+  
   try {
     const response = await axios.post(
       OPENROUTER_API_URL,
@@ -217,7 +281,7 @@ async function getAISummary(filenames) {
         messages: [
           {
             role: 'system',
-            content: 'あなたは優秀なプログラマーおよびコードレビュアーです。このプルリクエストの全体的な評価と要約を提供してください。'
+            content: systemPrompt
           },
           {
             role: 'user',
@@ -255,4 +319,7 @@ function getFirstChangedLine(file) {
 }
 
 // スクリプトの実行
-main();
+main().catch(error => {
+  console.error('致命的なエラーが発生しました:', error);
+  process.exit(1);
+});
