@@ -15,7 +15,7 @@ let octokit;
 
 // OpenRouter API 関連の設定
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1";
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"; // 正しいエンドポイント
 const AI_MODEL = "google/gemini-2.0-pro-exp-02-05:free"; // 使用するモデルを指定
 
 // ファイル拡張子のフィルタリング（レビュー対象）
@@ -87,6 +87,12 @@ async function main() {
 async function handlePullRequest(owner, repo, eventData) {
   const pullNumber = eventData.pull_request.number;
   console.log(`PR #${pullNumber} をレビューします`);
+  
+  // PR情報をデバッグ出力
+  console.log('PR情報:', JSON.stringify({
+    number: pullNumber,
+    head_sha: eventData.pull_request.head.sha
+  }, null, 2));
 
   // PRの変更ファイルを取得
   const { data: files } = await octokit.pulls.listFiles({
@@ -106,46 +112,80 @@ async function handlePullRequest(owner, repo, eventData) {
     console.log("レビュー対象のファイルが見つかりませんでした");
     return;
   }
+  
+  // ファイルリストをデバッグ出力
+  console.log('ファイルリスト:', JSON.stringify(filesToReview.map(f => f.filename), null, 2));
 
   // 各ファイルの内容を取得してレビュー
+  let reviewedFiles = [];
+  
   for (const file of filesToReview) {
-    // ファイルの内容を取得
-    const { data: fileContent } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path: file.filename,
-      ref: eventData.pull_request.head.sha,
-    });
+    try {
+      console.log(`ファイル ${file.filename} の内容を取得中...`);
+      
+      // ファイルの内容を取得
+      const { data: fileContent } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path: file.filename,
+        ref: eventData.pull_request.head.sha,
+      });
+      
+      // fileContentの構造をデバッグ出力
+      console.log(`ファイル ${file.filename} のコンテンツ構造:`, 
+                typeof fileContent, 
+                fileContent ? (fileContent.content ? "content有り" : "content無し") : "undefined");
+      
+      // 安全なデコード処理
+      let content = '';
+      if (typeof fileContent === 'string') {
+        content = fileContent;
+      } else if (fileContent && fileContent.content) {
+        try {
+          content = Buffer.from(fileContent.content, "base64").toString();
+        } catch (decodeError) {
+          console.error(`ファイル ${file.filename} のデコード中にエラー: ${decodeError.message}`);
+          continue;
+        }
+      } else {
+        console.log(`ファイル ${file.filename} の内容形式が不明または空です`);
+        continue;
+      }
 
-    // Base64デコード
-    const content = Buffer.from(fileContent.content, "base64").toString();
+      // AIにレビューを依頼
+      const review = await getAIReview(file.filename, content);
 
-    // AIにレビューを依頼
-    const review = await getAIReview(file.filename, content);
+      // PRにコメントを追加
+      await octokit.pulls.createReviewComment({
+        owner,
+        repo,
+        pull_number: pullNumber,
+        body: review,
+        commit_id: eventData.pull_request.head.sha,
+        path: file.filename,
+        line: getFirstChangedLine(file),
+      });
 
-    // PRにコメントを追加
-    await octokit.pulls.createReviewComment({
-      owner,
-      repo,
-      pull_number: pullNumber,
-      body: review,
-      commit_id: eventData.pull_request.head.sha,
-      path: file.filename,
-      line: getFirstChangedLine(file),
-    });
-
-    console.log(`ファイル ${file.filename} のレビューを投稿しました`);
+      console.log(`ファイル ${file.filename} のレビューを投稿しました`);
+      reviewedFiles.push(file.filename);
+    } catch (error) {
+      console.error(`ファイル ${file.filename} の処理中にエラーが発生しました:`, error.message);
+    }
   }
 
   // 全体的な要約コメントを追加
-  if (filesToReview.length > 0) {
-    const summary = await getAISummary(filesToReview.map((f) => f.filename));
-    await octokit.issues.createComment({
-      owner,
-      repo,
-      issue_number: pullNumber,
-      body: `## AIレビュー要約\n\n${summary}`,
-    });
+  if (reviewedFiles.length > 0) {
+    try {
+      const summary = await getAISummary(reviewedFiles);
+      await octokit.issues.createComment({
+        owner,
+        repo,
+        issue_number: pullNumber,
+        body: `## AIレビュー要約\n\n${summary}`,
+      });
+    } catch (error) {
+      console.error('要約コメントの投稿中にエラーが発生しました:', error.message);
+    }
   }
 }
 
@@ -175,23 +215,44 @@ async function handleCommit(owner, repo) {
 
   // 各ファイルの内容を取得してレビュー（コミットの場合はGitHub上にコメントできないため、コンソール出力のみ）
   for (const file of filesToReview) {
-    // ファイルの内容を取得
-    const { data: fileContent } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path: file.filename,
-      ref: GITHUB_SHA,
-    });
+    try {
+      console.log(`ファイル ${file.filename} の内容を取得中...`);
+      
+      // ファイルの内容を取得
+      const { data: fileContent } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path: file.filename,
+        ref: GITHUB_SHA,
+      });
+      
+      // fileContentの構造をデバッグ出力
+      console.log(`ファイル ${file.filename} のコンテンツ構造:`, 
+                typeof fileContent, 
+                fileContent ? (fileContent.content ? "content有り" : "content無し") : "undefined");
+      
+      // 安全なデコード処理
+      if (!fileContent || !fileContent.content) {
+        console.log(`\n⚠️ ${file.filename} の内容を取得できないかフォーマットが不明です\n`);
+        continue;
+      }
 
-    // Base64デコード
-    const content = Buffer.from(fileContent.content, "base64").toString();
-
-    // AIにレビューを依頼
-    const review = await getAIReview(file.filename, content);
-
-    console.log(`\n===== ${file.filename} のレビュー =====\n`);
-    console.log(review);
-    console.log("\n=====================================\n");
+      try {
+        // Base64デコード
+        const content = Buffer.from(fileContent.content, "base64").toString();
+        
+        // AIにレビューを依頼
+        const review = await getAIReview(file.filename, content);
+        
+        console.log(`\n===== ${file.filename} のレビュー =====\n`);
+        console.log(review);
+        console.log("\n=====================================\n");
+      } catch (decodeError) {
+        console.error(`ファイル ${file.filename} のデコード中にエラー: ${decodeError.message}`);
+      }
+    } catch (error) {
+      console.error(`ファイル ${file.filename} の処理中にエラーが発生しました:`, error.message);
+    }
   }
 }
 
@@ -239,6 +300,8 @@ async function getAIReview(filename, content) {
   }
 
   try {
+    console.log(`${filename} のレビューリクエスト送信中...`);
+    
     const response = await axios.post(
       OPENROUTER_API_URL,
       {
@@ -265,6 +328,8 @@ async function getAIReview(filename, content) {
         },
       }
     );
+    
+    console.log(`${filename} のAPIレスポンス受信: ステータス ${response.status}`);
 
     // レスポンスの構造を検証
     if (
@@ -275,6 +340,7 @@ async function getAIReview(filename, content) {
       response.data.choices[0].message &&
       response.data.choices[0].message.content
     ) {
+      console.log(`${filename} のレビュー生成成功`);
       return response.data.choices[0].message.content;
     } else {
       console.log(
@@ -330,20 +396,23 @@ async function getAISummary(filenames) {
   }
 
   try {
+    console.log("PR全体要約のリクエスト送信中...");
+    
     const response = await axios.post(
       OPENROUTER_API_URL,
       {
         model: AI_MODEL,
         messages: [
           {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
             role: "user",
-            content: `このプルリクエストには以下のファイルが含まれています：\n${filenames.join(
-              "\n"
-            )}\n\n全体的な評価と改善のアドバイスをお願いします。`,
+            content: [
+              {
+                type: "text",
+                text: `${systemPrompt}\n\nこのプルリクエストには以下のファイルが含まれています：\n${filenames.join(
+                  "\n"
+                )}\n\n全体的な評価と改善のアドバイスをお願いします。`,
+              },
+            ],
           },
         ],
         max_tokens: 1000,
@@ -353,17 +422,45 @@ async function getAISummary(filenames) {
           Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
           "HTTP-Referer": "https://github.com/actions",
+          "X-Title": "GitHub Actions AI Code Review",
         },
       }
     );
+    
+    console.log("PR全体要約のAPIレスポンス受信: ステータス", response.status);
 
-    return response.data.choices[0].message.content;
+    // レスポンスの構造を検証
+    if (
+      response.data &&
+      response.data.choices &&
+      Array.isArray(response.data.choices) &&
+      response.data.choices.length > 0 &&
+      response.data.choices[0].message &&
+      response.data.choices[0].message.content
+    ) {
+      console.log("PR全体要約の生成成功");
+      return response.data.choices[0].message.content;
+    } else {
+      console.log(
+        "APIレスポンスの形式が予期しない構造です:",
+        JSON.stringify(response.data, null, 2)
+      );
+      return "⚠️ AI要約の生成中に問題が発生しました。APIからの応答の形式が想定と異なります。";
+    }
   } catch (error) {
     console.error(
       "AI要約の取得中にエラーが発生しました:",
       error.response?.data || error.message
     );
-    return "AI要約の生成中にエラーが発生しました。詳細はログを確認してください。";
+    // デバッグ情報を追加
+    if (error.response) {
+      console.error(
+        "API応答の詳細:",
+        JSON.stringify(error.response.data, null, 2)
+      );
+      console.error("ステータスコード:", error.response.status);
+    }
+    return "⚠️ AI要約の生成中にエラーが発生しました。詳細はログを確認してください。";
   }
 }
 
