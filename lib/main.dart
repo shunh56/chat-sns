@@ -8,7 +8,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/core/values.dart';
-import 'package:app/data/datasource/local/hive/friends_map.dart';
+import 'package:app/data/datasource/local/hive/hive_boxes.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/firebase_options.dart';
 import 'package:app/notification_service.dart';

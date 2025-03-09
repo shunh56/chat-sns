@@ -22,12 +22,7 @@ class HiveBoxes {
   }
 
   static openBoxes() async {
-    await Hive.openBox<List<String>>('friendIds');
     await Hive.openBox<UserAccountHive>('userAccount');
-  }
-
-  static Box<List<String>> box() {
-    return Hive.box<List<String>>('friendIds');
   }
 
   static Box<UserAccountHive> userBox() {

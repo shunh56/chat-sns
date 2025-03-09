@@ -38,35 +38,4 @@ class FollowRepositoryImpl implements FollowRepository {
   Future<bool> isFollowing(String userId, String targetId) {
     return _dataSource.isFollowing(userId, targetId);
   }
-
-  @override
-  Future<FollowStats> getFollowStats(String userId) async {
-    final statsModel = await _dataSource.getFollowStats(userId);
-    return statsModel.toDomain();
-  }
-
-  @override
-  Future<List<FollowActivity>> getRecentFollowActivities(String userId,
-      {int limit = 20}) async {
-    final activityModels =
-        await _dataSource.getRecentFollowActivities(userId, limit: limit);
-    return activityModels.map((model) => model.toDomain()).toList();
-  }
-
-  @override
-  Future<List<String>> getRecentFollowing(String userId, {int limit = 10}) {
-    return _dataSource.getRecentFollowing(userId, limit: limit);
-  }
-
-  @override
-  Future<List<String>> getRecentFollowers(String userId, {int limit = 10}) {
-    return _dataSource.getRecentFollowers(userId, limit: limit);
-  }
-
-  @override
-  Stream<FollowStats> followStatsStream(String userId) {
-    return _dataSource
-        .followStatsStream(userId)
-        .map((statsModel) => statsModel.toDomain());
-  }
 }
