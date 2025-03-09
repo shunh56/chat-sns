@@ -1,38 +1,50 @@
-// pubspec.yaml に追加
-// card_swiper: ^3.0.1
-// shimmer: ^3.0.0
-
+// 改善版 - 独立した状態管理を持つカードスタックUI
+import 'dart:math';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
-import 'package:card_swiper/card_swiper.dart';
+import 'package:app/presentation/navigation/navigator.dart';
+import 'package:app/presentation/providers/provider/following_list_notifier.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:shimmer/shimmer.dart';
 
-// Providerの定義
-final userCardStackProvider =
-    StateNotifierProvider<UserCardStackNotifier, UserCardStackState>((ref) {
-  return UserCardStackNotifier();
-});
+// ----- 状態管理の改善 -----
+
+// プロバイダーファミリーを使用して、各インスタンスごとに独立した状態を持つよう修正
+final userCardStackProvider = StateNotifierProviderFamily<UserCardStackNotifier,
+    UserCardStackState, String>(
+  (ref, id) => UserCardStackNotifier(),
+);
 
 class UserCardStackState {
   final int currentIndex;
   final bool isLoading;
+  final bool isCompleted;
+  final int followCount;
 
   UserCardStackState({
     this.currentIndex = 0,
     this.isLoading = true,
+    this.isCompleted = false,
+    this.followCount = 0,
   });
 
   UserCardStackState copyWith({
     int? currentIndex,
     bool? isLoading,
+    bool? isCompleted,
+    int? followCount,
   }) {
     return UserCardStackState(
       currentIndex: currentIndex ?? this.currentIndex,
       isLoading: isLoading ?? this.isLoading,
+      isCompleted: isCompleted ?? this.isCompleted,
+      followCount: followCount ?? this.followCount,
     );
   }
 }
@@ -47,126 +59,556 @@ class UserCardStackNotifier extends StateNotifier<UserCardStackState> {
   void setLoading(bool isLoading) {
     state = state.copyWith(isLoading: isLoading);
   }
+
+  void setCompleted(bool isCompleted) {
+    state = state.copyWith(isCompleted: isCompleted);
+  }
+
+  void incrementFollow() {
+    state = state.copyWith(followCount: state.followCount + 1);
+  }
+
+  void resetFollowCount() {
+    state = state.copyWith(followCount: 0);
+  }
+
+  // 状態を完全にリセットするメソッドを追加
+  void resetState() {
+    state = UserCardStackState();
+  }
 }
 
 class UserCardStackScreen extends ConsumerStatefulWidget {
-  const UserCardStackScreen({super.key, required this.users});
+  // プロバイダーIDとユーザータイプを追加して状態を区別
+  const UserCardStackScreen({
+    super.key,
+    required this.users,
+    required this.userGroupId, // 例："new_users", "online_users" など
+    this.userGroupTitle = "",
+  });
+
   final List<UserAccount> users;
+  final String userGroupId;
+  final String userGroupTitle;
 
   @override
   ConsumerState<UserCardStackScreen> createState() =>
       _UserCardStackScreenState();
 }
 
-class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen> {
-  late SwiperController _controller;
-  final Set<String> seenUserIds = {};
+enum CardStatus { idle, swiping, like, nope }
+
+class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
+    with SingleTickerProviderStateMixin {
+  late ConfettiController _confettiController;
+  List<UserAccount> _remainingUsers = [];
+
+  // プロバイダーIDを取得するためのgetter
+  String get _providerId => widget.userGroupId;
+
+  // スワイプアニメーション用の変数
+  Offset _position = Offset.zero;
+  Size _screenSize = Size.zero;
+  double _angle = 0;
+  CardStatus _status = CardStatus.idle;
+
+  // スワイプ判定の閾値
+  final double _swipeThreshold = 0.3;
+
+  // スワイプ後のアニメーション用コントローラー
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    _controller = SwiperController();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 1));
+
+    // 最初はすべてのユーザーを表示
+    _remainingUsers = List.from(widget.users);
+
+    // アニメーションコントローラー初期化
+    _animationController = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          // アニメーション完了時の処理
+          if (_status != CardStatus.idle) {
+            _handleSwipeComplete();
+          }
+          _position = Offset.zero;
+          _angle = 0;
+          _status = CardStatus.idle;
+        });
+        _animationController.reset();
+      }
+    });
+
     // 画像のプリロード完了を模擬
     Future.delayed(const Duration(milliseconds: 800), () {
-      ref.read(userCardStackProvider.notifier).setLoading(false);
+      ref.read(userCardStackProvider(_providerId).notifier).setLoading(false);
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _animationController.dispose();
+    _confettiController.dispose();
     super.dispose();
+  }
+
+  // スワイプ完了処理（カードアニメーション完了後に呼ばれる）
+  void _handleSwipeComplete() async {
+    if (_remainingUsers.isEmpty) return;
+
+    final user = _remainingUsers.first;
+    final wasLiked = _status == CardStatus.like;
+    ScaffoldMessenger.of(context).clearSnackBars();
+    // ステータスをリセットする前に処理
+    if (wasLiked) {
+      // フォロー時のフィードバック
+
+      final notifier = ref.read(followingListNotifierProvider.notifier);
+      final isFollowing = notifier.isFollowing(user.userId);
+      if (!isFollowing) {
+        try {
+          await notifier.followUser(user);
+          ref
+              .read(userCardStackProvider(_providerId).notifier)
+              .incrementFollow();
+          showMessage("${user.name}をフォローしました！");
+        } catch (e) {
+          showErrorSnackbar(error: e);
+        }
+      } else {
+        showMessage("既に${user.name}をフォローしています。");
+      }
+    }
+
+    // カードを削除
+    setState(() {
+      _remainingUsers.removeAt(0);
+    });
+
+    // すべてのカードをスワイプし終わった場合
+    if (_remainingUsers.isEmpty) {
+      Future.delayed(Duration(milliseconds: 300), () {
+        ref
+            .read(userCardStackProvider(_providerId).notifier)
+            .setCompleted(true);
+        _confettiController.play();
+      });
+    }
+  }
+
+  // 手動スワイプ開始
+  void _startSwipe(int direction) {
+    if (_remainingUsers.isEmpty || _status != CardStatus.idle) return;
+
+    _status = direction > 0 ? CardStatus.like : CardStatus.nope;
+
+    // 画面外へのスワイプアニメーション
+    final targetX =
+        direction > 0 ? _screenSize.width + 200.0 : -_screenSize.width - 200.0;
+
+    _animationController.addListener(() {
+      setState(() {
+        _position = Offset(targetX * _animationController.value, _position.dy);
+        _angle = direction * 0.5 * _animationController.value;
+      });
+    });
+
+    _animationController.forward();
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(userCardStackProvider);
+    final state = ref.watch(userCardStackProvider(_providerId));
+    _screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: ThemeColor.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        title: widget.userGroupTitle.isNotEmpty
+            ? Text(widget.userGroupTitle)
+            : null,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       extendBodyBehindAppBar: true,
-      body: state.isLoading
-          ? _buildLoadingState()
-          : Stack(
-              children: [
-                // カードスワイパー
-                Swiper(
-                  controller: _controller,
-                  itemCount: 10000,
-                  itemBuilder: (context, index) {
-                    final filteredUsers = widget.users
-                        .where((user) => !seenUserIds.contains(user.userId))
-                        .toList();
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // コンフェッティアニメーション
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: pi / 2, // 下方向
+              maxBlastForce: 7, // より力強く
+              minBlastForce: 3,
+              emissionFrequency: 0.5, // より頻繁に
+              numberOfParticles: 10, // パーティクル数増加
+              gravity: 0.2, // 重力を少し強く
+              particleDrag: 0.05, // 空気抵抗を追加
+              minimumSize: const Size(10, 10), // パーティクルサイズ最小
+              maximumSize: const Size(15, 15), // パーティクルサイズ最大
+              shouldLoop: false, // ループさせない
+              colors: const [
+                Colors.pink,
+                Colors.purple,
+                Colors.blue,
+                Colors.cyan,
+                Colors.teal,
+                Colors.amber,
+                Colors.orange,
+              ],
+            ),
+          ),
 
-                    if (filteredUsers.isEmpty) {
-                      return Center(
-                        child: Text(
-                          "すべてのカードをスワイプし終わりました",
-                          style: TextStyle(fontSize: 20, color: Colors.white),
-                        ),
-                      );
-                    }
+          // メインコンテンツ
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            child: state.isLoading
+                ? _buildLoadingState()
+                : state.isCompleted
+                    ? _buildCompletionScreen(state.followCount)
+                    : _buildCardStack(),
+          ),
+        ],
+      ),
+    );
+  }
 
-                    final userIndex = index % filteredUsers.length;
-                    return _buildCard(filteredUsers[userIndex]);
-                  },
-                  itemWidth: MediaQuery.of(context).size.width * 0.9,
-                  itemHeight: MediaQuery.of(context).size.height * 0.66,
-                  layout: SwiperLayout.STACK,
-                  axisDirection: AxisDirection.right,
-                  onIndexChanged: (index) {
-                    final filteredUsers = widget.users
-                        .where((user) => !seenUserIds.contains(user.userId))
-                        .toList();
-                    if (filteredUsers.isNotEmpty) {
-                      final userIndex = index % filteredUsers.length;
-                      seenUserIds.add(filteredUsers[userIndex].userId);
-                      ref
-                            .read(userCardStackProvider.notifier)
-                            .setIndex(index);
-                    }
-                  },
-                ),
+  // パンジェスチャーが更新されたときの処理を修正
+  void _onPanUpdate(DragUpdateDetails details) {
+    setState(() {
+      _position += details.delta;
 
-                // アクションボタン
+      // 角度の計算（ドラッグの横移動に応じて回転）
+      final newAngle = 45.0 * (_position.dx / _screenSize.width);
+      _angle = newAngle.clamp(-45.0, 45.0) * pi / 180;
+
+      // ドラッグ中はまだ判定を確定せず、ドラッグの方向に応じたインジケーションのみ表示
+      if (_position.dx > _screenSize.width * 0.1) {
+        _status = CardStatus.like; // 右方向への十分な移動でフォローの可能性を示唆
+      } else if (_position.dx < -_screenSize.width * 0.1) {
+        _status = CardStatus.nope; // 左方向への十分な移動でスキップの可能性を示唆
+      } else {
+        _status = CardStatus.idle; // わずかな移動では判定なし
+      }
+    });
+  }
+
+// パンジェスチャーが終了したときの処理を修正
+  void _onPanEnd(DragEndDetails details) {
+    final threshold = _screenSize.width * _swipeThreshold;
+
+    // 閾値を超えたかチェック - 実際の判定はここで確定する
+    if (_position.dx.abs() > threshold) {
+      // スワイプが成立
+      final isRight = _position.dx > 0;
+      final targetX =
+          isRight ? _screenSize.width + 200.0 : -_screenSize.width - 200.0;
+
+      _animationController.addListener(() {
+        setState(() {
+          _position = Offset(
+              _position.dx +
+                  (targetX - _position.dx) * _animationController.value,
+              _position.dy);
+        });
+      });
+
+      // 判定を確定
+      _status = isRight ? CardStatus.like : CardStatus.nope;
+      _animationController.forward();
+    } else {
+      // スワイプが不成立 - 元の位置に戻り、判定もリセット
+      _animationController.addListener(() {
+        setState(() {
+          _position = Offset(_position.dx * (1 - _animationController.value),
+              _position.dy * (1 - _animationController.value));
+          _angle = _angle * (1 - _animationController.value);
+        });
+      });
+
+      // 判定をリセット
+      _status = CardStatus.idle;
+      _animationController.forward();
+    }
+  }
+
+  Widget _buildCardStack() {
+    if (_remainingUsers.isEmpty) {
+      return Container(); // すべてのカードを見終わった場合は空のコンテナ
+    }
+
+    return Stack(
+      children: [
+        // カードセクション
+        Positioned.fill(
+          top: 80,
+          bottom: 150,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // 背景カード（次のカード）
+              if (_remainingUsers.length > 1)
                 Positioned(
-                  bottom: 40,
-                  left: 0,
-                  right: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildActionButton(
-                          onTap: () => _controller.next(),
-                          icon: Icons.close_rounded,
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFF4B6B), Color(0xFFFF6B8B)],
-                          ),
-                          label: 'スキップ',
-                        ),
-                        _buildActionButton(
-                          onTap: () => _controller.next(),
-                          icon: Icons.person_add_rounded,
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)],
-                          ),
-                          label: 'フォロー',
-                        ),
-                      ],
+                  child: Transform.scale(
+                    scale: 0.9,
+                    child: Opacity(
+                      opacity: 0.6,
+                      child: _buildCard(_remainingUsers[1], isBackground: true),
                     ),
                   ),
                 ),
-              ],
+
+              // メインカード - ドラッグ可能に
+              Positioned(
+                child: GestureDetector(
+                  onPanUpdate: _onPanUpdate,
+                  onPanEnd: _onPanEnd,
+                  child: Transform.translate(
+                    offset: _position,
+                    child: Transform.rotate(
+                      angle: _angle,
+                      child: Stack(
+                        children: [
+                          _buildCard(_remainingUsers[0]),
+
+                          // スワイプフィードバック
+                          if (_status != CardStatus.idle)
+                            AnimatedPositioned(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeOutCubic,
+                              top: 40,
+                              right: _status == CardStatus.like ? 20 : null,
+                              left: _status == CardStatus.nope ? 20 : null,
+                              child: AnimatedOpacity(
+                                duration: const Duration(milliseconds: 200),
+                                opacity: 1.0,
+                                curve: Curves.easeInOut,
+                                child: TweenAnimationBuilder<double>(
+                                    duration: const Duration(milliseconds: 300),
+                                    tween: Tween<double>(begin: 0.8, end: 1.0),
+                                    curve: Curves.elasticOut,
+                                    builder: (context, value, child) {
+                                      return Transform.scale(
+                                        scale: value,
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.black.withOpacity(0.3),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: _status == CardStatus.like
+                                                  ? Color(0xFF4ADE80)
+                                                      .withOpacity(0.8)
+                                                  : Color(0xFFF87171)
+                                                      .withOpacity(0.8),
+                                              width: 1,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color:
+                                                    _status == CardStatus.like
+                                                        ? Color(0xFF4ADE80)
+                                                            .withOpacity(0.3)
+                                                        : Color(0xFFF87171)
+                                                            .withOpacity(0.3),
+                                                blurRadius: 8,
+                                                spreadRadius: 0,
+                                              ),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                _status == CardStatus.like
+                                                    ? Icons
+                                                        .add_circle_outline_rounded
+                                                    : Icons
+                                                        .remove_circle_outline_rounded,
+                                                color:
+                                                    _status == CardStatus.like
+                                                        ? Color(0xFF4ADE80)
+                                                        : Color(0xFFF87171),
+                                                size: 18,
+                                              ),
+                                              SizedBox(width: 6),
+                                              Text(
+                                                _status == CardStatus.like
+                                                    ? 'FOLLOW'
+                                                    : 'SKIP',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 18,
+                                                  letterSpacing: 0.5,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // アクションボタン
+        Positioned(
+          bottom: 40,
+          left: 0,
+          right: 0,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  AnimatedActionButton(
+                    onTap: () => _startSwipe(-1),
+                    icon: Icons.close_rounded,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF4B6B), Color(0xFFFF6B8B)],
+                    ),
+                    label: 'スキップ',
+                  ),
+                  const SizedBox(width: 16),
+                  AnimatedActionButton(
+                    onTap: () => _startSwipe(1),
+                    icon: Icons.person_add_rounded,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF3B82F6), Color(0xFF60A5FA)],
+                    ),
+                    label: 'フォロー',
+                  ),
+                ],
+              ),
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompletionScreen(int followCount) {
+    return Container(
+      child: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.85,
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 32),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.15),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: ThemeColor.accent.withOpacity(0.2),
+                blurRadius: 30,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black.withOpacity(0.3),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1.5,
+                  ),
+                ),
+                child: Icon(
+                  Icons.check_rounded,
+                  size: 48,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+              ),
+              const Gap(24),
+              Text(
+                'スワイプ完了',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const Gap(16),
+              Container(
+                height: 1,
+                width: 40,
+                color: Colors.white.withOpacity(0.2),
+                margin: const EdgeInsets.symmetric(vertical: 8),
+              ),
+              const Gap(16),
+              Text(
+                followCount > 0
+                    ? '$followCount人のユーザーをフォローしました'
+                    : '全てのユーザーを見終わりました',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white.withOpacity(0.7),
+                  letterSpacing: 0.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const Gap(40),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 36, vertical: 16),
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  'ホームへ',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -187,115 +629,41 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen> {
     );
   }
 
-  Widget _buildCard(UserAccount user) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ThemeColor.accent,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Column(
-          children: [
-            Expanded(
-              child: CachedImage.usersCard(
-                user.imageUrl ?? '',
-                //fit: BoxFit.cover,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user.name,
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.3),
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                        ),
-                      ],
-                    ),
+  Widget _buildCard(UserAccount user, {bool isBackground = false}) {
+    return GestureDetector(
+      onTap: () {
+        ref.read(navigationRouterProvider(context)).goToProfile(user);
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.66,
+        decoration: BoxDecoration(
+          color: ThemeColor.accent,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: isBackground
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
                   ),
-                  const Gap(8),
-                  Text(
-                    user.aboutMe,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                      height: 1.5,
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Gap(16),
-                  _buildUserStats(user),
                 ],
-              ),
-            ),
-          ],
         ),
-      ),
-    );
-  }
-
-  /*idget _buildCard(UserAccount user) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // 背景画像
-            CachedImage.userCard(
-              user.imageUrl ?? '',
-              fit: BoxFit.cover,
-            ),
-            
-            // グラデーションオーバーレイ
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.center,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.8),
-                  ],
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: CachedImage.usersCard(
+                  user.imageUrl ?? '',
+                  //fit: BoxFit.cover,
                 ),
               ),
-            ),
-            
-            // ユーザー情報
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -325,17 +693,19 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen> {
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const Gap(16),
-                    _buildUserStats(user),
+
+                    // const Gap(16),
+                    // _buildUserStats(user),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
-  } */
+  }
+
   Widget _buildUserStats(UserAccount user) {
     return Row(
       children: [
@@ -343,12 +713,6 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen> {
           icon: Icons.people_outline_rounded,
           value: "123", // "${user.followerCount}",
           label: "フォロワー",
-        ),
-        const Gap(24),
-        _buildStatItem(
-          icon: Icons.favorite_border_rounded,
-          value: "12", //${user.likeCount}",
-          label: "いいね",
         ),
       ],
     );
@@ -433,6 +797,131 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen> {
           label,
           style: TextStyle(
             color: gradient.colors.first,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class AnimatedActionButton extends StatefulWidget {
+  final VoidCallback onTap;
+  final IconData icon;
+  final Gradient gradient;
+  final String label;
+
+  const AnimatedActionButton({
+    Key? key,
+    required this.onTap,
+    required this.icon,
+    required this.gradient,
+    required this.label,
+  }) : super(key: key);
+
+  @override
+  State<AnimatedActionButton> createState() => _AnimatedActionButtonState();
+}
+
+class _AnimatedActionButtonState extends State<AnimatedActionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 0.85),
+        weight: 1,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.85, end: 1.0),
+        weight: 1,
+      ),
+    ]).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTap() async {
+    // タップ時のスケールアニメーション
+    _controller.forward(from: 0.0);
+
+    // 触覚フィードバック
+    HapticFeedback.mediumImpact();
+
+    // 短い遅延後にアクションを実行
+    Future.delayed(const Duration(milliseconds: 100), () {
+      widget.onTap();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: child,
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: widget.gradient,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: widget.gradient.colors.first.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _handleTap,
+                customBorder: const CircleBorder(),
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    widget.icon,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const Gap(8),
+        Text(
+          widget.label,
+          style: TextStyle(
+            color: widget.gradient.colors.first,
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),

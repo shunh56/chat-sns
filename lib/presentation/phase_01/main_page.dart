@@ -380,13 +380,11 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
                             child: GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onTap: () {
-                                DebugPrint("TAP");
                                 ref
                                     .read(navigationRouterProvider(context))
                                     .goToChat(user);
                               },
                               onLongPress: () {
-                                DebugPrint("LONG PRESS");
                                 ref
                                     .read(navigationRouterProvider(context))
                                     .goToChat(user);

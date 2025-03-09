@@ -3,6 +3,7 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/dialogs/dialogs.dart';
 import 'package:app/presentation/components/user_icon.dart';
+import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/usecase/friends_usecase.dart';
@@ -12,62 +13,69 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 class UserRequestWidget extends ConsumerWidget {
-  const UserRequestWidget({super.key, required this.user});
+  const UserRequestWidget({super.key, required this.user, this.padding = 12.0});
   final UserAccount user;
+  final double padding;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          UserIcon(
-            user: user,
-            width: 48,
-            isCircle: true,
-          ),
-          const Gap(12),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Gap(4),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user.name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: ThemeColor.text,
-                        height: 1,
-                      ),
-                    ),
-                    const Gap(4),
-                    Text(
-                      "@${user.username}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: ThemeColor.subText,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+    return InkWell(
+      onTap: () {
+        ref.read(navigationRouterProvider(context)).goToProfile(user);
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: padding, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            UserIcon(
+              user: user,
+              width: 48,
+              isCircle: true,
             ),
-          ),
-          _buildFollowButton(user),
-        ],
+            const Gap(12),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Gap(4),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.name,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: ThemeColor.text,
+                          height: 1,
+                        ),
+                      ),
+                      const Gap(4),
+                      Text(
+                        "@${user.username}",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: ThemeColor.subText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            _buildFollowButton(user),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFollowButton(UserAccount user) {
+    if (user.isMe) return SizedBox();
     return Consumer(
       builder: (context, ref, child) {
         final themeSize = ref.watch(themeSizeProvider(context));
@@ -98,7 +106,7 @@ class UserRequestWidget extends ConsumerWidget {
               child: Center(
                 child: Text(
                   !isFollowing ? 'フォロー' : 'フォロー中',
-                  style: textStyle.w500(
+                  style: textStyle.w600(
                     fontSize: 12,
                     color:
                         isFollowing ? ThemeColor.white : ThemeColor.background,

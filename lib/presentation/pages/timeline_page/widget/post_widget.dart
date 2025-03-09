@@ -7,6 +7,7 @@ import 'package:app/core/values.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
@@ -269,15 +270,30 @@ class PostWidget extends ConsumerWidget {
     if (post.mediaUrls.isEmpty) return const SizedBox();
 
     if (post.mediaUrls.length == 1) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: AspectRatio(
-          aspectRatio: post.aspectRatios.isNotEmpty
-              ? min(post.aspectRatios[0], 5 / 4)
-              : 16 / 9,
-          child: CachedImage.postImage(
-            post.mediaUrls[0],
-            ms: 100,
+      return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            PageTransitionMethods.fadeIn(
+              PostImageHero(
+                imageUrls: post.mediaUrls,
+                aspectRatios: post.aspectRatios,
+                initialIndex: 0,
+                // tag: 'imageHero-${post.mediaUrls[0]}',
+              ),
+            ),
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: AspectRatio(
+            aspectRatio: post.aspectRatios.isNotEmpty
+                ? min(post.aspectRatios[0], 5 / 4)
+                : 16 / 9,
+            child: CachedImage.postImage(
+              post.mediaUrls[0],
+              ms: 100,
+            ),
           ),
         ),
       );
@@ -289,14 +305,29 @@ class PostWidget extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         itemCount: post.mediaUrls.length,
         itemBuilder: (context, index) {
-          return Container(
-            width: 160,
-            margin: EdgeInsets.only(
-                right: index < post.mediaUrls.length - 1 ? 8 : 0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CachedImage.postImage(
-                post.mediaUrls[index],
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                PageTransitionMethods.fadeIn(
+                  PostImageHero(
+                    imageUrls: post.mediaUrls,
+                    aspectRatios: post.aspectRatios,
+                    initialIndex: index,
+                    //tag: 'imageHero-${post.mediaUrls[0]}',
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              width: 160,
+              margin: EdgeInsets.only(
+                  right: index < post.mediaUrls.length - 1 ? 8 : 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedImage.postImage(
+                  post.mediaUrls[index],
+                ),
               ),
             ),
           );

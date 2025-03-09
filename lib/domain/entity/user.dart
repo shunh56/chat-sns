@@ -407,6 +407,10 @@ class UserAccount extends HiveObject {
     ];
     return admins.contains(userId);
   }
+
+  bool get isMe {
+    return userId == FirebaseAuth.instance.currentUser!.uid;
+  }
 }
 
 //

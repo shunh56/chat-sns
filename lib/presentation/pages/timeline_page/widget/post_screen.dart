@@ -314,7 +314,7 @@ class PostScreen extends ConsumerWidget {
                               PostImageHero(
                                 imageUrls: post.mediaUrls,
                                 aspectRatios: post.aspectRatios,
-                                initialIndex: 0,
+                                initialIndex: index,
                                 //tag: 'imageHero-${post.mediaUrls[0]}',
                               ),
                             ),

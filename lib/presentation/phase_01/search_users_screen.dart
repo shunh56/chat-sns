@@ -86,103 +86,218 @@ class SearchUsersScreen extends ConsumerWidget {
         child: ListView(
           children: const [
             Gap(12),
-            UsersFeed(), Gap(24),
-            //NewUsersSection(),
-            CommunityListView(),
+            UsersFeed(),
             Gap(24),
+            RecommendedUsersSection(),
+            Gap(24),
+            PopularHashtagsSection(),
 
-            //RecommendedUsersSection(),
-            // Gap(24),
-            // RecentUsersSection(),
+            Gap(40),
+            //CommunityListView(),
           ],
         ),
       ),
     );
   }
+}
 
-  /* Widget friendsFriendListView(BuildContext context, WidgetRef ref) {
+class PopularHashtagsSection extends ConsumerWidget {
+  const PopularHashtagsSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final friendIds = ref.watch(friendIdsProvider);
-    final deletes =
-        ref.watch(deletesIdListNotifierProvider).asData?.value ?? [];
-    final requesteds = ref.watch(requestedIdsProvider);
-    final blocks = ref.watch(blocksListNotifierProvider).asData?.value ?? [];
-    final blockeds =
-        ref.watch(blockedsListNotifierProvider).asData?.value ?? [];
-    final filters = deletes +
-        requesteds +
-        blocks +
-        blockeds +
-        friendIds +
-        [ref.read(authProvider).currentUser!.uid];
-    final asyncValue = ref.watch(maybeFriends);
-    return ListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      children: [
-        const Gap(12),
-        const Padding(
-          padding: EdgeInsets.only(left: 12),
-          child: Text(
-            "知り合いかも",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: ThemeColor.text,
+
+    // ハッシュタグのモックデータ
+    final hashtags = [
+      "#大学生と繋がりたい",
+      "#推しの沼",
+      "#今日のコーデ",
+      "#勉強垢",
+      "#バイト仲間募集",
+      "#ゲーム好きと繋がりたい",
+      "#日常",
+      "#音楽好き",
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "注目のハッシュタグ",
+            style: textStyle.w700(
+              fontSize: 20,
+              color: ThemeColor.white,
             ),
           ),
-        ),
-        asyncValue.when(
-          data: (ids) {
-            final userIds =
-                ids.where((userId) => !filters.contains(userId)).toList();
-            final users = ref
-                .read(allUsersNotifierProvider)
-                .asData!
-                .value
-                .values
-                .where((item) => userIds.contains(item.userId))
-                .toList();
-            //フレンドリクエストが来ているユーザーは消す
-            users.removeWhere((user) => filters.contains(user.userId));
-            if (users.isEmpty) {
-              return SizedBox(
-                height: themeSize.screenHeight * 0.1,
-                child: Center(
-                  child: Text(
-                    "おすすめのユーザーはいません。",
-                    style: textStyle.w600(
-                      color: ThemeColor.subText,
-                    ),
+          const Gap(16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 12,
+            children: hashtags.map((tag) {
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1A1A),
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: const Color(0xFF262626),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  tag,
+                  style: textStyle.w500(
+                    fontSize: 14,
+                    color: Colors.blue,
                   ),
                 ),
               );
-            }
-            return ListView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                users.isEmpty
-                    ? const Text("")
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: users.length,
-                        itemBuilder: (context, index) {
-                          final user = users[index];
-                          return UserRequestWidget(user: user);
-                        },
-                      ),
-              ],
-            );
-          },
-          error: (e, s) => const SizedBox(),
-          loading: () => const SizedBox(),
-        ),
-      ],
+            }).toList(),
+          ),
+        ],
+      ),
     );
-  } */
+  }
+}
+
+// 新規：おすすめユーザーセクション
+class RecommendedUsersSection extends ConsumerWidget {
+  const RecommendedUsersSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    final allUsersAsyncValue = ref.watch(allUsersNotifierProvider);
+    final notifier = ref.read(followingListNotifierProvider.notifier);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "おすすめユーザー",
+                style: textStyle.w700(
+                  fontSize: 20,
+                  color: ThemeColor.white,
+                ),
+              ),
+            ],
+          ),
+          const Gap(16),
+          allUsersAsyncValue.when(
+            data: (users) {
+              final usersList = users.values.toList();
+              usersList.removeWhere((user) => user.isMe);
+              usersList
+                  .removeWhere((user) => notifier.isFollowing(user.userId));
+
+              final displayUsers =
+                  usersList.length > 6 ? usersList.sublist(0, 6) : usersList;
+
+              // おすすめユーザーがいない場合の表示
+              if (displayUsers.isEmpty) {
+                return Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A1A),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFF262626),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.people_alt_outlined,
+                        size: 48,
+                        color: ThemeColor.subText,
+                      ),
+                      const Gap(16),
+                      Text(
+                        "現在おすすめのユーザーはいません",
+                        style: textStyle.w600(
+                          fontSize: 16,
+                          color: ThemeColor.subText,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const Gap(24),
+                      ElevatedButton(
+                        onPressed: () {
+                          // 検索画面に移動など
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SearchParamsScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          "ユーザーを検索する",
+                          style: textStyle.w600(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: displayUsers.length,
+                itemBuilder: (context, index) {
+                  final user = displayUsers[index];
+                  return UserRequestWidget(
+                    user: user,
+                    padding: 0,
+                  );
+                },
+              );
+            },
+            error: (error, stackTrace) => Center(
+              child: Text(
+                'エラーが発生しました',
+                style: textStyle.w400(
+                  fontSize: 14,
+                  color: ThemeColor.error,
+                ),
+              ),
+            ),
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }
 
 class UsersFeed extends ConsumerWidget {
@@ -231,6 +346,7 @@ class UsersFeed extends ConsumerWidget {
             padding: EdgeInsets.symmetric(horizontal: 4),
             scrollDirection: Axis.horizontal,
             children: [
+// newUsersのカードスタック
               newUsersAsyncValue.when(
                 data: (users) {
                   if (users.isEmpty) {
@@ -242,8 +358,12 @@ class UsersFeed extends ConsumerWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) =>
-                                  UserCardStackScreen(users: users)));
+                              builder: (_) => UserCardStackScreen(
+                                    users: users,
+                                    userGroupId: "new_users", // 固有のIDを指定
+                                    userGroupTitle:
+                                        "最近始めたユーザー", // オプションでタイトルも指定可能
+                                  )));
                     },
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -340,6 +460,8 @@ class UsersFeed extends ConsumerWidget {
                   child: CircularProgressIndicator(),
                 ),
               ),
+
+// onlineUsersのカードスタック
               onlineUsersAsyncValue.when(
                 data: (users) {
                   if (users.isEmpty) {
@@ -351,8 +473,12 @@ class UsersFeed extends ConsumerWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) =>
-                                  UserCardStackScreen(users: users)));
+                              builder: (_) => UserCardStackScreen(
+                                    users: users,
+                                    userGroupId: "online_users", // 固有のIDを指定
+                                    userGroupTitle:
+                                        "アクティブな友達", // オプションでタイトルも指定可能
+                                  )));
                     },
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 8),
