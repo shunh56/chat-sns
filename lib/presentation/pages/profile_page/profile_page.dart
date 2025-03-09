@@ -247,7 +247,7 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                           const Gap(4),
                           Text(
-                            "@" + me.username,
+                            "@${me.username}",
                             style: const TextStyle(
                               fontSize: 14,
                               color: ThemeColor.subText,
@@ -338,7 +338,7 @@ class ProfileScreen extends ConsumerWidget {
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.location_on_outlined,
                                         color: ThemeColor.subText,
                                         size: 16,
@@ -360,7 +360,7 @@ class ProfileScreen extends ConsumerWidget {
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.work_outline,
                                         color: ThemeColor.subText,
                                         size: 16,
@@ -377,7 +377,7 @@ class ProfileScreen extends ConsumerWidget {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.calendar_today,
                                       color: ThemeColor.subText,
                                       size: 14,

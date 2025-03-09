@@ -3,19 +3,14 @@ import 'dart:math';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/community.dart';
-import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/image/image.dart';
-import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/phase_01/community_detail_screen.dart';
 import 'package:app/presentation/phase_01/search_params_screen.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/phase_01/user_card_stack_screen.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/online_users.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -352,6 +347,7 @@ class UsersFeed extends ConsumerWidget {
                   if (users.isEmpty) {
                     return const SizedBox();
                   }
+                  users.removeWhere((user) => user.isMe);
                   final user = users.first;
                   return GestureDetector(
                     onTap: () {
@@ -464,6 +460,7 @@ class UsersFeed extends ConsumerWidget {
 // onlineUsersのカードスタック
               onlineUsersAsyncValue.when(
                 data: (users) {
+                  users.removeWhere((user) => user.isMe);
                   if (users.isEmpty) {
                     return const SizedBox();
                   }

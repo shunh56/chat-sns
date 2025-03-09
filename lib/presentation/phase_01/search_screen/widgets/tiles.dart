@@ -75,7 +75,7 @@ class UserRequestWidget extends ConsumerWidget {
   }
 
   Widget _buildFollowButton(UserAccount user) {
-    if (user.isMe) return SizedBox();
+    if (user.isMe) return const SizedBox();
     return Consumer(
       builder: (context, ref, child) {
         final themeSize = ref.watch(themeSizeProvider(context));

@@ -194,7 +194,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
     // すべてのカードをスワイプし終わった場合
     if (_remainingUsers.isEmpty) {
-      Future.delayed(Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         ref
             .read(userCardStackProvider(_providerId).notifier)
             .setCompleted(true);
@@ -404,7 +404,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
                                       return Transform.scale(
                                         scale: value,
                                         child: Container(
-                                          padding: EdgeInsets.symmetric(
+                                          padding: const EdgeInsets.symmetric(
                                               horizontal: 16, vertical: 8),
                                           decoration: BoxDecoration(
                                             color:
@@ -413,9 +413,9 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
                                                 BorderRadius.circular(12),
                                             border: Border.all(
                                               color: _status == CardStatus.like
-                                                  ? Color(0xFF4ADE80)
+                                                  ? const Color(0xFF4ADE80)
                                                       .withOpacity(0.8)
-                                                  : Color(0xFFF87171)
+                                                  : const Color(0xFFF87171)
                                                       .withOpacity(0.8),
                                               width: 1,
                                             ),
@@ -423,9 +423,9 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
                                               BoxShadow(
                                                 color:
                                                     _status == CardStatus.like
-                                                        ? Color(0xFF4ADE80)
+                                                        ? const Color(0xFF4ADE80)
                                                             .withOpacity(0.3)
-                                                        : Color(0xFFF87171)
+                                                        : const Color(0xFFF87171)
                                                             .withOpacity(0.3),
                                                 blurRadius: 8,
                                                 spreadRadius: 0,
@@ -443,16 +443,16 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
                                                         .remove_circle_outline_rounded,
                                                 color:
                                                     _status == CardStatus.like
-                                                        ? Color(0xFF4ADE80)
-                                                        : Color(0xFFF87171),
+                                                        ? const Color(0xFF4ADE80)
+                                                        : const Color(0xFFF87171),
                                                 size: 18,
                                               ),
-                                              SizedBox(width: 6),
+                                              const SizedBox(width: 6),
                                               Text(
                                                 _status == CardStatus.like
                                                     ? 'FOLLOW'
                                                     : 'SKIP',
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.w600,
                                                   fontSize: 18,
@@ -555,7 +555,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
                 ),
               ),
               const Gap(24),
-              Text(
+              const Text(
                 'スワイプ完了',
                 style: TextStyle(
                   fontSize: 28,
@@ -596,7 +596,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'ホームへ',
                   style: TextStyle(
                     fontSize: 16,
@@ -813,12 +813,12 @@ class AnimatedActionButton extends StatefulWidget {
   final String label;
 
   const AnimatedActionButton({
-    Key? key,
+    super.key,
     required this.onTap,
     required this.icon,
     required this.gradient,
     required this.label,
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedActionButton> createState() => _AnimatedActionButtonState();

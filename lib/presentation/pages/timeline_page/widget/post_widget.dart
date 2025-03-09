@@ -3,17 +3,13 @@ import 'dart:math';
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/core/values.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
-import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
-import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/sub_pages/post_images_screen.dart';
 import 'package:app/presentation/providers/notifier/heart_animation_notifier.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
@@ -23,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
-import 'package:overscroll_pop/overscroll_pop.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostWidget extends ConsumerWidget {

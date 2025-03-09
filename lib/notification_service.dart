@@ -268,7 +268,7 @@ class NotificationService {
       ), */
       //extra: <String, dynamic>{'userId': '1a2b3c4d'},
       // headers: <String, dynamic>{'apiKey': 'Abc@123!'},
-      android: AndroidParams(
+      android: const AndroidParams(
         isCustomNotification: true,
         isShowLogo: true,
         missedCallNotificationChannelName: "着信通知",

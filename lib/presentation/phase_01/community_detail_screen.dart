@@ -243,7 +243,7 @@ class CommunityDetailScreen extends ConsumerWidget {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                   const Gap(24),
 
                   // 最近の投稿
@@ -325,7 +325,7 @@ class CommunityDetailScreen extends ConsumerWidget {
                             children: [
                               Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.favorite_border_rounded,
                                     size: 20,
                                     color: ThemeColor.textTertiary,
@@ -343,7 +343,7 @@ class CommunityDetailScreen extends ConsumerWidget {
                               const Gap(16),
                               Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.chat_bubble_outline_rounded,
                                     size: 20,
                                     color: ThemeColor.textTertiary,
@@ -363,7 +363,7 @@ class CommunityDetailScreen extends ConsumerWidget {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                   const Gap(24),
 
                   // アクティブメンバー

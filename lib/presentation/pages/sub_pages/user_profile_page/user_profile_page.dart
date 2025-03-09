@@ -482,7 +482,7 @@ class UserProfileScreen extends ConsumerWidget {
                               height: 1.1,
                             ),
                           ),
-                          Gap(8),
+                          const Gap(8),
                           if (!user.greenBadge)
                             Text(
                               user.badgeStatus,
@@ -495,7 +495,7 @@ class UserProfileScreen extends ConsumerWidget {
 
                       const Gap(4),
                       Text(
-                        "@" + user.username,
+                        "@${user.username}",
                         style: const TextStyle(
                           fontSize: 14,
                           color: ThemeColor.subText,
@@ -526,7 +526,7 @@ class UserProfileScreen extends ConsumerWidget {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.location_on_outlined,
                                     color: ThemeColor.subText,
                                     size: 16,
@@ -547,7 +547,7 @@ class UserProfileScreen extends ConsumerWidget {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.work_outline,
                                     color: ThemeColor.subText,
                                     size: 16,
@@ -564,7 +564,7 @@ class UserProfileScreen extends ConsumerWidget {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.calendar_today,
                                   color: ThemeColor.subText,
                                   size: 14,
