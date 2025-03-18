@@ -64,7 +64,7 @@ class AuthNotifier {
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        DebugPrint("canceled"); // DebugPrint ではなく debugPrint を使用
+        DebugPrint("canceled"); // DebugPrint ではなく DebugPrint を使用
         _ref.read(loginProcessProvider.notifier).state = false;
         return "provider_error";
       }

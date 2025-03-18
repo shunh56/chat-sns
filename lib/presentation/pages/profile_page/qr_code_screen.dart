@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/icons.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
@@ -21,7 +22,7 @@ class QrCodeScreen extends ConsumerWidget {
       "username": me.username,
       "link": "https://appname.vercel.app/@${me.username}",
     };
-    debugPrint(qrJsonData.toString());
+    DebugPrint(qrJsonData.toString());
     return Scaffold(
       backgroundColor: me.canvasTheme.bgColor,
       appBar: AppBar(

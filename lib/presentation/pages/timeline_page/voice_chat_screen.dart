@@ -210,7 +210,7 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
           uid: 0,
         );
       } catch (e) {
-        debugPrint("join error : $e");
+        DebugPrint("join error : $e");
       }
 
       // Register the event handler
@@ -251,13 +251,13 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
             }
           },
           onError: (err, msg) => {
-            debugPrint(err.toString()),
-            debugPrint(msg.toString()),
+            DebugPrint(err.toString()),
+            DebugPrint(msg.toString()),
           },
         ),
       );
     } catch (err) {
-      debugPrint("initialization error $err");
+      DebugPrint("initialization error $err");
     }
   }
 

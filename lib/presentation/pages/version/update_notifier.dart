@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/presentation/pages/version/version_manager.dart';
@@ -61,7 +62,7 @@ class _UpdateNotifierState extends ConsumerState<UpdateNotifier> {
           break;
       }
     } catch (e) {
-      debugPrint('Version check failed: $e');
+      DebugPrint('Version check failed: $e');
     }
   }
 

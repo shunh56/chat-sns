@@ -8,7 +8,7 @@ import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
-import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/create_chat_screen.dart';
+import 'package:app/presentation/pages/chat_screen/sub_screens/create_chat_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
