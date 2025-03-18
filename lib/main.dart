@@ -29,6 +29,7 @@ import 'package:app/presentation/phase_01/main_page.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_remote_config.dart';
+import 'package:app/presentation/providers/provider/theme_provider.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -282,7 +283,8 @@ configureVoiceCall() async {
         // TODO: show screen calling in Flutter
         break;
       case Event.actionCallAccept:
-      showMessage("id(uuid) : ${event.body['id']}\ncallId : ${event.body['extra']['id']}");
+        showMessage(
+            "id(uuid) : ${event.body['id']}\ncallId : ${event.body['extra']['id']}");
         await FlutterCallkitIncoming.endCall(event.body['id']);
         await Future.delayed(const Duration(milliseconds: 30));
         // 通話画面への遷移
@@ -351,7 +353,7 @@ class MyApp extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     //4. configure voice call
     configureVoiceCall();
-
+    final isDarkMode = ref.watch(isDarkModeProvider);
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorKey: navigatorKey,
@@ -366,6 +368,7 @@ class MyApp extends ConsumerWidget {
       locale: const Locale("ja", "JP"),
       title: appName,
       //theme: AppTheme().lightTheme,
+      // theme: isDarkMode ? ThemeData.dark() : ThemeData.light(),
       theme: ThemeData(
         appBarTheme: AppBarTheme(
           surfaceTintColor: Colors.transparent,
