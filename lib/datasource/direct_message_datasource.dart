@@ -54,7 +54,7 @@ class DirectMessageDatasource {
         .snapshots();
   }
 
-  sendMessage(
+  Future<String> sendMessage(
     String text,
     String otherUserId,
   ) async {
@@ -69,6 +69,7 @@ class DirectMessageDatasource {
         .doc(id)
         .set(json);
     writeOverview(json, otherUserId);
+    return id;
   }
 
   sendCurrentStatusReply(

@@ -13,11 +13,11 @@ class DirectMessageUsecase {
   final DirectMessageRepository _repository;
   DirectMessageUsecase(this._repository);
 
-  sendMessage(
+  Future<String> sendMessage(
     String text,
     UserAccount otherUser,
   ) {
-    _repository.sendMessage(text, otherUser.userId);
+    return _repository.sendMessage(text, otherUser.userId);
   }
 
   sendCurrentStatusReply(

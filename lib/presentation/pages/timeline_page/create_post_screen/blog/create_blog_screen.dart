@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/blog/blog_content_menu.dart';
@@ -96,9 +97,9 @@ class CreateBlogScreen extends ConsumerWidget {
                     child: GestureDetector(
                       onTap: () async {
                         
-                        debugPrint(
+                        DebugPrint(
                             "title : ${ref.watch(blogStateProvider).title}");
-                        debugPrint(
+                        DebugPrint(
                             "contents : ${ref.watch(blogStateProvider).contents}");
                         if (ref.watch(blogStateProvider).isReadyToUpload) {
                           final text = ref.read(inputTextProvider);

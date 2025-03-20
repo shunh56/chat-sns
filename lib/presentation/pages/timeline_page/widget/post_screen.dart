@@ -41,6 +41,15 @@ class PostScreen extends ConsumerWidget {
           "${user.name}の投稿",
           style: textStyle.appbarText(isSmall: true),
         ),
+        leading: GestureDetector(
+          onTap: () {
+            primaryFocus?.unfocus();
+            Navigator.pop(context);
+          },
+          child: Icon(
+            Icons.arrow_back_ios,
+          ),
+        ),
       ),
       body: Stack(
         children: [

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/room_message.dart';
 import 'package:app/usecase/comunity_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -79,7 +80,7 @@ class CommunityMessagesNotifier
       }
     } catch (e) {
       // エラーの場合でも現在の状態は保持
-      print('Error loading more messages: $e');
+      DebugPrint('Error loading more messages: $e');
     } finally {
       _isLoading = false;
     }
