@@ -4,6 +4,10 @@ FLUTTER = flutter
 DART_DEFINE_DEV = --dart-define=FLAVOR=dev --dart-define-from-file=dart_defines/dev.env
 DART_DEFINE_PROD = --dart-define=FLAVOR=prod --dart-define-from-file=dart_defines/prod.env
 
+build-runner:
+	@echo "Activating build runner..."
+	flutter pub run build_runner build --delete-conflicting-outputs
+
 dev-debug:
 	@echo "Starting dev debug build..."
 	$(FLUTTER) run $(DART_DEFINE_DEV)

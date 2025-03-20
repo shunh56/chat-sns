@@ -1,0 +1,273 @@
+
+[
+    {
+      "id": "tag001",
+      "name": "K-pop",
+      "description": "韓国の音楽やアイドルに関する投稿",
+      "category": "エンタメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag002",
+      "name": "アニメ",
+      "description": "アニメや漫画についての話題",
+      "category": "エンタメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag003",
+      "name": "ゲーム",
+      "description": "ビデオゲーム、eスポーツ関連",
+      "category": "エンタメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag004",
+      "name": "スニーカー",
+      "description": "スニーカーコレクションやストリートファッション",
+      "category": "ファッション",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag005",
+      "name": "カフェ巡り",
+      "description": "おしゃれなカフェや飲食店の発見",
+      "category": "グルメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag006",
+      "name": "推し活",
+      "description": "推しているアイドル・タレントの応援活動",
+      "category": "エンタメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag007",
+      "name": "大学生",
+      "description": "大学生活、勉強、サークル活動",
+      "category": "ライフスタイル",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag008",
+      "name": "TikTok",
+      "description": "TikTokでのトレンドや創作活動",
+      "category": "SNS",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag009",
+      "name": "自己投資",
+      "description": "自己啓発、スキルアップ、学習",
+      "category": "ライフスタイル",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag010",
+      "name": "フェス",
+      "description": "音楽フェスやイベント情報",
+      "category": "エンタメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag011",
+      "name": "プチプラコーデ",
+      "description": "お手頃価格のおしゃれなファッション",
+      "category": "ファッション",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag012",
+      "name": "ヴィーガン",
+      "description": "ヴィーガン・ベジタリアン向けの食事や生活",
+      "category": "グルメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag013",
+      "name": "メイク術",
+      "description": "メイクアップのテクニックやコスメ情報",
+      "category": "ビューティー",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag014",
+      "name": "インテリア",
+      "description": "一人暮らしや部屋づくりのアイデア",
+      "category": "ライフスタイル",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag015",
+      "name": "フィットネス",
+      "description": "トレーニングや健康的な生活習慣",
+      "category": "ヘルス",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag016",
+      "name": "バイト",
+      "description": "アルバイト経験や探し方のコツ",
+      "category": "仕事",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag017",
+      "name": "恋バナ",
+      "description": "恋愛相談や恋愛話",
+      "category": "恋愛",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag018",
+      "name": "英語学習",
+      "description": "英語や他の言語の勉強法",
+      "category": "学習",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag019",
+      "name": "SDGs",
+      "description": "環境問題や持続可能な生活スタイル",
+      "category": "社会",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag020",
+      "name": "DIY",
+      "description": "手作りアイテムやリメイク術",
+      "category": "クラフト",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag021",
+      "name": "旅行好き",
+      "description": "国内外の旅行スポットや旅のヒント",
+      "category": "旅行",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag022",
+      "name": "マインドフルネス",
+      "description": "メンタルヘルスやストレス管理",
+      "category": "ヘルス",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag023",
+      "name": "クリエイター",
+      "description": "動画制作、イラスト、音楽などの創作活動",
+      "category": "クリエイティブ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag024",
+      "name": "副業",
+      "description": "副業やマネースキルに関する情報",
+      "category": "仕事",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag025",
+      "name": "スマホ写真",
+      "description": "スマートフォンで撮影するフォトテクニック",
+      "category": "クリエイティブ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag026",
+      "name": "古着",
+      "description": "古着や持続可能なファッション",
+      "category": "ファッション",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag027",
+      "name": "ライブ参戦",
+      "description": "コンサートやライブイベントの参加記録",
+      "category": "エンタメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag028",
+      "name": "料理初心者",
+      "description": "簡単料理のレシピや料理のコツ",
+      "category": "グルメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag029",
+      "name": "ダンス",
+      "description": "ダンスやボーカルなどのパフォーマンススキル",
+      "category": "クリエイティブ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    },
+    {
+      "id": "tag030",
+      "name": "推し握手会",
+      "description": "ファンミーティングやイベント参加の思い出",
+      "category": "エンタメ",
+      "usageCount": 0,
+      "isActive": true,
+      "createdAt": 1678924800000
+    }
+  ]

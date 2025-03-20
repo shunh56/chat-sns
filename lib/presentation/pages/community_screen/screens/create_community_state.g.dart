@@ -7,7 +7,7 @@ part of 'create_community_state.dart';
 // **************************************************************************
 
 String _$createCommunityNotifierHash() =>
-    r'9f41e8952827adb3b5bbf1910d2ead95fa198627';
+    r'f3fc77b34b804519b75c517648aacb307eb76ed0';
 
 /// See also [CreateCommunityNotifier].
 @ProviderFor(CreateCommunityNotifier)

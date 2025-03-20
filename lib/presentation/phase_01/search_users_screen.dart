@@ -5,6 +5,7 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/community.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/pages/search_screen/widgets/popular_hashtag_section.dart';
 import 'package:app/presentation/phase_01/community_detail_screen.dart';
 import 'package:app/presentation/phase_01/search_params_screen.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
@@ -96,7 +97,7 @@ class SearchUsersScreen extends ConsumerWidget {
   }
 }
 
-class PopularHashtagsSection extends ConsumerWidget {
+/*class PopularHashtagsSection extends ConsumerWidget {
   const PopularHashtagsSection({super.key});
 
   @override
@@ -121,11 +122,21 @@ class PopularHashtagsSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "注目のハッシュタグ",
-            style: textStyle.w700(
-              fontSize: 20,
-              color: ThemeColor.white,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StoryPage(),
+                ),
+              );
+            },
+            child: Text(
+              "注目のハッシュタグ",
+              style: textStyle.w700(
+                fontSize: 20,
+                color: ThemeColor.white,
+              ),
             ),
           ),
           const Gap(16),
@@ -161,7 +172,7 @@ class PopularHashtagsSection extends ConsumerWidget {
     );
   }
 }
-
+ */
 // 新規：おすすめユーザーセクション
 class RecommendedUsersSection extends ConsumerWidget {
   const RecommendedUsersSection({super.key});
@@ -181,7 +192,7 @@ class RecommendedUsersSection extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "おすすめユーザー",
+                "おすすめのユーザー",
                 style: textStyle.w700(
                   fontSize: 20,
                   color: ThemeColor.white,
@@ -196,7 +207,8 @@ class RecommendedUsersSection extends ConsumerWidget {
               usersList.removeWhere((user) => user.isMe);
               usersList
                   .removeWhere((user) => notifier.isFollowing(user.userId));
-
+              usersList.removeWhere(
+                  (user) => user.name == "null" || user.username == "null");
               final displayUsers =
                   usersList.length > 6 ? usersList.sublist(0, 6) : usersList;
 
