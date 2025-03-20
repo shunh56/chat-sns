@@ -93,7 +93,7 @@ class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<Message>>> {
       }
     } catch (e) {
       // エラーの場合でも現在の状態は保持
-      print('Error loading more messages: $e');
+      DebugPrint('Error loading more messages: $e');
     } finally {
       _isLoading = false;
     }

@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/presentation/pages/community_screen/components/community_card.dart';
 import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/usecase/comunity_usecase.dart';
@@ -111,7 +112,7 @@ class SearchCommunityScreen extends ConsumerWidget {
           await ref.read(communityUsecaseProvider).searchCommunities(query);
       ref.read(searchResultsProvider.notifier).state = communities;
     } catch (e) {
-      print('Search error: $e');
+      DebugPrint('Search error: $e');
       // エラーハンドリングを実装
     }
   }

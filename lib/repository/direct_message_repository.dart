@@ -52,8 +52,8 @@ class DirectMessageRepository {
     );
   }
 
-  sendMessage(String text, String otherUserId) {
-    _dmDatasource.sendMessage(text, otherUserId);
+  Future<String> sendMessage(String text, String otherUserId) {
+    return _dmDatasource.sendMessage(text, otherUserId);
   }
 
   sendCurrentStatusReply(String text, String userId, String postId) {

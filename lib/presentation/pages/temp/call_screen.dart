@@ -79,9 +79,9 @@ class _CallScreenState extends ConsumerState<CallScreen> {
         options: options,
         uid: uid,
       );
-      debugPrint("joined channel $channelId !");
+      DebugPrint("joined channel $channelId !");
     } catch (e) {
-      debugPrint("join error : $e");
+      DebugPrint("join error : $e");
     }
   }
 
@@ -137,13 +137,13 @@ class _CallScreenState extends ConsumerState<CallScreen> {
             });
           },
           onError: (err, msg) => {
-            debugPrint(err.toString()),
-            debugPrint(msg.toString()),
+            DebugPrint(err.toString()),
+            DebugPrint(msg.toString()),
           },
         ),
       );
     } catch (err) {
-      debugPrint(err.toString());
+      DebugPrint(err.toString());
     }
   }
 
