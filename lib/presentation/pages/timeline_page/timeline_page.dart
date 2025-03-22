@@ -9,7 +9,7 @@ import 'package:app/presentation/pages/new_screen.dart';
 import 'package:app/presentation/pages/timeline_page/threads/following_posts.dart';
 import 'package:app/presentation/pages/timeline_page/threads/friends_posts.dart';
 import 'package:app/presentation/pages/timeline_page/threads/public_posts.dart';
-import 'package:app/presentation/phase_01/main_page.dart';
+import 'package:app/new/presentation/pages/main_page.dart';
 import 'package:app/presentation/phase_01/search_screen.dart';
 import 'package:app/presentation/providers/provider/activities_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/friends_notifier.dart';

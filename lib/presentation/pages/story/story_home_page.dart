@@ -20,9 +20,9 @@ class StoryHomePage extends ConsumerStatefulWidget {
   final Tag? initialTag;
 
   const StoryHomePage({
-    Key? key,
+    super.key,
     this.initialTag,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<StoryHomePage> createState() => _StoryHomePageState();
@@ -86,7 +86,7 @@ class _StoryHomePageState extends ConsumerState<StoryHomePage>
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            CreateStoryPage(),
+            const CreateStoryPage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(0.0, 1.0);
           const end = Offset.zero;
@@ -206,8 +206,8 @@ class _StoryHomePageState extends ConsumerState<StoryHomePage>
       child: Column(
         children: [
           // アプリバー
-          Padding(
-            padding: const EdgeInsets.only(
+          const Padding(
+            padding: EdgeInsets.only(
               left: 16,
               right: 16,
               top: 12,
@@ -269,8 +269,8 @@ class _StoryHomePageState extends ConsumerState<StoryHomePage>
   }
 
   Widget _buildLoadingScaffold() {
-    return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+    return const Scaffold(
+      backgroundColor: Color(0xFF121212),
       body: Center(
         child: CircularProgressIndicator(
           color: Colors.blue,
@@ -286,17 +286,17 @@ class _StoryHomePageState extends ConsumerState<StoryHomePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               color: Colors.red,
               size: 48,
             ),
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'タグの読み込みに失敗しました',
               style: TextStyle(color: Colors.white),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
@@ -305,9 +305,9 @@ class _StoryHomePageState extends ConsumerState<StoryHomePage>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: Text('再読み込み'),
+              child: const Text('再読み込み'),
             ),
           ],
         ),
@@ -322,11 +322,11 @@ class _StoryHomePageState extends ConsumerState<StoryHomePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'タグがありません',
               style: TextStyle(color: Colors.white),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: onRetry,
               style: ElevatedButton.styleFrom(
@@ -335,9 +335,9 @@ class _StoryHomePageState extends ConsumerState<StoryHomePage>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: Text('再読み込み'),
+              child: const Text('再読み込み'),
             ),
           ],
         ),
@@ -349,7 +349,7 @@ class _StoryHomePageState extends ConsumerState<StoryHomePage>
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => CreateStoryPage(),
+                builder: (_) => const CreateStoryPage(),
               ),
             );
           },
@@ -372,9 +372,8 @@ class _StoryGridByTag extends ConsumerWidget {
   final Tag tag;
 
   const _StoryGridByTag({
-    Key? key,
     required this.tag,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -396,7 +395,7 @@ class _StoryGridByTag extends ConsumerWidget {
               children: [
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.6,
-                  child: Center(
+                  child: const Center(
                     child: Text(
                       'このタグのストーリーはまだありません',
                       style: TextStyle(color: Colors.grey),
@@ -419,8 +418,8 @@ class _StoryGridByTag extends ConsumerWidget {
           child: GridView.builder(
             // 物理スクロールを可能にする
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.all(8),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            padding: const EdgeInsets.all(8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: 0.75,
               crossAxisSpacing: 12,
@@ -439,7 +438,7 @@ class _StoryGridByTag extends ConsumerWidget {
         );
       },
       loading: () =>
-          Center(child: CircularProgressIndicator(color: Colors.blue)),
+          const Center(child: CircularProgressIndicator(color: Colors.blue)),
       error: (error, stackTrace) {
         // エラーの詳細をコンソールに出力
         print('ストーリー取得エラー: $error');
@@ -463,25 +462,25 @@ class _StoryGridByTag extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.error_outline,
                         color: Colors.red,
                         size: 48,
                       ),
-                      SizedBox(height: 16),
-                      Text(
+                      const SizedBox(height: 16),
+                      const Text(
                         'ストーリーの読み込みに失敗しました',
                         style: TextStyle(color: Colors.grey),
                       ),
-                      SizedBox(height: 16),
-                      Text(
+                      const SizedBox(height: 16),
+                      const Text(
                         '下に引っ張って更新',
                         style: TextStyle(
                           color: Colors.blue,
                           fontSize: 14,
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
                           // 再読み込みのためにプロバイダーをリフレッシュ
@@ -493,10 +492,10 @@ class _StoryGridByTag extends ConsumerWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 24, vertical: 12),
                         ),
-                        child: Text('再試行'),
+                        child: const Text('再試行'),
                       ),
                     ],
                   ),
@@ -517,11 +516,10 @@ class _StoryGridItem extends StatelessWidget {
   final List<Story> stories;
 
   const _StoryGridItem({
-    Key? key,
     required this.story,
     required this.index,
     required this.stories,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -561,7 +559,7 @@ class _StoryGridItem extends StatelessWidget {
               BoxShadow(
                 color: Colors.black.withOpacity(0.3),
                 blurRadius: 8,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -578,7 +576,7 @@ class _StoryGridItem extends StatelessWidget {
                       Colors.transparent,
                       Colors.black.withOpacity(0.8),
                     ],
-                    stops: [0.7, 1.0],
+                    stops: const [0.7, 1.0],
                   ),
                 ),
                 child: Image.network(
@@ -601,7 +599,7 @@ class _StoryGridItem extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       color: Colors.grey.shade800,
-                      child: Icon(
+                      child: const Icon(
                         Icons.error_outline,
                         color: Colors.white,
                         size: 32,
@@ -622,7 +620,7 @@ class _StoryGridItem extends StatelessWidget {
                         Colors.transparent,
                         Colors.black.withOpacity(0.7),
                       ],
-                      stops: [0.7, 1.0],
+                      stops: const [0.7, 1.0],
                     ),
                   ),
                 ),
@@ -641,30 +639,30 @@ class _StoryGridItem extends StatelessWidget {
                       // いいね数とビュー数
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.favorite,
                             color: Colors.red,
                             size: 16,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
                             '${story.likeCount}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(width: 12),
-                          Icon(
+                          const SizedBox(width: 12),
+                          const Icon(
                             Icons.visibility,
                             color: Colors.white,
                             size: 16,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
                             '${story.viewCount}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -679,7 +677,7 @@ class _StoryGridItem extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 6),
                           child: Text(
                             story.caption!,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                             ),
@@ -698,12 +696,12 @@ class _StoryGridItem extends StatelessWidget {
                   top: 8,
                   right: 8,
                   child: Container(
-                    padding: EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.play_arrow,
                       color: Colors.white,
                       size: 16,
@@ -717,12 +715,12 @@ class _StoryGridItem extends StatelessWidget {
                   top: 8,
                   left: 8,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.amber,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(
+                    child: const Text(
                       'ハイライト',
                       style: TextStyle(
                         color: Colors.black,

@@ -46,7 +46,7 @@ class PostScreen extends ConsumerWidget {
             primaryFocus?.unfocus();
             Navigator.pop(context);
           },
-          child: Icon(
+          child: const Icon(
             Icons.arrow_back_ios,
           ),
         ),

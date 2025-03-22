@@ -1,8 +1,5 @@
 // Flutter imports:
-import 'package:app/core/utils/debug_print.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 // Project imports:
@@ -13,8 +10,6 @@ import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
-import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
 
 import '../utils/animated_message.dart';
 

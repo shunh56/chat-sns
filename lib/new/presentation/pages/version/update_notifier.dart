@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
-import 'package:app/presentation/pages/version/version_manager.dart';
+import 'package:app/new/presentation/pages/version/version_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';

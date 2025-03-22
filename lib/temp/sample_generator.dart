@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SampleDataGeneratorWidget extends ConsumerStatefulWidget {
-  const SampleDataGeneratorWidget({Key? key}) : super(key: key);
+  const SampleDataGeneratorWidget({super.key});
 
   @override
   ConsumerState<SampleDataGeneratorWidget> createState() =>
@@ -19,24 +19,24 @@ class _SampleDataGeneratorWidgetState
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'サンプルデータ生成',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16),
-            Text('ランダムなストーリーを50件生成します。'),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+            const Text('ランダムなストーリーを50件生成します。'),
+            const SizedBox(height: 16),
             _isGenerating
-                ? Column(
+                ? const Column(
                     children: [
                       CircularProgressIndicator(),
                       SizedBox(height: 8),
@@ -52,7 +52,7 @@ class _SampleDataGeneratorWidgetState
                       try {
                         await generateSampleStories(ref);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('50件のストーリーを生成しました')),
+                          const SnackBar(content: Text('50件のストーリーを生成しました')),
                         );
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +66,7 @@ class _SampleDataGeneratorWidgetState
                         }
                       }
                     },
-                    child: Text('サンプルストーリーを生成'),
+                    child: const Text('サンプルストーリーを生成'),
                   ),
           ],
         ),

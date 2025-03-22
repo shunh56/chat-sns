@@ -229,7 +229,7 @@ class RecommendedUsersSection extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.people_alt_outlined,
                         size: 48,
                         color: ThemeColor.subText,
@@ -318,8 +318,8 @@ class UsersFeed extends ConsumerWidget {
     final onlineUsersAsyncValue = ref.watch(recentUsersNotifierProvider);
     final width = themeSize.screenWidth * 0.42;
     final height = width * 1.3;
-    final titleSize = 16.0;
-    final textSize = 14.0;
+    const titleSize = 16.0;
+    const textSize = 14.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -350,7 +350,7 @@ class UsersFeed extends ConsumerWidget {
         SizedBox(
           height: height,
           child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             scrollDirection: Axis.horizontal,
             children: [
 // newUsersのカードスタック
@@ -410,7 +410,7 @@ class UsersFeed extends ConsumerWidget {
                                   color: ThemeColor.white,
                                 ),
                               ),
-                              Gap(8),
+                              const Gap(8),
                               Text(
                                 "登録したばかりで\nまだ慣れていません",
                                 textAlign: TextAlign.center,
@@ -419,9 +419,9 @@ class UsersFeed extends ConsumerWidget {
                                   color: ThemeColor.white,
                                 ),
                               ),
-                              Gap(16),
+                              const Gap(16),
                               Container(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                   vertical: 6,
                                   horizontal: 32,
                                 ),
@@ -439,7 +439,7 @@ class UsersFeed extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              Gap(12),
+                              const Gap(12),
                             ],
                           ),
                         ],
@@ -526,7 +526,7 @@ class UsersFeed extends ConsumerWidget {
                                   color: ThemeColor.white,
                                 ),
                               ),
-                              Gap(8),
+                              const Gap(8),
                               Text(
                                 "最近開いた友達",
                                 textAlign: TextAlign.center,
@@ -535,9 +535,9 @@ class UsersFeed extends ConsumerWidget {
                                   color: ThemeColor.white,
                                 ),
                               ),
-                              Gap(16),
+                              const Gap(16),
                               Container(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                   vertical: 6,
                                   horizontal: 32,
                                 ),
@@ -555,7 +555,7 @@ class UsersFeed extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              Gap(12),
+                              const Gap(12),
                             ],
                           ),
                         ],

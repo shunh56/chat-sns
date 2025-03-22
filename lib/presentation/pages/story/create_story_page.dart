@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateStoryPage extends ConsumerStatefulWidget {
-  const CreateStoryPage({Key? key}) : super(key: key);
+  const CreateStoryPage({super.key});
 
   @override
   ConsumerState<CreateStoryPage> createState() => _CreateStoryPageState();
@@ -22,7 +22,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
   File? _selectedImage;
   final TextEditingController _captionController = TextEditingController();
   bool _isUploading = false;
-  List<Tag> _selectedTags = [];
+  final List<Tag> _selectedTags = [];
   bool _isEditing = false;
   late TabController _tabController;
   
@@ -38,7 +38,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
     
     // システムUIを設定
     SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
+      const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
       ),
@@ -56,7 +56,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
     _tabController.dispose();
     // システムUIを元に戻す
     SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
+      const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
       ),
@@ -107,7 +107,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
     await showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF121212),
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       isScrollControlled: true,
@@ -139,13 +139,13 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   
                   // タイトル
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'タグを選択',
                         style: TextStyle(
                           fontSize: 18,
@@ -155,7 +155,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: Text(
+                        child: const Text(
                           '完了',
                           style: TextStyle(
                             fontSize: 16,
@@ -166,25 +166,25 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   
                   // 検索バー
                   TextField(
                     decoration: InputDecoration(
                       hintText: 'タグを検索...',
-                      hintStyle: TextStyle(color: Colors.grey),
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
                       filled: true,
                       fillColor: const Color(0xFF1E1E1E),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   
                   // タグリスト
                   Expanded(
@@ -206,15 +206,15 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                           subtitle: tag.description != null && tag.description!.isNotEmpty
                               ? Text(
                                   tag.description!,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.grey,
                                     fontSize: 12,
                                   ),
                                 )
                               : null,
                           trailing: isSelected
-                              ? Icon(Icons.check_circle, color: Colors.blue)
-                              : Icon(Icons.add_circle_outline, color: Colors.grey),
+                              ? const Icon(Icons.check_circle, color: Colors.blue)
+                              : const Icon(Icons.add_circle_outline, color: Colors.grey),
                           onTap: () {
                             setModalState(() {
                               if (isSelected) {
@@ -277,7 +277,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('ストーリーをアップロードしました'),
+          content: const Text('ストーリーをアップロードしました'),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -342,10 +342,10 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: Icon(Icons.close, color: Colors.white),
+                icon: const Icon(Icons.close, color: Colors.white),
                 onPressed: () => Navigator.pop(context),
               ),
-              Text(
+              const Text(
                 '新しいストーリー',
                 style: TextStyle(
                   color: Colors.white,
@@ -353,7 +353,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(width: 48), // バランスを取るためのスペーサー
+              const SizedBox(width: 48), // バランスを取るためのスペーサー
             ],
           ),
         ),
@@ -369,7 +369,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                 label: 'ギャラリーから選択',
                 onTap: _pickImage,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               
               // カメラで撮影ボタン
               _buildSelectionButton(
@@ -395,14 +395,14 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
                   setState(() {
                     _selectedImage = null;
                   });
                 },
               ),
-              Text(
+              const Text(
                 '画像を編集',
                 style: TextStyle(
                   color: Colors.white,
@@ -416,7 +416,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                     _isEditing = false;
                   });
                 },
-                child: Text(
+                child: const Text(
                   '次へ',
                   style: TextStyle(
                     color: Colors.blue,
@@ -432,7 +432,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
         // 画像プレビュー
         Expanded(
           child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               color: Colors.black,
@@ -457,13 +457,13 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
         
         // 編集ツール
         Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               // タブバー
               TabBar(
                 controller: _tabController,
-                tabs: [
+                tabs: const [
                   Tab(text: 'フィルター'),
                   Tab(text: '調整'),
                 ],
@@ -502,9 +502,9 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                           // 明るさ調整
                           Row(
                             children: [
-                              Icon(Icons.brightness_6, color: Colors.white, size: 20),
-                              SizedBox(width: 8),
-                              Text('明るさ', style: TextStyle(color: Colors.white)),
+                              const Icon(Icons.brightness_6, color: Colors.white, size: 20),
+                              const SizedBox(width: 8),
+                              const Text('明るさ', style: TextStyle(color: Colors.white)),
                               Expanded(
                                 child: Slider(
                                   value: _brightness,
@@ -525,9 +525,9 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                           // コントラスト調整
                           Row(
                             children: [
-                              Icon(Icons.contrast, color: Colors.white, size: 20),
-                              SizedBox(width: 8),
-                              Text('コントラスト', style: TextStyle(color: Colors.white)),
+                              const Icon(Icons.contrast, color: Colors.white, size: 20),
+                              const SizedBox(width: 8),
+                              const Text('コントラスト', style: TextStyle(color: Colors.white)),
                               Expanded(
                                 child: Slider(
                                   value: _contrast,
@@ -548,9 +548,9 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                           // 彩度調整
                           Row(
                             children: [
-                              Icon(Icons.color_lens, color: Colors.white, size: 20),
-                              SizedBox(width: 8),
-                              Text('彩度', style: TextStyle(color: Colors.white)),
+                              const Icon(Icons.color_lens, color: Colors.white, size: 20),
+                              const SizedBox(width: 8),
+                              const Text('彩度', style: TextStyle(color: Colors.white)),
                               Expanded(
                                 child: Slider(
                                   value: _saturation,
@@ -591,14 +591,14 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
                   setState(() {
                     _isEditing = true;
                   });
                 },
               ),
-              Text(
+              const Text(
                 '新しいストーリー',
                 style: TextStyle(
                   color: Colors.white,
@@ -607,7 +607,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                 ),
               ),
               _isUploading
-                  ? SizedBox(
+                  ? const SizedBox(
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(
@@ -617,7 +617,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                     )
                   : TextButton(
                       onPressed: _uploadStory,
-                      child: Text(
+                      child: const Text(
                         '投稿',
                         style: TextStyle(
                           color: Colors.blue,
@@ -633,7 +633,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
         // メインコンテンツ
         Expanded(
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -655,14 +655,14 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                         fit: BoxFit.cover,
                       ),
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     
                     // キャプション入力
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'キャプション',
                             style: TextStyle(
                               color: Colors.white,
@@ -670,21 +670,21 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           TextField(
                             controller: _captionController,
                             decoration: InputDecoration(
                               hintText: 'キャプションを入力...',
-                              hintStyle: TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(color: Colors.grey),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide.none,
                               ),
                               filled: true,
                               fillColor: const Color(0xFF1E1E1E),
-                              contentPadding: EdgeInsets.all(12),
+                              contentPadding: const EdgeInsets.all(12),
                             ),
-                            style: TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white),
                             maxLines: 5,
                             maxLength: 200,
                             enabled: !_isUploading,
@@ -695,13 +695,13 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                   ],
                 ),
                 
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 
                 // タグセクション
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    const Text(
                       'タグ',
                       style: TextStyle(
                         color: Colors.white,
@@ -711,25 +711,25 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                     ),
                     ElevatedButton.icon(
                       onPressed: _isUploading ? null : _showTagSelectionBottomSheet,
-                      icon: Icon(Icons.add, size: 18),
-                      label: Text('タグを選択'),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('タグを選択'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 
                 // 選択されたタグの表示
                 _selectedTags.isEmpty
                     ? Container(
-                        padding: EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: const Color(0xFF1E1E1E),
                           borderRadius: BorderRadius.circular(8),
@@ -738,7 +738,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                             width: 1,
                           ),
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Text(
                             'タグが選択されていません',
                             style: TextStyle(
@@ -753,7 +753,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                         runSpacing: 8,
                         children: _selectedTags.map((tag) {
                           return Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 8,
                             ),
@@ -770,13 +770,13 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                               children: [
                                 Text(
                                   "#${tag.name}",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.blue,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                SizedBox(width: 4),
+                                const SizedBox(width: 4),
                                 GestureDetector(
                                   onTap: _isUploading
                                       ? null
@@ -798,11 +798,11 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                         }).toList(),
                       ),
                 
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 
                 // 公開範囲セクション
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E1E1E),
                     borderRadius: BorderRadius.circular(12),
@@ -810,7 +810,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         '公開範囲',
                         style: TextStyle(
                           color: Colors.white,
@@ -818,7 +818,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       _buildVisibilityOption(
                         Icons.public, 
                         'すべてのユーザー', 
@@ -861,7 +861,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: 200,
-        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(12),
@@ -869,7 +869,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
               blurRadius: 8,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -881,10 +881,10 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
               color: Colors.blue,
               size: 48,
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -900,7 +900,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
   // フィルターオプションウィジェット
   Widget _buildFilterOption(String name) {
     return Container(
-      margin: EdgeInsets.only(right: 16),
+      margin: const EdgeInsets.only(right: 16),
       child: Column(
         children: [
           Container(
@@ -919,7 +919,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
               fit: BoxFit.cover,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             name,
             style: TextStyle(
@@ -952,7 +952,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
               color: isSelected ? Colors.blue : Colors.grey,
               size: 24,
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -967,7 +967,7 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 12,
                     ),
@@ -976,8 +976,8 @@ class _CreateStoryPageState extends ConsumerState<CreateStoryPage> with SingleTi
               ),
             ),
             isSelected
-                ? Icon(Icons.check_circle, color: Colors.blue)
-                : Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                ? const Icon(Icons.check_circle, color: Colors.blue)
+                : const Icon(Icons.radio_button_unchecked, color: Colors.grey),
           ],
         ),
       ),

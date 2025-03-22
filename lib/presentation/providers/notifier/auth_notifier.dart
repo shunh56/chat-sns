@@ -1,7 +1,7 @@
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/presentation/pages/auth/signin_page.dart';
-import 'package:app/presentation/pages/auth/signup_page.dart';
+import 'package:app/new/presentation/pages/auth/signin_page.dart';
+import 'package:app/new/presentation/pages/auth/signup_page.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:firebase_auth/firebase_auth.dart';

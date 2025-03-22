@@ -29,7 +29,7 @@ final storiesProvider = StreamProvider<List<Story>>((ref) {
 });
 
 class StoryPage extends ConsumerStatefulWidget {
-  const StoryPage({Key? key}) : super(key: key);
+  const StoryPage({super.key});
 
   @override
   ConsumerState<StoryPage> createState() => _StoryPageState();
@@ -331,7 +331,7 @@ class _StoryPageState extends ConsumerState<StoryPage> {
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
                           color: Colors.blue,

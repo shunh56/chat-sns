@@ -64,7 +64,7 @@ class TagRepositoryImpl implements TagRepository {
       final querySnapshot = await _firestore
           .collection('tags')
           .where('name', isGreaterThanOrEqualTo: query)
-          .where('name', isLessThanOrEqualTo: query + '\uf8ff')
+          .where('name', isLessThanOrEqualTo: '$query\uf8ff')
           .where('isActive', isEqualTo: true)
           .get();
 

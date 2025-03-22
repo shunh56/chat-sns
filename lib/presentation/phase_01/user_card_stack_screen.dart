@@ -118,6 +118,11 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
   // スワイプ後のアニメーション用コントローラー
   late AnimationController _animationController;
 
+  // カードアニメーション用の変数を追加
+  final bool _isNewCardAnimating = false;
+  bool _isProcessingSwipe = false; // スワイプ処理中フラグ
+  final _cardAnimationDuration = const Duration(milliseconds: 300);
+
   @override
   void initState() {
     super.initState();
@@ -133,11 +138,11 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
+        // アニメーション完了時にスワイプ処理を実行
+        _handleSwipeComplete();
+
+        // アニメーション変数をリセット（次のアニメーションのため）
         setState(() {
-          // アニメーション完了時の処理
-          if (_status != CardStatus.idle) {
-            _handleSwipeComplete();
-          }
           _position = Offset.zero;
           _angle = 0;
           _status = CardStatus.idle;
@@ -148,7 +153,9 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
     // 画像のプリロード完了を模擬
     Future.delayed(const Duration(milliseconds: 800), () {
-      ref.read(userCardStackProvider(_providerId).notifier).setLoading(false);
+      if (mounted) {
+        ref.read(userCardStackProvider(_providerId).notifier).setLoading(false);
+      }
     });
   }
 
@@ -161,15 +168,19 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
   // スワイプ完了処理（カードアニメーション完了後に呼ばれる）
   void _handleSwipeComplete() async {
-    if (_remainingUsers.isEmpty) return;
+    if (_remainingUsers.isEmpty || _isProcessingSwipe) return;
+
+    setState(() {
+      _isProcessingSwipe = true;
+    });
 
     final user = _remainingUsers.first;
     final wasLiked = _status == CardStatus.like;
     ScaffoldMessenger.of(context).clearSnackBars();
+
     // ステータスをリセットする前に処理
     if (wasLiked) {
       // フォロー時のフィードバック
-
       final notifier = ref.read(followingListNotifierProvider.notifier);
       final isFollowing = notifier.isFollowing(user.userId);
       if (!isFollowing) {
@@ -187,18 +198,24 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
       }
     }
 
+    // 次のカードがアニメーションで前に移動する時間を確保
+    await Future.delayed(const Duration(milliseconds: 250));
+
     // カードを削除
     setState(() {
       _remainingUsers.removeAt(0);
+      _isProcessingSwipe = false;
     });
 
     // すべてのカードをスワイプし終わった場合
     if (_remainingUsers.isEmpty) {
       Future.delayed(const Duration(milliseconds: 300), () {
-        ref
-            .read(userCardStackProvider(_providerId).notifier)
-            .setCompleted(true);
-        _confettiController.play();
+        if (mounted) {
+          ref
+              .read(userCardStackProvider(_providerId).notifier)
+              .setCompleted(true);
+          _confettiController.play();
+        }
       });
     }
   }
@@ -303,6 +320,11 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
       } else {
         _status = CardStatus.idle; // わずかな移動では判定なし
       }
+
+      // カードの動きに応じて次のカードのスケールとオパシティを調整
+      // アニメーションウィジェットで使用するため不要になりました
+      // _nextCardScale = 0.9 + (min(_position.dx.abs(), 100) / 100) * 0.05;
+      // _nextCardOpacity = 0.6 + (min(_position.dx.abs(), 100) / 100) * 0.3;
     });
   }
 
@@ -361,117 +383,102 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
             children: [
               // 背景カード（次のカード）
               if (_remainingUsers.length > 1)
-                Positioned(
-                  child: Transform.scale(
-                    scale: 0.9,
-                    child: Opacity(
-                      opacity: 0.6,
-                      child: _buildCard(_remainingUsers[1], isBackground: true),
-                    ),
-                  ),
+                TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  tween: Tween<double>(
+                      begin: 0.9, end: _status != CardStatus.idle ? 0.95 : 0.9),
+                  builder: (context, scale, child) {
+                    return Transform.scale(
+                      scale: scale,
+                      child: TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOutCubic,
+                        tween: Tween<double>(
+                            begin: 0.6,
+                            end: _status != CardStatus.idle ? 0.9 : 0.6),
+                        builder: (context, opacity, _) {
+                          return Opacity(
+                            opacity: opacity,
+                            child: _buildCard(_remainingUsers[1],
+                                isBackground: true),
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
 
-              // メインカード - ドラッグ可能に
-              Positioned(
-                child: GestureDetector(
-                  onPanUpdate: _onPanUpdate,
-                  onPanEnd: _onPanEnd,
-                  child: Transform.translate(
-                    offset: _position,
-                    child: Transform.rotate(
-                      angle: _angle,
-                      child: Stack(
-                        children: [
-                          _buildCard(_remainingUsers[0]),
+              // アニメーションスペースホルダー（メイン処理中に表示）
+              if (_isProcessingSwipe && _remainingUsers.length > 1)
+                TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.easeOutCubic,
+                  tween: Tween<double>(begin: 0.95, end: 1.0),
+                  builder: (context, scale, child) {
+                    return Transform.scale(
+                      scale: scale,
+                      child: TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeOutCubic,
+                        tween: Tween<double>(begin: 0.9, end: 1.0),
+                        builder: (context, opacity, _) {
+                          return Opacity(
+                            opacity: opacity,
+                            child: _buildCard(_remainingUsers[1],
+                                isBackground: false),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
 
-                          // スワイプフィードバック
-                          if (_status != CardStatus.idle)
-                            AnimatedPositioned(
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeOutCubic,
-                              top: 40,
-                              right: _status == CardStatus.like ? 20 : null,
-                              left: _status == CardStatus.nope ? 20 : null,
-                              child: AnimatedOpacity(
+              // メインカード - ドラッグ可能
+              if (!_isProcessingSwipe)
+                Positioned(
+                  child: GestureDetector(
+                    onPanUpdate: _onPanUpdate,
+                    onPanEnd: _onPanEnd,
+                    child: Transform.translate(
+                      offset: _position,
+                      child: Transform.rotate(
+                        angle: _angle,
+                        child: Stack(
+                          children: [
+                            _buildCard(_remainingUsers[0]),
+
+                            // スワイプフィードバック
+                            if (_status != CardStatus.idle)
+                              AnimatedPositioned(
                                 duration: const Duration(milliseconds: 200),
-                                opacity: 1.0,
-                                curve: Curves.easeInOut,
-                                child: TweenAnimationBuilder<double>(
+                                curve: Curves.easeOutCubic,
+                                top: 40,
+                                right: _status == CardStatus.like ? 20 : null,
+                                left: _status == CardStatus.nope ? 20 : null,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 200),
+                                  opacity: 1.0,
+                                  curve: Curves.easeInOut,
+                                  child: TweenAnimationBuilder<double>(
                                     duration: const Duration(milliseconds: 300),
                                     tween: Tween<double>(begin: 0.8, end: 1.0),
                                     curve: Curves.elasticOut,
                                     builder: (context, value, child) {
                                       return Transform.scale(
                                         scale: value,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 16, vertical: 8),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                Colors.black.withOpacity(0.3),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            border: Border.all(
-                                              color: _status == CardStatus.like
-                                                  ? const Color(0xFF4ADE80)
-                                                      .withOpacity(0.8)
-                                                  : const Color(0xFFF87171)
-                                                      .withOpacity(0.8),
-                                              width: 1,
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color:
-                                                    _status == CardStatus.like
-                                                        ? const Color(0xFF4ADE80)
-                                                            .withOpacity(0.3)
-                                                        : const Color(0xFFF87171)
-                                                            .withOpacity(0.3),
-                                                blurRadius: 8,
-                                                spreadRadius: 0,
-                                              ),
-                                            ],
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                _status == CardStatus.like
-                                                    ? Icons
-                                                        .add_circle_outline_rounded
-                                                    : Icons
-                                                        .remove_circle_outline_rounded,
-                                                color:
-                                                    _status == CardStatus.like
-                                                        ? const Color(0xFF4ADE80)
-                                                        : const Color(0xFFF87171),
-                                                size: 18,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                _status == CardStatus.like
-                                                    ? 'FOLLOW'
-                                                    : 'SKIP',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 18,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                        child: _buildSwipeIndicator(),
                                       );
-                                    }),
+                                    },
+                                  ),
+                                ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -510,6 +517,55 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSwipeIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _status == CardStatus.like
+              ? const Color(0xFF4ADE80).withOpacity(0.8)
+              : const Color(0xFFF87171).withOpacity(0.8),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _status == CardStatus.like
+                ? const Color(0xFF4ADE80).withOpacity(0.3)
+                : const Color(0xFFF87171).withOpacity(0.3),
+            blurRadius: 8,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _status == CardStatus.like
+                ? Icons.add_circle_outline_rounded
+                : Icons.remove_circle_outline_rounded,
+            color: _status == CardStatus.like
+                ? const Color(0xFF4ADE80)
+                : const Color(0xFFF87171),
+            size: 18,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            _status == CardStatus.like ? 'FOLLOW' : 'SKIP',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -630,76 +686,81 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
   }
 
   Widget _buildCard(UserAccount user, {bool isBackground = false}) {
-    return GestureDetector(
-      onTap: () {
-        ref.read(navigationRouterProvider(context)).goToProfile(user);
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.66,
-        decoration: BoxDecoration(
-          color: ThemeColor.accent,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: isBackground
-              ? []
-              : [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
+    return AnimatedOpacity(
+      duration: _cardAnimationDuration,
+      opacity: _isNewCardAnimating && !isBackground ? 0.95 : 1.0,
+      child: AnimatedScale(
+        duration: _cardAnimationDuration,
+        scale: _isNewCardAnimating && !isBackground ? 0.95 : 1.0,
+        child: GestureDetector(
+          onTap: () {
+            ref.read(navigationRouterProvider(context)).goToProfile(user);
+          },
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.66,
+            decoration: BoxDecoration(
+              color: ThemeColor.accent,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: isBackground
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: CachedImage.usersCard(
+                      user.imageUrl ?? '',
+                      //fit: BoxFit.cover,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.3),
+                                offset: const Offset(0, 2),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Gap(8),
+                        Text(
+                          user.aboutMe,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white70,
+                            height: 1.5,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: CachedImage.usersCard(
-                  user.imageUrl ?? '',
-                  //fit: BoxFit.cover,
-                ),
               ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user.name,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.3),
-                            offset: const Offset(0, 2),
-                            blurRadius: 4,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Gap(8),
-                    Text(
-                      user.aboutMe,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                        height: 1.5,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    // const Gap(16),
-                    // _buildUserStats(user),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

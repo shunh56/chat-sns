@@ -1,5 +1,5 @@
 // lib/providers/shared_preferences_provider.dart
-import 'package:app/presentation/pages/flows/onboarding/onboarding_state.dart';
+import 'package:app/new/presentation/pages/onboarding/onboarding_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

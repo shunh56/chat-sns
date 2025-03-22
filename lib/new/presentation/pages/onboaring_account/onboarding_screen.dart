@@ -1,9 +1,9 @@
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/pages/onboarding/providers/providers.dart';
-import 'package:app/presentation/pages/onboarding/screens/account_confiirmation_screen.dart';
-import 'package:app/presentation/pages/onboarding/screens/image_input_screen.dart';
-import 'package:app/presentation/pages/onboarding/screens/name_input_screen.dart';
-import 'package:app/presentation/pages/onboarding/screens/username_input_screen.dart';
+import 'package:app/new/presentation/pages/onboaring_account/account_confiirmation_screen.dart';
+import 'package:app/new/presentation/pages/onboaring_account/image_input_screen.dart';
+import 'package:app/new/presentation/pages/onboaring_account/name_input_screen.dart';
+import 'package:app/new/presentation/pages/onboaring_account/username_input_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

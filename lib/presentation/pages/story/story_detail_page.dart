@@ -16,11 +16,11 @@ class StoryDetailPage extends ConsumerStatefulWidget {
   final int initialIndex;
 
   const StoryDetailPage({
-    Key? key,
+    super.key,
     required this.story,
     required this.allStories,
     required this.initialIndex,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<StoryDetailPage> createState() => _StoryDetailPageState();
@@ -52,7 +52,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
       _recordView(_stories[_currentIndex]);
       
       // 自動的にコントロールを隠す
-      Future.delayed(Duration(seconds: 3), () {
+      Future.delayed(const Duration(seconds: 3), () {
         if (!_userInteracting && mounted) {
           setState(() {
             _showControls = false;
@@ -179,7 +179,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
             _userInteracting = false;
             
             // 3秒後にコントロールを自動的に隠す
-            Future.delayed(Duration(seconds: 3), () {
+            Future.delayed(const Duration(seconds: 3), () {
               if (!_userInteracting && mounted) {
                 setState(() {
                   _showControls = false;
@@ -208,7 +208,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
             // オーバーレイUI（上部）
             AnimatedOpacity(
               opacity: _showControls ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 200),
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -236,12 +236,12 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                             GestureDetector(
                               onTap: () => Navigator.pop(context),
                               child: Container(
-                                padding: EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withOpacity(0.5),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.arrow_back,
                                   color: Colors.white,
                                   size: 20,
@@ -260,14 +260,14 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                             
                             // ストーリー数表示
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.5),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 "${_currentIndex + 1}/${_stories.length}",
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
@@ -282,26 +282,26 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                       if (currentStory.tags.isNotEmpty)
                         Container(
                           height: 36,
-                          margin: EdgeInsets.only(bottom: 8),
+                          margin: const EdgeInsets.only(bottom: 8),
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
                             itemCount: currentStory.tags.length,
                             itemBuilder: (context, index) {
                               return Padding(
-                                padding: EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.only(right: 8),
                                 child: FutureBuilder<Tag?>(
                                   future: ref.read(getTagsUsecaseProvider).getTagById(
                                     currentStory.tags[index]
                                   ),
                                   builder: (context, snapshot) {
                                     if (!snapshot.hasData) {
-                                      return SizedBox.shrink();
+                                      return const SizedBox.shrink();
                                     }
                                     
                                     final tag = snapshot.data!;
                                     return Container(
-                                      padding: EdgeInsets.symmetric(
+                                      padding: const EdgeInsets.symmetric(
                                         horizontal: 12,
                                         vertical: 6,
                                       ),
@@ -315,7 +315,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                                       ),
                                       child: Text(
                                         "#${tag.name}",
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.blue,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
@@ -337,7 +337,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
             // オーバーレイUI（下部）
             AnimatedOpacity(
               opacity: _showControls ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 200),
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
@@ -369,7 +369,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                                   fontSize: 16,
                                   shadows: [
                                     Shadow(
-                                      offset: Offset(1, 1),
+                                      offset: const Offset(1, 1),
                                       blurRadius: 3,
                                       color: Colors.black.withOpacity(0.5),
                                     ),
@@ -400,7 +400,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                                 onTap: () {
                                   // コメント機能の実装
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('コメント機能は実装中です')),
+                                    const SnackBar(content: Text('コメント機能は実装中です')),
                                   );
                                 },
                               ),
@@ -412,7 +412,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                                 onTap: () {
                                   // シェア機能の実装
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('シェア機能は実装中です')),
+                                    const SnackBar(content: Text('シェア機能は実装中です')),
                                   );
                                 },
                               ),
@@ -432,15 +432,15 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                               padding: const EdgeInsets.only(top: 16),
                               child: Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.location_on,
                                     color: Colors.white,
                                     size: 16,
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Text(
                                     currentStory.location!,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 14,
                                     ),
@@ -462,7 +462,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                                       fontSize: 12,
                                     ),
                                   ),
-                                  SizedBox(height: 4),
+                                  const SizedBox(height: 4),
                                   Icon(
                                     Icons.keyboard_arrow_up,
                                     color: Colors.white.withOpacity(0.7),
@@ -483,7 +483,7 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
             // サイドメニュー（右側）- TikTokスタイル
             AnimatedOpacity(
               opacity: _showControls ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 200),
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Padding(
@@ -497,35 +497,35 @@ class _StoryDetailPageState extends ConsumerState<StoryDetailPage> {
                         onTap: () => _toggleLike(currentStory),
                         isActive: currentStory.likeCount > 0,
                       ),
-                      SizedBox(height:
+                      const SizedBox(height:
   16),
                       _SideActionButton(
                         icon: Icons.chat_bubble,
                         count: '0',
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('コメント機能は実装中です')),
+                            const SnackBar(content: Text('コメント機能は実装中です')),
                           );
                         },
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       _SideActionButton(
                         icon: Icons.bookmark,
                         count: currentStory.isHighlighted ? 'ブックマーク中' : '',
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('ブックマーク機能は実装中です')),
+                            const SnackBar(content: Text('ブックマーク機能は実装中です')),
                           );
                         },
                         isActive: currentStory.isHighlighted,
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       _SideActionButton(
                         icon: Icons.share,
                         count: '',
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('シェア機能は実装中です')),
+                            const SnackBar(content: Text('シェア機能は実装中です')),
                           );
                         },
                       ),
@@ -547,10 +547,9 @@ class _StoryContent extends StatefulWidget {
   final VoidCallback onDoubleTap;
 
   const _StoryContent({
-    Key? key,
     required this.story,
     required this.onDoubleTap,
-  }) : super(key: key);
+  });
 
   @override
   State<_StoryContent> createState() => _StoryContentState();
@@ -565,7 +564,7 @@ class _StoryContentState extends State<_StoryContent> with SingleTickerProviderS
     super.initState();
     _heartAnimController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 800),
     );
     _heartAnimController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -622,7 +621,7 @@ class _StoryContentState extends State<_StoryContent> with SingleTickerProviderS
                     );
                   },
                   errorBuilder: (context, error, stackTrace) {
-                    return Center(
+                    return const Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -656,7 +655,7 @@ class _StoryContentState extends State<_StoryContent> with SingleTickerProviderS
                 color: Colors.black.withOpacity(0.5),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.play_arrow,
                 color: Colors.white,
                 size: 40,
@@ -678,10 +677,10 @@ class _StoryContentState extends State<_StoryContent> with SingleTickerProviderS
                     opacity: Tween<double>(begin: 1.0, end: 0.0)
                         .animate(CurvedAnimation(
                           parent: _heartAnimController,
-                          curve: Interval(0.5, 1.0),
+                          curve: const Interval(0.5, 1.0),
                         ))
                         .value,
-                    child: Icon(
+                    child: const Icon(
                       Icons.favorite,
                       color: Colors.red,
                       size: 100,
@@ -705,13 +704,12 @@ class _InteractionButton extends StatelessWidget {
   final bool isLoading;
 
   const _InteractionButton({
-    Key? key,
     required this.icon,
     required this.label,
     this.color = Colors.white,
     this.onTap,
     this.isLoading = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -719,7 +717,7 @@ class _InteractionButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -736,7 +734,7 @@ class _InteractionButton extends StatelessWidget {
                     icon,
                     color: color,
                   ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
@@ -759,12 +757,11 @@ class _SideActionButton extends StatelessWidget {
   final bool isActive;
 
   const _SideActionButton({
-    Key? key,
     required this.icon,
     required this.count,
     required this.onTap,
     this.isActive = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -792,7 +789,7 @@ class _SideActionButton extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               count,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,

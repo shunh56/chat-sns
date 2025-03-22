@@ -3,11 +3,8 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/data/providers/tag_providers.dart';
-import 'package:app/domain/usecases/tag/upload_initial_tags_usecase.dart';
-import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/story/story_home_page.dart';
 import 'package:app/presentation/providers/tag/tag_state.dart';
-import 'package:app/temp/sample_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -48,7 +45,7 @@ class _PopularHashtagsSectionState
 
     // タグの状態に基づいて表示
     if (tagState.status == TagStatus.loading) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     // 使用回数に基づいて人気のタグを取得
@@ -79,7 +76,7 @@ class _PopularHashtagsSectionState
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => StoryHomePage(),
+                      builder: (_) => const StoryHomePage(),
                     ),
                   );
                 },
@@ -95,7 +92,7 @@ class _PopularHashtagsSectionState
           ),
           const Gap(16),
           // 新しいタグ表示UIの実装（背景画像付き）
-          Container(
+          SizedBox(
             height: 180,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -119,14 +116,14 @@ class _PopularHashtagsSectionState
                   },
                   child: Container(
                     width: 150,
-                    margin: EdgeInsets.only(right: 16),
+                    margin: const EdgeInsets.only(right: 16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.2),
                           blurRadius: 8,
-                          offset: Offset(0, 4),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -141,14 +138,14 @@ class _PopularHashtagsSectionState
                             width: 150,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: Color(0xFF2A2A2A),
-                              child: Center(
+                              color: const Color(0xFF2A2A2A),
+                              child: const Center(
                                 child: CircularProgressIndicator(),
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
-                              color: Color(0xFF2A2A2A),
-                              child: Icon(Icons.error, color: Colors.white54),
+                              color: const Color(0xFF2A2A2A),
+                              child: const Icon(Icons.error, color: Colors.white54),
                             ),
                           ),
                         ),
@@ -185,16 +182,16 @@ class _PopularHashtagsSectionState
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               // 投稿数とカテゴリ
                               Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.photo_library,
                                     color: Colors.white70,
                                     size: 14,
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Text(
                                     "${tag.usageCount} 投稿",
                                     style: textStyle.w500(
@@ -205,9 +202,9 @@ class _PopularHashtagsSectionState
                                 ],
                               ),
                               if (tag.category != null) ...[
-                                SizedBox(height: 8),
+                                const SizedBox(height: 8),
                                 Container(
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
                                     vertical: 4,
                                   ),

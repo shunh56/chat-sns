@@ -55,7 +55,7 @@ class StoryGenerator {
   // ランダムなストーリーを生成する関数
   Story _generateRandomStory(String userId) {
     final random = Random();
-    final uuid = Uuid();
+    const uuid = Uuid();
     final storyId = uuid.v4();
     
     // ランダムなシード値を生成
@@ -147,7 +147,7 @@ class StoryGenerator {
         
         // 連続アップロードによるレート制限を避けるための遅延
         if (i < count - 1) {
-          await Future.delayed(Duration(milliseconds: 200));
+          await Future.delayed(const Duration(milliseconds: 200));
         }
       } catch (e) {
         print('ストーリーのアップロードに失敗: $e');
