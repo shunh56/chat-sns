@@ -87,12 +87,19 @@ async function main() {
 async function handlePullRequest(owner, repo, eventData) {
   const pullNumber = eventData.pull_request.number;
   console.log(`PR #${pullNumber} をレビューします`);
-  
+
   // PR情報をデバッグ出力
-  console.log('PR情報:', JSON.stringify({
-    number: pullNumber,
-    head_sha: eventData.pull_request.head.sha
-  }, null, 2));
+  console.log(
+    "PR情報:",
+    JSON.stringify(
+      {
+        number: pullNumber,
+        head_sha: eventData.pull_request.head.sha,
+      },
+      null,
+      2
+    )
+  );
 
   // PRの変更ファイルを取得
   const { data: files } = await octokit.pulls.listFiles({
@@ -112,17 +119,24 @@ async function handlePullRequest(owner, repo, eventData) {
     console.log("レビュー対象のファイルが見つかりませんでした");
     return;
   }
-  
+
   // ファイルリストをデバッグ出力
-  console.log('ファイルリスト:', JSON.stringify(filesToReview.map(f => f.filename), null, 2));
+  console.log(
+    "ファイルリスト:",
+    JSON.stringify(
+      filesToReview.map((f) => f.filename),
+      null,
+      2
+    )
+  );
 
   // 各ファイルの内容を取得してレビュー
   let reviewedFiles = [];
-  
+
   for (const file of filesToReview) {
     try {
       console.log(`ファイル ${file.filename} の内容を取得中...`);
-      
+
       // ファイルの内容を取得
       const { data: fileContent } = await octokit.repos.getContent({
         owner,
@@ -130,21 +144,29 @@ async function handlePullRequest(owner, repo, eventData) {
         path: file.filename,
         ref: eventData.pull_request.head.sha,
       });
-      
+
       // fileContentの構造をデバッグ出力
-      console.log(`ファイル ${file.filename} のコンテンツ構造:`, 
-                typeof fileContent, 
-                fileContent ? (fileContent.content ? "content有り" : "content無し") : "undefined");
-      
+      console.log(
+        `ファイル ${file.filename} のコンテンツ構造:`,
+        typeof fileContent,
+        fileContent
+          ? fileContent.content
+            ? "content有り"
+            : "content無し"
+          : "undefined"
+      );
+
       // 安全なデコード処理
-      let content = '';
-      if (typeof fileContent === 'string') {
+      let content = "";
+      if (typeof fileContent === "string") {
         content = fileContent;
       } else if (fileContent && fileContent.content) {
         try {
           content = Buffer.from(fileContent.content, "base64").toString();
         } catch (decodeError) {
-          console.error(`ファイル ${file.filename} のデコード中にエラー: ${decodeError.message}`);
+          console.error(
+            `ファイル ${file.filename} のデコード中にエラー: ${decodeError.message}`
+          );
           continue;
         }
       } else {
@@ -169,7 +191,10 @@ async function handlePullRequest(owner, repo, eventData) {
       console.log(`ファイル ${file.filename} のレビューを投稿しました`);
       reviewedFiles.push(file.filename);
     } catch (error) {
-      console.error(`ファイル ${file.filename} の処理中にエラーが発生しました:`, error.message);
+      console.error(
+        `ファイル ${file.filename} の処理中にエラーが発生しました:`,
+        error.message
+      );
     }
   }
 
@@ -184,7 +209,10 @@ async function handlePullRequest(owner, repo, eventData) {
         body: `## AIレビュー要約\n\n${summary}`,
       });
     } catch (error) {
-      console.error('要約コメントの投稿中にエラーが発生しました:', error.message);
+      console.error(
+        "要約コメントの投稿中にエラーが発生しました:",
+        error.message
+      );
     }
   }
 }
@@ -217,7 +245,7 @@ async function handleCommit(owner, repo) {
   for (const file of filesToReview) {
     try {
       console.log(`ファイル ${file.filename} の内容を取得中...`);
-      
+
       // ファイルの内容を取得
       const { data: fileContent } = await octokit.repos.getContent({
         owner,
@@ -225,33 +253,46 @@ async function handleCommit(owner, repo) {
         path: file.filename,
         ref: GITHUB_SHA,
       });
-      
+
       // fileContentの構造をデバッグ出力
-      console.log(`ファイル ${file.filename} のコンテンツ構造:`, 
-                typeof fileContent, 
-                fileContent ? (fileContent.content ? "content有り" : "content無し") : "undefined");
-      
+      console.log(
+        `ファイル ${file.filename} のコンテンツ構造:`,
+        typeof fileContent,
+        fileContent
+          ? fileContent.content
+            ? "content有り"
+            : "content無し"
+          : "undefined"
+      );
+
       // 安全なデコード処理
       if (!fileContent || !fileContent.content) {
-        console.log(`\n⚠️ ${file.filename} の内容を取得できないかフォーマットが不明です\n`);
+        console.log(
+          `\n⚠️ ${file.filename} の内容を取得できないかフォーマットが不明です\n`
+        );
         continue;
       }
 
       try {
         // Base64デコード
         const content = Buffer.from(fileContent.content, "base64").toString();
-        
+
         // AIにレビューを依頼
         const review = await getAIReview(file.filename, content);
-        
+
         console.log(`\n===== ${file.filename} のレビュー =====\n`);
         console.log(review);
         console.log("\n=====================================\n");
       } catch (decodeError) {
-        console.error(`ファイル ${file.filename} のデコード中にエラー: ${decodeError.message}`);
+        console.error(
+          `ファイル ${file.filename} のデコード中にエラー: ${decodeError.message}`
+        );
       }
     } catch (error) {
-      console.error(`ファイル ${file.filename} の処理中にエラーが発生しました:`, error.message);
+      console.error(
+        `ファイル ${file.filename} の処理中にエラーが発生しました:`,
+        error.message
+      );
     }
   }
 }
@@ -301,7 +342,7 @@ async function getAIReview(filename, content) {
 
   try {
     console.log(`${filename} のレビューリクエスト送信中...`);
-    
+
     const response = await axios.post(
       OPENROUTER_API_URL,
       {
@@ -328,8 +369,10 @@ async function getAIReview(filename, content) {
         },
       }
     );
-    
-    console.log(`${filename} のAPIレスポンス受信: ステータス ${response.status}`);
+
+    console.log(
+      `${filename} のAPIレスポンス受信: ステータス ${response.status}`
+    );
 
     // レスポンスの構造を検証
     if (
@@ -380,15 +423,16 @@ async function getAISummary(filenames) {
   if (hasDartFiles || hasPubspecFile) {
     // Flutterプロジェクトの場合、特化したプロンプトを使用
     systemPrompt =
-      "あなたは優秀なFlutter/Dart開発者およびコードレビュアーです。このプルリクエストの全体的な評価を行い、以下の観点から分析してください：\n" +
-      "- 全体的なコード品質とFlutterのベストプラクティスへの準拠\n" +
-      "- アーキテクチャと設計パターンの一貫性（MVVM, Clean Architectureなど）\n" +
-      "- パフォーマンス最適化の機会\n" +
-      "- コード再利用性と保守性\n" +
-      "- UI/UXの一貫性と改善点\n" +
-      "- テスト戦略と改善点\n" +
-      "- セキュリティの懸念事項\n\n" +
-      "この変更がプロジェクト全体に与える影響と、優先すべき改善点について言及してください。";
+      "あなたは優秀なFlutter/Dart開発者およびコードレビュアーです。総評に関しては2行(約50~100字程度)で作成してください。このプルリクエストのレビューを行い、以下の観点から分析してください：\n" +
+      "- クリティカルな修正点（バグ、セキュリティリスク、クラッシュの可能性）\n" +
+      "- 非効率なコードやパフォーマンス問題\n" +
+      "- アーキテクチャの一貫性（MVVM, Clean Architecture など）\n" +
+      "- コードの保守性・再利用性の向上\n" +
+      "- UI/UXの明らかな問題点\n" +
+      "- テストの不備やカバレッジ不足\n\n" +
+      "不要な冗長な指摘は避け、影響度の高い問題を優先してください。\n" +
+      "フィードバックは簡潔に（短文・箇条書き推奨）。\n" +
+      "修正すべき点を優先度順にリスト化し、プロジェクト全体への影響も言及してください。";
   } else {
     // 一般的なシステムプロンプト
     systemPrompt =
@@ -397,7 +441,7 @@ async function getAISummary(filenames) {
 
   try {
     console.log("PR全体要約のリクエスト送信中...");
-    
+
     const response = await axios.post(
       OPENROUTER_API_URL,
       {
@@ -426,7 +470,7 @@ async function getAISummary(filenames) {
         },
       }
     );
-    
+
     console.log("PR全体要約のAPIレスポンス受信: ステータス", response.status);
 
     // レスポンスの構造を検証
