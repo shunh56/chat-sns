@@ -5,6 +5,7 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/community.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/pages/search_screen/widgets/popular_hashtag_section.dart';
 import 'package:app/presentation/phase_01/community_detail_screen.dart';
 import 'package:app/presentation/phase_01/search_params_screen.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
@@ -96,7 +97,7 @@ class SearchUsersScreen extends ConsumerWidget {
   }
 }
 
-class PopularHashtagsSection extends ConsumerWidget {
+/*class PopularHashtagsSection extends ConsumerWidget {
   const PopularHashtagsSection({super.key});
 
   @override
@@ -121,11 +122,21 @@ class PopularHashtagsSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "注目のハッシュタグ",
-            style: textStyle.w700(
-              fontSize: 20,
-              color: ThemeColor.white,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StoryPage(),
+                ),
+              );
+            },
+            child: Text(
+              "注目のハッシュタグ",
+              style: textStyle.w700(
+                fontSize: 20,
+                color: ThemeColor.white,
+              ),
             ),
           ),
           const Gap(16),
@@ -161,7 +172,7 @@ class PopularHashtagsSection extends ConsumerWidget {
     );
   }
 }
-
+ */
 // 新規：おすすめユーザーセクション
 class RecommendedUsersSection extends ConsumerWidget {
   const RecommendedUsersSection({super.key});
@@ -181,7 +192,7 @@ class RecommendedUsersSection extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "おすすめユーザー",
+                "おすすめのユーザー",
                 style: textStyle.w700(
                   fontSize: 20,
                   color: ThemeColor.white,
@@ -196,7 +207,8 @@ class RecommendedUsersSection extends ConsumerWidget {
               usersList.removeWhere((user) => user.isMe);
               usersList
                   .removeWhere((user) => notifier.isFollowing(user.userId));
-
+              usersList.removeWhere(
+                  (user) => user.name == "null" || user.username == "null");
               final displayUsers =
                   usersList.length > 6 ? usersList.sublist(0, 6) : usersList;
 
@@ -217,7 +229,7 @@ class RecommendedUsersSection extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.people_alt_outlined,
                         size: 48,
                         color: ThemeColor.subText,
@@ -306,8 +318,8 @@ class UsersFeed extends ConsumerWidget {
     final onlineUsersAsyncValue = ref.watch(recentUsersNotifierProvider);
     final width = themeSize.screenWidth * 0.42;
     final height = width * 1.3;
-    final titleSize = 16.0;
-    final textSize = 14.0;
+    const titleSize = 16.0;
+    const textSize = 14.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -338,7 +350,7 @@ class UsersFeed extends ConsumerWidget {
         SizedBox(
           height: height,
           child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             scrollDirection: Axis.horizontal,
             children: [
 // newUsersのカードスタック
@@ -398,7 +410,7 @@ class UsersFeed extends ConsumerWidget {
                                   color: ThemeColor.white,
                                 ),
                               ),
-                              Gap(8),
+                              const Gap(8),
                               Text(
                                 "登録したばかりで\nまだ慣れていません",
                                 textAlign: TextAlign.center,
@@ -407,9 +419,9 @@ class UsersFeed extends ConsumerWidget {
                                   color: ThemeColor.white,
                                 ),
                               ),
-                              Gap(16),
+                              const Gap(16),
                               Container(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                   vertical: 6,
                                   horizontal: 32,
                                 ),
@@ -427,7 +439,7 @@ class UsersFeed extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              Gap(12),
+                              const Gap(12),
                             ],
                           ),
                         ],
@@ -514,7 +526,7 @@ class UsersFeed extends ConsumerWidget {
                                   color: ThemeColor.white,
                                 ),
                               ),
-                              Gap(8),
+                              const Gap(8),
                               Text(
                                 "最近開いた友達",
                                 textAlign: TextAlign.center,
@@ -523,9 +535,9 @@ class UsersFeed extends ConsumerWidget {
                                   color: ThemeColor.white,
                                 ),
                               ),
-                              Gap(16),
+                              const Gap(16),
                               Container(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                   vertical: 6,
                                   horizontal: 32,
                                 ),
@@ -543,7 +555,7 @@ class UsersFeed extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              Gap(12),
+                              const Gap(12),
                             ],
                           ),
                         ],

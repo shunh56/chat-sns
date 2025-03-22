@@ -275,7 +275,7 @@ class UserTile extends ConsumerWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            ref.read(navigationRouterProvider(context)).goToChat(user);
+            ref.read(navigationRouterProvider(context)).goToProfile(user);
           },
           child: Container(
             padding: const EdgeInsets.all(16),

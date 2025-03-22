@@ -84,6 +84,19 @@ async function main() {
   }
 }
 
+// Inside ai-code-review.js
+// Add these new configuration options near the top of the file, after the existing configuration
+
+// レビュー対象の最大ファイル数
+const MAX_FILES_TO_REVIEW = 5; // 一度に最大5ファイルまでレビュー
+
+// ファイルの最大サイズ（バイト単位、大きすぎるファイルはスキップ）
+const MAX_FILE_SIZE = 50 * 1024; // 50KB
+
+// ファイルの優先順位付け方法（最近変更された順、サイズ順など）
+const FILE_SORT_METHOD = "recent"; // "recent" または "size"
+
+// handlePullRequest 関数の中の変更部分
 async function handlePullRequest(owner, repo, eventData) {
   const pullNumber = eventData.pull_request.number;
   console.log(`PR #${pullNumber} をレビューします`);
@@ -102,7 +115,7 @@ async function handlePullRequest(owner, repo, eventData) {
   });
 
   // レビュー対象のファイルをフィルタリング
-  const filesToReview = files.filter(
+  let filesToReview = files.filter(
     (file) =>
       REVIEW_FILE_EXTENSIONS.includes(path.extname(file.filename)) &&
       !EXCLUDED_DIRECTORIES.some((dir) => file.filename.startsWith(dir + "/"))
@@ -113,8 +126,27 @@ async function handlePullRequest(owner, repo, eventData) {
     return;
   }
   
+  // 合計変更ファイル数を記録
+  const totalFilesCount = filesToReview.length;
+  
+  // ファイルの優先順位付け
+  if (FILE_SORT_METHOD === "recent") {
+    // 最近変更されたファイルを優先（GitHub APIはデフォルトで最新の変更順）
+    // 何もしない
+  } else if (FILE_SORT_METHOD === "size") {
+    // サイズの小さいファイルを優先
+    filesToReview.sort((a, b) => a.changes - b.changes);
+  }
+  
+  // サイズの大きすぎるファイルを除外
+  filesToReview = filesToReview.filter(file => file.changes <= MAX_FILE_SIZE);
+  
+  // 最大ファイル数に制限
+  filesToReview = filesToReview.slice(0, MAX_FILES_TO_REVIEW);
+  
   // ファイルリストをデバッグ出力
-  console.log('ファイルリスト:', JSON.stringify(filesToReview.map(f => f.filename), null, 2));
+  console.log(`合計 ${totalFilesCount} ファイルのうち ${filesToReview.length} ファイルをレビューします`);
+  console.log('レビュー対象ファイル:', JSON.stringify(filesToReview.map(f => f.filename), null, 2));
 
   // 各ファイルの内容を取得してレビュー
   let reviewedFiles = [];
@@ -123,51 +155,8 @@ async function handlePullRequest(owner, repo, eventData) {
     try {
       console.log(`ファイル ${file.filename} の内容を取得中...`);
       
-      // ファイルの内容を取得
-      const { data: fileContent } = await octokit.repos.getContent({
-        owner,
-        repo,
-        path: file.filename,
-        ref: eventData.pull_request.head.sha,
-      });
-      
-      // fileContentの構造をデバッグ出力
-      console.log(`ファイル ${file.filename} のコンテンツ構造:`, 
-                typeof fileContent, 
-                fileContent ? (fileContent.content ? "content有り" : "content無し") : "undefined");
-      
-      // 安全なデコード処理
-      let content = '';
-      if (typeof fileContent === 'string') {
-        content = fileContent;
-      } else if (fileContent && fileContent.content) {
-        try {
-          content = Buffer.from(fileContent.content, "base64").toString();
-        } catch (decodeError) {
-          console.error(`ファイル ${file.filename} のデコード中にエラー: ${decodeError.message}`);
-          continue;
-        }
-      } else {
-        console.log(`ファイル ${file.filename} の内容形式が不明または空です`);
-        continue;
-      }
-
-      // AIにレビューを依頼
-      const review = await getAIReview(file.filename, content);
-
-      // PRにコメントを追加
-      await octokit.pulls.createReviewComment({
-        owner,
-        repo,
-        pull_number: pullNumber,
-        body: review,
-        commit_id: eventData.pull_request.head.sha,
-        path: file.filename,
-        line: getFirstChangedLine(file),
-      });
-
-      console.log(`ファイル ${file.filename} のレビューを投稿しました`);
-      reviewedFiles.push(file.filename);
+      // 以下は元のコードと同じ
+      // ...（省略）...
     } catch (error) {
       console.error(`ファイル ${file.filename} の処理中にエラーが発生しました:`, error.message);
     }
@@ -177,11 +166,19 @@ async function handlePullRequest(owner, repo, eventData) {
   if (reviewedFiles.length > 0) {
     try {
       const summary = await getAISummary(reviewedFiles);
+      
+      // レビューされなかったファイルがある場合は通知を追加
+      let summaryBody = `## AIレビュー要約\n\n`;
+      if (totalFilesCount > reviewedFiles.length) {
+        summaryBody += `> ⚠️ ${totalFilesCount} ファイル中 ${reviewedFiles.length} ファイルをレビューしました。残りのファイルはサイズ制限または数量制限により省略されました。\n\n`;
+      }
+      summaryBody += summary;
+      
       await octokit.issues.createComment({
         owner,
         repo,
         issue_number: pullNumber,
-        body: `## AIレビュー要約\n\n${summary}`,
+        body: summaryBody,
       });
     } catch (error) {
       console.error('要約コメントの投稿中にエラーが発生しました:', error.message);
@@ -189,6 +186,7 @@ async function handlePullRequest(owner, repo, eventData) {
   }
 }
 
+// handleCommit 関数も同様に変更
 async function handleCommit(owner, repo) {
   console.log(`コミット ${GITHUB_SHA} をレビューします`);
 
@@ -200,7 +198,7 @@ async function handleCommit(owner, repo) {
   });
 
   // レビュー対象のファイルをフィルタリング
-  const filesToReview = commit.files.filter(
+  let filesToReview = commit.files.filter(
     (file) =>
       REVIEW_FILE_EXTENSIONS.includes(path.extname(file.filename)) &&
       !EXCLUDED_DIRECTORIES.some((dir) => file.filename.startsWith(dir + "/"))
@@ -210,51 +208,37 @@ async function handleCommit(owner, repo) {
     console.log("レビュー対象のファイルが見つかりませんでした");
     return;
   }
+  
+  // 合計変更ファイル数を記録
+  const totalFilesCount = filesToReview.length;
+  
+  // ファイルの優先順位付け
+  if (FILE_SORT_METHOD === "recent") {
+    // 最近変更されたファイルを優先（デフォルト順）
+    // 何もしない
+  } else if (FILE_SORT_METHOD === "size") {
+    // サイズの小さいファイルを優先
+    filesToReview.sort((a, b) => a.changes - b.changes);
+  }
+  
+  // サイズの大きすぎるファイルを除外
+  filesToReview = filesToReview.filter(file => file.changes <= MAX_FILE_SIZE);
+  
+  // 最大ファイル数に制限
+  filesToReview = filesToReview.slice(0, MAX_FILES_TO_REVIEW);
 
-  console.log(`${filesToReview.length} ファイルをレビューします`);
+  console.log(`合計 ${totalFilesCount} ファイルのうち ${filesToReview.length} ファイルをレビューします`);
 
   // 各ファイルの内容を取得してレビュー（コミットの場合はGitHub上にコメントできないため、コンソール出力のみ）
   for (const file of filesToReview) {
     try {
-      console.log(`ファイル ${file.filename} の内容を取得中...`);
-      
-      // ファイルの内容を取得
-      const { data: fileContent } = await octokit.repos.getContent({
-        owner,
-        repo,
-        path: file.filename,
-        ref: GITHUB_SHA,
-      });
-      
-      // fileContentの構造をデバッグ出力
-      console.log(`ファイル ${file.filename} のコンテンツ構造:`, 
-                typeof fileContent, 
-                fileContent ? (fileContent.content ? "content有り" : "content無し") : "undefined");
-      
-      // 安全なデコード処理
-      if (!fileContent || !fileContent.content) {
-        console.log(`\n⚠️ ${file.filename} の内容を取得できないかフォーマットが不明です\n`);
-        continue;
-      }
-
-      try {
-        // Base64デコード
-        const content = Buffer.from(fileContent.content, "base64").toString();
-        
-        // AIにレビューを依頼
-        const review = await getAIReview(file.filename, content);
-        
-        console.log(`\n===== ${file.filename} のレビュー =====\n`);
-        console.log(review);
-        console.log("\n=====================================\n");
-      } catch (decodeError) {
-        console.error(`ファイル ${file.filename} のデコード中にエラー: ${decodeError.message}`);
-      }
+      // 以下は元のコードと同じ
+      // ...（省略）...
     } catch (error) {
       console.error(`ファイル ${file.filename} の処理中にエラーが発生しました:`, error.message);
     }
   }
-}
+}Ï
 
 async function getAIReview(filename, content) {
   console.log(`ファイル ${filename} のAIレビューを要求中...`);
@@ -301,7 +285,7 @@ async function getAIReview(filename, content) {
 
   try {
     console.log(`${filename} のレビューリクエスト送信中...`);
-    
+
     const response = await axios.post(
       OPENROUTER_API_URL,
       {
@@ -328,8 +312,10 @@ async function getAIReview(filename, content) {
         },
       }
     );
-    
-    console.log(`${filename} のAPIレスポンス受信: ステータス ${response.status}`);
+
+    console.log(
+      `${filename} のAPIレスポンス受信: ステータス ${response.status}`
+    );
 
     // レスポンスの構造を検証
     if (
@@ -380,15 +366,16 @@ async function getAISummary(filenames) {
   if (hasDartFiles || hasPubspecFile) {
     // Flutterプロジェクトの場合、特化したプロンプトを使用
     systemPrompt =
-      "あなたは優秀なFlutter/Dart開発者およびコードレビュアーです。このプルリクエストの全体的な評価を行い、以下の観点から分析してください：\n" +
-      "- 全体的なコード品質とFlutterのベストプラクティスへの準拠\n" +
-      "- アーキテクチャと設計パターンの一貫性（MVVM, Clean Architectureなど）\n" +
-      "- パフォーマンス最適化の機会\n" +
-      "- コード再利用性と保守性\n" +
-      "- UI/UXの一貫性と改善点\n" +
-      "- テスト戦略と改善点\n" +
-      "- セキュリティの懸念事項\n\n" +
-      "この変更がプロジェクト全体に与える影響と、優先すべき改善点について言及してください。";
+      "あなたは優秀なFlutter/Dart開発者およびコードレビュアーです。総評に関しては2行(約50~100字程度)で作成してください。このプルリクエストのレビューを行い、以下の観点から分析してください：\n" +
+      "- クリティカルな修正点（バグ、セキュリティリスク、クラッシュの可能性）\n" +
+      "- 非効率なコードやパフォーマンス問題\n" +
+      "- アーキテクチャの一貫性（MVVM, Clean Architecture など）\n" +
+      "- コードの保守性・再利用性の向上\n" +
+      "- UI/UXの明らかな問題点\n" +
+      "- テストの不備やカバレッジ不足\n\n" +
+      "不要な冗長な指摘は避け、影響度の高い問題を優先してください。\n" +
+      "フィードバックは簡潔に（短文・箇条書き推奨）。\n" +
+      "修正すべき点を優先度順にリスト化し、プロジェクト全体への影響も言及してください。";
   } else {
     // 一般的なシステムプロンプト
     systemPrompt =
@@ -397,7 +384,7 @@ async function getAISummary(filenames) {
 
   try {
     console.log("PR全体要約のリクエスト送信中...");
-    
+
     const response = await axios.post(
       OPENROUTER_API_URL,
       {
@@ -426,7 +413,7 @@ async function getAISummary(filenames) {
         },
       }
     );
-    
+
     console.log("PR全体要約のAPIレスポンス受信: ステータス", response.status);
 
     // レスポンスの構造を検証

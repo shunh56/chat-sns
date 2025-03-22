@@ -44,13 +44,10 @@ class AnimatedMessageWidget extends HookWidget {
     );
 
     // スライドのアニメーション
-    final slideOffset = slideFromBottom ? const Offset(0, 0.2) : 
-                       (animationType == AnimationType.slide && child is Row && (child as Row).mainAxisAlignment == MainAxisAlignment.end) 
-                       ? const Offset(-0.1, 0) // 右側メッセージは右からスライドイン
-                       : const Offset(0.1, 0);  // 左側メッセージは左からスライドイン
-    
     final slideAnimation = Tween<Offset>(
-      begin: slideOffset,
+      begin: slideFromBottom 
+          ? const Offset(0, 0.2) 
+          : const Offset(0.1, 0),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: animationController,
@@ -66,16 +63,18 @@ class AnimatedMessageWidget extends HookWidget {
     // 選択したアニメーションタイプに応じたウィジェットを返す
     switch (animationType) {
       case AnimationType.fadeIn:
-        return Opacity(
+        return AnimatedOpacity(
           opacity: opacityAnimation,
+          duration: duration,
           child: child,
         );
         
       case AnimationType.scale:
         return Transform.scale(
           scale: scaleAnimation,
-          child: Opacity(
+          child: AnimatedOpacity(
             opacity: opacityAnimation,
+            duration: duration,
             child: child,
           ),
         );
@@ -83,8 +82,9 @@ class AnimatedMessageWidget extends HookWidget {
       case AnimationType.slide:
         return SlideTransition(
           position: slideAnimation,
-          child: Opacity(
+          child: AnimatedOpacity(
             opacity: opacityAnimation,
+            duration: duration,
             child: child,
           ),
         );
@@ -94,8 +94,9 @@ class AnimatedMessageWidget extends HookWidget {
           position: slideAnimation,
           child: Transform.scale(
             scale: scaleAnimation,
-            child: Opacity(
+            child: AnimatedOpacity(
               opacity: opacityAnimation,
+              duration: duration,
               child: child,
             ),
           ),

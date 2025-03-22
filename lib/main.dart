@@ -14,18 +14,18 @@ import 'package:app/firebase_options.dart';
 import 'package:app/notification_service.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/presentation/pages/account_status_screen/banned_screen.dart';
-import 'package:app/presentation/pages/account_status_screen/deleted_screen.dart';
-import 'package:app/presentation/pages/account_status_screen/freezed_screen.dart';
-import 'package:app/presentation/pages/auth/signin_page.dart';
-import 'package:app/presentation/pages/auth/signup_page.dart';
-import 'package:app/presentation/pages/flows/onboarding/onboarding_screen.dart';
-import 'package:app/presentation/pages/flows/onboarding/shared_preferences_provider.dart';
-import 'package:app/presentation/pages/onboarding/screens/onboarding_screen.dart';
-import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
-import 'package:app/presentation/pages/version/update_notifier.dart';
-import 'package:app/presentation/pages/version/version_manager.dart';
-import 'package:app/presentation/phase_01/main_page.dart';
+import 'package:app/new/presentation/pages/account_status_screen/banned_screen.dart';
+import 'package:app/new/presentation/pages/account_status_screen/deleted_screen.dart';
+import 'package:app/new/presentation/pages/account_status_screen/freezed_screen.dart';
+import 'package:app/new/presentation/pages/auth/signin_page.dart';
+import 'package:app/new/presentation/pages/auth/signup_page.dart';
+import 'package:app/new/presentation/pages/onboarding/onboarding_screen.dart';
+import 'package:app/new/presentation/pages/onboarding/shared_preferences_provider.dart';
+import 'package:app/new/presentation/pages/onboaring_account/onboarding_screen.dart';
+
+import 'package:app/new/presentation/pages/version/update_notifier.dart';
+import 'package:app/new/presentation/pages/version/version_manager.dart';
+import 'package:app/new/presentation/pages/main_page.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_remote_config.dart';
@@ -218,58 +218,6 @@ void main() {
   );
 }
 
-class ScreenTracker extends StatefulWidget {
-  final Widget child;
-  final void Function(String screenName) onScreenDetected;
-
-  const ScreenTracker({
-    super.key,
-    required this.child,
-    required this.onScreenDetected,
-  });
-
-  @override
-  State<ScreenTracker> createState() => _ScreenTrackerState();
-}
-
-class _ScreenTrackerState extends State<ScreenTracker> {
-  Timer? _timer;
-  String _currentScreenName = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _startTracking();
-  }
-
-  void _startTracking() {
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      final context = this.context;
-      if (!context.mounted) return;
-
-      final currentRoute = ModalRoute.of(context);
-      if (currentRoute != null) {
-        final screenName = currentRoute.settings.name ?? 'Unknown';
-        if (screenName != _currentScreenName) {
-          _currentScreenName = screenName;
-          widget.onScreenDetected(screenName);
-        }
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
-}
-
 configureVoiceCall() async {
   FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
     //print("callEvent: ${event?.body}");
@@ -293,14 +241,14 @@ configureVoiceCall() async {
           final callId = event.body['extra']?['id'] as String?;
           final uuid = event.body['id'] as String?;
           if (callId != null) {
-            navigatorKey.currentState!.push(
+            /*navigatorKey.currentState!.push(
               MaterialPageRoute(
                 builder: (_) => VoiceChatScreen(
                   id: callId,
                   uuid: uuid ?? '',
                 ),
               ),
-            );
+            ); */
           }
         }
         break;

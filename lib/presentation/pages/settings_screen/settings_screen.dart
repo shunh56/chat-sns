@@ -7,7 +7,7 @@ import 'package:app/presentation/pages/settings_screen/contact_screen.dart';
 import 'package:app/presentation/pages/settings_screen/debug_report_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/direct_messages_screen.dart';
 import 'package:app/presentation/pages/settings_screen/notification_settings/friend_requests_screen.dart';
-import 'package:app/presentation/pages/version/version_manager.dart';
+import 'package:app/new/presentation/pages/version/version_manager.dart';
 import 'package:app/presentation/providers/provider/theme_provider.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
@@ -219,7 +219,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          Gap(32),
+          const Gap(32),
           /*  _buildContainer(
             "サブスクリプション設定",
             [

@@ -210,6 +210,7 @@ flutter:
     - assets/images/icons/
     - assets/images/stickers/sunglass_babies/
     - assets/images/community/
+    - assets/data/
 
   fonts:
     - family: NotoSansJP
