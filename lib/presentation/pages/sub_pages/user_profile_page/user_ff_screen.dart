@@ -1,12 +1,13 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/domain/entity/relation.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
+
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
+import 'package:app/presentation/providers/new/providers/follow/followers_list_notifier.dart';
+import 'package:app/presentation/providers/new/providers/follow/user_followings_followers.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/followers_list_notifier.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -174,23 +175,20 @@ class _FFListView extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
-    final relations = user.userId == ref.read(authProvider).currentUser!.uid
+    final users = user.userId == ref.read(authProvider).currentUser!.uid
         ? type == FFType.followers
-            ? ref.watch(followersListNotifierProvider).asData?.value ?? []
+            ? ref.read(followersUserStreamProvider(null)).asData?.value ?? []
             : ref.watch(followingListNotifierProvider).asData?.value ?? []
         : type == FFType.followers
             ? ref.watch(userFollowersProvider(user.userId)).asData?.value ?? []
             : ref.watch(userFollowingsProvider(user.userId)).asData?.value ??
                 [];
 
-    return relations.isEmpty
+    return users.isEmpty
         ? _buildEmptyState(textStyle)
         : ListView.builder(
-            itemCount: relations.length,
-            itemBuilder: (context, index) => _FFListTile(
-              relation: relations[index],
-              currentUser: user,
-            ),
+            itemCount: users.length,
+            itemBuilder: (context, index) => UserRequestWidget(user: users[index]),
           );
   }
 
@@ -217,64 +215,6 @@ class _FFListView extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _FFListTile extends ConsumerWidget {
-  const _FFListTile({
-    required this.relation,
-    required this.currentUser,
-  });
-
-  final Relation relation;
-  final UserAccount currentUser;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
-
-    return FutureBuilder(
-      future: ref
-          .read(allUsersNotifierProvider.notifier)
-          .getUserAccounts([relation.userId]),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return ListTile(
-            leading: const Icon(
-              Icons.error_outline,
-              color: ThemeColor.error,
-            ),
-            title: Text(
-              'エラーが発生しました',
-              style: textStyle.w400(
-                fontSize: 14,
-                color: ThemeColor.error,
-              ),
-            ),
-          );
-        }
-
-        if (!snapshot.hasData) {
-          return ListTile(
-            leading: const SizedBox(
-              width: 40,
-              height: 40,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-            title: Text(
-              'Loading...',
-              style: textStyle.w400(fontSize: 14),
-            ),
-          );
-        }
-
-        final user = snapshot.data![0];
-        return UserRequestWidget(user: user);
-      },
     );
   }
 }

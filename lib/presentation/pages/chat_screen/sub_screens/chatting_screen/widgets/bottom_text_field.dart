@@ -1,4 +1,6 @@
 import 'package:app/core/utils/debug_print.dart';
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
+import 'package:app/presentation/providers/new/providers/follow/followers_list_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -8,8 +10,6 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
-import 'package:app/presentation/providers/provider/followers_list_notifier.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/usecase/direct_message_usecase.dart';
 
@@ -29,13 +29,11 @@ class BottomTextField extends HookConsumerWidget {
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom + 24;
 
     // フォロー関連の状態取得
-    final followings =
-        ref.watch(followingListNotifierProvider).asData?.value ?? [];
-    final followers =
-        ref.watch(followersListNotifierProvider).asData?.value ?? [];
-    final isFollowing =
-        followings.any((follow) => follow.userId == user.userId);
-    final isFollowed = followers.any((follow) => follow.userId == user.userId);
+
+    final followingNotifier = ref.watch(followingListNotifierProvider.notifier);
+    final followerNotifier = ref.watch(followersListNotifierProvider.notifier);
+    final isFollowing = followingNotifier.isFollowing(user.userId);
+    final isFollowed = followerNotifier.isFollower(user.userId);
     final isMutualFollow = isFollowing && isFollowed;
 
     // ブロック関連の状態取得
@@ -161,13 +159,13 @@ class BottomTextField extends HookConsumerWidget {
     try {
       // メッセージ送信
       await ref.read(dmUsecaseProvider).sendMessage(text, user);
-      
+
       // メッセージリストの更新を促す
       // この後、MessageListWidgetが新しいメッセージを検出してアニメーションを適用する
-      
+
       // 通知送信
       ref.read(pushNotificationNotifierProvider).sendDm(user, text);
-  
+
       // テキスト入力をクリア
       controller.clear();
       ref.read(inputTextProvider.notifier).state = "";

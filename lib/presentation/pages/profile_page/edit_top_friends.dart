@@ -1,4 +1,4 @@
-import 'package:app/core/utils/theme.dart';
+/*import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
@@ -233,3 +233,4 @@ class EditTopFriendsScreen extends HookConsumerWidget {
     );
   }
 }
+ */

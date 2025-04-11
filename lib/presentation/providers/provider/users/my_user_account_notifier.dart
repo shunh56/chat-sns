@@ -10,7 +10,6 @@ import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart'
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/usecase/invite_code_usecase.dart';
 import 'package:app/usecase/posts/current_status_post_usecase.dart';
-import 'package:app/usecase/relation_usecase.dart';
 import 'package:app/usecase/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -225,7 +224,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
       for (String userId in otherIds) {
         final otherUser =
             ref.read(allUsersNotifierProvider).asData!.value[userId]!;
-        ref.read(relationUsecaseProvider).sendRequest(otherUser.userId);
+        //ref.read(relationUsecaseProvider).sendRequest(otherUser.userId);
       }
     }
   }

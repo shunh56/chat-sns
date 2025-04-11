@@ -2,7 +2,6 @@ import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/message_overview.dart';
-import 'package:app/domain/entity/relation.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
@@ -10,9 +9,9 @@ import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/chatting_screen/chatting_screen.dart';
 import 'package:app/presentation/pages/chat_screen/sub_screens/create_chat_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/user_ff_screen.dart';
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:flutter/material.dart';
@@ -168,9 +167,8 @@ class FollowingList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final List<Relation> followingRelations =
-        ref.watch(followingListNotifierProvider).asData?.value ??
-            []; //ref.watch(followersListNotifierProvider).asData?.value ?? []
+    final List<UserAccount> followingRelations =
+        ref.watch(followingListNotifierProvider).asData?.value ?? [];
     final userIds = followingRelations.map((_) => _.userId).toList();
     return followingRelations.isEmpty
         ? _buildEmptyState(textStyle)
@@ -587,7 +585,7 @@ class FollowingUsers extends ConsumerWidget {
   });
 
   // UIを構築するためのコールバック関数
-  final Widget Function(List<Relation> followings) builder;
+  final Widget Function(List<UserAccount> users) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -597,10 +595,9 @@ class FollowingUsers extends ConsumerWidget {
     final filters =
         blockes + blockeds + [ref.read(authProvider).currentUser!.uid];
     return ref.watch(followingListNotifierProvider).when(
-          data: (followings) {
-            followings
-                .removeWhere((relation) => filters.contains(relation.userId));
-            return builder(followings);
+          data: (users) {
+            users.removeWhere((user) => filters.contains(user.userId));
+            return builder(users);
           },
           loading: () => const Center(
             child: CircularProgressIndicator(),
@@ -620,203 +617,155 @@ class FollowingOnlineListView extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     return FollowingUsers(
-      builder: (followings) {
-        if (followings.isEmpty) {
+      builder: (users) {
+        if (users.isEmpty) {
           return const SizedBox();
         }
-        final userIds = followings.map((relation) => relation.userId).toList();
-        return FutureBuilder(
-            future: ref
-                .read(allUsersNotifierProvider.notifier)
-                .getUserAccounts(userIds),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return ListTile(
-                  leading: const Icon(
-                    Icons.error_outline,
-                    color: ThemeColor.error,
-                  ),
-                  title: Text(
-                    'エラーが発生しました',
-                    style: textStyle.w400(
-                      fontSize: 14,
-                      color: ThemeColor.error,
+        //4時間以内のユーザーのみ表示
+        users.removeWhere((user) =>
+            DateTime.now().difference(user.lastOpenedAt.toDate()).inHours > 4);
+        // status => online => lastOpenedAt順
+        users.sort((a, b) {
+          if (a.currentStatus.updatedRecently &&
+              !b.currentStatus.updatedRecently) {
+            return -1;
+          }
+          if (!a.currentStatus.updatedRecently &&
+              b.currentStatus.updatedRecently) {
+            return 1;
+          }
+          if (a.greenBadge && !b.greenBadge) {
+            return -1;
+          }
+          if (!a.greenBadge && b.greenBadge) {
+            return 1;
+          }
+          return b.lastOpenedAt.compareTo(a.lastOpenedAt);
+        });
+        if (users.isEmpty) {
+          return const SizedBox();
+        }
+        return Padding(
+          padding: EdgeInsets.only(top: themeSize.verticalPaddingSmall),
+          child: SizedBox(
+            height: 92,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: users.length,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              itemBuilder: (context, index) {
+                final user = users[index];
+                return GestureDetector(
+                  onTap: () {
+                    ref.read(navigationRouterProvider(context)).goToChat(user);
+                  },
+                  onLongPress: () {
+                    ref
+                        .read(navigationRouterProvider(context))
+                        .goToProfile(user);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: ThemeColor.accent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: ThemeColor.stroke,
+                        width: 0.4,
+                      ),
                     ),
-                  ),
-                );
-              }
-
-              if (!snapshot.hasData) {
-                return ListTile(
-                  leading: const SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                  title: Text(
-                    'Loading...',
-                    style: textStyle.w400(fontSize: 14),
-                  ),
-                );
-              }
-              final users = snapshot.data!;
-              //4時間以内のユーザーのみ表示
-              users.removeWhere((user) =>
-                  DateTime.now()
-                      .difference(user.lastOpenedAt.toDate())
-                      .inHours >
-                  4);
-              // status => online => lastOpenedAt順
-              users.sort((a, b) {
-                if (a.currentStatus.updatedRecently &&
-                    !b.currentStatus.updatedRecently) {
-                  return -1;
-                }
-                if (!a.currentStatus.updatedRecently &&
-                    b.currentStatus.updatedRecently) {
-                  return 1;
-                }
-                if (a.greenBadge && !b.greenBadge) {
-                  return -1;
-                }
-                if (!a.greenBadge && b.greenBadge) {
-                  return 1;
-                }
-                return b.lastOpenedAt.compareTo(a.lastOpenedAt);
-              });
-              if (users.isEmpty) {
-                return const SizedBox();
-              }
-              return Padding(
-                padding: EdgeInsets.only(top: themeSize.verticalPaddingSmall),
-                child: SizedBox(
-                  height: 92,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: users.length,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    itemBuilder: (context, index) {
-                      final user = users[index];
-                      return GestureDetector(
-                        onTap: () {
-                          ref
-                              .read(navigationRouterProvider(context))
-                              .goToChat(user);
-                        },
-                        onLongPress: () {
-                          ref
-                              .read(navigationRouterProvider(context))
-                              .goToProfile(user);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          decoration: BoxDecoration(
-                            color: ThemeColor.accent,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: ThemeColor.stroke,
-                              width: 0.4,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Stack(
-                                alignment: Alignment.bottomRight,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(4),
-                                    child: CachedImage.userIcon(
-                                      user.imageUrl,
-                                      user.name,
-                                      30,
-                                    ),
-                                  ),
-                                  // online and 10mins
-                                  (user.greenBadge)
-                                      ? Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              width: 2,
-                                              color: ThemeColor.background,
-                                            ),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const CircleAvatar(
-                                            radius: 8,
-                                            backgroundColor: Colors.green,
-                                          ),
-                                        )
-                                      //blue status
-                                      : DateTime.now()
-                                                  .difference(user.lastOpenedAt
-                                                      .toDate())
-                                                  .inHours <
-                                              4
-                                          ? Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 6,
-                                                      vertical: 2),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(100),
-                                                border: Border.all(
-                                                  width: 2,
-                                                  color: ThemeColor.background,
-                                                ),
-                                                color: ThemeColor.highlight,
-                                              ),
-                                              child: Text(
-                                                user.lastOpenedAt.xxStatus,
-                                                style: const TextStyle(
-                                                  fontSize: 8,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: ThemeColor.white,
-                                                ),
-                                              ),
-                                            )
-                                          : const SizedBox(),
-                                ],
+                    child: Row(
+                      children: [
+                        Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              child: CachedImage.userIcon(
+                                user.imageUrl,
+                                user.name,
+                                30,
                               ),
-                              if (user.currentStatus.updatedRecently)
-                                Container(
-                                  constraints:
-                                      const BoxConstraints(maxWidth: 180),
-                                  padding: const EdgeInsets.only(left: 12),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        user.name,
-                                        style: textStyle.w600(
-                                          fontSize: 14,
-                                          color: ThemeColor.text,
-                                        ),
+                            ),
+                            // online and 10mins
+                            (user.greenBadge)
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        width: 2,
+                                        color: ThemeColor.background,
                                       ),
-                                      const Gap(4),
-                                      Text(
-                                        user.currentStatus.bubbles.first,
-                                        style: textStyle.w400(
-                                          color: ThemeColor.subText,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const CircleAvatar(
+                                      radius: 8,
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  )
+                                //blue status
+                                : DateTime.now()
+                                            .difference(
+                                                user.lastOpenedAt.toDate())
+                                            .inHours <
+                                        4
+                                    ? Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          border: Border.all(
+                                            width: 2,
+                                            color: ThemeColor.background,
+                                          ),
+                                          color: ThemeColor.highlight,
                                         ),
-                                      ),
-                                    ],
+                                        child: Text(
+                                          user.lastOpenedAt.xxStatus,
+                                          style: const TextStyle(
+                                            fontSize: 8,
+                                            fontWeight: FontWeight.w600,
+                                            color: ThemeColor.white,
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox(),
+                          ],
+                        ),
+                        if (user.currentStatus.updatedRecently)
+                          Container(
+                            constraints: const BoxConstraints(maxWidth: 180),
+                            padding: const EdgeInsets.only(left: 12),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.name,
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                    color: ThemeColor.text,
                                   ),
                                 ),
-                            ],
+                                const Gap(4),
+                                Text(
+                                  user.currentStatus.bubbles.first,
+                                  style: textStyle.w400(
+                                    color: ThemeColor.subText,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
-                ),
-              );
-            });
+                );
+              },
+            ),
+          ),
+        );
       },
     );
   }

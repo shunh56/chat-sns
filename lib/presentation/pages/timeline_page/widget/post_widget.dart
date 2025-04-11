@@ -49,13 +49,32 @@ class PostWidget extends ConsumerWidget {
       },
       child: Column(
         children: [
-          Container(
+          /* Container(
             height: 1,
             color: const Color(0xFF262626),
-          ),
-          const Gap(16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+          ), */
+          // const Gap(16),
+          Container(
+            margin: EdgeInsets.only(
+              bottom: 12,
+              left: 8,
+              right: 8,
+            ),
+            padding: const EdgeInsets.only(
+              top: 12,
+              left: 12,
+              right: 12,
+              bottom: 12,
+            ),
+            //padding: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              color: ThemeColor.accent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: ThemeColor.stroke,
+                width: 0.8,
+              ),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -109,8 +128,7 @@ class PostWidget extends ConsumerWidget {
               ],
             ),
           ),
-          const Gap(16),
-          // 区切り線
+          // const Gap(16),
         ],
       ),
     );
@@ -743,7 +761,7 @@ class BuildText extends ConsumerWidget {
   const BuildText({
     super.key,
     required this.text,
-    this.isDynamicSize = true, // 動的サイズの切り替えフラグ
+    this.isDynamicSize = false, // 動的サイズの切り替えフラグ
   });
 
   final String text;

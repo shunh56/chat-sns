@@ -175,6 +175,7 @@ dependencies:
 
   intl: any
   shared_preferences: ^2.3.3
+  rxdart: ^0.27.7
 dependency_overrides:
   intl: ^0.17.0
   flutter_lints: ^3.0.1

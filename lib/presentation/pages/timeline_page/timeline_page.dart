@@ -7,12 +7,9 @@ import 'package:app/presentation/pages/community_screen/model/community.dart';
 import 'package:app/presentation/pages/community_screen/screens/tabs.dart';
 import 'package:app/presentation/pages/new_screen.dart';
 import 'package:app/presentation/pages/timeline_page/threads/following_posts.dart';
-import 'package:app/presentation/pages/timeline_page/threads/friends_posts.dart';
 import 'package:app/presentation/pages/timeline_page/threads/public_posts.dart';
 import 'package:app/new/presentation/pages/main_page.dart';
-import 'package:app/presentation/phase_01/search_screen.dart';
 import 'package:app/presentation/providers/provider/activities_list_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -391,12 +388,12 @@ class Communitytabs extends ConsumerWidget {
                           const Gap(12),
                           GestureDetector(
                             onTap: () {
-                              Navigator.push(
+                              /*Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => const SearchScreen(),
                                 ),
-                              );
+                              ); */
                             },
                             child: Stack(
                               children: [
@@ -409,7 +406,7 @@ class Communitytabs extends ConsumerWidget {
                                     color: ThemeColor.icon,
                                   ),
                                 ),
-                                Visibility(
+                                /*Visibility(
                                   visible: (ref.watch(requestedIdsProvider))
                                       .isNotEmpty,
                                   child: Positioned(
@@ -421,7 +418,7 @@ class Communitytabs extends ConsumerWidget {
                                           Theme.of(context).colorScheme.error,
                                     ),
                                   ),
-                                ),
+                                ), */
                               ],
                             ),
                           ),
@@ -503,7 +500,7 @@ class Communitytabs extends ConsumerWidget {
           body: TabBarView(
             children: [
               const PublicPostsThread(),
-              const FriendsPostsThread(),
+              Container(), // const FriendsPostsThread(),
               ...communities.map(
                 (community) => PostsTab(
                   community: community,

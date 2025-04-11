@@ -3,10 +3,9 @@
 // Package imports:
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/posts/timeline_post.dart';
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/usecase/posts/post_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -69,8 +68,8 @@ class FollowingPostsNotifier extends StateNotifier<AsyncValue<List<PostBase>>> {
     List<PostBase> posts = [];
     List<Future<List<PostBase>>> futures = [];
     final myId = ref.read(authProvider).currentUser!.uid;
-    final friendIds = ref.read(friendIdsProvider);
-    final userIds = [...friendIds, myId];
+    final friendIds = []; // ref.read(friendIdsProvider);
+    final List<String> userIds = [...friendIds, myId];
     futures.add(postUsecase.getPostFromUserIds(userIds));
     //futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
     await Future.wait(futures);
