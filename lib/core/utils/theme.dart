@@ -9,7 +9,7 @@ class Images {
 
 class ThemeColor {
   // 背景色のグラデーション
-  static const background = Color(0xFF141414); // メイン背景色
+  static const background = Color(0xFF151515); // メイン背景色
   static const surface = Color(0xFF1E1E1E); // カード・要素の背景
   static const accent = Color(0xFF1E1E1E); // 要素の強調背景
 
@@ -53,6 +53,14 @@ class ThemeColor {
   static const headline = Color(0xFFACACAC);
   static const highlight = Colors.blue;
   static const subText = Color(0xFF808080);
+
+
+
+  //new 
+  static const cardColor = Color(0xFF1F1F1F);
+  static const cardBorderColor = Color(0xFF3E3E3E);
+  static const cardSecondaryColor = Color(0xFF9A9A9A);
+
 }
 
 /*

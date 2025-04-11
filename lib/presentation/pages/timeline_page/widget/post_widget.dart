@@ -55,8 +55,9 @@ class PostWidget extends ConsumerWidget {
           ), */
           // const Gap(16),
           Container(
-            margin: EdgeInsets.only(
-              bottom: 12,
+            margin: const EdgeInsets.only(
+              top: 6,
+              bottom: 6,
               left: 8,
               right: 8,
             ),
@@ -68,31 +69,29 @@ class PostWidget extends ConsumerWidget {
             ),
             //padding: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
-              color: ThemeColor.accent,
+              color: ThemeColor.cardColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: ThemeColor.stroke,
-                width: 0.8,
+                color: ThemeColor.cardBorderColor,
+                width: 1.2,
               ),
             ),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ユーザーアイコン
-                UserIcon(
-                  user: user,
-                  width: 40,
-                  isCircle: true,
-                ),
-                const Gap(12),
+                // ユーザー名と時間
 
-                // メインコンテンツ
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ユーザー名と時間
-                      Row(
+                Row(
+                  children: [
+                    UserIcon(
+                      user: user,
+                      width: 40,
+                      isCircle: true,
+                    ),
+                    const Gap(12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             user.name,
@@ -102,29 +101,36 @@ class PostWidget extends ConsumerWidget {
                               color: Colors.white,
                             ),
                           ),
-                          const Gap(8),
+                          const Gap(4),
                           Text(
                             post.createdAt.xxAgo,
                             style: textStyle.w400(
-                              fontSize: 13,
+                              fontSize: 12,
                               color: const Color(0xFF9CA3AF),
                             ),
                           ),
                         ],
                       ),
-                      const Gap(6),
+                    ),
+                  ],
+                ),
 
-                      // 投稿テキスト
-                      BuildText(text: post.text),
-
-                      // 画像
-                      if (post.mediaUrls.isNotEmpty) const Gap(8),
-                      _buildImages(context, post),
-                      _buildActionButton(context, ref, post, user),
-                      // アクション
-                    ],
+                const Gap(8),
+                Text(
+                  "THIS IS TITLE",
+                  style: textStyle.w700(
+                    fontSize: 16,
                   ),
                 ),
+                const Gap(6),
+                // 投稿テキスト
+                BuildText(text: post.text),
+
+                // 画像
+                if (post.mediaUrls.isNotEmpty) const Gap(8),
+                _buildImages(context, post),
+                _buildActionButton(context, ref, post, user),
+                // アクション
               ],
             ),
           ),
@@ -201,21 +207,19 @@ class PostWidget extends ConsumerWidget {
                           padding: EdgeInsets.only(top: 2),
                           child: Icon(
                             Icons.favorite_border_rounded,
-                            color: ThemeColor.icon,
-                            size: 18,
+                            color: ThemeColor.cardSecondaryColor,
+                            size: 20,
                           ),
                         ),
-                        const Gap(8),
+                        const Gap(4),
                         SizedBox(
-                          width: 60,
-                          child: Row(
-                            children: [
-                              (post.likeCount > 0)
-                                  ? GradientText(
-                                      text: post.likeCount.toString(),
-                                    )
-                                  : const SizedBox(),
-                            ],
+                          width: 48,
+                          child: Text(
+                            post.likeCount.toString(),
+                            style: textStyle.numText(
+                              fontSize: 14,
+                              color: ThemeColor.cardSecondaryColor,
+                            ),
                           ),
                         ),
                       ],
@@ -223,40 +227,32 @@ class PostWidget extends ConsumerWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      PostBottomModelSheet(context).openReplies(user, post);
+                      ref
+                          .read(navigationRouterProvider(context))
+                          .goToPost(post, user);
+                      //PostBottomModelSheet(context).openReplies(user, post);
                     },
                     child: Row(
                       children: [
                         SizedBox(
-                          height: 14,
-                          width: 14,
+                          height: 16,
+                          width: 16,
                           child: SvgPicture.asset(
                             "assets/images/icons/chat.svg",
-                            color: ThemeColor.icon,
+                            color: ThemeColor.cardSecondaryColor,
                           ),
                         ),
                         const Gap(8),
                         SizedBox(
-                          width: 60,
-                          child: Row(
-                            children: [
-                              (post.replyCount > 0)
-                                  ? Text(
-                                      post.replyCount.toString(),
-                                      style: textStyle.numText(
-                                        fontSize: 14,
-                                        color: ThemeColor.icon,
-                                      ),
-                                    )
-                                  : const SizedBox(),
-                            ],
+                          width: 48,
+                          child: Text(
+                            post.replyCount.toString(),
+                            style: textStyle.numText(
+                              fontSize: 14,
+                              color: ThemeColor.cardSecondaryColor,
+                            ),
                           ),
                         ),
-
-                        /* Text(
-                        "コメント",
-                        style: textStyle.w600(color: ThemeColor.subText),
-                      ), */
                       ],
                     ),
                   ),
@@ -269,7 +265,7 @@ class PostWidget extends ConsumerWidget {
               },
               child: const Icon(
                 Icons.more_horiz_rounded,
-                color: ThemeColor.subText,
+                color: ThemeColor.cardSecondaryColor,
                 size: 20,
               ),
             )
@@ -774,9 +770,9 @@ class BuildText extends ConsumerWidget {
 
   // 固定サイズの設定
   static const TextConfig fixedConfig = TextConfig(
-    fontSize: 16.0,
-    fontWeight: FontWeight.w600,
-    lineHeight: 1.5,
+    fontSize: 14.0,
+    fontWeight: FontWeight.w500,
+    lineHeight: 1.4,
   );
 
   // 文字数に応じたテキスト設定を取得
@@ -875,6 +871,7 @@ class BuildText extends ConsumerWidget {
 
     return RichText(
       text: TextSpan(children: spans),
+      maxLines: 2,
     );
   }
 }
