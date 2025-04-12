@@ -9,7 +9,6 @@ import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/chat_screen/chat_screen.dart';
-import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
@@ -18,7 +17,6 @@ import 'package:app/presentation/phase_01/search_users_screen.dart';
 import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
@@ -113,7 +111,7 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
   }
 
   bool showed = false;
-  List<String> _previousFriends = [];
+  final List<String> _previousFriends = [];
 
   Future<void> showNewFriendDialog(UserAccount user) async {
     final themeSize = ref.watch(themeSizeProvider(context));
@@ -244,21 +242,6 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
   @override
   Widget build(BuildContext context) {
     //return NativeInlinePage();
-    ref.listen(friendIdsStreamNotifier, (prev, next) {
-      next.whenData((friendInfos) {
-        List<String> newFriends = friendInfos
-            .where((friend) => !_previousFriends.any((prev) => prev == friend))
-            .toList();
-        if (newFriends.isNotEmpty && _previousFriends.isNotEmpty) {
-          final user = ref
-              .read(allUsersNotifierProvider)
-              .asData!
-              .value[newFriends.first]!;
-          showNewFriendDialog(user);
-        }
-        _previousFriends = friendInfos;
-      });
-    });
 
     /* final fab = FloatingActionButton(
       heroTag: "edit_currentStatus",
@@ -476,16 +459,6 @@ class _Phase01MainPageState extends ConsumerState<Phase01MainPage>
               ),
             )
           : null,
-    );
-  }
-
-  navToEditCurrentStatus(BuildContext context, WidgetRef ref, UserAccount me) {
-    ref.read(currentStatusStateProvider.notifier).state = me.currentStatus;
-    Navigator.push(
-      context,
-      PageTransitionMethods.slideUp(
-        const EditCurrentStatusScreen(),
-      ),
     );
   }
 }

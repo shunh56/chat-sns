@@ -36,7 +36,6 @@ class PostDatasource {
     return await _firestore
         .collection(collectionName)
         .where("isPublic", isEqualTo: true)
-        .where("communityId", isNull: true)
         .orderBy("createdAt", descending: true)
         .limit(QUERY_LIMIT)
         .get();

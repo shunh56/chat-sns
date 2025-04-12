@@ -1,5 +1,4 @@
 import 'package:app/domain/entity/voice_chat.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
 import 'package:app/usecase/voice_chat_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,7 +28,7 @@ class VoiceChatListNotifier extends StateNotifier<AsyncValue<List<VoiceChat>>> {
 
   init() async {
     List<VoiceChat> vcs = [];
-    final friendIds = _ref.read(friendIdsProvider);
+    final List<String> friendIds = []; //_ref.read(friendIdsProvider);
     if (vcs.isNotEmpty) return;
     vcs = await _usecase.getFriendsVoiceChats(friendIds);
     final uniqueVcs = {for (var vc in vcs) vc.id: vc}.values.toList();
@@ -39,7 +38,7 @@ class VoiceChatListNotifier extends StateNotifier<AsyncValue<List<VoiceChat>>> {
   }
 
   refresh() async {
-    final friendIds = _ref.read(friendIdsProvider);
+    final List<String> friendIds = []; //_ref.read(friendIdsProvider);
     final voiceChats = await _usecase.getFriendsVoiceChats(friendIds);
     state = AsyncValue.data(voiceChats);
   }

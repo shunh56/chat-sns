@@ -128,3 +128,8 @@ https://zenn.dev/altiveinc/articles/separating-environments-in-flutter-old-editi
 
 
 android google sign in => SHA1 8b:ec:78:9a:44:98:50:74:e0:50:86:fc:83:9c:d0:ef:e5:db:21:c4を追加するとできる
+
+
+
+aab => Google Play Store経由出ないとインストールできない
+apk => そのままファイルを使用することができる

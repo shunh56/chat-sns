@@ -3,8 +3,8 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/usecase/user_usecase.dart';
 import 'package:flutter/material.dart';
@@ -103,7 +103,6 @@ class _CreateChatsScreenState extends ConsumerState<CreateChatsScreen> {
             child: searchResults.when(
               data: (users) {
                 if (searchQuery.isEmpty) {
-                  followings.sort((a, b) => a.count.compareTo(b.count));
                   final followingIds =
                       followings.map((relation) => relation.userId).toList();
                   if (followingIds.isEmpty) {

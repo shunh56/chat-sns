@@ -8,8 +8,6 @@ import 'package:flutter/services.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Project imports:
-
 class PostTextInputWidget extends ConsumerWidget {
   const PostTextInputWidget({super.key});
 
@@ -19,13 +17,12 @@ class PostTextInputWidget extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     return TextField(
       keyboardType: TextInputType.multiline,
-      minLines: 1,
       maxLines: null,
-      maxLength: 120,
-      autofocus: true,
+      maxLength: 500,
+      autofocus: false,
       cursorColor: ThemeColor.highlight,
-      style: textStyle.w400(
-        fontSize: 16,
+      style: textStyle.w500(
+        fontSize: 14,
       ),
       onChanged: (text) {
         ref.watch(inputTextProvider.notifier).state = text;
@@ -36,8 +33,8 @@ class PostTextInputWidget extends ConsumerWidget {
       decoration: InputDecoration(
         contentPadding: EdgeInsets.zero,
         isDense: true,
-        hintText: "メッセージを入力...",
-        hintStyle: textStyle.w400(
+        hintText: "本文を入力...",
+        hintStyle: textStyle.w500(
           fontSize: 14,
           color: ThemeColor.subText,
         ),

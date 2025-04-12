@@ -128,10 +128,11 @@ class CustomPostWidget extends ConsumerWidget {
                                   ],
                                 ),
                                 const Gap(4),
-                                BuildText(
-                                  text: post.text,
-                                  canvasTheme: user.canvasTheme,
-                                ),
+                                if (post.text != null)
+                                  BuildText(
+                                    text: post.text!,
+                                    canvasTheme: user.canvasTheme,
+                                  ),
                               ],
                             ),
                           ),

@@ -10,7 +10,7 @@ import 'package:app/presentation/phase_01/community_detail_screen.dart';
 import 'package:app/presentation/phase_01/search_params_screen.dart';
 import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/phase_01/user_card_stack_screen.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/online_users.dart';
 import 'package:flutter/material.dart';

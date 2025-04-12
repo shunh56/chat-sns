@@ -1,14 +1,12 @@
 import 'package:app/domain/entity/user.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'package:app/presentation/providers/provider/followers_list_notifier.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 
 /// チャット関連のユーティリティ関数を提供するクラス
 class ChatUtils {
   /// ユーザー間のフォロー関係を確認
-  static bool checkMutualFollow(WidgetRef ref, UserAccount user) {
+  /*static bool checkMutualFollow(WidgetRef ref, UserAccount user) {
     final followings =
         ref.read(followingListNotifierProvider).asData?.value ?? [];
     final followers =
@@ -19,7 +17,7 @@ class ChatUtils {
     final isFollowed = followers.any((follow) => follow.userId == user.userId);
 
     return isFollowing && isFollowed;
-  }
+  } */
 
   /// ユーザーがブロックされているか確認
   static bool isUserBlocked(WidgetRef ref, UserAccount user) {

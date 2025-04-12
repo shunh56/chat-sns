@@ -1,3 +1,5 @@
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
+import 'package:app/presentation/providers/new/providers/follow/followers_list_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
@@ -10,8 +12,6 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';
-import 'package:app/presentation/providers/provider/followers_list_notifier.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/blocks_list.dart';
 import 'package:app/usecase/voip_usecase.dart';
 
@@ -111,13 +111,10 @@ class ChatAppBar extends ConsumerWidget {
   Future<void> _handleCallButtonTap(BuildContext context, WidgetRef ref) async {
     HapticFeedback.mediumImpact();
 
-    final followings =
-        ref.watch(followingListNotifierProvider).asData?.value ?? [];
-    final followers =
-        ref.watch(followersListNotifierProvider).asData?.value ?? [];
-    final isFollowing =
-        followings.any((follow) => follow.userId == user.userId);
-    final isFollowed = followers.any((follow) => follow.userId == user.userId);
+    final followingNotifier = ref.watch(followingListNotifierProvider.notifier);
+    final followerNotifier = ref.watch(followersListNotifierProvider.notifier);
+    final isFollowing = followingNotifier.isFollowing(user.userId);
+    final isFollowed = followerNotifier.isFollower(user.userId);
     final isMutualFollow = isFollowing && isFollowed;
 
     final blockeds =

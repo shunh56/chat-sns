@@ -1,4 +1,4 @@
-import 'package:app/core/utils/text_styles.dart';
+/*import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/pages/profile_page/edit_now_with_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
@@ -468,3 +468,4 @@ class EditCurrentStatusScreen extends ConsumerWidget {
     );
   }
 }
+ */

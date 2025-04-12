@@ -1,9 +1,8 @@
-
+import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
 import 'package:app/presentation/providers/state/create_post/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 
 class PostImagesWidget extends ConsumerStatefulWidget {
   const PostImagesWidget({super.key});
@@ -17,6 +16,7 @@ class _PostImagesWidgetState extends ConsumerState<PostImagesWidget> {
   @override
   Widget build(BuildContext context) {
     final images = ref.watch(imageListNotifierProvider);
+    final themeSize = ref.watch(themeSizeProvider(context));
     if (images.isNotEmpty) {
       return Container(
         margin: const EdgeInsets.only(top: 8),
@@ -25,10 +25,12 @@ class _PostImagesWidgetState extends ConsumerState<PostImagesWidget> {
           shrinkWrap: true,
           itemCount: images.length,
           scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.symmetric(
+            horizontal: themeSize.horizontalPadding - 4,
+          ),
           itemBuilder: (context, index) {
             return Container(
-              margin: const EdgeInsets.only(right: 8),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
               child: FadeTransitionWidget(
                 child: Stack(
                   children: [

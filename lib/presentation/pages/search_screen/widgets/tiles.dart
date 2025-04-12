@@ -1,13 +1,9 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/dialogs/dialogs.dart';
 import 'package:app/presentation/components/user_icon.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
-import 'package:app/usecase/friends_usecase.dart';
-import 'package:app/usecase/relation_usecase.dart';
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -80,7 +76,7 @@ class UserRequestWidget extends ConsumerWidget {
       builder: (context, ref, child) {
         final themeSize = ref.watch(themeSizeProvider(context));
         final textStyle = ThemeTextStyle(themeSize: themeSize);
-        ref.watch(followingListNotifierProvider);
+
         final notifier = ref.read(followingListNotifierProvider.notifier);
         final isFollowing = notifier.isFollowing(user.userId);
 
@@ -136,8 +132,8 @@ class UserRequestButton extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
     const subscribed = false;
-    final requests = ref.watch(requestIdsProvider);
-    final requesteds = ref.watch(requestedIdsProvider);
+    final requests = []; // ref.watch(requestIdsProvider);
+    final requesteds = []; // ref.watch(requestedIdsProvider);
 
     final privateMode = user.privacy.privateMode;
     final range = user.privacy.requestRange;
@@ -154,11 +150,11 @@ class UserRequestButton extends ConsumerWidget {
             splashColor: Colors.black.withOpacity(0.3),
             highlightColor: Colors.transparent,
             onTap: () {
-              showDialog(
+              /*showDialog(
                 context: context,
                 builder: (context) =>
                     showFriendRequestDialog(context, ref, user),
-              );
+              ); */
             },
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
@@ -185,12 +181,12 @@ class UserRequestButton extends ConsumerWidget {
             splashColor: Colors.black.withOpacity(0.3),
             highlightColor: Colors.transparent,
             onTap: () {
-              showDialog(
+             /* showDialog(
                 context: context,
                 builder: (context) {
                   return showQuitRequestDialog(context, ref, user);
                 },
-              );
+              ); */
             },
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
@@ -237,7 +233,7 @@ class UserRequestButton extends ConsumerWidget {
           splashColor: Colors.black.withOpacity(0.3),
           highlightColor: Colors.transparent,
           onTap: () {
-            ref.read(relationUsecaseProvider).sendRequest(user.userId);
+           // ref.read(relationUsecaseProvider).sendRequest(user.userId);
           },
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
@@ -300,12 +296,12 @@ class FriendRequestDialog extends ConsumerWidget {
                   child: TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
-                      ref
+                      /*ref
                           .read(relationUsecaseProvider)
                           .deleteRequested(user.userId);
                       ref
                           .read(deletesIdListNotifierProvider.notifier)
-                          .deleteUser(user);
+                          .deleteUser(user); */
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: ThemeColor.surface,
@@ -328,10 +324,10 @@ class FriendRequestDialog extends ConsumerWidget {
                     onPressed: () {
                       Navigator.of(context).pop();
 
-                      ref.read(friendsUsecaseProvider).addFriend(user.userId);
+                     /* ref.read(friendsUsecaseProvider).addFriend(user.userId);
                       ref
                           .read(relationUsecaseProvider)
-                          .deleteRequested(user.userId);
+                          .deleteRequested(user.userId); */
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.pink,

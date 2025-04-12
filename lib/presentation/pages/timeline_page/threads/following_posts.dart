@@ -2,9 +2,6 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/navigation/page_transition.dart';
-import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
-import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/pages/timeline_page/widget/current_status_post.dart';
 import 'package:app/presentation/pages/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/provider/posts/following_posts.dart';
@@ -74,22 +71,21 @@ class _FollowingPostsThreadState extends ConsumerState<FollowingPostsThread>
                 itemBuilder: (context, index) {
                   final post = list[index];
 
-                  if (post is Post) {
-                    return Column(
-                      children: [
-                        PostWidget(postRef: post),
-                        /* if (index != 0 && index % 10 == 0)
+                  return Column(
+                    children: [
+                      PostWidget(postRef: post),
+                      /* if (index != 0 && index % 10 == 0)
                           NativeAdWidget(
                             id: const Uuid().v4(),
                           ), */
-                      ],
-                    );
-                  }
-                  if (post is CurrentStatusPost) {
+                    ],
+                  );
+
+                  /*if (post is CurrentStatusPost) {
                     return CurrentStatusPostWidget(
                       postRef: post,
                     );
-                  }
+                  } */
                   return const SizedBox();
                 },
               ),
@@ -111,7 +107,7 @@ class _FollowingPostsThreadState extends ConsumerState<FollowingPostsThread>
     );
   }
 
-  navToEditCurrentStatus(BuildContext context, WidgetRef ref, UserAccount me) {
+  /*navToEditCurrentStatus(BuildContext context, WidgetRef ref, UserAccount me) {
     ref.read(currentStatusStateProvider.notifier).state = me.currentStatus;
     Navigator.push(
       context,
@@ -119,7 +115,7 @@ class _FollowingPostsThreadState extends ConsumerState<FollowingPostsThread>
         const EditCurrentStatusScreen(),
       ),
     );
-  }
+  } */
 
   /*Widget _buildCurrentStatus(
       BuildContext context, WidgetRef ref, UserAccount me) {

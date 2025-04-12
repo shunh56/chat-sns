@@ -1,3 +1,4 @@
+import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/posts/timeline_post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -8,7 +9,7 @@ class Activity {
   final List<String> userIds;
   final Timestamp updatedAt;
   final bool isSeen;
-  late final PostBase post;
+  late final Post post;
 
   Activity({
     required this.id,

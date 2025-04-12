@@ -1,4 +1,4 @@
-import 'package:app/core/utils/theme.dart';
+/*import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
@@ -112,7 +112,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
     );
   }
 
-  navToEditCurrentStatus(BuildContext context, WidgetRef ref, UserAccount me) {
+ /* navToEditCurrentStatus(BuildContext context, WidgetRef ref, UserAccount me) {
     ref.read(currentStatusStateProvider.notifier).state = me.currentStatus;
     Navigator.push(
       context,
@@ -120,7 +120,7 @@ class _FriendsPostsThreadState extends ConsumerState<FriendsPostsThread>
         const EditCurrentStatusScreen(),
       ),
     );
-  }
+  } */
 
   /*Widget _buildCurrentStatus(
       BuildContext context, WidgetRef ref, UserAccount me) {
@@ -1015,4 +1015,4 @@ class CurrentStatusStories extends ConsumerWidget {
     );
   }
 }
- */
+ */ */

@@ -1,5 +1,4 @@
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/usecase/user_usecase.dart';
 import 'package:flutter/material.dart';
@@ -99,7 +98,7 @@ class _SearchParamsScreenState extends ConsumerState<SearchParamsScreen> {
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     final user = users[index];
-                    return UserRequestWidget(user: user);
+                    return Container(); //UserRequestWidget(user: user);
                   },
                 );
               },

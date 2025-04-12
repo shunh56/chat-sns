@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
@@ -7,20 +6,13 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_icon.dart';
-import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/profile_page/edit_bio_screen.dart';
-import 'package:app/presentation/pages/profile_page/edit_current_status_screen.dart';
-import 'package:app/presentation/pages/profile_page/edit_top_friends.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/pages/sub_pages/user_profile_page/user_posts_list.dart';
-import 'package:app/presentation/phase_01/friends_screen.dart';
-import 'package:app/presentation/providers/provider/followers_list_notifier.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/friends_notifier.dart';
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
+import 'package:app/presentation/providers/new/providers/follow/followers_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -633,7 +625,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  navToEditCurrentStatus(BuildContext context, WidgetRef ref, UserAccount me) {
+  /*navToEditCurrentStatus(BuildContext context, WidgetRef ref, UserAccount me) {
     ref.read(currentStatusStateProvider.notifier).state = me.currentStatus;
     Navigator.push(
       context,
@@ -651,7 +643,7 @@ class ProfileScreen extends ConsumerWidget {
         builder: (_) => const EditTopFriendsScreen(),
       ),
     );
-  }
+  } 
 
   Widget _buildCurrentStatus(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount me) {
@@ -1281,6 +1273,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+*/
   Widget box(CanvasTheme canvasTheme, Widget child, Function onPressed,
       {bool isEditable = true}) {
     return Stack(
@@ -1415,7 +1408,7 @@ class FollowStatsSection extends ConsumerWidget {
     final followings =
         ref.watch(followingListNotifierProvider).asData?.value ?? [];
     final followers =
-        ref.watch(followersListNotifierProvider).asData?.value ?? [];
+        ref.watch(followersUserStreamProvider(null)).asData?.value ?? [];
 
     return GestureDetector(
       onTap: () {

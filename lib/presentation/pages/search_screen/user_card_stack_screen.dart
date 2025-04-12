@@ -5,7 +5,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/navigation/navigator.dart';
-import 'package:app/presentation/providers/provider/following_list_notifier.dart';
+import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
