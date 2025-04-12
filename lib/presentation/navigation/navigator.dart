@@ -98,8 +98,8 @@ class NavigationRouter {
   goToPost(Post post, UserAccount user) {
     Navigator.push(
       context,
-      PageTransitionMethods.slideRight(
-        PostScreen(
+      MaterialPageRoute(
+        builder: (_) => PostScreen(
           postRef: post,
           user: user,
         ),

@@ -131,7 +131,7 @@ class ThemeSize {
   double get appbarHeight => kToolbarHeight - 12;
 
   //appbar, titles, regularpadding
-  double get horizontalPadding => size.width * 0.04;
+  double get horizontalPadding => size.width * 0.02;
 
   double get verticalSpaceLarge => 24;
   double get verticalSpaceMedium => 12;

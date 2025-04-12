@@ -43,99 +43,89 @@ class PostWidget extends ConsumerWidget {
       return const SizedBox();
     }
 
-    return InkWell(
-      onTap: () {
+    return GestureDetector(
+      onTap: (){
         ref.read(navigationRouterProvider(context)).goToPost(post, user);
       },
-      child: Column(
-        children: [
-          /* Container(
-            height: 1,
-            color: const Color(0xFF262626),
-          ), */
-          // const Gap(16),
-          Container(
-            margin: const EdgeInsets.only(
-              top: 6,
-              bottom: 6,
-              left: 8,
-              right: 8,
-            ),
-            padding: const EdgeInsets.only(
-              top: 12,
-              left: 12,
-              right: 12,
-              bottom: 12,
-            ),
-            //padding: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              color: ThemeColor.cardColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: ThemeColor.cardBorderColor,
-                width: 1.2,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Container(
+        margin: const EdgeInsets.only(
+          top: 6,
+          bottom: 6,
+          left: 8,
+          right: 8,
+        ),
+        padding: const EdgeInsets.only(
+          top: 12,
+          left: 12,
+          right: 12,
+          bottom: 12,
+        ),
+        //padding: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: ThemeColor.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: ThemeColor.cardBorderColor,
+            width: 1.2,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ユーザー名と時間
+      
+            Row(
               children: [
-                // ユーザー名と時間
-
-                Row(
-                  children: [
-                    UserIcon(
-                      user: user,
-                      width: 40,
-                      isCircle: true,
-                    ),
-                    const Gap(12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            user.name,
-                            style: textStyle.w600(
-                              fontSize: 14,
-                              height: 1.0,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const Gap(4),
-                          Text(
-                            post.createdAt.xxAgo,
-                            style: textStyle.w400(
-                              fontSize: 12,
-                              color: const Color(0xFF9CA3AF),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                UserIcon(
+                  user: user,
+                  width: 28,
+                  isCircle: true,
                 ),
-
-                const Gap(8),
-                Text(
-                  "THIS IS TITLE",
-                  style: textStyle.w700(
-                    fontSize: 16,
+                const Gap(12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.name,
+                        style: textStyle.w600(
+                          fontSize: 12,
+                          height: 1.0,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Gap(2),
+                      Text(
+                        post.createdAt.xxAgo,
+                        style: textStyle.w400(
+                          fontSize: 10,
+                          color: const Color(0xFF9CA3AF),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const Gap(6),
-                // 投稿テキスト
-                BuildText(text: post.text),
-
-                // 画像
-                if (post.mediaUrls.isNotEmpty) const Gap(8),
-                _buildImages(context, post),
-                _buildActionButton(context, ref, post, user),
-                // アクション
               ],
             ),
-          ),
-          // const Gap(16),
-        ],
+      
+            const Gap(8),
+            Text(
+              post.title,
+              style: textStyle.w700(
+                fontSize: 16,
+              ),
+            ),
+            const Gap(6),
+            // 投稿テキスト
+            if (post.text != null) BuildText(text: post.text!),
+      
+            // 画像
+            if (post.mediaUrls.isNotEmpty) const Gap(8),
+            _buildImages(context, post),
+            _buildActionButton(context, ref, post, user),
+            // アクション
+          ],
+        ),
       ),
     );
   }
@@ -297,7 +287,9 @@ class PostWidget extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           child: AspectRatio(
             aspectRatio: post.aspectRatios.isNotEmpty
-                ? min(post.aspectRatios[0], 5 / 4)
+                ? post.aspectRatios[0] < 1
+                    ? min(1 / post.aspectRatios[0], 16 / 9)
+                    : max(1 / post.aspectRatios[0], 4 / 5)
                 : 16 / 9,
             child: CachedImage.postImage(
               post.mediaUrls[0],
@@ -758,10 +750,12 @@ class BuildText extends ConsumerWidget {
     super.key,
     required this.text,
     this.isDynamicSize = false, // 動的サイズの切り替えフラグ
+    this.isShort = true,
   });
 
   final String text;
   final bool isDynamicSize;
+  final bool isShort;
 
   static final urlPattern = RegExp(
     r'https?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?',
@@ -771,7 +765,7 @@ class BuildText extends ConsumerWidget {
   // 固定サイズの設定
   static const TextConfig fixedConfig = TextConfig(
     fontSize: 14.0,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w400,
     lineHeight: 1.4,
   );
 
@@ -871,7 +865,7 @@ class BuildText extends ConsumerWidget {
 
     return RichText(
       text: TextSpan(children: spans),
-      maxLines: 2,
+      maxLines: isShort ? 2 : null,
     );
   }
 }

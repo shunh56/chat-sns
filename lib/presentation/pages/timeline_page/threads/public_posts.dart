@@ -37,7 +37,6 @@ class _PublicPostsThreadState extends ConsumerState<PublicPostsThread>
             itemCount: list.length,
             itemBuilder: (context, index) {
               final post = list[index];
-
               return PostWidget(postRef: post);
             },
           ),

@@ -19,6 +19,7 @@ import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/presentation/providers/provider/posts/replies.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 
 final inputTextProvider = StateProvider.autoDispose((ref) => "");
@@ -35,25 +36,28 @@ class PostScreen extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id]!;
     final controller = ref.watch(controllerProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "${user.name}の投稿",
-          style: textStyle.appbarText(isSmall: true),
-        ),
-        leading: GestureDetector(
-          onTap: () {
-            primaryFocus?.unfocus();
-            Navigator.pop(context);
-          },
-          child: const Icon(
-            Icons.arrow_back_ios,
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: Text(
+              post.title,
+              style: textStyle.w700(
+                fontSize: 16,
+              ),
+            ),
+            titleSpacing: 0,
+            leading: GestureDetector(
+              onTap: () {
+                primaryFocus?.unfocus();
+                Navigator.pop(context);
+              },
+              child: const Icon(
+                Icons.arrow_back_ios,
+              ),
+            ),
           ),
-        ),
-      ),
-      body: Stack(
-        children: [
-          Column(
+          body: Column(
             children: [
               Expanded(
                 child: ListView(
@@ -154,249 +158,232 @@ class PostScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const HeartAnimationArea(),
-        ],
-      ),
+        ),
+        const HeartAnimationArea(),
+      ],
     );
   }
 
   _buildPostSection(BuildContext context, WidgetRef ref, Post post) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final heartAnimationNotifier = ref.read(heartAnimationNotifierProvider);
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onDoubleTapDown: (details) {
-        ref
-            .read(allPostsNotifierProvider.notifier)
-            .incrementLikeCount(user, post);
-        heartAnimationNotifier.showHeart(
-          context,
-          details.globalPosition.dx,
-          details.globalPosition.dy - themeSize.appbarHeight,
-          (details.globalPosition.dy -
-              themeSize.appbarHeight -
-              details.localPosition.dy),
-        );
-      },
+
+    return Container(
+      padding: const EdgeInsets.only(
+        top: 12,
+        left: 12,
+        right: 12,
+        bottom: 12,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              top: 12,
-              left: 12,
-              right: 12,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                UserIcon(
-                  user: user,
-                  width: 40,
-                  isCircle: true,
-                ),
-                /*  UserIconPostIcon(user: user), */
-                const Gap(12),
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Gap(4),
-                            Row(
-                              children: [
-                                Text(
-                                  user.name,
-                                  style: textStyle.w600(
-                                    fontSize: 15,
-                                    height: 1.0,
-                                  ),
-                                ),
-                                const Gap(4),
-                                /*Icon(
-                                  size: 12,
-                                  post.isPublic
-                                      ? Icons.public_outlined
-                                      : Icons.lock_outline,
-                                  color: Colors.white,
-                                ), */
-                                Text(
-                                  "・${post.createdAt.xxAgo}",
-                                  style: textStyle.w600(
-                                    fontSize: 12,
-                                    color: ThemeColor.subText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Gap(4),
-                            BuildText(text: post.text)
-                          ],
-                        ),
+          Row(
+            children: [
+              UserIcon(
+                user: user,
+                width: 40,
+                isCircle: true,
+              ),
+              const Gap(12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user.name,
+                      style: textStyle.w600(
+                        fontSize: 14,
+                        height: 1.0,
+                        color: Colors.white,
                       ),
-                    ],
-                  ),
+                    ),
+                    const Gap(4),
+                    Text(
+                      post.createdAt.xxAgo,
+                      style: textStyle.w400(
+                        fontSize: 12,
+                        color: const Color(0xFF9CA3AF),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+            ],
+          ),
+          const Gap(8),
+          Text(
+            post.title,
+            style: textStyle.w700(
+              fontSize: 16,
             ),
           ),
+          const Gap(6),
+          if (post.text != null)
+            BuildText(
+              text: post.text!,
+              isShort: false,
+            ),
+          if (post.mediaUrls.isNotEmpty) const Gap(8),
           _buildImages(context, post),
-          const Gap(8),
         ],
       ),
     );
   }
 
   _buildImages(BuildContext context, Post post) {
-    if ((post.mediaUrls.isNotEmpty)) {
-      return (post.mediaUrls.length == 1)
-          ? Container(
-              width: MediaQuery.sizeOf(context).width,
-              margin: const EdgeInsets.only(
-                top: 8,
-                left: 12 + 40 + 12,
-                right: 12,
+    if (post.mediaUrls.isEmpty) return const SizedBox();
+
+    if (post.mediaUrls.length == 1) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            PageTransitionMethods.fadeIn(
+              PostImageHero(
+                imageUrls: post.mediaUrls,
+                aspectRatios: post.aspectRatios,
+                initialIndex: 0,
               ),
-              child: FadeTransitionWidget(
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageTransitionMethods.fadeIn(
-                        PostImageHero(
-                          imageUrls: post.mediaUrls,
-                          aspectRatios: post.aspectRatios,
-                          initialIndex: 0,
-                          // tag: 'imageHero-${post.mediaUrls[0]}',
-                        ),
-                      ),
-                    );
-                  },
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    // child: Hero(
-                    // tag: 'imageHero-${post.mediaUrls[0]}0',
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width -
-                          (8 * 2 + 48 + 12 + 4),
-                      constraints: BoxConstraints.expand(
-                        height: (MediaQuery.sizeOf(context).width - 88) *
-                            (post.aspectRatios.isNotEmpty
-                                ? min(post.aspectRatios[0], 5 / 4)
-                                : 1),
-                      ),
-                      child: CachedImage.postImage(
-                        post.mediaUrls[0],
-                        ms: 100,
-                      ),
-                    ),
-                    //  ),
+            ),
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: AspectRatio(
+            aspectRatio: post.aspectRatios.isNotEmpty
+                ? post.aspectRatios[0] < 1
+                    ? min(1 / post.aspectRatios[0], 16 / 9)
+                    : max(1 / post.aspectRatios[0], 4 / 5)
+                : 16 / 9,
+            child: CachedImage.postImage(
+              post.mediaUrls[0],
+              ms: 100,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 200,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: post.mediaUrls.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                PageTransitionMethods.fadeIn(
+                  PostImageHero(
+                    imageUrls: post.mediaUrls,
+                    aspectRatios: post.aspectRatios,
+                    initialIndex: index,
                   ),
                 ),
-              ),
-            )
-          : SizedBox(
-              width: MediaQuery.sizeOf(context).width,
-              height: 200,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: post.mediaUrls.length,
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.only(
-                  top: 8,
-                  left: 12 + 40 + 12,
-                  right: 4,
+              );
+            },
+            child: Container(
+              width: 160,
+              margin: EdgeInsets.only(
+                  right: index < post.mediaUrls.length - 1 ? 8 : 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedImage.postImage(
+                  post.mediaUrls[index],
                 ),
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    child: FadeTransitionWidget(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            PageTransitionMethods.fadeIn(
-                              PostImageHero(
-                                imageUrls: post.mediaUrls,
-                                aspectRatios: post.aspectRatios,
-                                initialIndex: index,
-                                //tag: 'imageHero-${post.mediaUrls[0]}',
-                              ),
-                            ),
-                          );
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          // child: Hero(
-                          //tag:'imageHero-$index-${post.mediaUrls[index]}$index',
-                          child: SizedBox(
-                            width: 160,
-                            child: CachedImage.postImage(
-                              post.mediaUrls[index],
-                            ),
-                          ),
-                          //   ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
               ),
-            );
-    } else {
-      return const Gap(0);
-    }
+            ),
+          );
+        },
+      ),
+    );
   }
 
   _buildPostBottomSection(BuildContext context, WidgetRef ref, Post post) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    return Padding(
+    final heartAnimationNotifier = ref.read(heartAnimationNotifierProvider);
+
+    return Container(
       padding: const EdgeInsets.only(
-        top: 8,
+        top: 12,
+        left: 12,
         right: 12,
-        bottom: 8,
+        bottom: 12,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (post.replyCount > 0)
-            Row(
-              children: [
-                Text(
-                  post.replyCount.toString(),
-                  style: const TextStyle(
-                    color: ThemeColor.text,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+          Row(
+            children: [
+              GestureDetector(
+                onTapDown: (details) {
+                  ref
+                      .read(allPostsNotifierProvider.notifier)
+                      .incrementLikeCount(user, post);
+                  heartAnimationNotifier.showHeart(
+                    context,
+                    details.globalPosition.dx,
+                    details.globalPosition.dy,
+                    (details.globalPosition.dy - details.localPosition.dy),
+                  );
+                },
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 2),
+                      child: Icon(
+                        Icons.favorite_border_rounded,
+                        color: ThemeColor.cardSecondaryColor,
+                        size: 20,
+                      ),
+                    ),
+                    const Gap(4),
+                    SizedBox(
+                      width: 48,
+                      child: Text(
+                        post.likeCount.toString(),
+                        style: textStyle.numText(
+                          fontSize: 14,
+                          color: ThemeColor.cardSecondaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const Gap(4),
-                Text(
-                  "コメント",
-                  style: textStyle.w600(color: ThemeColor.subText),
+              ),
+              GestureDetector(
+                onTap: () {
+                  // スクロールしてコメントセクションに移動する処理をここに追加できます
+                },
+                child: Row(
+                  children: [
+                    SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: SvgPicture.asset(
+                        "assets/images/icons/chat.svg",
+                        color: ThemeColor.cardSecondaryColor,
+                      ),
+                    ),
+                    const Gap(8),
+                    SizedBox(
+                      width: 48,
+                      child: Text(
+                        post.replyCount.toString(),
+                        style: textStyle.numText(
+                          fontSize: 14,
+                          color: ThemeColor.cardSecondaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          if (post.likeCount > 0)
-            Row(
-              children: [
-                const Gap(12),
-                GradientText(
-                  text: post.likeCount.toString(),
-                ),
-                const Gap(4),
-                Text(
-                  "いいね",
-                  style: textStyle.w600(color: ThemeColor.subText),
-                ),
-              ],
-            ),
-          const Gap(12),
+              ),
+            ],
+          ),
           GestureDetector(
             onTap: () {
               PostBottomModelSheet(context).openPostAction(
@@ -407,10 +394,10 @@ class PostScreen extends ConsumerWidget {
             },
             child: const Icon(
               Icons.more_horiz_rounded,
-              color: ThemeColor.subText,
+              color: ThemeColor.cardSecondaryColor,
               size: 20,
             ),
-          )
+          ),
         ],
       ),
     );

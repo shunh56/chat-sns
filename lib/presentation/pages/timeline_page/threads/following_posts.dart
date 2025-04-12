@@ -71,22 +71,21 @@ class _FollowingPostsThreadState extends ConsumerState<FollowingPostsThread>
                 itemBuilder: (context, index) {
                   final post = list[index];
 
-                  if (post is Post) {
-                    return Column(
-                      children: [
-                        PostWidget(postRef: post),
-                        /* if (index != 0 && index % 10 == 0)
+                  return Column(
+                    children: [
+                      PostWidget(postRef: post),
+                      /* if (index != 0 && index % 10 == 0)
                           NativeAdWidget(
                             id: const Uuid().v4(),
                           ), */
-                      ],
-                    );
-                  }
-                  if (post is CurrentStatusPost) {
+                    ],
+                  );
+
+                  /*if (post is CurrentStatusPost) {
                     return CurrentStatusPostWidget(
                       postRef: post,
                     );
-                  }
+                  } */
                   return const SizedBox();
                 },
               ),
