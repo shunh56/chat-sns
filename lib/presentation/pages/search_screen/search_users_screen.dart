@@ -5,11 +5,12 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/community.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/pages/search_screen/community_detail_screen.dart';
+import 'package:app/presentation/pages/search_screen/search_params_screen.dart';
+import 'package:app/presentation/pages/search_screen/user_card_stack_screen.dart';
 import 'package:app/presentation/pages/search_screen/widgets/popular_hashtag_section.dart';
-import 'package:app/presentation/phase_01/community_detail_screen.dart';
-import 'package:app/presentation/phase_01/search_params_screen.dart';
-import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
-import 'package:app/presentation/phase_01/user_card_stack_screen.dart';
+import 'package:app/presentation/pages/search_screen/widgets/tiles.dart';
+
 import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/provider/users/online_users.dart';

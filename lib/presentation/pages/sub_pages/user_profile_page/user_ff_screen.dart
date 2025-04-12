@@ -1,7 +1,7 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/phase_01/search_screen/widgets/tiles.dart';
+import 'package:app/presentation/pages/search_screen/widgets/tiles.dart';
 
 import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/new/providers/follow/followers_list_notifier.dart';
