@@ -123,6 +123,10 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
   bool _isProcessingSwipe = false; // スワイプ処理中フラグ
   final _cardAnimationDuration = const Duration(milliseconds: 300);
 
+  // アニメーションリスナーを格納する変数
+  VoidCallback? _animationListener;
+  AnimationStatusListener? _statusListener;
+
   @override
   void initState() {
     super.initState();
@@ -136,20 +140,9 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
     _animationController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
 
-    _animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        // アニメーション完了時にスワイプ処理を実行
-        _handleSwipeComplete();
-
-        // アニメーション変数をリセット（次のアニメーションのため）
-        setState(() {
-          _position = Offset.zero;
-          _angle = 0;
-          _status = CardStatus.idle;
-        });
-        _animationController.reset();
-      }
-    });
+    // リスナー変数の初期化
+    _animationListener = null;
+    _statusListener = null;
 
     // 画像のプリロード完了を模擬
     Future.delayed(const Duration(milliseconds: 800), () {
@@ -161,15 +154,25 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
   @override
   void dispose() {
+    // リスナー削除の追加
+    if (_animationListener != null) {
+      _animationController.removeListener(_animationListener!);
+    }
+
+    if (_statusListener != null) {
+      _animationController.removeStatusListener(_statusListener!);
+    }
+
     _animationController.dispose();
     _confettiController.dispose();
     super.dispose();
   }
 
-  // スワイプ完了処理（カードアニメーション完了後に呼ばれる）
+// スワイプ完了処理（カードアニメーション完了後に呼ばれる）
   void _handleSwipeComplete() async {
     if (_remainingUsers.isEmpty || _isProcessingSwipe) return;
 
+    // 処理中フラグをセット
     setState(() {
       _isProcessingSwipe = true;
     });
@@ -201,14 +204,27 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
     // 次のカードがアニメーションで前に移動する時間を確保
     await Future.delayed(const Duration(milliseconds: 250));
 
-    // カードを削除
-    setState(() {
-      _remainingUsers.removeAt(0);
-      _isProcessingSwipe = false;
-    });
+    // アニメーション変数をリセット
+    if (mounted) {
+      setState(() {
+        _position = Offset.zero;
+        _angle = 0;
+        _status = CardStatus.idle;
+
+        // カードを削除
+        if (_remainingUsers.isNotEmpty) {
+          _remainingUsers.removeAt(0);
+        }
+
+        _isProcessingSwipe = false;
+      });
+    }
+
+    // アニメーションをリセット
+    _animationController.reset();
 
     // すべてのカードをスワイプし終わった場合
-    if (_remainingUsers.isEmpty) {
+    if (_remainingUsers.isEmpty && mounted) {
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) {
           ref
@@ -230,14 +246,47 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
     final targetX =
         direction > 0 ? _screenSize.width + 200.0 : -_screenSize.width - 200.0;
 
-    _animationController.addListener(() {
-      setState(() {
-        _position = Offset(targetX * _animationController.value, _position.dy);
-        _angle = direction * 0.5 * _animationController.value;
-      });
-    });
+    // 既存のリスナーを削除
+    if (_animationListener != null) {
+      _animationController.removeListener(_animationListener!);
+      _animationListener = null;
+    }
 
-    _animationController.forward();
+    if (_statusListener != null) {
+      _animationController.removeStatusListener(_statusListener!);
+      _statusListener = null;
+    }
+
+    // 新しいアニメーションリスナーを作成
+    _animationListener = () {
+      if (mounted) {
+        setState(() {
+          _position =
+              Offset(targetX * _animationController.value, _position.dy);
+          _angle = direction * 0.5 * _animationController.value;
+        });
+      }
+    };
+
+    // ステータスリスナーを作成
+    final threshold = _screenSize.width * _swipeThreshold;
+
+    // 閾値を超えたかチェック - 実際の判定はここで確定する
+
+    _statusListener = (status) {
+      if (status == AnimationStatus.completed &&
+          _position.dx.abs() > threshold) {
+        // アニメーション完了後に次のカードへの移行処理
+        _handleSwipeComplete();
+      }
+    };
+
+    // リスナーを追加
+    _animationController.addListener(_animationListener!);
+    _animationController.addStatusListener(_statusListener!);
+
+    // アニメーション開始
+    _animationController.forward(from: 0.0);
   }
 
   @override
@@ -339,31 +388,76 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
       final targetX =
           isRight ? _screenSize.width + 200.0 : -_screenSize.width - 200.0;
 
-      _animationController.addListener(() {
-        setState(() {
-          _position = Offset(
-              _position.dx +
-                  (targetX - _position.dx) * _animationController.value,
-              _position.dy);
-        });
-      });
+      // 既存のリスナーを削除
+      if (_animationListener != null) {
+        _animationController.removeListener(_animationListener!);
+        _animationListener = null;
+      }
+
+      if (_statusListener != null) {
+        _animationController.removeStatusListener(_statusListener!);
+        _statusListener = null;
+      }
 
       // 判定を確定
       _status = isRight ? CardStatus.like : CardStatus.nope;
-      _animationController.forward();
+
+      // 新しいアニメーションリスナーを作成
+      _animationListener = () {
+        if (mounted) {
+          setState(() {
+            _position = Offset(
+                _position.dx +
+                    (targetX - _position.dx) * _animationController.value,
+                _position.dy);
+          });
+        }
+      };
+
+      // ステータスリスナーを作成
+      _statusListener = (status) {
+        if (status == AnimationStatus.completed) {
+          // アニメーション完了後に次のカードへの移行処理
+          _handleSwipeComplete();
+        }
+      };
+
+      // リスナーを追加
+      _animationController.addListener(_animationListener!);
+      _animationController.addStatusListener(_statusListener!);
+
+      // アニメーション開始
+      _animationController.forward(from: 0.0);
     } else {
-      // スワイプが不成立 - 元の位置に戻り、判定もリセット
-      _animationController.addListener(() {
-        setState(() {
-          _position = Offset(_position.dx * (1 - _animationController.value),
-              _position.dy * (1 - _animationController.value));
-          _angle = _angle * (1 - _animationController.value);
-        });
-      });
+      // スワイプが不成立 - 元の位置に戻るアニメーション
+
+      // 既存のリスナーを削除
+      if (_animationListener != null) {
+        _animationController.removeListener(_animationListener!);
+        _animationListener = null;
+      }
+
+      // 新しいリスナーを作成
+      _animationListener = () {
+        if (mounted) {
+          setState(() {
+            // 現在位置から徐々に元の位置(0,0)に戻る
+            _position = Offset(_position.dx * (1 - _animationController.value),
+                _position.dy * (1 - _animationController.value));
+            // 角度も徐々に0に戻す
+            _angle = _angle * (1 - _animationController.value);
+          });
+        }
+      };
+
+      // リスナーを追加
+      _animationController.addListener(_animationListener!);
 
       // 判定をリセット
       _status = CardStatus.idle;
-      _animationController.forward();
+
+      // アニメーション開始
+      _animationController.forward(from: 0.0);
     }
   }
 
@@ -454,8 +548,8 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
                                 duration: const Duration(milliseconds: 200),
                                 curve: Curves.easeOutCubic,
                                 top: 40,
-                                right: _status == CardStatus.like ? 20 : null,
-                                left: _status == CardStatus.nope ? 20 : null,
+                                left: _status == CardStatus.like ? 20 : null,
+                                right: _status == CardStatus.nope ? 20 : null,
                                 child: AnimatedOpacity(
                                   duration: const Duration(milliseconds: 200),
                                   opacity: 1.0,
