@@ -138,6 +138,15 @@ class AllUsersNotifier extends _$AllUsersNotifier {
     return res;
   }
 
+  Future<List<UserAccount>> getUsersByHashTag(String tagId,
+      {bool oneOnly = false}) async {
+    final users =
+        await ref.read(userUsecaseProvider).searchUserByTag(tagId, oneOnly);
+    addUserAccounts(users);
+    final res = filterUsers(users);
+    return res;
+  }
+
   Future<List<UserAccount>> getNewUsers({Timestamp? createdAt}) async {
     final users =
         await ref.read(userUsecaseProvider).getNewUsers(createdAt: createdAt);

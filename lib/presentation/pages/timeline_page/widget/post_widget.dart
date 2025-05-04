@@ -44,7 +44,7 @@ class PostWidget extends ConsumerWidget {
     }
 
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         ref.read(navigationRouterProvider(context)).goToPost(post, user);
       },
       child: Container(
@@ -73,7 +73,7 @@ class PostWidget extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ユーザー名と時間
-      
+
             Row(
               children: [
                 UserIcon(
@@ -81,7 +81,7 @@ class PostWidget extends ConsumerWidget {
                   width: 28,
                   isCircle: true,
                 ),
-                const Gap(12),
+                const Gap(8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,7 +107,7 @@ class PostWidget extends ConsumerWidget {
                 ),
               ],
             ),
-      
+
             const Gap(8),
             Text(
               post.title,
@@ -118,7 +118,7 @@ class PostWidget extends ConsumerWidget {
             const Gap(6),
             // 投稿テキスト
             if (post.text != null) BuildText(text: post.text!),
-      
+
             // 画像
             if (post.mediaUrls.isNotEmpty) const Gap(8),
             _buildImages(context, post),

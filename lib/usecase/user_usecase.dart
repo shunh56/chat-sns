@@ -38,8 +38,16 @@ class UserUsecase {
     return _repository.searchUserByName(name);
   }
 
-  Future<List<UserAccount>> searchUserByUsername(String username) async {
-    return _repository.searchUserByUsername(username);
+  Future<List<UserAccount>> searchUserByUsername(
+    String username,
+  ) async {
+    return _repository.searchUserByUsername(
+      username,
+    );
+  }
+
+  Future<List<UserAccount>> searchUserByTag(String tagId, bool oneOnly) async {
+    return _repository.searchUserByTag(tagId, oneOnly);
   }
 
   createUser(UserAccount user) {

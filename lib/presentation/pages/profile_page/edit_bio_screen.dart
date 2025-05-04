@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/permissions/photo_permission.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/new/presentation/pages/profile/subpages/select_hashtag_screen.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/dialogs/dialogs.dart';
+import 'package:app/presentation/components/hasgtag_widgets.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
 import 'package:app/presentation/providers/notifier/image/image_processor.dart';
 import 'package:app/usecase/image_uploader_usecase.dart';
@@ -175,10 +177,6 @@ class EditProfileScreens extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           "プロフィールを編集",
           style: TextStyle(color: Colors.white, fontSize: 17),
@@ -396,97 +394,32 @@ class EditProfileScreens extends ConsumerWidget {
                     runSpacing: 8,
                     children: [
                       ...tags.map(
-                        (tag) => Container(
+                        (id) => HashtagChip(tagId: id),
+                      ),
+                      GestureDetector(
+                        onTap: () async {
+                          final currentTags = ref.read(tagsStateProvider);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SelectHashtagScreen(
+                                beforeTags: currentTags,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
                             color: ThemeColor.accent,
-                            borderRadius: BorderRadius.circular(100),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                tag,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              const Gap(4),
-                              GestureDetector(
-                                onTap: () {
-                                  tagsNotifier.state = [...tags]..remove(tag);
-                                },
-                                child: const Icon(
-                                  Icons.close,
-                                  color: ThemeColor.white,
-                                  size: 18,
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: Text(tags.length < 5 ? '+ タグを追加' : 'タグを編集'),
                         ),
                       ),
-                      if (tags.length < 3)
-                        GestureDetector(
-                          onTap: () async {
-                            final controller = TextEditingController();
-                            final result = await showDialog<String>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                backgroundColor: Colors.grey.shade900,
-                                title: const Text(
-                                  'タグを追加',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                content: TextField(
-                                  autofocus: true,
-                                  style: const TextStyle(color: Colors.white),
-                                  controller: controller,
-                                  decoration: InputDecoration(
-                                    hintText: 'タグを入力',
-                                    hintStyle:
-                                        TextStyle(color: Colors.grey.shade600),
-                                  ),
-                                  onSubmitted: (value) =>
-                                      Navigator.of(context).pop(value),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                    child: const Text('キャンセル'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(
-                                      controller.text,
-                                    ),
-                                    child: const Text('追加'),
-                                  ),
-                                ],
-                              ),
-                            );
-                            DebugPrint("result : $result");
-                            if (result != null && result.isNotEmpty) {
-                              if (tags.length < 3 && !tags.contains(result)) {
-                                final newTags =
-                                    List<String>.from([...tags, result]);
-                                tagsNotifier.state = newTags;
-                              }
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: ThemeColor.accent,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text('+ タグを追加'),
-                          ),
-                        ),
                     ],
                   ),
                 ],

@@ -1,7 +1,7 @@
-
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/datasource/local/hashtags.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.dart';
 import 'package:app/presentation/components/image/image.dart';
@@ -396,7 +396,7 @@ class ProfileScreen extends ConsumerWidget {
                                 runSpacing: 8,
                                 children: me.tags
                                     .map(
-                                      (tag) => Container(
+                                      (id) => Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12,
                                           vertical: 6,
@@ -407,10 +407,9 @@ class ProfileScreen extends ConsumerWidget {
                                               BorderRadius.circular(16),
                                         ),
                                         child: Text(
-                                          tag,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
+                                          getTextFromId(id)!,
+                                          style: textStyle.w500(
+                                            color: ThemeColor.textSecondary,
                                           ),
                                         ),
                                       ),

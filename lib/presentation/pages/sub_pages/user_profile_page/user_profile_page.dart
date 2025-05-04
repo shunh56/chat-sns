@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/datasource/local/hashtags.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/user_icon.dart';
@@ -587,7 +588,7 @@ class UserProfileScreen extends ConsumerWidget {
                             runSpacing: 8,
                             children: user.tags
                                 .map(
-                                  (tag) => Container(
+                                  (tagId) => Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 12,
                                       vertical: 6,
@@ -597,10 +598,9 @@ class UserProfileScreen extends ConsumerWidget {
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     child: Text(
-                                      tag,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
+                                      getTextFromId(tagId)!,
+                                      style: textStyle.w500(
+                                        color: ThemeColor.textSecondary,
                                       ),
                                     ),
                                   ),
@@ -938,7 +938,6 @@ class UserProfileScreen extends ConsumerWidget {
       },
     );
   }
-
 
   Widget _buildTopActions(
       BuildContext context, WidgetRef ref, UserAccount user) {
@@ -1636,8 +1635,6 @@ class UserProfileScreen extends ConsumerWidget {
     );
   }
 }
-
-
 
 class FollowStatsSection extends ConsumerWidget {
   const FollowStatsSection({super.key, required this.user});

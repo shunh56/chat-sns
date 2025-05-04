@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
@@ -11,6 +12,7 @@ import 'package:app/presentation/pages/timeline_page/threads/public_posts.dart';
 import 'package:app/new/presentation/pages/main_page.dart';
 import 'package:app/presentation/providers/provider/activities_list_notifier.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
+import 'package:app/repository/user_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';

@@ -35,10 +35,10 @@ class FollowingPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
     List<Post> posts = [];
     final asyncValue = ref.read(followingListNotifierProvider);
     asyncValue.maybeWhen(
-      data: (relations) async {
+      data: (users) async {
         if (initialized) return;
         initialized = true;
-        final friendIds = relations.map((relation) => relation.userId);
+        final friendIds = users.map((relation) => relation.userId);
         List<Future<List<Post>>> futures = [];
         final userIds = [...friendIds, myId];
         futures.add(postUsecase.getPostFromUserIds(userIds));

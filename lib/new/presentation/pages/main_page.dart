@@ -10,7 +10,7 @@ import 'package:app/presentation/navigation/navigator.dart';
 import 'package:app/presentation/navigation/page_transition.dart';
 import 'package:app/presentation/pages/chat_screen/chat_screen.dart';
 import 'package:app/presentation/pages/profile_page/profile_page.dart';
-import 'package:app/presentation/pages/search_screen/search_users_screen.dart';
+import 'package:app/new/presentation/pages/search/search_users_screen.dart';
 import 'package:app/presentation/pages/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/timeline_page/voice_chat_screen.dart';

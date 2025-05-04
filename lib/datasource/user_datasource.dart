@@ -20,6 +20,7 @@ class UserDatasource {
   UserDatasource(this._auth, this._firestore);
 
   final collectionName = "users";
+
   Future<QuerySnapshot<Map<String, dynamic>>> getOnlineUsers() async {
     return _firestore
         .collection(collectionName)
@@ -102,6 +103,7 @@ class UserDatasource {
         .collection("users")
         .where('name', isGreaterThanOrEqualTo: name)
         .where('name', isLessThanOrEqualTo: '$name\uf8ff')
+        .limit(qLimit)
         .get();
   }
 
@@ -111,6 +113,23 @@ class UserDatasource {
         .collection("users")
         .where('username', isGreaterThanOrEqualTo: username)
         .where('username', isLessThanOrEqualTo: '$username\uf8ff')
+        .limit(qLimit)
+        .get();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> searchUserByTag(
+      String tagId, bool oneOnly) async {
+    if (oneOnly) {
+      return _firestore
+          .collection("users")
+          .where("profile.tags", arrayContains: tagId)
+          .limit(2)
+          .get();
+    }
+    return _firestore
+        .collection("users")
+        .where("profile.tags", arrayContains: tagId)
+        .limit(qLimit)
         .get();
   }
 

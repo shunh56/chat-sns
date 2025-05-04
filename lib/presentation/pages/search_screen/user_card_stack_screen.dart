@@ -1,5 +1,6 @@
 // 改善版 - 独立した状態管理を持つカードスタックUI
 import 'dart:math';
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
@@ -277,6 +278,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
       if (status == AnimationStatus.completed &&
           _position.dx.abs() > threshold) {
         // アニメーション完了後に次のカードへの移行処理
+        DebugPrint("statuslistener end with threshold exceed");
         _handleSwipeComplete();
       }
     };
@@ -383,7 +385,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
     // 閾値を超えたかチェック - 実際の判定はここで確定する
     if (_position.dx.abs() > threshold) {
-      // スワイプが成立
+      DebugPrint("THRESHOLD TRUE"); // スワイプが成立
       final isRight = _position.dx > 0;
       final targetX =
           isRight ? _screenSize.width + 200.0 : -_screenSize.width - 200.0;
@@ -416,7 +418,9 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
       // ステータスリスナーを作成
       _statusListener = (status) {
-        if (status == AnimationStatus.completed) {
+        if (status == AnimationStatus.completed &&
+            _position.dx.abs() > threshold) {
+          DebugPrint("swipe end with threshold exceed");
           // アニメーション完了後に次のカードへの移行処理
           _handleSwipeComplete();
         }

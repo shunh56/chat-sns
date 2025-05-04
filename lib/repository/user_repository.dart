@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:app/datasource/local/hashtags.dart';
 import 'package:app/datasource/user_datasource.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -51,8 +54,15 @@ class UserRepository {
     return res.docs.map((doc) => UserAccount.fromJson(doc.data())).toList();
   }
 
-  Future<List<UserAccount>> searchUserByUsername(String username) async {
+  Future<List<UserAccount>> searchUserByUsername(
+    String username,
+  ) async {
     final res = await _datasource.searchUserByUsername(username);
+    return res.docs.map((doc) => UserAccount.fromJson(doc.data())).toList();
+  }
+
+  Future<List<UserAccount>> searchUserByTag(String tagId, bool oneOnly) async {
+    final res = await _datasource.searchUserByTag(tagId, oneOnly);
     return res.docs.map((doc) => UserAccount.fromJson(doc.data())).toList();
   }
 

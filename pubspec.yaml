@@ -208,6 +208,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/svg/
     - assets/images/icons/
     - assets/images/stickers/sunglass_babies/
     - assets/images/community/

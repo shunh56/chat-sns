@@ -1,4 +1,5 @@
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/pages/search_screen/widgets/tiles.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/usecase/user_usecase.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +63,7 @@ class _SearchParamsScreenState extends ConsumerState<SearchParamsScreen> {
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: searchController,
-              onChanged: (value) => setState(() => searchQuery = value),
+              onSubmitted: (value) => setState(() => searchQuery = value),
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'ユーザー名で検索',
@@ -98,7 +99,7 @@ class _SearchParamsScreenState extends ConsumerState<SearchParamsScreen> {
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     final user = users[index];
-                    return Container(); //UserRequestWidget(user: user);
+                    return UserRequestWidget(user: user);
                   },
                 );
               },
