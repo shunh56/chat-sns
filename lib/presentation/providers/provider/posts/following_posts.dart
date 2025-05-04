@@ -2,11 +2,10 @@
 
 // Package imports:
 import 'package:app/domain/entity/posts/post.dart';
-import 'package:app/domain/entity/posts/timeline_post.dart';
-import 'package:app/presentation/providers/new/providers/follow/follow_list_notifier.dart';
+import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
-import 'package:app/usecase/posts/post_usecase.dart';
+import 'package:app/domain/usecases/posts/post_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final followingPostsNotifierProvider = StateNotifierProvider.autoDispose<
@@ -48,7 +47,7 @@ class FollowingPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
           final list = await item;
           ref
               .read(allPostsNotifierProvider.notifier)
-              .addPosts(list as List<Post>);
+              .addPosts(list);
           posts.addAll(list);
         }
         posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -75,7 +74,7 @@ class FollowingPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
     await Future.wait(futures);
     for (var item in futures) {
       final list = await item;
-      ref.read(allPostsNotifierProvider.notifier).addPosts(list as List<Post>);
+      ref.read(allPostsNotifierProvider.notifier).addPosts(list);
       posts.addAll(list);
     }
     posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));

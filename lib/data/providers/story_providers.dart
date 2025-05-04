@@ -2,12 +2,12 @@
 
 import 'package:app/data/repository/story_repository_impl.dart';
 import 'package:app/domain/entity/story/story.dart';
-import 'package:app/domain/repositories/story_repository.dart';
+import 'package:app/domain/repository_interface/story_repository.dart';
 import 'package:app/domain/usecases/story/get_stories_usecase.dart';
 import 'package:app/domain/usecases/story/story_action_usecase.dart';
 import 'package:app/presentation/providers/story/story_notifier.dart';
 import 'package:app/presentation/providers/story/story_state.dart';
-import 'package:app/services/storage_service.dart';
+import 'package:app/data/services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,12 +26,12 @@ final storyRepositoryProvider = Provider<StoryRepository>((ref) {
 });
 
 // メインの Story プロバイダー
-final storyProvider = StateNotifierProvider<StoryNotifier, StoryState>((ref) {
+/*final storyProvider = StateNotifierProvider<StoryNotifier, StoryState>((ref) {
   return StoryNotifier(
     ref.watch(getStoriesUsecaseProvider),
     ref.watch(storyActionUsecaseProvider),
   );
-});
+}); */
 
 // タグ別のストーリー取得プロバイダー
 final tagStoriesProvider =

@@ -1,7 +1,7 @@
 import 'package:app/domain/entity/message_overview.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/usecase/direct_message_overview_usecase.dart';
+import 'package:app/domain/usecases/direct_message_overview_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final dmOverviewListNotifierProvider = StateNotifierProvider.autoDispose<

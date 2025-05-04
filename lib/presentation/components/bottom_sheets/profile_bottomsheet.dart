@@ -1,10 +1,10 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/navigation/page_transition.dart';
-import 'package:app/presentation/pages/profile_page/edit_bio_screen.dart';
-import 'package:app/presentation/pages/profile_page/profile_page.dart';
-import 'package:app/presentation/pages/settings_screen/settings_screen.dart';
+import 'package:app/presentation/routes/page_transition.dart';
+import 'package:app/presentation/pages/profile/subpages/edit_bio_screen.dart';
+import 'package:app/presentation/pages/profile/profile_page.dart';
+import 'package:app/presentation/pages/settings/settings_screen.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

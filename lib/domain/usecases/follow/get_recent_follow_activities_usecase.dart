@@ -1,6 +1,6 @@
 import 'package:app/data/providers/follow_providers.dart';
 import 'package:app/domain/entity/follow/follow.dart';
-import 'package:app/domain/repositories/follow_repository.dart';
+import 'package:app/domain/repository_interface/follow_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final getRecentFollowActivitiesUsecaseProvider = Provider(

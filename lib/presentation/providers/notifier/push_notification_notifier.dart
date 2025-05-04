@@ -1,6 +1,6 @@
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
-import 'package:app/usecase/push_notification_usecase.dart';
+import 'package:app/domain/usecases/push_notification_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // TODO

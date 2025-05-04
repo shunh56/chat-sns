@@ -1,6 +1,6 @@
 // Flutter imports:
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/components/widgets/fade_transition_widget.dart';
+import 'package:app/presentation/components/transition/fade_transition_widget.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:

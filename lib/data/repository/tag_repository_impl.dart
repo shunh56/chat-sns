@@ -1,128 +1,90 @@
 // lib/data/repositories/tag_repository_impl.dart
-
-import 'dart:convert';
-import 'package:app/domain/entity/tag/tag.dart';
-import 'package:app/domain/repositories/tag_repository.dart';
+import 'package:app/data/datasource/local/hashtags.dart';
+import 'package:app/data/datasource/tag_datasource.dart';
+import 'package:app/domain/entity/tag_stat.dart';
+import 'package:app/domain/repository_interface/tag_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final tagRepositoryProvider = Provider<TagRepository>((ref) {
+  final dataSource = ref.watch(tagDatasourceProvider);
+  return TagRepositoryImpl(dataSource);
+});
 
 class TagRepositoryImpl implements TagRepository {
-  final FirebaseFirestore _firestore;
+  final TagDatasource _datasource;
 
-  TagRepositoryImpl(this._firestore);
+  TagRepositoryImpl(this._datasource);
 
   @override
-  Future<List<Tag>> getAllTags() async {
-    try {
-      final query = await _firestore
-          .collection('tags')
-          .orderBy('usageCount', descending: true)
-          .get();
-
-      return query.docs.map((doc) => Tag.fromFirestore(doc)).toList();
-    } catch (e) {
-      throw Exception('Failed to get tags: $e');
-    }
+  Future<void> updateUserTagsImmediate(
+      List<String> newTags, List<String> previousTags) async {
+    await _datasource.updateUserTagsImmediate(newTags, previousTags);
   }
 
   @override
-  Future<List<Tag>> getTagsByCategory(String category) async {
-    try {
-      final query = await _firestore
-          .collection('tags')
-          .where('category', isEqualTo: category)
-          .where('isActive', isEqualTo: true)
-          .orderBy('name')
-          .get();
-
-      return query.docs.map((doc) => Tag.fromFirestore(doc)).toList();
-    } catch (e) {
-      throw Exception('Failed to get tags by category: $e');
-    }
+  Future<List<String>> getUserTags(String userId) async {
+    return await _datasource.getUserTags(userId);
   }
 
   @override
-  Future<Tag?> getTagById(String tagId) async {
-    try {
-      final doc = await _firestore.collection('tags').doc(tagId).get();
-
-      if (!doc.exists) {
-        return null;
-      }
-
-      return Tag.fromFirestore(doc);
-    } catch (e) {
-      throw Exception('Failed to get tag: $e');
-    }
+  Future<void> updateTagStatsDaily() async {
+    await _datasource.updateTagStatsDaily();
   }
 
   @override
-  Future<List<Tag>> searchTags(String query) async {
-    try {
-      // 完全一致ではなく、前方一致で検索
-      // Firestoreでは部分一致検索に制限があるため
-      final querySnapshot = await _firestore
-          .collection('tags')
-          .where('name', isGreaterThanOrEqualTo: query)
-          .where('name', isLessThanOrEqualTo: '$query\uf8ff')
-          .where('isActive', isEqualTo: true)
-          .get();
-
-      return querySnapshot.docs.map((doc) => Tag.fromFirestore(doc)).toList();
-    } catch (e) {
-      throw Exception('Failed to search tags: $e');
-    }
+  Future<TagStat> getTagStat(String tagId) async {
+    final data = await _datasource.getTagStat(tagId);
+    return TagStat(
+      id: data['id'],
+      text: data['text'] ?? getTextFromId(tagId) ?? tagId,
+      count: data['count'] ?? 0,
+      lastUpdated: data['lastUpdated'] ?? Timestamp.now(),
+    );
   }
 
   @override
-  Future<void> incrementTagUsage(String tagId) async {
-    try {
-      await _firestore
-          .collection('tags')
-          .doc(tagId)
-          .update({'usageCount': FieldValue.increment(1)});
-    } catch (e) {
-      throw Exception('Failed to increment tag usage: $e');
-    }
+  Future<List<TagStat>> getPopularTags({int limit = 10}) async {
+    final dataList = await _datasource.getPopularTags(limit: limit);
+    return dataList
+        .map(
+          (data) => TagStat(
+            id: data['id'],
+            text: data['text'] ?? getTextFromId(data['id']) ?? data['id'],
+            count: data['count'] ?? 0,
+            lastUpdated: data['lastUpdated'],
+          ),
+        )
+        .toList();
   }
 
   @override
-  Future<void> uploadInitialTags(List<Tag> tags) async {
-    try {
-      final batch = _firestore.batch();
-
-      for (final tag in tags) {
-        final docRef = _firestore.collection('tags').doc(tag.id);
-        batch.set(docRef, tag.toFirestore());
-      }
-
-      await batch.commit();
-    } catch (e) {
-      throw Exception('Failed to upload initial tags: $e');
-    }
+  Future<List<String>> getUsersByTag(String tagId,
+      {int limit = 20, String? lastUserId}) async {
+    return await _datasource.getUsersByTag(tagId,
+        limit: limit, lastUserId: lastUserId);
   }
 
   @override
-  Future<void> toggleTagActive(String tagId, bool isActive) async {
-    try {
-      await _firestore
-          .collection('tags')
-          .doc(tagId)
-          .update({'isActive': isActive});
-    } catch (e) {
-      throw Exception('Failed to toggle tag active status: $e');
-    }
-  }
+  Future<List<TagHistory>> getTagHistory(
+    String tagId, {
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    final dataList = await _datasource.getTagHistory(
+      tagId,
+      startDate: startDate,
+      endDate: endDate,
+    );
 
-  // ローカルのJSONファイルから初期タグを読み込む
-  Future<List<Tag>> loadInitialTagsFromAsset(String assetPath) async {
-    try {
-      final jsonString = await rootBundle.loadString(assetPath);
-      final List<dynamic> jsonList = json.decode(jsonString);
-
-      return jsonList.map((data) => Tag.fromJson(data)).toList();
-    } catch (e) {
-      throw Exception('Failed to load initial tags from asset: $e');
-    }
+    return dataList
+        .map(
+          (data) => TagHistory(
+            tagId: tagId,
+            count: data['count'] ?? 0,
+            timestamp: data['timestamp'],
+          ),
+        )
+        .toList();
   }
 }

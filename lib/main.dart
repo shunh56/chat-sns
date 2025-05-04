@@ -8,24 +8,24 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/core/values.dart';
-import 'package:app/datasource/local/hive/friends_map.dart';
+import 'package:app/data/datasource/local/hive/friends_map.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/firebase_options.dart';
 import 'package:app/notification_service.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/new/presentation/pages/account_status_screen/banned_screen.dart';
-import 'package:app/new/presentation/pages/account_status_screen/deleted_screen.dart';
-import 'package:app/new/presentation/pages/account_status_screen/freezed_screen.dart';
-import 'package:app/new/presentation/pages/auth/signin_page.dart';
-import 'package:app/new/presentation/pages/auth/signup_page.dart';
-import 'package:app/new/presentation/pages/onboarding/onboarding_screen.dart';
-import 'package:app/new/presentation/pages/onboarding/shared_preferences_provider.dart';
-import 'package:app/new/presentation/pages/onboaring_account/onboarding_screen.dart';
+import 'package:app/presentation/pages/account_status_screen/banned_screen.dart';
+import 'package:app/presentation/pages/account_status_screen/deleted_screen.dart';
+import 'package:app/presentation/pages/account_status_screen/freezed_screen.dart';
+import 'package:app/presentation/pages/auth/signin_page.dart';
+import 'package:app/presentation/pages/auth/signup_page.dart';
+import 'package:app/presentation/pages/onboarding/onboarding_screen.dart';
+import 'package:app/presentation/pages/onboarding/shared_preferences_provider.dart';
+import 'package:app/presentation/pages/onboaring_account/onboarding_screen.dart';
 
-import 'package:app/new/presentation/pages/version/update_notifier.dart';
-import 'package:app/new/presentation/pages/version/version_manager.dart';
-import 'package:app/new/presentation/pages/main_page.dart';
+import 'package:app/presentation/pages/version/update_notifier.dart';
+import 'package:app/presentation/pages/version/version_manager.dart';
+import 'package:app/presentation/pages/main_page.dart';
 import 'package:app/presentation/providers/notifier/auth_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_remote_config.dart';
@@ -424,7 +424,7 @@ class SplashScreen extends ConsumerWidget {
                                       if (!onboardingState.isCompleted) {
                                         return const OnboardingFlowScreen();
                                       }
-                                      return const Phase01MainPage();
+                                      return const MainPage();
                                     },
                                     loading: () => const LoadingPage(),
                                     error: (e, s) => ErrorPage(e: e, s: s),

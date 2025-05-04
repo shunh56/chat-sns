@@ -1,4 +1,4 @@
-// lib/presentation/providers/story/story_notifier.dart
+/*// lib/presentation/providers/story/story_notifier.dart
 
 import 'package:app/domain/usecases/story/get_stories_usecase.dart';
 import 'package:app/domain/usecases/story/story_action_usecase.dart';
@@ -101,4 +101,4 @@ class StoryNotifier extends StateNotifier<StoryState> {
       print('Failed to mark story as viewed: $e');
     }
   }
-}
+} */

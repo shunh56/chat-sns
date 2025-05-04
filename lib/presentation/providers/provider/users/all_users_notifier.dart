@@ -1,7 +1,7 @@
 import 'package:app/core/utils/debug_print.dart';
-import 'package:app/datasource/local/hive/friends_map.dart';
+import 'package:app/data/datasource/local/hive/friends_map.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/usecase/user_usecase.dart';
+import 'package:app/domain/usecases/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

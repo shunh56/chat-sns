@@ -2,7 +2,7 @@ import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/usecase/posts/current_status_post_usecase.dart';
+import 'package:app/domain/usecases/posts/current_status_post_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'all_current_status_posts.g.dart';

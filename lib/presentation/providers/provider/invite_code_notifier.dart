@@ -1,7 +1,7 @@
 // Package imports:
 
 import 'package:app/domain/entity/invite_code.dart';
-import 'package:app/usecase/invite_code_usecase.dart';
+import 'package:app/domain/usecases/invite_code_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final myInviteCodeNotifierProvider =

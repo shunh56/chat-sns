@@ -1,7 +1,7 @@
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/thread.dart';
 import 'package:app/presentation/providers/provider/threads/all_threads_notifier.dart';
-import 'package:app/usecase/threads_usecase.dart';
+import 'package:app/domain/usecases/threads_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final followingThreadsNotifierProvider = StateNotifierProvider<

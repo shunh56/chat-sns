@@ -3,7 +3,7 @@ import 'dart:async';
 
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
-import 'package:app/usecase/block_usecase.dart';
+import 'package:app/domain/usecases/block_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:

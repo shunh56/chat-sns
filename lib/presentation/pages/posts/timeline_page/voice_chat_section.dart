@@ -1,0 +1,160 @@
+import 'dart:math';
+
+import 'package:app/core/utils/theme.dart';
+import 'package:app/domain/entity/voice_chat.dart';
+import 'package:app/presentation/components/dialogs/voice_chat_dialogs.dart';
+import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/providers/provider/chats/voice_chats_list.dart';
+import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
+
+class VoiceChatSection extends ConsumerWidget {
+  const VoiceChatSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vcAsyncValue = ref.watch(voiceChatListNotifierProvider);
+    return vcAsyncValue.when(
+      data: (vcList) {
+        if (vcList.isEmpty) return const SizedBox();
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: SizedBox(
+            height: 56,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: vcList.length,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              itemBuilder: (context, index) {
+                final vc = vcList[index];
+                return _buildVoiceChatCard(context, ref, vc);
+              },
+            ),
+          ),
+        );
+      },
+      error: (e, s) => const SizedBox(),
+      loading: () => const SizedBox(),
+    );
+  }
+
+  Widget _buildVoiceChatCard(
+    BuildContext context,
+    WidgetRef ref,
+    VoiceChat vc,
+  ) {
+    const displayCount = 3;
+    return FutureBuilder(
+      future: ref
+          .read(allUsersNotifierProvider.notifier)
+          .getUserAccounts(vc.joinedUsers),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox();
+        } else {
+          final users = snapshot.data!;
+          List<Widget> stack = [];
+          for (int i = 0; i < min(displayCount, users.length); i++) {
+            stack.add(
+              Positioned(
+                left: i * 28,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      width: 4,
+                      color: ThemeColor.accent,
+                    ),
+                  ),
+                  child: UserIcon(
+                    user: users[i],
+                    width: 36,
+                    isCircle: true,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return GestureDetector(
+            onTap: () {
+              VoiceChatDialogs(context).showVoiceChatDialog(vc, users);
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.only(
+                left: 4,
+                top: 6,
+                bottom: 6,
+                right: 16,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: ThemeColor.accent,
+                border: Border.all(
+                  color: ThemeColor.stroke,
+                  width: 0.4,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Stack(
+                    children: [
+                      SizedBox(
+                        width: 44 +
+                            (min(displayCount, users.length) - 1) * 28 +
+                            12,
+                        height: 100,
+                        child: Stack(
+                          alignment: Alignment.centerLeft,
+                          children: stack,
+                        ),
+                      ),
+                      if (users.length > displayCount)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.pink,
+                              border: Border.all(
+                                width: 2,
+                                color: ThemeColor.accent,
+                              ),
+                            ),
+                            child: Text(
+                              "+${users.length - displayCount}",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        )
+                    ],
+                  ),
+                  const Gap(4),
+                  const Text(
+                    "通話中",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}

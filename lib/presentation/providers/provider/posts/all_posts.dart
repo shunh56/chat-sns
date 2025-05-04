@@ -3,8 +3,8 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
 import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
-import 'package:app/usecase/activities_usecase.dart';
-import 'package:app/usecase/posts/post_usecase.dart';
+import 'package:app/domain/usecases/activities_usecase.dart';
+import 'package:app/domain/usecases/posts/post_usecase.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'all_posts.g.dart';

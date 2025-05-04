@@ -1,7 +1,7 @@
 // lib/domain/usecases/story/delete_story_usecase.dart
 
 import 'package:app/data/providers/story_providers.dart';
-import 'package:app/domain/repositories/story_repository.dart';
+import 'package:app/domain/repository_interface/story_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final deleteStoryUsecaseProvider = Provider(

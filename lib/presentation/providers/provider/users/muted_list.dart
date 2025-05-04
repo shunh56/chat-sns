@@ -1,6 +1,6 @@
 // Package imports:
 import 'package:app/domain/entity/user.dart';
-import 'package:app/usecase/mute_usecase.dart';
+import 'package:app/domain/usecases/mute_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:

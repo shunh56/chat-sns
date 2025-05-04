@@ -2,7 +2,7 @@
 
 // Package imports:
 import 'package:app/domain/entity/posts/post.dart';
-import 'package:app/usecase/posts/post_usecase.dart';
+import 'package:app/domain/usecases/posts/post_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

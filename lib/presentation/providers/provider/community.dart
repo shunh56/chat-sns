@@ -1,8 +1,8 @@
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/pages/community_screen/model/community.dart';
+import 'package:app/presentation/UNUSED/community_screen/model/community.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/usecase/comunity_usecase.dart';
+import 'package:app/domain/usecases/comunity_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

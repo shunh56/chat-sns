@@ -1,6 +1,6 @@
-import 'package:app/presentation/pages/community_screen/model/topic.dart';
+import 'package:app/presentation/UNUSED/community_screen/model/topic.dart';
 
-import 'package:app/usecase/topics_usecase.dart';
+import 'package:app/domain/usecases/topics_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final recentTopicsNotifier =

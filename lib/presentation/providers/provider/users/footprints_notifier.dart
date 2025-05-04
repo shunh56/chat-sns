@@ -1,7 +1,7 @@
 import 'package:app/domain/entity/footprint.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/usecase/footprint_usecase.dart';
+import 'package:app/domain/usecases/footprint_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

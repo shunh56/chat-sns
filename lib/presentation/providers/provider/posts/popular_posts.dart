@@ -4,7 +4,7 @@
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/presentation/providers/provider/posts/all_posts.dart';
 import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/usecase/posts/post_usecase.dart';
+import 'package:app/domain/usecases/posts/post_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final popularPostsNotiferProvider =

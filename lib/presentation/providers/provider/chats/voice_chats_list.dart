@@ -1,5 +1,5 @@
 import 'package:app/domain/entity/voice_chat.dart';
-import 'package:app/usecase/voice_chat_usecase.dart';
+import 'package:app/domain/usecases/voice_chat_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final vcStreamProvider = StreamProvider.family(

@@ -1,4 +1,4 @@
-// lib/presentation/providers/story/story_state.dart
+/*// lib/presentation/providers/story/story_state.dart
 
 import 'package:app/domain/entity/story/story.dart';
 
@@ -39,3 +39,4 @@ class StoryState {
     );
   }
 }
+ */

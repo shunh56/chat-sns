@@ -1,7 +1,7 @@
 import 'package:app/domain/entity/story/story.dart';
 import 'package:app/domain/entity/story/story_view.dart';
-import 'package:app/domain/repositories/story_repository.dart';
-import 'package:app/services/storage_service.dart';
+import 'package:app/domain/repository_interface/story_repository.dart';
+import 'package:app/data/services/storage_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

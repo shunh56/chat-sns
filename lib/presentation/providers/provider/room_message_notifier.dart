@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/utils/debug_print.dart';
-import 'package:app/datasource/room_datasource.dart';
+import 'package:app/data/datasource/room_datasource.dart';
 import 'package:app/domain/entity/room_message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

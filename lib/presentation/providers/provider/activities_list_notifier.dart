@@ -2,7 +2,7 @@
 import 'dart:async';
 
 import 'package:app/domain/entity/activities.dart';
-import 'package:app/usecase/activities_usecase.dart';
+import 'package:app/domain/usecases/activities_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:

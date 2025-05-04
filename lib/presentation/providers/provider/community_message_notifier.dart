@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/room_message.dart';
-import 'package:app/usecase/comunity_usecase.dart';
+import 'package:app/domain/usecases/comunity_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

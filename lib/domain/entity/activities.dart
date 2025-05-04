@@ -1,5 +1,4 @@
 import 'package:app/domain/entity/posts/post.dart';
-import 'package:app/domain/entity/posts/timeline_post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Activity {
