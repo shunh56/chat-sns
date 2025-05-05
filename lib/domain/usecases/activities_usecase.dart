@@ -1,4 +1,4 @@
-import 'package:app/Repository/activities_repository.dart';
+import 'package:app/data/repository/activities_repository.dart';
 import 'package:app/domain/entity/activities.dart';
 import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';

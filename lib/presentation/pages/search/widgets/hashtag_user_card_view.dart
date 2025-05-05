@@ -5,6 +5,7 @@ import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/pages/search/sub_pages/user_card_stack_screen.dart';
 import 'package:app/presentation/providers/provider/users/hashtag_users.dart';
 import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/tag_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -64,6 +65,35 @@ class HashtagUserCardView extends ConsumerWidget {
       String tagName, ThemeTextStyle textStyle) {
     final asyncValue = ref.watch(hashTagUsersNotifierProvider(tagId));
     final themeSize = ref.watch(themeSizeProvider(context));
+    final asyncTagStat = ref.watch(tagStatProvider(tagId));
+    final statsWidget = asyncTagStat.when(
+      data: (data) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              "#$tagName",
+              style: textStyle.w600(
+                fontSize: 18,
+                color: ThemeColor.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const Gap(4),
+            Text(
+              "${data.count}人",
+              style: textStyle.w600(
+                fontSize: 14,
+                color: ThemeColor.white,
+              ),
+            ),
+            Gap(themeSize.screenWidth / 4.5)
+          ],
+        );
+      },
+      error: (e, s) => SizedBox(),
+      loading: () => SizedBox(),
+    );
     return asyncValue.when(
       data: (users) {
         if (users.isEmpty) {
@@ -96,50 +126,20 @@ class HashtagUserCardView extends ConsumerWidget {
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  Expanded(
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // ユーザー画像
-                        user.imageUrl != null
-                            ? CachedImage.usersCard(user.imageUrl!)
-                            : const SizedBox(),
-                        // 暗くするオーバーレイ
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.3),
-                          ),
-                        ),
-                        Container(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(
-                                "#$tagName",
-                                style: textStyle.w600(
-                                  fontSize: 18,
-                                  color: ThemeColor.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const Gap(4),
-                              Text(
-                                "${users.length}人",
-                                style: textStyle.w600(
-                                  fontSize: 14,
-                                  color: ThemeColor.white,
-                                ),
-                              ),
-                              Gap(themeSize.screenWidth / 4.5)
-                            ],
-                          ),
-                        ),
-                      ],
+                  // ユーザー画像
+                  user.imageUrl != null
+                      ? CachedImage.usersCard(user.imageUrl!)
+                      : const SizedBox(),
+                  // 暗くするオーバーレイ
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
                     ),
                   ),
+                  statsWidget,
                 ],
               ),
             ),
