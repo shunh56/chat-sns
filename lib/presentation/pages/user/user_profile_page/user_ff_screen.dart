@@ -6,7 +6,7 @@ import 'package:app/presentation/components/tiles/user_request_widget.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/follow/followers_list_notifier.dart';
 import 'package:app/presentation/providers/follow/user_followings_followers.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

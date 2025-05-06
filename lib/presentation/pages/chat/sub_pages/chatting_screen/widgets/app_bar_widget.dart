@@ -12,7 +12,7 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/posts/timeline_page/voice_chat_screen.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
+import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:app/domain/usecases/voip_usecase.dart';
 
 /// チャット画面のアプリバーウィジェット

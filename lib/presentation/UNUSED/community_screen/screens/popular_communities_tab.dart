@@ -1,6 +1,6 @@
 // views/popular_communities_tab.dart
 import 'package:app/presentation/UNUSED/community_screen/components/community_card.dart';
-import 'package:app/presentation/providers/provider/community.dart';
+import 'package:app/presentation/providers/community.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

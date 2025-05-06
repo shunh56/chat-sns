@@ -1,5 +1,5 @@
 import 'package:app/domain/entity/follow_model.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
+import 'package:app/presentation/providers/firebase/firebase_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

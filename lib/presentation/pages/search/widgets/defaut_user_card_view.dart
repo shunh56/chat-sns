@@ -2,7 +2,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/pages/search/sub_pages/user_card_stack_screen.dart';
-import 'package:app/presentation/providers/provider/users/online_users.dart';
+import 'package:app/presentation/providers/users/online_users.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -65,14 +65,15 @@ class DefaultUserCardView extends ConsumerWidget {
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => UserCardStackScreen(
-                                    users: users,
-                                    userGroupId: "new_users", // 固有のIDを指定
-                                    userGroupTitle:
-                                        "最近始めたユーザー", // オプションでタイトルも指定可能
-                                  )));
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UserCardStackScreen(
+                            users: users,
+                            userGroupId: "new_users", // 固有のIDを指定
+                            userGroupTitle: "最近始めたユーザー", // オプションでタイトルも指定可能
+                          ),
+                        ),
+                      );
                     },
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 8),

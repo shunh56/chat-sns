@@ -2,7 +2,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
+import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';

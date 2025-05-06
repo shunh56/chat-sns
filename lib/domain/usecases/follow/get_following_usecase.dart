@@ -13,7 +13,9 @@ class GetFollowingUseCase {
 
   GetFollowingUseCase(this.repository);
 
-  Future<List<String>> call(String userId) {
-    return repository.getFollowing(userId);
+  Future<List<String>> call(String userId) async {
+    final list = await repository.getFollowing(userId);
+    list.removeWhere((id) => id == userId);
+    return list;
   }
 }

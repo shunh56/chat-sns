@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/users/all_users_notifier.dart';
 
 import 'widgets/app_bar_widget.dart';
 import 'widgets/bottom_text_field.dart';

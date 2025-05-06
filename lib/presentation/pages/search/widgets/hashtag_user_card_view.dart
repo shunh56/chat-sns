@@ -3,8 +3,8 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/data/datasource/local/hashtags.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/pages/search/sub_pages/user_card_stack_screen.dart';
-import 'package:app/presentation/providers/provider/users/hashtag_users.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/users/hashtag_users.dart';
+import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/tag_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,8 +47,8 @@ class HashtagUserCardView extends ConsumerWidget {
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2, // 2列
             childAspectRatio: 0.75, // カードの縦横比
-            crossAxisSpacing: 8, // 水平方向の間隔
-            mainAxisSpacing: 8, // 垂直方向の間隔
+            crossAxisSpacing: 12, // 水平方向の間隔
+            mainAxisSpacing: 12, // 垂直方向の間隔
           ),
           itemCount: tagIds.length,
           itemBuilder: (context, index) {
@@ -108,6 +108,7 @@ class HashtagUserCardView extends ConsumerWidget {
                 .loadMore();
             final loadedUsers =
                 ref.read(hashTagUsersNotifierProvider(tagId)).asData!.value;
+            loadedUsers.removeWhere((user) => user.isMe);
             Navigator.push(
               context,
               MaterialPageRoute(

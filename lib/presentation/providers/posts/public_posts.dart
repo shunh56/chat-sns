@@ -1,0 +1,43 @@
+// Flutter imports:
+
+// Package imports:
+import 'package:app/domain/entity/posts/post.dart';
+import 'package:app/presentation/providers/posts/all_posts.dart';
+import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/domain/usecases/posts/post_usecase.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final publicPostsNotiferProvider =
+    StateNotifierProvider<PublicPostsNotifier, AsyncValue<List<Post>>>((ref) {
+  return PublicPostsNotifier(
+    ref,
+    ref.watch(postUsecaseProvider),
+  )..initialize();
+});
+
+/// State
+class PublicPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
+  PublicPostsNotifier(this.ref, this.usecase)
+      : super(const AsyncValue.loading());
+
+  final Ref ref;
+  final PostUsecase usecase;
+
+  Future<void> initialize() async {
+    final posts = await usecase.getPublicPosts();
+    await ref
+        .read(allUsersNotifierProvider.notifier)
+        .getUserAccounts(posts.map((post) => post.userId).toList());
+    ref.read(allPostsNotifierProvider.notifier).addPosts(posts);
+    state = AsyncValue.data(posts);
+  }
+
+  refresh() async {
+    final posts = await usecase.getPublicPosts();
+    await ref
+        .read(allUsersNotifierProvider.notifier)
+        .getUserAccounts(posts.map((post) => post.userId).toList());
+    ref.read(allPostsNotifierProvider.notifier).addPosts(posts);
+    state = AsyncValue.data(posts);
+  }
+}

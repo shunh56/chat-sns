@@ -3,7 +3,7 @@
 import 'dart:io';
 
 import 'package:app/presentation/UNUSED/community_screen/screens/create_community_state.dart';
-import 'package:app/presentation/providers/notifier/image/image_processor.dart';
+import 'package:app/presentation/providers/image/image_processor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

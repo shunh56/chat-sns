@@ -1,4 +1,4 @@
-import 'package:app/presentation/providers/provider/images/images.dart';
+import 'package:app/presentation/providers/images/images.dart';
 import 'package:app/data/repository/image_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

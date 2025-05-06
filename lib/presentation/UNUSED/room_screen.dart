@@ -2,9 +2,9 @@
 import 'package:app/domain/entity/room_message.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
-import 'package:app/presentation/providers/notifier/image/image_processor.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/room_message_notifier.dart';
+import 'package:app/presentation/providers/image/image_processor.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/room_message_notifier.dart';
 import 'package:app/domain/usecases/room_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';

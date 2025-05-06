@@ -9,8 +9,8 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
-import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
+import 'package:app/presentation/providers/chats/dm_overview_list.dart';
+import 'package:app/presentation/providers/posts/all_current_status_posts.dart';
 import 'package:app/domain/usecases/posts/current_status_post_usecase.dart';
 
 import '../utils/animated_message.dart';

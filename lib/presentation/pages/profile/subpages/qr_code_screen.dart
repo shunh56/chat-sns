@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/icons.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

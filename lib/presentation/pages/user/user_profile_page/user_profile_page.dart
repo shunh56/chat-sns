@@ -6,6 +6,7 @@ import 'package:app/data/datasource/local/hashtags.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/providers/footprint/footprint_manager_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/report/report_user_screen.dart';
 import 'package:app/presentation/pages/user/user_profile_page/blocked_profile_screen.dart';
@@ -13,7 +14,7 @@ import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dar
 import 'package:app/presentation/pages/user/user_profile_page/user_posts_list.dart';
 import 'package:app/presentation/pages/user/user_profile_page/users_friends_screen.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
+import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:app/domain/usecases/friends_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:focused_menu/focused_menu.dart';
@@ -22,24 +23,38 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final scrollControllerProvider = Provider((ref) => ScrollController());
 
-class UserProfileScreen extends ConsumerWidget {
-  const UserProfileScreen({
-    super.key,
-    required this.user,
-  });
+class UserProfileScreen extends ConsumerStatefulWidget {
+  const UserProfileScreen({super.key, required this.user});
   final UserAccount user;
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _UserProfileScreenState();
+}
+
+class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // ユーザー自身のプロフィールでない場合のみ足あとを残す
+    if (!widget.user.isMe) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(footprintManagerProvider).visitUserProfile(widget.user);
+      });
+    }
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final canvasTheme = CanvasTheme.defaultCanvasTheme();
+    final user = widget.user;
     final blocks = ref.watch(blocksListNotifierProvider).asData?.value ?? [];
     final blockeds =
         ref.watch(blockedsListNotifierProvider).asData?.value ?? [];
@@ -898,6 +913,7 @@ class UserProfileScreen extends ConsumerWidget {
       builder: (context, ref, child) {
         final themeSize = ref.watch(themeSizeProvider(context));
         final textStyle = ThemeTextStyle(themeSize: themeSize);
+        final user = widget.user;
         final notifier = ref.read(followingListNotifierProvider.notifier);
         final isFollowing = notifier.isFollowing(user.userId);
         return Padding(

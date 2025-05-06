@@ -8,9 +8,9 @@ import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart'
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/post_widget.dart';
-import 'package:app/presentation/providers/notifier/heart_animation_notifier.dart';
-import 'package:app/presentation/providers/provider/posts/all_current_status_posts.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/heart_animation_notifier.dart';
+import 'package:app/presentation/providers/posts/all_current_status_posts.dart';
+import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

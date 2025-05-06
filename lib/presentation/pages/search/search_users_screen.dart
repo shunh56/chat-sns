@@ -1,12 +1,14 @@
-
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/pages/footprint/footprint_screen.dart';
+import 'package:app/presentation/pages/footprint/widget/footprint_badge.dart';
 import 'package:app/presentation/pages/search/widgets/defaut_user_card_view.dart';
 import 'package:app/presentation/pages/search/widgets/hashtag_user_card_view.dart';
 import 'package:app/presentation/pages/search/widgets/top_feed.dart';
 import 'package:app/presentation/pages/search/sub_pages/search_params_screen.dart';
+import 'package:app/presentation/providers/footprint/visitors_provider.dart';
 
-import 'package:app/presentation/providers/provider/users/online_users.dart';
+import 'package:app/presentation/providers/users/online_users.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -51,6 +53,7 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
     centerTitle: false,
     leading: null,
     automaticallyImplyLeading: false,
+    toolbarHeight: kToolbarHeight,
     title: Row(
       children: [
         Text(
@@ -61,34 +64,36 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
           ),
         ),
         const Spacer(),
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF222222),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
+        FootprintBadge(
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFF222222),
               borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SearchParamsScreen(),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const FootprintScreen(),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: SvgPicture.asset(
+                    "assets/svg/footprint.svg",
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SvgPicture.asset(
-                  "assets/svg/footprint.svg",
                 ),
               ),
             ),
           ),
         ),
         const Gap(12),
-        Container(
+        /* Container(
           decoration: BoxDecoration(
             color: const Color(0xFF222222),
             borderRadius: BorderRadius.circular(12),
@@ -114,7 +119,7 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
             ),
           ),
         ),
-        const Gap(12),
+        const Gap(12), */
         Container(
           decoration: BoxDecoration(
             color: const Color(0xFF222222),

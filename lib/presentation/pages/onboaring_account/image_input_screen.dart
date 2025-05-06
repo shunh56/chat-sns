@@ -4,7 +4,7 @@ import 'package:app/core/utils/permissions/photo_permission.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/dialogs/dialogs.dart';
 import 'package:app/presentation/providers/onboarding_providers.dart';
-import 'package:app/presentation/providers/notifier/image/image_processor.dart';
+import 'package:app/presentation/providers/image/image_processor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

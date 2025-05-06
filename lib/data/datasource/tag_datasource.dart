@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:app/data/datasource/local/hashtags.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/firebase/firebase_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

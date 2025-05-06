@@ -12,7 +12,7 @@ import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dar
 import 'package:app/presentation/pages/user/user_profile_page/user_posts_list.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/follow/followers_list_notifier.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';

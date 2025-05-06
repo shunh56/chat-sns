@@ -72,7 +72,7 @@ const List<Map<String, String>> hashTags = [
   {"id": "ramen", "text": "ラーメン"},
   {"id": "yakiniku", "text": "焼肉"},
   {"id": "tea", "text": "お茶"},
-  {"id": "beer", "text": "beer"},
+  {"id": "beer", "text": "ビール"},
   {"id": "wine", "text": "ワイン"},
 
   // ファッション・クラフト

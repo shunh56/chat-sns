@@ -3,7 +3,7 @@ import 'package:app/data/datasource/push_notification_datasource.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/main.dart';
 import 'package:app/presentation/components/core/toast.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/data/repository/push_notification_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

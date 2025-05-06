@@ -3,7 +3,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/routes/navigator.dart';
-import 'package:app/presentation/providers/provider/users/online_users.dart';
+import 'package:app/presentation/providers/users/online_users.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

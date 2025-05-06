@@ -1,6 +1,6 @@
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/post_widget.dart';
-import 'package:app/presentation/providers/provider/posts/user_posts.dart';
+import 'package:app/presentation/providers/posts/user_posts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

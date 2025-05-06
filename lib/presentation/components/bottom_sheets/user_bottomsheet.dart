@@ -4,9 +4,9 @@ import 'package:app/core/values.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
-import 'package:app/presentation/providers/notifier/auth_notifier.dart';
-import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
+import 'package:app/presentation/providers/auth_notifier.dart';
+import 'package:app/presentation/providers/chats/dm_overview_list.dart';
+import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:app/domain/usecases/friends_usecase.dart';
 
 import 'package:flutter/material.dart';

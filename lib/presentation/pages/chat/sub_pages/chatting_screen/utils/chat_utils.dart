@@ -1,7 +1,7 @@
 import 'package:app/domain/entity/user.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
+import 'package:app/presentation/providers/users/blocks_list.dart';
 
 /// チャット関連のユーティリティ関数を提供するクラス
 class ChatUtils {

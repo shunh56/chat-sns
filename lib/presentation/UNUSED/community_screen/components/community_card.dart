@@ -8,8 +8,8 @@ import 'package:app/presentation/UNUSED/community_screen/components/components.d
 import 'package:app/presentation/UNUSED/community_screen/model/community.dart';
 import 'package:app/presentation/UNUSED/community_screen/screens/community_chat_screen/community_chat_screen.dart';
 import 'package:app/presentation/UNUSED/community_screen/screens/popular_communities_tab.dart';
-import 'package:app/presentation/providers/provider/community.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/community.dart';
+import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/comunity_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

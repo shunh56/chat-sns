@@ -7,8 +7,8 @@ import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_profile_page.dart';
 import 'package:app/presentation/pages/posts/timeline_page/current_status_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/post_screen.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

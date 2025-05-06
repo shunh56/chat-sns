@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/main.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_storage.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/firebase/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';

@@ -21,18 +21,18 @@ packages:
     dependency: "direct main"
     description:
       name: agora_rtc_engine
-      sha256: deefb5ea051c4d916552cbf76cfbdd652867aa9b554ff9afb3c732ec2e44652e
+      sha256: "458c4b535a619d573915a36aa634feccd076ac72782263004e9666cafc449021"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.2"
+    version: "6.5.1"
   agora_rtm:
     dependency: transitive
     description:
       name: agora_rtm
-      sha256: "6c65cf6c9658acc9024322798c546e9dc61c39605b67d0af069793d4ee81d199"
+      sha256: ab4b77fa722153f9399302693a95acb7b7e9593745ef2aefa34c10555337f139
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.9"
+    version: "1.6.0"
   agora_uikit:
     dependency: "direct main"
     description:
@@ -1281,10 +1281,10 @@ packages:
     dependency: transitive
     description:
       name: iris_method_channel
-      sha256: "131d0a40ba646ba8fd4bf76e24d4ebd4aa3174ee39aa5fe8240c3b827979052c"
+      sha256: "99143ae77073ee8fd6c19d8f56ec59ba6c332000d8bea46bb9b6a89d83feca5c"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.1"
+    version: "2.2.2"
   js:
     dependency: transitive
     description:

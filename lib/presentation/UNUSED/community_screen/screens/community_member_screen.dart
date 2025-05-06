@@ -4,7 +4,7 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/UNUSED/community_screen/model/community.dart';
-import 'package:app/presentation/providers/provider/community.dart';
+import 'package:app/presentation/providers/community.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';

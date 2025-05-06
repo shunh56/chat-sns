@@ -1,5 +1,5 @@
 import 'package:app/data/datasource/image_datasource.dart';
-import 'package:app/presentation/providers/provider/images/images.dart';
+import 'package:app/presentation/providers/images/images.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';

@@ -1,6 +1,6 @@
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/image.dart';
-import 'package:app/presentation/providers/provider/threads/all_threads_notifier.dart';
+import 'package:app/presentation/providers/threads/all_threads_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';

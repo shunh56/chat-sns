@@ -3,7 +3,7 @@
 import 'package:app/presentation/UNUSED/community_screen/screens/community_chat_screen/empty_message.dart';
 import 'package:app/presentation/UNUSED/community_screen/screens/community_chat_screen/error_state.dart';
 import 'package:app/presentation/UNUSED/community_screen/screens/community_chat_screen/message_bubble.dart';
-import 'package:app/presentation/providers/provider/community_message_notifier.dart';
+import 'package:app/presentation/providers/community_message_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

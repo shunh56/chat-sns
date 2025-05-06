@@ -1,6 +1,6 @@
 import 'package:app/data/datasource/voice_chat_datasource.dart';
 import 'package:app/domain/entity/voice_chat.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

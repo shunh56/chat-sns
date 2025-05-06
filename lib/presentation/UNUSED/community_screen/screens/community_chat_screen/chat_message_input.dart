@@ -1,6 +1,6 @@
 // lib/presentation/pages/community/components/chat_message_input.dart
 
-import 'package:app/presentation/providers/notifier/image/image_processor.dart';
+import 'package:app/presentation/providers/image/image_processor.dart';
 import 'package:app/domain/usecases/comunity_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';

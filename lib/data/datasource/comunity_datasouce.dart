@@ -1,6 +1,6 @@
 import 'package:app/core/utils/debug_print.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_firestore.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/firebase/firebase_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

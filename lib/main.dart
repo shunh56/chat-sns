@@ -26,11 +26,11 @@ import 'package:app/presentation/pages/onboaring_account/onboarding_screen.dart'
 import 'package:app/presentation/pages/version/update_notifier.dart';
 import 'package:app/presentation/pages/version/version_manager.dart';
 import 'package:app/presentation/pages/main_page.dart';
-import 'package:app/presentation/providers/notifier/auth_notifier.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_remote_config.dart';
-import 'package:app/presentation/providers/provider/theme_provider.dart';
-import 'package:app/presentation/providers/provider/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/auth_notifier.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/firebase/firebase_remote_config.dart';
+import 'package:app/presentation/providers/theme_provider.dart';
+import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

@@ -10,10 +10,10 @@ import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_s
 import 'package:app/presentation/pages/chat/sub_pages/create_chat_screen.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
-import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
+import 'package:app/presentation/providers/chats/dm_overview_list.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -78,17 +78,6 @@ class ChatScreen extends ConsumerWidget {
                     child: SizedBox(
                       width: tabWidth,
                       child: Center(
-                        child: Text(
-                          "フォロー中",
-                          style: textStyle.w600(fontSize: 14),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Tab(
-                    child: SizedBox(
-                      width: tabWidth,
-                      child: Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -109,13 +98,23 @@ class ChatScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  Tab(
+                    child: SizedBox(
+                      width: tabWidth,
+                      child: Center(
+                        child: Text(
+                          "フォロー中",
+                          style: textStyle.w600(fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
             Expanded(
               child: TabBarView(
                 children: [
-                  const FollowingList(),
                   Stack(
                     children: [
                       ListView(
@@ -150,6 +149,7 @@ class ChatScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  const FollowingList(),
                 ],
               ),
             ),

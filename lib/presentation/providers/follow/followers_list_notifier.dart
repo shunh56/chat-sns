@@ -6,8 +6,8 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/usecases/follow/get_followers_stream_usecase.dart';
 import 'package:app/domain/usecases/follow/get_followers_usecase.dart';
 
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// フォロワーストリームを提供するプロバイダー

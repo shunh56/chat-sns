@@ -8,9 +8,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/providers/provider/chats/message_list.dart';
-import 'package:app/presentation/providers/provider/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/provider/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/chats/message_list.dart';
+import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/presentation/providers/users/all_users_notifier.dart';
 
 import '../providers/chat_providers.dart';
 import '../providers/latest_message_tracker.dart';

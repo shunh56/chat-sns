@@ -8,9 +8,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/providers/notifier/push_notification_notifier.dart';
-import 'package:app/presentation/providers/provider/chats/dm_overview_list.dart';
-import 'package:app/presentation/providers/provider/users/blocks_list.dart';
+import 'package:app/presentation/providers/push_notification_notifier.dart';
+import 'package:app/presentation/providers/chats/dm_overview_list.dart';
+import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:app/domain/usecases/direct_message_usecase.dart';
 
 import '../providers/chat_providers.dart';

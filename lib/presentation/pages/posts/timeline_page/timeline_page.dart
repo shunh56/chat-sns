@@ -9,7 +9,7 @@ import 'package:app/presentation/UNUSED/user_listview_testing_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/threads/following_posts.dart';
 import 'package:app/presentation/pages/posts/timeline_page/threads/public_posts.dart';
 import 'package:app/presentation/pages/main_page.dart';
-import 'package:app/presentation/providers/provider/activities_list_notifier.dart';
+import 'package:app/presentation/providers/activities_list_notifier.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

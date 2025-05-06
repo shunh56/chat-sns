@@ -179,6 +179,10 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
     });
 
     final user = _remainingUsers.first;
+    if (user.isMe) {
+      showErrorSnackbar(error: "自分をフォローすることはできません。");
+      return;
+    }
     final wasLiked = _status == CardStatus.like;
     ScaffoldMessenger.of(context).clearSnackBars();
 
