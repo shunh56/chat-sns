@@ -24,6 +24,10 @@ dev-android-release:
 	@echo "Starting Android dev release build..."
 	$(FLUTTER) run --flavor dev --release $(DART_DEFINE_DEV)
 
+dev-android-release-verbose:
+	@echo "Starting Android dev release build..."
+	$(FLUTTER) run --verbose --flavor dev --release $(DART_DEFINE_DEV)
+
 build-dev:
 	@echo "Building dev IPA..."
 	$(FLUTTER) build ipa --release $(DART_DEFINE_DEV)

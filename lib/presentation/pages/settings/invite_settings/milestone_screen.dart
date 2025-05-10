@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
-import 'package:share_plus/share_plus.dart';
+//import 'package:share_plus/share_plus.dart';
 
 // 招待方法を選択するシート
 
@@ -536,11 +536,11 @@ class InviteMethodSheet extends ConsumerWidget {
   }
 
   void _shareInviteLink(BuildContext context) async {
-    final dynamicLink = "https://yourdomain.com/invite?code=$inviteCode";
+    /*final dynamicLink = "https://yourdomain.com/invite?code=$inviteCode";
     await Share.share(
       '一緒にアプリを楽しもう！\n$dynamicLink',
       subject: 'アプリへの招待',
-    );
+    ); */
     if (context.mounted) Navigator.pop(context);
   }
 
@@ -643,7 +643,7 @@ class QRCodeScreen extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   // シェア機能
-                  Share.share('アプリに参加するにはこちらのコードを使用してください: $inviteCode');
+                  // Share.share('アプリに参加するにはこちらのコードを使用してください: $inviteCode');
                 },
                 icon: const Icon(Icons.share),
                 label: const Text('シェアする'),

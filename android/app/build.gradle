@@ -115,6 +115,13 @@ android {
             }
         }
     }
+    
+    packagingOptions {
+        pickFirst 'lib/arm64-v8a/libaosl.so'
+        pickFirst 'lib/armeabi-v7a/libaosl.so'  // 他のアーキテクチャ向けも同様に設定
+        pickFirst 'lib/x86/libaosl.so'
+        pickFirst 'lib/x86_64/libaosl.so'
+    }
 }
 
 flutter {

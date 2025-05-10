@@ -180,7 +180,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const Gap(32),
+          /*const Gap(32),
           _buildContainer(
             "表示設定",
             [
@@ -218,7 +218,7 @@ class SettingsScreen extends ConsumerWidget {
                 // フォントサイズ設定画面への遷移はここに実装
               ),
             ],
-          ),
+          ), */
           const Gap(32),
           /*  _buildContainer(
             "サブスクリプション設定",

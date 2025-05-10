@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:social_share/social_share.dart';
+//import 'package:share_plus/share_plus.dart';
+//import 'package:social_share/social_share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const webUrl = "https://somekindoflink.com";
@@ -146,14 +146,14 @@ class ShareWidget extends ConsumerWidget {
                               final assetPath = '${tempDir.path}/temp.png';
                               File file = await File(assetPath).create();
                               await file.writeAsBytes(image);
-
-                              await SocialShare.shareInstagramStory(
+                              showMessage("TODO");
+                              /** await SocialShare.shareInstagramStory(
                                 appId: "909800630776361",
                                 imagePath: file.path,
                                 backgroundTopColor: "#0F0F0F",
                                 backgroundBottomColor: "#4F4F4F",
                                 attributionURL: message + webUrl,
-                              );
+                              ); */
                             }
                           } catch (e) {
                             showMessage("error : $e");
@@ -181,7 +181,7 @@ class ShareWidget extends ConsumerWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Share.share(message + webUrl);
+                         // Share.share(message + webUrl);
                         },
                         child: Icon(
                           shareIcon,

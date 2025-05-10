@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
-import 'package:overscroll_pop/overscroll_pop.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final canvasThemeProvider =
@@ -1373,7 +1372,7 @@ class ImagesView extends ConsumerWidget {
   }
 }
 
-class VerticalScrollview extends StatelessWidget {
+/*class VerticalScrollview extends StatelessWidget {
   final ScrollToPopOption scrollToPopOption;
   final DragToPopDirection? dragToPopDirection;
   final Widget child;
@@ -1393,7 +1392,7 @@ class VerticalScrollview extends StatelessWidget {
     );
   }
 }
-
+ */
 class FollowStatsSection extends ConsumerWidget {
   const FollowStatsSection({
     super.key,

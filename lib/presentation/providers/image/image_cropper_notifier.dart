@@ -74,7 +74,7 @@ class ImageCropperNotifier {
     return File(croppedFile.path);
   }
  */
-  Future<File?> cropCirlceImage(File file) async {
+  /* Future<File?> cropCirlceImage(File file) async {
     CroppedFile? croppedFile = await ImageCropper().cropImage(
       sourcePath: file.path,
       aspectRatio: const CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
@@ -82,6 +82,7 @@ class ImageCropperNotifier {
       aspectRatioPresets: [
         CropAspectRatioPreset.square,
       ],
+      
 
       //borderRadius: BorderRadius.circular(/ 3),
       uiSettings: [
@@ -104,15 +105,15 @@ class ImageCropperNotifier {
       return null;
     }
     return File(croppedFile.path);
-  }
+  } */
 
   Future<File?> cropSquareImage(File file) async {
     CroppedFile? croppedFile = await ImageCropper().cropImage(
       sourcePath: file.path,
       aspectRatio: const CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
-      aspectRatioPresets: [
+      /*aspectRatioPresets: [
         CropAspectRatioPreset.square,
-      ],
+      ], */
 
       //borderRadius: BorderRadius.circular(/ 3),
       uiSettings: [

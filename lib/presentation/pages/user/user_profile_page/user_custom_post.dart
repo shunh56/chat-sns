@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
-import 'package:overscroll_pop/overscroll_pop.dart';
+//import 'package:overscroll_pop/overscroll_pop.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CustomPostWidget extends ConsumerWidget {
@@ -179,17 +179,12 @@ class CustomPostWidget extends ConsumerWidget {
                     Navigator.push(
                       context,
                       PageTransitionMethods.fadeIn(
-                        VerticalScrollview(
-                          scrollToPopOption: ScrollToPopOption.both,
-                          dragToPopDirection: DragToPopDirection.toBottom,
-                          child: PostImageHero(
-                            imageUrls: post.mediaUrls,
-                            aspectRatios: post.aspectRatios,
-                            initialIndex: 0,
-                            //tag: 'imageHero-${post.mediaUrls[0]}',
-                          ),
+                        PostImageHero(
+                          imageUrls: post.mediaUrls,
+                          aspectRatios: post.aspectRatios,
+                          initialIndex: 0,
+                          //tag: 'imageHero-${post.mediaUrls[0]}',
                         ),
-                        /*  */
                       ),
                     );
                   },
@@ -237,14 +232,11 @@ class CustomPostWidget extends ConsumerWidget {
                           Navigator.push(
                             context,
                             PageTransitionMethods.fadeIn(
-                              VerticalScrollview(
-                                scrollToPopOption: ScrollToPopOption.both,
-                                dragToPopDirection: DragToPopDirection.toBottom,
-                                child: ImagesView(
-                                  imageUrls: post.mediaUrls,
-                                  initialIndex: index,
-                                ),
+                              ImagesView(
+                                imageUrls: post.mediaUrls,
+                                initialIndex: index,
                               ),
+
                               /* PostImageHero(
                                   imageUrls: post.mediaUrls,
                                   aspectRatios: post.aspectRatios,
