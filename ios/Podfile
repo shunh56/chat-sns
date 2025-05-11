@@ -24,24 +24,22 @@ end
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
 flutter_ios_podfile_setup
+# Override Firebase SDK Version
+$FirebaseSDKVersion = '10.24.0'
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
   # Firebase設定
-  pod 'Firebase', :modular_headers => true
-  pod 'Firebase/Analytics', :modular_headers => true
-  #pod 'Firebase/Auth', :modular_headers => true
-  pod 'Firebase/Core', :modular_headers => true
-  pod 'Firebase/Firestore', :modular_headers => true
-  pod 'Firebase/Database', :modular_headers => true
-  pod 'Firebase/Messaging', :modular_headers => true
-  pod 'FirebaseCore', :modular_headers => true
-  pod 'FirebaseDatabase', :modular_headers => true
-  
-  # Override Firebase SDK Version
-  $FirebaseSDKVersion = '10.24.0'
+  pod 'Firebase', $FirebaseSDKVersion, :modular_headers => true
+  pod 'Firebase/Analytics', $FirebaseSDKVersion, :modular_headers => true
+  pod 'Firebase/Core', $FirebaseSDKVersion, :modular_headers => true
+  pod 'Firebase/Firestore', $FirebaseSDKVersion, :modular_headers => true
+  pod 'Firebase/Database', $FirebaseSDKVersion, :modular_headers => true
+  pod 'Firebase/Messaging', $FirebaseSDKVersion, :modular_headers => true
+  pod 'FirebaseCore', $FirebaseSDKVersion, :modular_headers => true
+  pod 'FirebaseDatabase', $FirebaseSDKVersion, :modular_headers => true
   
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   

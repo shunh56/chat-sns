@@ -542,7 +542,7 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ],
                 ),
-                if (flavor == "dev") ...[
+                if (flavor != "appstore") ...[
                   const Gap(4),
                   Text(
                     info.packageName,

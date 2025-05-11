@@ -30,6 +30,10 @@ class UserUsecase {
     return user != null;
   }
 
+  Future<List<UserAccount>> getUsersByUserIds(List<String> userIds) async {
+    return _repository.getUsersByUserIds(userIds);
+  }
+
   Future<UserAccount?> getUserByUid(String userId) async {
     return _repository.getUserByUserId(userId);
   }

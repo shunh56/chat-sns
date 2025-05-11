@@ -194,8 +194,9 @@ class DefaultTabs extends ConsumerWidget {
                           ),
                           const Expanded(child: SizedBox()),
                           // subscriptionLogo,
-                          const Gap(12),
-                          const ActivityIcon(), /*  const Gap(12),
+                          // const Gap(12),
+                          //const ActivityIcon(),
+                          /*  const Gap(12),
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -558,67 +559,5 @@ class HeartAnimationArea extends ConsumerWidget {
         ),
       ),
     );
-  }
-}
-
-class ActivityIcon extends ConsumerWidget {
-  const ActivityIcon({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncValue = ref.watch(activitiesListNotifierProvider);
-    final notifier = ref.read(activitiesListNotifierProvider.notifier);
-    return asyncValue.maybeWhen(data: (data) {
-      final unseenMark = data.any((item) => !item.isSeen);
-      return Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 2),
-            child: GestureDetector(
-              onTap: () {
-                notifier.readActivities();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ActivitiesScreen(),
-                  ),
-                );
-              },
-              child: const Icon(
-                Icons.notifications_outlined,
-                color: ThemeColor.icon,
-              ),
-            ),
-          ),
-          if (unseenMark)
-            Positioned(
-              top: 0, // 上部の位置を調整
-              right: 0, // 右側の位置を調整
-              child: CircleAvatar(
-                radius: 4, // サイズを小さくする
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            ),
-        ],
-      );
-    }, orElse: () {
-      return Padding(
-        padding: const EdgeInsets.only(right: 2),
-        child: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ActivitiesScreen(),
-              ),
-            );
-          },
-          child: const Icon(
-            Icons.notifications_outlined,
-            color: ThemeColor.icon,
-          ),
-        ),
-      );
-    });
   }
 }

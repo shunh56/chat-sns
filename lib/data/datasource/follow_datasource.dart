@@ -27,102 +27,110 @@ class FirestoreFollowDataSource {
       _firestore.collection('follow_stats_by_user'); */
 
   Future<void> followUser(String userId, String targetId) async {
-    final batch = _firestore.batch();
-    final timestamp = FieldValue.serverTimestamp();
-    final followingData = {
-      'data': FieldValue.arrayUnion([
-        {
-          'createdAt': timestamp,
-          'userId': targetId,
-        }
-      ])
-    };
-    final followedData = {
-      'data': FieldValue.arrayUnion([
-        {
-          'createdAt': timestamp,
-          'userId': userId,
-        }
-      ])
-    };
-    // 1. followingsコレクションに追加 (userIdがtargetIdをフォロー)
-    final followingRef = _followingsCollection.doc(userId);
-    batch.set(followingRef, followingData, SetOptions(merge: true));
-    // 2. followersコレクションに追加 (targetIdのフォロワーにuserIdを追加)
-    final followerRef = _followersCollection.doc(targetId);
-    batch.set(followerRef, followedData, SetOptions(merge: true));
-    // 3. フォロー数とフォロワー数をインクリメント（usersコレクションのみ）
-    batch.update(_usersCollection.doc(userId),
-        {'followingCount': FieldValue.increment(1)});
+    // 自分自身をフォローしようとしていないかチェック
+    if (userId == targetId) {
+      throw Exception('自分自身をフォローすることはできません');
+    }
 
-    batch.update(_usersCollection.doc(targetId),
-        {'followerCount': FieldValue.increment(1)});
-    await batch.commit();
-    /* final activityRef = _followActivitiesCollection.doc();
-    batch.set(activityRef, {
-      'from': userId,
-      'to': targetId,
-      'action': 'follow',
-      'createdAt': timestamp
-    });
+    // 既にフォローしているかチェック
+    final isAlreadyFollowing = await isFollowing(userId, targetId);
+    if (isAlreadyFollowing) {
+      throw Exception('既にフォローしています');
+    }
 
-    // 5. フォロー統計情報の更新（日次・週次のカウントのみ）
-    final statsUserRef = _followStatsByUserCollection.doc(userId);
-    batch.set(
-        statsUserRef,
-        {
-          'followingCountLastDay': FieldValue.increment(1),
-          'followingCountLastWeek': FieldValue.increment(1)
-        },
-        SetOptions(merge: true));
+    try {
+      final batch = _firestore.batch();
+      final timestamp = FieldValue.serverTimestamp();
+      final followingData = {
+        'data': FieldValue.arrayUnion([
+          {
+            'createdAt': timestamp,
+            'userId': targetId,
+          }
+        ])
+      };
+      final followedData = {
+        'data': FieldValue.arrayUnion([
+          {
+            'createdAt': timestamp,
+            'userId': userId,
+          }
+        ])
+      };
 
-    final statsTargetRef = _followStatsByUserCollection.doc(targetId);
-    batch.set(
-        statsTargetRef,
-        {
-          'followerCountLastDay': FieldValue.increment(1),
-          'followerCountLastWeek': FieldValue.increment(1)
-        },
-        SetOptions(merge: true));
- */
+      // 1. followingsコレクションに追加 (userIdがtargetIdをフォロー)
+      final followingRef = _followingsCollection.doc(userId);
+      batch.set(followingRef, followingData, SetOptions(merge: true));
+
+      // 2. followersコレクションに追加 (targetIdのフォロワーにuserIdを追加)
+      final followerRef = _followersCollection.doc(targetId);
+      batch.set(followerRef, followedData, SetOptions(merge: true));
+
+      // 3. フォロー数とフォロワー数をインクリメント
+      batch.update(_usersCollection.doc(userId),
+          {'followingCount': FieldValue.increment(1)});
+
+      batch.update(_usersCollection.doc(targetId),
+          {'followerCount': FieldValue.increment(1)});
+
+      await batch.commit();
+    } catch (e) {
+      // Firestoreの操作中にエラーが発生した場合
+      throw Exception('フォロー操作に失敗しました: ${e.toString()}');
+    }
   }
 
   Future<void> unfollowUser(String userId, String targetId) async {
-    final followingList = await _getFollowingList(userId);
-    final followerList = await _getFollowerList(userId);
+    // 自分自身をアンフォローしようとしていないかチェック
+    if (userId == targetId) {
+      throw Exception('自分自身をアンフォローすることはできません');
+    }
 
-    // 削除対象のデータを検索
-    final followingToRemove =
-        followingList.where((item) => item['userId'] == targetId).toList();
-    final followerToRemove =
-        followerList.where((item) => item['userId'] == userId).toList();
+    // フォローしているかチェック
+    final isCurrentlyFollowing = await isFollowing(userId, targetId);
+    if (!isCurrentlyFollowing) {
+      throw Exception('フォローしていないユーザーをアンフォローすることはできません');
+    }
 
-    final batch = _firestore.batch();
+    try {
+      final followingList = await _getFollowingList(userId);
+      final followerList = await _getFollowerList(targetId);
 
-    // 1. followingsコレクションから削除
-    if (followingToRemove.isNotEmpty) {
+      // 削除対象のデータを検索
+      final followingToRemove =
+          followingList.where((item) => item['userId'] == targetId).toList();
+      final followerToRemove =
+          followerList.where((item) => item['userId'] == userId).toList();
+
+      if (followingToRemove.isEmpty || followerToRemove.isEmpty) {
+        throw Exception('フォロー関係が見つかりません');
+      }
+
+      final batch = _firestore.batch();
+
+      // 1. followingsコレクションから削除
       batch.set(
           _followingsCollection.doc(userId),
           {'data': FieldValue.arrayRemove(followingToRemove)},
           SetOptions(merge: true));
-    }
 
-    // 2. followersコレクションから削除
-    if (followerToRemove.isNotEmpty) {
+      // 2. followersコレクションから削除
       batch.set(
           _followersCollection.doc(targetId),
           {'data': FieldValue.arrayRemove(followerToRemove)},
           SetOptions(merge: true));
+
+      // 3. フォロー数とフォロワー数をデクリメント
+      batch.update(_usersCollection.doc(userId),
+          {'followingCount': FieldValue.increment(-1)});
+
+      batch.update(_usersCollection.doc(targetId),
+          {'followerCount': FieldValue.increment(-1)});
+
+      await batch.commit();
+    } catch (e) {
+      throw Exception('アンフォロー操作に失敗しました: ${e.toString()}');
     }
-
-    // 3. フォロー数とフォロワー数をデクリメント（usersコレクションのみ）
-    batch.update(_usersCollection.doc(userId),
-        {'followingCount': FieldValue.increment(-1)});
-
-    batch.update(_usersCollection.doc(targetId),
-        {'followerCount': FieldValue.increment(-1)});
-
-    await batch.commit();
   }
 
   /// ユーザーがフォローしている人のリストを取得

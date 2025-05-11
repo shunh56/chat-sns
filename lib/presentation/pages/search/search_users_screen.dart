@@ -1,11 +1,14 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/core/values.dart';
+import 'package:app/presentation/pages/activities/activities_screen.dart';
 import 'package:app/presentation/pages/footprint/footprint_screen.dart';
 import 'package:app/presentation/pages/footprint/widget/footprint_badge.dart';
 import 'package:app/presentation/pages/search/widgets/defaut_user_card_view.dart';
 import 'package:app/presentation/pages/search/widgets/hashtag_user_card_view.dart';
 import 'package:app/presentation/pages/search/widgets/top_feed.dart';
 import 'package:app/presentation/pages/search/sub_pages/search_params_screen.dart';
+import 'package:app/presentation/providers/activities_list_notifier.dart';
 import 'package:app/presentation/providers/footprint/visitors_provider.dart';
 
 import 'package:app/presentation/providers/users/online_users.dart';
@@ -21,7 +24,6 @@ class SearchUsersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     return Scaffold(
-      appBar: _buildAppBar(context, ref),
       body: RefreshIndicator(
         backgroundColor: ThemeColor.accent,
         onRefresh: () async {
@@ -29,7 +31,8 @@ class SearchUsersScreen extends ConsumerWidget {
           ref.read(recentUsersNotifierProvider.notifier).refresh();
         },
         child: ListView(
-          children: const [
+          children: [
+            _buildAppBar(context, ref),
             Gap(12),
             SearchScreenTopFeed(),
             Gap(16),
@@ -57,8 +60,8 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
     title: Row(
       children: [
         Text(
-          "探す",
-          style: textStyle.w700(
+          "$appName",
+          style: textStyle.w600(
             fontSize: 28,
             color: ThemeColor.white,
           ),
@@ -93,6 +96,8 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
           ),
         ),
         const Gap(12),
+        ActivityIcon(),
+        Gap(12),
         /* Container(
           decoration: BoxDecoration(
             color: const Color(0xFF222222),
@@ -151,4 +156,60 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
       ],
     ),
   );
+}
+
+class ActivityIcon extends ConsumerWidget {
+  const ActivityIcon({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+    final asyncValue = ref.watch(activitiesListNotifierProvider);
+    final widget = Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF222222),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ActivitiesScreen(),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Icon(
+              Icons.notifications_outlined,
+              color: ThemeColor.icon,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return asyncValue.when(
+      data: (data) {
+        final count = data.where((item) => !item.isSeen).length;
+        return Badge(
+          isLabelVisible: count > 0,
+          label: Text(
+            '$count',
+            style: textStyle.numText(
+              color: Colors.white,
+            ),
+          ),
+          child: widget,
+        );
+      },
+      loading: () => widget,
+      error: (_, __) => widget,
+    );
+  }
 }

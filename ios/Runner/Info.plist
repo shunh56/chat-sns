@@ -16,7 +16,8 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>$(APP_ID)</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<!--<string>$(APP_ID)</string>-->
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -34,21 +35,8 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<!-- dev -->
 				<string>com.googleusercontent.apps.889410445548-e12j86agor31tgb0n6o0hbpqb8g8ltg3</string>
-				<!-- 
-				<string>chat-sns-project.firebaseapp.com</string>
-				<string>chat-sns-project.firebaseapp</string>
-				<string>chat-sns-project</string>
-				-->
-				<!-- prod -->
 				<string>com.googleusercontent.apps.822316855484-3gcaup6u2k9b8jfljdn56rilbsgekm9i</string>
-				<!-- 
-				<string>blank-project-prod.firebaseapp.com</string>
-				<string>blank-project-prod.firebaseapp</string>
-				<string>blank-project-prod</string>
-				-->
-				<!-- common -->
 				<string>twitterauth</string>
 				<string>https</string>
 			</array>
@@ -73,14 +61,14 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSRemoteNotificationUsageDescription</key>
-	<string>新着メッセージやアップデートをお知らせするため、プッシュ通知の許可をお願いします。</string>
 	<key>NSCameraUsageDescription</key>
 	<string>写真の投稿とQRコードの読み取りのため、カメラの使用を許可してください。</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>音声通話機能を利用するため、マイクの使用を許可してください。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>画像の投稿とプロフィール設定のため、写真へのアクセスを許可してください。</string>
+	<key>NSRemoteNotificationUsageDescription</key>
+	<string>新着メッセージやアップデートをお知らせするため、プッシュ通知の許可をお願いします。</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>アプリの改善とより良い体験を提供するために、データの収集を許可していただけますと幸いです。</string>
 	<key>SKAdNetworkItems</key>
@@ -258,13 +246,9 @@
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
-		<!-- バックグラウンドでのデータ更新 -->
 		<string>fetch</string>
-		<!-- VoIP通話機能 -->
 		<string>voip</string>
-		<!-- プッシュ通知 -->
 		<string>remote-notification</string>
-		<!-- バックグラウンド処理 -->
 		<string>processing</string>
 	</array>
 	<key>UILaunchStoryboardName</key>

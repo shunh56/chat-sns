@@ -1,5 +1,5 @@
 import 'package:app/core/utils/debug_print.dart';
-import 'package:app/data/datasource/local/hive/hive_boxes.dart';
+import 'package:app/data/datasource/hive/hive_boxes.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/usecases/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,70 +12,53 @@ part 'all_users_notifier.g.dart';
 @Riverpod(keepAlive: true)
 class AllUsersNotifier extends _$AllUsersNotifier {
   final Box<UserAccountHive> box = HiveBoxes.userBox();
+
+  Map<String, UserAccount> _getCache() =>
+      Map<String, UserAccount>.from(state.asData?.value ?? {});
+
   @override
   AsyncValue<Map<String, UserAccount>> build() {
-    Map<String, UserAccount> allUsers = {};
-    final keys = box.keys;
-    for (String userId in keys) {
-      final hiveObject = box.get(userId);
-      if (hiveObject != null) {
-        allUsers[userId] = hiveObject.toUserAccount();
-      }
-    }
-
-    return AsyncValue.data(allUsers);
+    return const AsyncValue.data({});
   }
 
-  Future<List<UserAccount>> getUserAccounts(List<String> userIds,
-      {bool update = false}) async {
-    Map<String, UserAccount> cache =
-        state.asData != null ? state.asData!.value : {};
-    List<UserAccount> list = [];
-    List<Future<UserAccount?>> futures = [];
-    if (update) {
-      for (String userId in userIds) {
-        futures.add(ref.read(userUsecaseProvider).getUserByUid(userId));
-      }
-    } else {
-      for (String userId in userIds) {
-        final cachUser = cache[userId];
-        final hiveUser = box.get(userId);
+  Future<List<UserAccount>> getUserAccounts(List<String> userIds) async {
+    // 現在のキャッシュを取得
+    Map<String, UserAccount> cache = _getCache();
 
-        if (cachUser != null) {
-          futures.add(Future.value(cachUser));
-        } else if (hiveUser != null) {
-          DateTime now = DateTime.now();
-          DateTime updatedAt = hiveUser.updatedAt.toDate();
-          final diffInHours = now.difference(updatedAt).inHours;
-          if ((diffInHours < 72)) {
-            futures.add(Future.value(hiveUser.toUserAccount()));
-          } else {
-            futures.add(ref.read(userUsecaseProvider).getUserByUid(userId));
-          }
-        } else {
-          futures.add(ref.read(userUsecaseProvider).getUserByUid(userId));
-        }
+    // まずキャッシュにあるユーザーを集める
+    final List<UserAccount> cachedUsers = [];
+    final List<String> missingUserIds = [];
+
+    for (final id in userIds) {
+      if (cache.containsKey(id)) {
+        cachedUsers.add(cache[id]!);
+      } else {
+        missingUserIds.add(id);
       }
     }
-    await Future.wait(futures);
 
-    for (var item in futures) {
-      final user = (await item)!;
+    // キャッシュにないユーザーをリポジトリから取得
+    final List<UserAccount> fetchedUsers =
+        await ref.read(userUsecaseProvider).getUsersByUserIds(missingUserIds);
 
-      cache[user.userId] = user;
-      list.add(user);
-      //アカウント切り替えのため、ConnectionTypeは使用しない
-      box.put(
-        user.userId,
-        UserAccountHive(
-          updatedAt: Timestamp.now(),
-          type: ConnectionType.others,
-          user: user,
-        ),
-      );
+    // キャッシュを更新
+    final updatedCache = Map<String, UserAccount>.from(cache);
+    for (final user in fetchedUsers) {
+      updatedCache[user.userId] = user;
     }
-    state = AsyncValue.data(cache);
-    return list;
+
+    // state を更新
+    state = AsyncValue.data(updatedCache);
+
+    // キャッシュ済み＋新規取得のリストを返す（順番を userIds に揃える）
+    final allUsers = <UserAccount>[];
+    for (final id in userIds) {
+      final user = updatedCache[id];
+      if (user != null) {
+        allUsers.add(user);
+      }
+    }
+    return allUsers;
   }
 
   Future<UserAccount?> updateUserAccount(String userId) async {
@@ -88,7 +71,7 @@ class AllUsersNotifier extends _$AllUsersNotifier {
       user.userId,
       UserAccountHive(
         updatedAt: Timestamp.now(),
-        type: ConnectionType.others,
+        //type: ConnectionType.others,
         user: user,
       ),
     );
@@ -99,15 +82,14 @@ class AllUsersNotifier extends _$AllUsersNotifier {
   }
 
   void addUserAccounts(List<UserAccount> users) {
-    Map<String, UserAccount> cache =
-        state.asData != null ? state.asData!.value : {};
+    Map<String, UserAccount> cache = _getCache();
     for (var user in users) {
       cache[user.userId] = user;
       box.put(
         user.userId,
         UserAccountHive(
           updatedAt: Timestamp.now(),
-          type: ConnectionType.others,
+          //type: ConnectionType.others,
           user: user,
         ),
       );

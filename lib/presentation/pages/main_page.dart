@@ -409,19 +409,9 @@ class _MainPageState extends ConsumerState<MainPage>
           IndexedStack(
             index: ref.watch(bottomNavIndexProvider),
             children: const [
-              //FollowingScreen(),
-              //0
-              TimelinePage(),
-              //1
-              //CommunityTabScreen(),
               SearchUsersScreen(),
-              //2
-
-              //3
+              TimelinePage(),
               ChatScreen(),
-              //4
-              //ThreadsScreen(),
-              //SearchScreen(),
               ProfileScreen(),
               //ThreadsScreen(),
               // PlaygroundScreen(),

@@ -26,13 +26,13 @@ packages:
     source: hosted
     version: "6.5.1"
   agora_rtm:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: agora_rtm
-      sha256: "56d802cd6592a163a90c1a4220e361734fa1a45dfe13536f36f4e81e1b7f5a61"
+      sha256: ab4b77fa722153f9399302693a95acb7b7e9593745ef2aefa34c10555337f139
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.2"
+    version: "1.6.0"
   agora_uikit:
     dependency: "direct main"
     description:
@@ -2091,7 +2091,7 @@ packages:
     source: hosted
     version: "3.0.1"
   webview_flutter:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: webview_flutter
       sha256: "6869c8786d179f929144b4a1f86e09ac0eddfe475984951ea6c634774c16b522"

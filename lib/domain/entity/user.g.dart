@@ -18,20 +18,17 @@ class UserAccountHiveAdapter extends TypeAdapter<UserAccountHive> {
     };
     return UserAccountHive(
       updatedAt: fields[0] as Timestamp,
-      type: fields[1] as ConnectionType,
-      user: fields[2] as UserAccount,
+      user: fields[1] as UserAccount,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserAccountHive obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(2)
       ..writeByte(0)
       ..write(obj.updatedAt)
       ..writeByte(1)
-      ..write(obj.type)
-      ..writeByte(2)
       ..write(obj.user);
   }
 
@@ -694,55 +691,6 @@ class PublicityRangeAdapter extends TypeAdapter<PublicityRange> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is PublicityRangeAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
-class ConnectionTypeAdapter extends TypeAdapter<ConnectionType> {
-  @override
-  final int typeId = 13;
-
-  @override
-  ConnectionType read(BinaryReader reader) {
-    switch (reader.readByte()) {
-      case 0:
-        return ConnectionType.me;
-      case 1:
-        return ConnectionType.friend;
-      case 2:
-        return ConnectionType.friendOfFriend;
-      case 3:
-        return ConnectionType.others;
-      default:
-        return ConnectionType.me;
-    }
-  }
-
-  @override
-  void write(BinaryWriter writer, ConnectionType obj) {
-    switch (obj) {
-      case ConnectionType.me:
-        writer.writeByte(0);
-        break;
-      case ConnectionType.friend:
-        writer.writeByte(1);
-        break;
-      case ConnectionType.friendOfFriend:
-        writer.writeByte(2);
-        break;
-      case ConnectionType.others:
-        writer.writeByte(3);
-        break;
-    }
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ConnectionTypeAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

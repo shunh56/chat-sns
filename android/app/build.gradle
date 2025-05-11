@@ -38,7 +38,8 @@ if (flutterVersionName == null) {
 android {
     namespace  'com.blank.sns'
     compileSdk = 34
-    ndkVersion = flutter.ndkVersion
+    //ndkVersion = flutter.ndkVersion
+    ndkVersion "25.1.8937393"
 
     compileOptions {
         coreLibraryDesugaringEnabled true

@@ -3,15 +3,15 @@
 FLUTTER = flutter
 DART_DEFINE_DEV = --dart-define=FLAVOR=dev --dart-define-from-file=dart_defines/dev.env
 DART_DEFINE_PROD = --dart-define=FLAVOR=prod --dart-define-from-file=dart_defines/prod.env
+DART_DEFINE_APPSTORE = --dart-define=FLAVOR=appstore --dart-define-from-file=dart_defines/appstore.env
 
+
+#build runner
 build-runner:
 	@echo "Activating build runner..."
 	flutter pub run build_runner build --delete-conflicting-outputs
 
-dev-debug:
-	@echo "Starting dev debug build..."
-	$(FLUTTER) run $(DART_DEFINE_DEV)
-
+#dev-ios
 dev-profile:
 	@echo "Starting dev profile build..."
 	$(FLUTTER) run --profile $(DART_DEFINE_DEV)
@@ -20,6 +20,7 @@ dev-release:
 	@echo "Starting dev release build..."
 	$(FLUTTER) run --release $(DART_DEFINE_DEV)
 
+#dev-android
 dev-android-release:
 	@echo "Starting Android dev release build..."
 	$(FLUTTER) run --flavor dev --release $(DART_DEFINE_DEV)
@@ -28,18 +29,7 @@ dev-android-release-verbose:
 	@echo "Starting Android dev release build..."
 	$(FLUTTER) run --verbose --flavor dev --release $(DART_DEFINE_DEV)
 
-build-dev:
-	@echo "Building dev IPA..."
-	$(FLUTTER) build ipa --release $(DART_DEFINE_DEV)
-
-build-android-dev:
-	@echo "Building Android dev App Bundle..."
-	$(FLUTTER) build appbundle --flavor dev --release $(DART_DEFINE_DEV)
-
-prod-debug:
-	@echo "Starting prod debug build..."
-	$(FLUTTER) run $(DART_DEFINE_PROD)
-
+#prod-ios
 prod-profile:
 	@echo "Starting prod profile build..."
 	$(FLUTTER) run --profile $(DART_DEFINE_PROD)
@@ -52,9 +42,27 @@ prod-android-release:
 	@echo "Starting Android prod release build..."
 	$(FLUTTER) run --flavor prod --release $(DART_DEFINE_PROD)
 
+appstore-release:
+	@echo "Starting appstore release build..."
+	$(FLUTTER) run --release $(DART_DEFINE_APPSTORE)
+
+#build-ios
+build-dev:
+	@echo "Building dev IPA..."
+	$(FLUTTER) build ipa --release $(DART_DEFINE_DEV)
+
 build-prod:
 	@echo "Building prod IPA..."
 	$(FLUTTER) build ipa --release $(DART_DEFINE_PROD)
+
+build-appstore:
+	@echo "Building appstore IPA..."
+	$(FLUTTER) build ipa --release $(DART_DEFINE_APPSTORE)
+
+#build-android
+build-android-dev:
+	@echo "Building Android dev App Bundle..."
+	$(FLUTTER) build appbundle --flavor dev --release $(DART_DEFINE_DEV)
 
 
 build-android-prod:

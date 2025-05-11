@@ -16,14 +16,10 @@ class UserAccountHive extends HiveObject {
   final Timestamp updatedAt;
 
   @HiveField(1)
-  final ConnectionType type;
-
-  @HiveField(2)
   final UserAccount user;
 
   UserAccountHive({
     required this.updatedAt,
-    required this.type,
     required this.user,
   });
 
@@ -413,7 +409,6 @@ class UserAccount extends HiveObject {
   }
 }
 
-//
 @HiveType(typeId: 2)
 enum AccountStatus {
   @HiveField(0)
@@ -1126,20 +1121,6 @@ enum PublicityRange {
   @HiveField(2)
   public,
 }
-
-@HiveType(typeId: 13)
-enum ConnectionType {
-  @HiveField(0)
-  me,
-  @HiveField(1)
-  friend,
-  @HiveField(2)
-  friendOfFriend,
-  @HiveField(3)
-  others,
-}
-
-//
 
 class TimestampAdapter extends TypeAdapter<Timestamp> {
   @override

@@ -113,7 +113,7 @@ class FootprintScreen extends HookConsumerWidget {
                         onRefresh: () async {
                           ref.read(visitorsProvider.notifier).refresh();
                         },
-                        child: FootprintListView(
+                        child: FootprintGridView(
                           footprints: visitors,
                           onDelete: (footprint) {
                             ref
@@ -146,7 +146,7 @@ class FootprintScreen extends HookConsumerWidget {
                               .read(visitedControllerProvider.notifier)
                               .refresh();
                         },
-                        child: FootprintListView(
+                        child: FootprintGridView(
                           footprints: visited,
                           isVisitedTile: true,
                           onDelete: (footprint) {
@@ -326,12 +326,12 @@ class FootprintScreen extends HookConsumerWidget {
   }
 }
 
-class FootprintListView extends StatelessWidget {
+class FootprintGridView extends StatelessWidget {
   final List<Footprint> footprints;
   final Function(Footprint) onDelete;
   final bool isVisitedTile;
 
-  const FootprintListView({
+  const FootprintGridView({
     Key? key,
     required this.footprints,
     required this.onDelete,
@@ -340,69 +340,84 @@ class FootprintListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: footprints.length,
-      itemBuilder: (context, index) {
-        final footprint = footprints[index];
+    // 日付ごとにフットプリントをグループ化
+    final Map<String, List<Footprint>> groupedFootprints = {};
 
-        // 日付グループ化のためのヘッダーを表示
-        final bool showHeader = index == 0 ||
-            !_isSameDay(
-                footprints[index].updatedAt, footprints[index - 1].updatedAt);
+    for (final footprint in footprints) {
+      final dateKey = _getDateKey(footprint.updatedAt);
+      if (!groupedFootprints.containsKey(dateKey)) {
+        groupedFootprints[dateKey] = [];
+      }
+      groupedFootprints[dateKey]!.add(footprint);
+    }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (showHeader) _buildDateHeader(context, footprint.updatedAt),
-            AnimatedFootprintCard(
-              footprint: footprint,
-              onDelete: () => onDelete(footprint),
-              delay: Duration(milliseconds: index * 50),
-              isVisitedTile: isVisitedTile,
+    // 日付キーを降順にソート
+    final sortedDates = groupedFootprints.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    return CustomScrollView(
+      slivers: [
+        for (final dateKey in sortedDates) ...[
+          // 日付ヘッダー
+          SliverToBoxAdapter(
+            child: _buildDateHeader(
+                context, groupedFootprints[dateKey]![0].updatedAt),
+          ),
+          // グリッドビュー (2列)
+          SliverPadding(
+            padding: const EdgeInsets.all(8.0),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.8, // カードのアスペクト比を調整
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final footprint = groupedFootprints[dateKey]![index];
+                  return AnimatedFootprintGridCard(
+                    footprint: footprint,
+                    onDelete: () => onDelete(footprint),
+                    delay: Duration(milliseconds: index * 50),
+                    isVisitedTile: isVisitedTile,
+                  );
+                },
+                childCount: groupedFootprints[dateKey]!.length,
+              ),
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      ],
     );
+  }
+
+  String _getDateKey(Timestamp timestamp) {
+    final date = timestamp.toDate();
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   Widget _buildDateHeader(BuildContext context, Timestamp timestamp) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          timestamp.toDateStr,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+      padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
+      child: Text(
+        timestamp.toDateStr,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
     );
   }
-
-  bool _isSameDay(Timestamp ts1, Timestamp ts2) {
-    final date1 = ts1.toDate();
-    final date2 = ts2.toDate();
-    return date1.year == date2.year &&
-        date1.month == date2.month &&
-        date1.day == date2.day;
-  }
 }
 
-class AnimatedFootprintCard extends HookConsumerWidget {
+class AnimatedFootprintGridCard extends HookConsumerWidget {
   final Footprint footprint;
   final VoidCallback onDelete;
   final Duration delay;
   final bool isVisitedTile;
 
-  const AnimatedFootprintCard({
+  const AnimatedFootprintGridCard({
     Key? key,
     required this.footprint,
     required this.onDelete,
@@ -423,8 +438,9 @@ class AnimatedFootprintCard extends HookConsumerWidget {
       )),
     );
 
+    // グリッド用に横からではなく下からのスライドインに変更
     final slideAnimation = useAnimation(
-      Tween<Offset>(begin: const Offset(0.5, 0), end: Offset.zero)
+      Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero)
           .animate(CurvedAnimation(
         parent: animationController,
         curve: Curves.easeOutCubic,
@@ -444,115 +460,146 @@ class AnimatedFootprintCard extends HookConsumerWidget {
       opacity: fadeAnimation,
       child: Transform.translate(
         offset: slideAnimation,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Card(
-            elevation: 2,
-            color: ThemeColor.accent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: userAsyncValue.when(
-                data: (user) {
-                  //final visitTime = footprint.updatedAt.toDate();
-                  //final timeString = DateFormat('HH:mm').format(visitTime);
-
-                  return Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        ref
-                            .read(navigationRouterProvider(context))
-                            .goToProfile(user);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
+        child: Card(
+          margin: EdgeInsets.zero,
+          elevation: 2,
+          color: ThemeColor.accent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: userAsyncValue.when(
+            data: (user) {
+              return Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    ref
+                        .read(navigationRouterProvider(context))
+                        .goToProfile(user);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: user.imageUrl != null
+                            ? CachedImage.usersCard(user.imageUrl!)
+                            : const SizedBox(),
+                      ),
+                      const Gap(8),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: 0,
+                          bottom: 8,
+                          left: 8,
+                          right: 8,
+                        ),
                         child: Row(
                           children: [
-                            CachedImage.userIcon(user.imageUrl, user.name, 30),
-                            const Gap(12),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  /*Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary
-                                          .withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      '${footprint.count}回目',
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .secondary,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                  const Gap(8), */
-                                  Text(
-                                    user.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                user.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             if (isVisitedTile)
-                              IconButton(
-                                icon: const Icon(Icons.clear, size: 20),
-                                onPressed: onDelete,
-                                style: IconButton.styleFrom(
-                                  backgroundColor: Colors.grey.withOpacity(0.1),
-                                  foregroundColor: Colors.grey[700],
+                              SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  icon: const Icon(Icons.clear, size: 16),
+                                  onPressed: onDelete,
+                                  style: IconButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.black.withOpacity(0.1),
+                                    foregroundColor:
+                                        Colors.white.withOpacity(0.5),
+                                  ),
                                 ),
                               ),
                           ],
                         ),
                       ),
-                    ),
-                  );
-                },
-                loading: () => const ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  title: LinearProgressIndicator(),
-                  subtitle: SizedBox(height: 20),
-                ),
-                error: (error, stack) => ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.red.withOpacity(0.2),
-                    child: const Icon(Icons.error, color: Colors.red),
-                  ),
-                  title: const Text('ユーザーを読み込めませんでした'),
-                  subtitle: Text(
-                    error.toString(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    ],
                   ),
                 ),
+              );
+            },
+            loading: () => const Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
+            ),
+            error: (error, stack) => Center(
+              child: Icon(Icons.error,
+                  color: Colors.red.withOpacity(0.7), size: 20),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+// 既存のサポートクラスの修正版 (必要な部分のみ)
+class FootprintLoadingState extends StatelessWidget {
+  const FootprintLoadingState({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 2.5,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey.withOpacity(0.1),
+          highlightColor: Colors.white.withOpacity(0.1),
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: const BoxDecoration(
+                      color: Colors.grey,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -607,76 +654,6 @@ class EmptyFootprintState extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class FootprintLoadingState extends StatelessWidget {
-  const FootprintLoadingState({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: Colors.grey.withOpacity(0.1),
-          highlightColor: Colors.white.withOpacity(0.1),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 12,
-                          width: 240,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[400],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          height: 12,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          height: 12,
-                          width: 180,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

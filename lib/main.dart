@@ -8,7 +8,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/core/values.dart';
-import 'package:app/data/datasource/local/hive/hive_boxes.dart';
+import 'package:app/data/datasource/hive/hive_boxes.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/firebase_options.dart';
 import 'package:app/notification_service.dart';
@@ -185,10 +185,8 @@ void main() {
         await Hive.deleteBoxFromDisk('userAccount');
       }
       prefs.setString("current_version", packageInfo.version);
-
       HiveBoxes.registerAdapters();
       await HiveBoxes.openBoxes();
-
       if (!kDebugMode) {
         await FirebaseCrashlytics.instance
             .setCrashlyticsCollectionEnabled(true);
@@ -1292,18 +1290,30 @@ class LoadingPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (flavor == "dev")
-              const Padding(
-                padding: EdgeInsets.only(bottom: 24),
-                child: Text(
-                  "DEVMODE",
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+            if (flavor != "appstore")
+              flavor == "dev"
+                  ? const Padding(
+                      padding: EdgeInsets.only(bottom: 24),
+                      child: Text(
+                        "DEVMODE",
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    )
+                  : const Padding(
+                      padding: EdgeInsets.only(bottom: 24),
+                      child: Text(
+                        "PRODMODE",
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
             SizedBox(
               height: 72,
               width: 72,
