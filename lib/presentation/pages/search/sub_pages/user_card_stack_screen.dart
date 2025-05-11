@@ -139,7 +139,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
     // アニメーションコントローラー初期化
     _animationController = AnimationController(
-        duration: const Duration(milliseconds: 500), vsync: this);
+        duration: const Duration(milliseconds: 300), vsync: this);
 
     // リスナー変数の初期化
     _animationListener = null;
@@ -207,7 +207,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
     }
 
     // 次のカードがアニメーションで前に移動する時間を確保
-    await Future.delayed(const Duration(milliseconds: 250));
+    await Future.delayed(const Duration(milliseconds: 120));
 
     // アニメーション変数をリセット
     if (mounted) {
@@ -243,6 +243,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
   // 手動スワイプ開始
   void _startSwipe(int direction) {
+    HapticFeedback.selectionClick();
     if (_remainingUsers.isEmpty || _status != CardStatus.idle) return;
 
     _status = direction > 0 ? CardStatus.like : CardStatus.nope;
@@ -268,7 +269,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
         setState(() {
           _position =
               Offset(targetX * _animationController.value, _position.dy);
-          _angle = direction * 0.5 * _animationController.value;
+          _angle = direction * 0.3 * _animationController.value;
         });
       }
     };
@@ -346,7 +347,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
           // メインコンテンツ
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 360),
             child: state.isLoading
                 ? _buildLoadingState()
                 : state.isCompleted
@@ -365,7 +366,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
       // 角度の計算（ドラッグの横移動に応じて回転）
       final newAngle = 45.0 * (_position.dx / _screenSize.width);
-      _angle = newAngle.clamp(-45.0, 45.0) * pi / 180;
+      _angle = newAngle.clamp(-30.0, 30.0) * pi / 180;
 
       // ドラッグ中はまだ判定を確定せず、ドラッグの方向に応じたインジケーションのみ表示
       if (_position.dx > _screenSize.width * 0.1) {
@@ -389,6 +390,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
 
     // 閾値を超えたかチェック - 実際の判定はここで確定する
     if (_position.dx.abs() > threshold) {
+      HapticFeedback.mediumImpact();
       DebugPrint("THRESHOLD TRUE"); // スワイプが成立
       final isRight = _position.dx > 0;
       final targetX =
@@ -416,6 +418,8 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
                 _position.dx +
                     (targetX - _position.dx) * _animationController.value,
                 _position.dy);
+            // 緩やかな角度でアニメーション
+            _angle = (_angle > 0 ? 1 : -1) * 0.3 * _animationController.value;
           });
         }
       };
@@ -437,6 +441,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
       // アニメーション開始
       _animationController.forward(from: 0.0);
     } else {
+      HapticFeedback.lightImpact();
       // スワイプが不成立 - 元の位置に戻るアニメーション
 
       // 既存のリスナーを削除
@@ -514,14 +519,14 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
               // アニメーションスペースホルダー（メイン処理中に表示）
               if (_isProcessingSwipe && _remainingUsers.length > 1)
                 TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 350),
+                  duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOutCubic,
                   tween: Tween<double>(begin: 0.95, end: 1.0),
                   builder: (context, scale, child) {
                     return Transform.scale(
                       scale: scale,
                       child: TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 350),
+                        duration: const Duration(milliseconds: 250),
                         curve: Curves.easeOutCubic,
                         tween: Tween<double>(begin: 0.9, end: 1.0),
                         builder: (context, opacity, _) {
@@ -563,7 +568,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
                                   opacity: 1.0,
                                   curve: Curves.easeInOut,
                                   child: TweenAnimationBuilder<double>(
-                                    duration: const Duration(milliseconds: 300),
+                                    duration: const Duration(milliseconds: 240),
                                     tween: Tween<double>(begin: 0.8, end: 1.0),
                                     curve: Curves.elasticOut,
                                     builder: (context, value, child) {
@@ -796,6 +801,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
         scale: _isNewCardAnimating && !isBackground ? 0.95 : 1.0,
         child: GestureDetector(
           onTap: () {
+            HapticFeedback.selectionClick();
             ref.read(navigationRouterProvider(context)).goToProfile(user);
           },
           child: Container(

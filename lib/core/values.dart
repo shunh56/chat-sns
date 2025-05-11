@@ -5,5 +5,5 @@ int QUERY_LIMIT = 30;
 bool postPrivacyMode = false;
 
 class AppConstants {
-  static const int HIVE_SCHEMA_VERSION = 3;
+  static const int HIVE_SCHEMA_VERSION = 4;
 }

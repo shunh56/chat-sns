@@ -7,7 +7,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/providers/heart_animation_notifier.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/posts/all_current_status_posts.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';

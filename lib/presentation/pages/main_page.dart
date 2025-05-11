@@ -6,6 +6,8 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/main.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
+import 'package:app/presentation/providers/follow/followers_list_notifier.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/chat/chat_screen.dart';
@@ -15,10 +17,11 @@ import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/cr
 import 'package:app/presentation/pages/posts/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/posts/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/providers/chats/dm_overview_list.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
+import 'package:app/presentation/services/dm_banner.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -264,6 +267,8 @@ class _MainPageState extends ConsumerState<MainPage>
     ); */
 
     final dmAsyncValue = ref.watch(dmOverviewListNotifierProvider);
+    ref.watch(followingListNotifierProvider);
+    ref.watch(followersListNotifierProvider);
 
     return Scaffold(
       extendBody: true,
@@ -420,6 +425,7 @@ class _MainPageState extends ConsumerState<MainPage>
             ],
           ),
           const HeartAnimationArea(),
+          const DMNotificationBanner(),
         ],
       ),
       bottomNavigationBar: ShaderWidget(

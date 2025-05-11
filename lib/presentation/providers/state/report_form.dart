@@ -1,5 +1,5 @@
 // Package imports:
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';

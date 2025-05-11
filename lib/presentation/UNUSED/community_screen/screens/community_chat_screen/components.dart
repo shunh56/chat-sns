@@ -2,7 +2,7 @@
 
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/presentation/UNUSED/community_screen/model/community.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/domain/usecases/comunity_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

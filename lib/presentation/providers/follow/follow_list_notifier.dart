@@ -1,8 +1,9 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/usecases/follow/follow_user_usecase.dart';
 import 'package:app/domain/usecases/follow/get_following_usecase.dart';
 import 'package:app/domain/usecases/follow/unfollow_user_usecase.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/push_notification_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -59,6 +60,7 @@ class FollowingListNotifier
       final users = await _getUsersFromIds(followingIds);
 
       state = AsyncValue.data(users);
+      DebugPrint("followings : $users");
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
@@ -67,16 +69,11 @@ class FollowingListNotifier
   /// ユーザーをフォローする
   Future<void> followUser(UserAccount user) async {
     try {
-      final currentState = state;
-      if (!currentState.hasValue) return;
-
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
         throw Exception('ユーザーがログインしていません');
       }
-
-      final listToUpdate = List<UserAccount>.from(currentState.value!);
-
+      final listToUpdate = List<UserAccount>.from(state.value ?? []);
       // すでにフォロー中の場合は処理を行わない
       if (listToUpdate.any((u) => u.userId == user.userId)) {
         return;
@@ -107,15 +104,11 @@ class FollowingListNotifier
   /// ユーザーのフォローを解除する
   Future<void> unfollowUser(UserAccount user) async {
     try {
-      final currentState = state;
-      if (!currentState.hasValue) return;
-
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
         throw Exception('ユーザーがログインしていません');
       }
-
-      final listToUpdate = List<UserAccount>.from(currentState.value!);
+      final listToUpdate = List<UserAccount>.from(state.value ?? []);
 
       // 楽観的更新（Optimistic update）
       listToUpdate.removeWhere((item) => item.userId == user.userId);

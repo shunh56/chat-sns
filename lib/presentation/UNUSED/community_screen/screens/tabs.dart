@@ -20,8 +20,8 @@ import 'package:app/presentation/UNUSED/community_screen/screens/topic_screen.da
 import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/community.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/firebase/firebase_firestore.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_firestore.dart';
 import 'package:app/presentation/providers/posts/community_posts.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/topics.dart';

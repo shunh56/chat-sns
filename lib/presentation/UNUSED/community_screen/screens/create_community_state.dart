@@ -3,7 +3,7 @@
 import 'dart:io';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/UNUSED/community_screen/model/community.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/domain/usecases/comunity_usecase.dart';
 import 'package:app/domain/usecases/image_uploader_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

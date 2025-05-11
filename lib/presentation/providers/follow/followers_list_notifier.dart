@@ -2,12 +2,14 @@
 
 import 'dart:async';
 
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/usecases/follow/get_followers_stream_usecase.dart';
 import 'package:app/domain/usecases/follow/get_followers_usecase.dart';
 
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// フォロワーストリームを提供するプロバイダー
@@ -21,84 +23,107 @@ final followersStreamProvider =
     return Stream.value([]);
   }
 
+  // ストリームを維持する
+  ref.keepAlive();
   return ref.watch(getFollowersStreamUsecaseProvider).call(targetUserId);
-});
-
-/// フォロワーリストをUserAccountリストとして提供するプロバイダー
-final followersUserStreamProvider = StreamProvider.autoDispose
-    .family<List<UserAccount>, String?>((ref, userId) {
-  final targetUserId = userId ?? ref.watch(authProvider).currentUser?.uid;
-
-  if (targetUserId == null) {
-    return Stream.value([]);
-  }
-
-  return ref
-      .watch(followersStreamProvider(targetUserId))
-      .when(
-        data: (data) => Stream.value(data),
-        loading: () => Stream.value([]),
-        error: (_, __) => Stream.value([]),
-      )
-      .asyncMap((followerIds) async {
-    if (followerIds.isEmpty) {
-      return [];
-    }
-    final userProvider = ref.read(allUsersNotifierProvider.notifier);
-    return await userProvider.getUserAccounts(followerIds.cast<String>());
-  });
 });
 
 final followersListNotifierProvider = StateNotifierProvider.autoDispose<
     FollowersListNotifier, AsyncValue<List<UserAccount>>>(
-  (ref) => FollowersListNotifier(ref),
+  (ref) => FollowersListNotifier(
+    ref,
+    ref.watch(authProvider),
+  )..initialize(),
 );
 
 class FollowersListNotifier
     extends StateNotifier<AsyncValue<List<UserAccount>>> {
-  FollowersListNotifier(this.ref)
-      : super(const AsyncValue<List<UserAccount>>.loading());
+  FollowersListNotifier(
+    this.ref,
+    this._auth,
+  ) : super(const AsyncValue<List<UserAccount>>.loading());
 
   final Ref ref;
+  final FirebaseAuth _auth;
+
+  // ストリームサブスクリプションを管理
+  StreamSubscription? _followerSubscription;
+
+  Future<void> initialize() async {
+    try {
+      state = const AsyncValue.loading();
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        state = AsyncValue.error('ユーザーがログインしていません', StackTrace.current);
+        return;
+      }
+
+      // フォロワーユーザーのIDリストを初期取得
+      final followerIds =
+          await ref.read(getFollowersUsecaseProvider).call(currentUser.uid);
+
+      // IDリストからユーザー情報を取得
+      final users = await _getUsersFromIds(followerIds);
+
+      // 状態を更新
+      state = AsyncValue.data(users);
+
+      // ストリームの監視を開始
+      _startListeningToFollowers(currentUser.uid);
+    } catch (e, stack) {
+      DebugPrint("Error in initialize: $e");
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  /// ストリームの監視を開始
+  void _startListeningToFollowers(String userId) {
+    // 既存のサブスクリプションがあればキャンセル
+    _followerSubscription?.cancel();
+
+    // フォロワーIDのストリームを監視
+    _followerSubscription =
+        ref.read(followersStreamProvider(userId).stream).listen(
+      (followerIds) async {
+        if (!mounted) return;
+
+        try {
+          // IDリストからユーザー情報を取得
+          final followers = await _getUsersFromIds(followerIds);
+
+          // 状態を更新
+          if (mounted) {
+            state = AsyncValue.data(followers);
+          }
+        } catch (e) {
+          DebugPrint("Error updating followers: $e");
+          // エラーが発生しても完全に置き換えるのではなく、エラー情報を保持
+          if (mounted) {
+            state = AsyncValue.error(e, StackTrace.current);
+          }
+        }
+      },
+      onError: (error) {
+        if (mounted) {
+          state = AsyncValue.error(error, StackTrace.current);
+        }
+      },
+    );
+
+    // Notifierが破棄されるときにサブスクリプションをキャンセル
+    ref.onDispose(() {
+      DebugPrint("フォロワーストリームの購読をキャンセル");
+      _followerSubscription?.cancel();
+      _followerSubscription = null;
+    });
+  }
 
   /// 特定のユーザーがフォロワーかどうかをチェック
   bool isFollower(String userId) {
-    final asyncValue = ref.read(followersStreamProvider(userId));
-    if (!asyncValue.hasValue) return false;
-    return asyncValue.value!.any((uid) => uid == userId);
-  }
-
-  /// フォロワーの更新を監視する（新しいフォロワーの通知などに利用）
-  void watchNewFollowers(Function(UserAccount) onNewFollower) {
-    final currentUserId = ref.read(authProvider).currentUser?.uid;
-    if (currentUserId == null) return;
-
-    final asyncValue = ref.read(followersStreamProvider(currentUserId));
-    if (!asyncValue.hasValue) return;
-
-    List<String> prevFollowers = asyncValue.value ?? [];
-
-    // ストリームを直接サブスクライブする
-    final stream = ref.read(followersUserStreamProvider(currentUserId).stream);
-
-    // ストリームサブスクリプション
-    final subscription = stream.listen((newFollowers) {
-      // 新しく追加されたフォロワーを見つける
-      for (final newFollower in newFollowers) {
-        if (!prevFollowers.any((uid) => uid == newFollower.userId)) {
-          // 新しいフォロワーを発見
-          onNewFollower(newFollower);
-        }
-      }
-
-      // 現在のフォロワーリストを更新
-      prevFollowers = newFollowers.map((user) => user.userId).toList();
-    });
-
-    // サブスクリプションの管理
-    ref.onDispose(() {
-      subscription.cancel();
-    });
+    return state.whenOrNull(
+          data: (followers) => followers.any((user) => user.userId == userId),
+        ) ??
+        false;
   }
 
   /// 特定のユーザーのフォロワーリストを一度だけ取得
@@ -112,10 +137,9 @@ class FollowersListNotifier
 
       final userIds =
           await ref.read(getFollowersUsecaseProvider).call(targetUserId);
-      return await ref
-          .read(allUsersNotifierProvider.notifier)
-          .getUserAccounts(userIds);
+      return await _getUsersFromIds(userIds);
     } catch (e) {
+      DebugPrint("Error getting followers: $e");
       return [];
     }
   }
@@ -123,13 +147,15 @@ class FollowersListNotifier
   /// フォロワーをソートする
   List<UserAccount> sortFollowers(List<UserAccount> followers,
       {FollowerSortOption sortOption = FollowerSortOption.latestFirst}) {
-    // ソートロジックをここに実装
+    // ソートの前にコピーを作成して元のリストを変更しない
+    final sortedFollowers = List<UserAccount>.from(followers);
+
     switch (sortOption) {
       case FollowerSortOption.nameAscending:
-        followers.sort((a, b) => a.name.compareTo(b.name));
+        sortedFollowers.sort((a, b) => a.name.compareTo(b.name));
         break;
       case FollowerSortOption.nameDescending:
-        followers.sort((a, b) => b.name.compareTo(a.name));
+        sortedFollowers.sort((a, b) => b.name.compareTo(a.name));
         break;
       // 他のソートオプションは必要に応じて追加
       // ただし最新順/古い順はフォロー日時のデータが必要です
@@ -137,7 +163,27 @@ class FollowersListNotifier
         // デフォルトはそのまま
         break;
     }
-    return followers;
+    return sortedFollowers;
+  }
+
+  /// IDリストからユーザー情報を取得するヘルパーメソッド
+  Future<List<UserAccount>> _getUsersFromIds(List<String> userIds) async {
+    if (userIds.isEmpty) return [];
+
+    try {
+      final userProvider = ref.read(allUsersNotifierProvider.notifier);
+      final users = await userProvider.getUserAccounts(userIds);
+      return users;
+    } catch (e) {
+      DebugPrint("Error fetching users from IDs: $e");
+      return [];
+    }
+  }
+
+  @override
+  void dispose() {
+    _followerSubscription?.cancel();
+    super.dispose();
   }
 }
 

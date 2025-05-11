@@ -11,7 +11,7 @@ import 'package:app/presentation/pages/report/report_user_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/voice_chat_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/reply_widget.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/posts/replies.dart';
 import 'package:app/domain/usecases/voice_chat_usecase.dart';

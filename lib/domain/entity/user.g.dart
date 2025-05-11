@@ -80,13 +80,15 @@ class UserAccountAdapter extends TypeAdapter<UserAccount> {
       location: fields[23] as String,
       job: fields[24] as String,
       friendIds: (fields[25] as List).cast<String>(),
+      followingCount: fields[26] as int,
+      followerCount: fields[27] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserAccount obj) {
     writer
-      ..writeByte(26)
+      ..writeByte(28)
       ..writeByte(0)
       ..write(obj.userId)
       ..writeByte(1)
@@ -138,7 +140,11 @@ class UserAccountAdapter extends TypeAdapter<UserAccount> {
       ..writeByte(24)
       ..write(obj.job)
       ..writeByte(25)
-      ..write(obj.friendIds);
+      ..write(obj.friendIds)
+      ..writeByte(26)
+      ..write(obj.followingCount)
+      ..writeByte(27)
+      ..write(obj.followerCount);
   }
 
   @override

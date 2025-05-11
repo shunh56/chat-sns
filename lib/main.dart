@@ -11,7 +11,8 @@ import 'package:app/core/values.dart';
 import 'package:app/data/datasource/hive/hive_boxes.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/firebase_options.dart';
-import 'package:app/notification_service.dart';
+import 'package:app/presentation/services/notification_handler.dart';
+import 'package:app/presentation/services/notification_service.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/account_status_screen/banned_screen.dart';
@@ -27,8 +28,8 @@ import 'package:app/presentation/pages/version/update_notifier.dart';
 import 'package:app/presentation/pages/version/version_manager.dart';
 import 'package:app/presentation/pages/main_page.dart';
 import 'package:app/presentation/providers/auth_notifier.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/firebase/firebase_remote_config.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_remote_config.dart';
 import 'package:app/presentation/providers/theme_provider.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:flutter/foundation.dart';
@@ -58,7 +59,8 @@ const flavor = String.fromEnvironment('FLAVOR');
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   HapticFeedback.vibrate();
-  final data = message.data;
+  await NotificationHandler.handleBackgroundMessage(message);
+  /*final data = message.data;
   if (data['type'] == "call") {
     final name = data["name"] ?? "name";
     final imageUrl = data['imageUrl'];
@@ -67,12 +69,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       NotificationService.showIncomingCall(name, imageUrl);
     }
   }
+  */
 }
 
 Future<void> _firebaseMessagingForegroundHandler(RemoteMessage message) async {
-  final data = message.data;
+  final container = ProviderContainer();
+  final handler = container.read(notificationHandlerProvider);
+  await handler.handleForegroundMessage(message);
+  /* final data = message.data;
   final type = data['type'];
-  showMessage("data : $data");
+  showMessage("data : $data"); */
   //アプリ内widgetとして通知を表示する
   /*switch (type) {
     case 'call':
@@ -169,10 +175,22 @@ void main() {
       );
       final initialMessage =
           await FirebaseMessaging.instance.getInitialMessage();
+      // 通知タップ時のハンドリング
       if (initialMessage != null) {
-        // 通知タップ時の処理を実行
-        NotificationService.handleNotificationTap(initialMessage);
+        // アプリ起動時に通知からの起動の場合
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // UIが構築された後に処理
+          final container = ProviderContainer();
+          final handler = container.read(notificationHandlerProvider);
+          handler.handleNotificationTap(initialMessage);
+        });
       }
+      // 通知をタップしてアプリが開かれた場合のハンドリング
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        final container = ProviderContainer();
+        final handler = container.read(notificationHandlerProvider);
+        handler.handleNotificationTap(message);
+      });
 
       //4. configure local DB
       await Hive.initFlutter();
@@ -296,9 +314,11 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    GlobalProviderRef.initialize(ref);
     final themeSize = ref.watch(themeSizeProvider(context));
     //4. configure voice call
     configureVoiceCall();
+
     final isDarkMode = ref.watch(isDarkModeProvider);
     return MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,

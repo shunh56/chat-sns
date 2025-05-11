@@ -5,10 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final userByUserIdProvider = FutureProvider.family<UserAccount, String>(
   (ref, userId) async {
     final notifier = ref.watch(allUsersNotifierProvider.notifier);
-    final user = await notifier.getUser(userId);
-    if (user == null) {
-      throw Exception('ユーザーが見つかりません');
-    }
+    final user = notifier.getUser(userId);
     return user;
   },
 );

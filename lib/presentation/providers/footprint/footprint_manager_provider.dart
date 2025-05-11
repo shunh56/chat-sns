@@ -1,12 +1,9 @@
-import 'package:app/domain/entity/footprint.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/footprint/mark_seen_provider.dart';
-import 'package:app/presentation/providers/footprint/privacy_setting_provider.dart';
 import 'package:app/presentation/providers/footprint/remove_footprint_provider.dart';
 import 'package:app/presentation/providers/footprint/unread_count_provider.dart';
 import 'package:app/presentation/providers/footprint/visit_profile_provider.dart';
 import 'package:app/presentation/providers/footprint/visited_provider.dart';
-import 'package:app/presentation/providers/footprint/visitors_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // 足あと機能の操作をまとめて提供する複合プロバイダ

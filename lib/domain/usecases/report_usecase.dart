@@ -1,4 +1,4 @@
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/state/report_form.dart';
 import 'package:app/data/repository/report_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

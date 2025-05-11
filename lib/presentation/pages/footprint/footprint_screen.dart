@@ -14,11 +14,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
 class FootprintScreen extends HookConsumerWidget {
-  const FootprintScreen({Key? key}) : super(key: key);
+  const FootprintScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -332,11 +331,11 @@ class FootprintGridView extends StatelessWidget {
   final bool isVisitedTile;
 
   const FootprintGridView({
-    Key? key,
+    super.key,
     required this.footprints,
     required this.onDelete,
     this.isVisitedTile = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -418,12 +417,12 @@ class AnimatedFootprintGridCard extends HookConsumerWidget {
   final bool isVisitedTile;
 
   const AnimatedFootprintGridCard({
-    Key? key,
+    super.key,
     required this.footprint,
     required this.onDelete,
     this.delay = Duration.zero,
     this.isVisitedTile = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -551,7 +550,7 @@ class AnimatedFootprintGridCard extends HookConsumerWidget {
 
 // 既存のサポートクラスの修正版 (必要な部分のみ)
 class FootprintLoadingState extends StatelessWidget {
-  const FootprintLoadingState({Key? key}) : super(key: key);
+  const FootprintLoadingState({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -610,11 +609,11 @@ class EmptyFootprintState extends ConsumerWidget {
   final bool isVisitedTile;
 
   const EmptyFootprintState({
-    Key? key,
+    super.key,
     required this.message,
     required this.icon,
     this.isVisitedTile = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -662,9 +661,9 @@ class FootprintErrorState extends StatelessWidget {
   final Object error;
 
   const FootprintErrorState({
-    Key? key,
+    super.key,
     required this.error,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

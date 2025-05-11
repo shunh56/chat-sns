@@ -9,7 +9,6 @@ import 'package:app/presentation/pages/search/widgets/hashtag_user_card_view.dar
 import 'package:app/presentation/pages/search/widgets/top_feed.dart';
 import 'package:app/presentation/pages/search/sub_pages/search_params_screen.dart';
 import 'package:app/presentation/providers/activities_list_notifier.dart';
-import 'package:app/presentation/providers/footprint/visitors_provider.dart';
 
 import 'package:app/presentation/providers/users/online_users.dart';
 import 'package:flutter/material.dart';
@@ -33,13 +32,13 @@ class SearchUsersScreen extends ConsumerWidget {
         child: ListView(
           children: [
             _buildAppBar(context, ref),
-            Gap(12),
-            SearchScreenTopFeed(),
-            Gap(16),
-            DefaultUserCardView(),
-            Gap(32),
-            HashtagUserCardView(),
-            Gap(40),
+            const Gap(12),
+            const SearchScreenTopFeed(),
+            const Gap(16),
+            const DefaultUserCardView(),
+            const Gap(32),
+            const HashtagUserCardView(),
+            const Gap(40),
           ],
         ),
       ),
@@ -60,7 +59,7 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
     title: Row(
       children: [
         Text(
-          "$appName",
+          appName,
           style: textStyle.w600(
             fontSize: 28,
             color: ThemeColor.white,
@@ -96,8 +95,8 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
           ),
         ),
         const Gap(12),
-        ActivityIcon(),
-        Gap(12),
+        const ActivityIcon(),
+        const Gap(12),
         /* Container(
           decoration: BoxDecoration(
             color: const Color(0xFF222222),
@@ -183,8 +182,8 @@ class ActivityIcon extends ConsumerWidget {
               ),
             );
           },
-          child: Padding(
-            padding: const EdgeInsets.all(10),
+          child: const Padding(
+            padding: EdgeInsets.all(10),
             child: Icon(
               Icons.notifications_outlined,
               color: ThemeColor.icon,

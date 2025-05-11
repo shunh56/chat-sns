@@ -1,4 +1,3 @@
-import 'package:app/domain/entity/footprint.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/data/repository/footprint_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

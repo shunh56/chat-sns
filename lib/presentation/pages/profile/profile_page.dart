@@ -477,9 +477,9 @@ class ProfileScreen extends ConsumerWidget {
                     // 投稿セクション
                     const Gap(24), */
                     const Gap(12),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 4),
-                      child: FollowStatsSection(),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: FollowStatsSection(me: me),
                     ),
                     const Gap(18),
                     Container(
@@ -1396,17 +1396,15 @@ class ImagesView extends ConsumerWidget {
 class FollowStatsSection extends ConsumerWidget {
   const FollowStatsSection({
     super.key,
+    required this.me,
   });
+
+  final UserAccount me;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-
-    final followings =
-        ref.watch(followingListNotifierProvider).asData?.value ?? [];
-    final followers =
-        ref.watch(followersUserStreamProvider(null)).asData?.value ?? [];
 
     return GestureDetector(
       onTap: () {
@@ -1422,18 +1420,41 @@ class FollowStatsSection extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           children: [
-            _buildStat(
-              context: context,
-              count: followers.length,
-              label: 'フォロワー',
-              textStyle: textStyle,
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UserFFScreen(user: me),
+                  ),
+                );
+              },
+              child: _buildStat(
+                context: context,
+                count: me.followerCount,
+                label: 'フォロワー',
+                textStyle: textStyle,
+              ),
             ),
             const Gap(24),
-            _buildStat(
-              context: context,
-              count: followings.length,
-              label: 'フォロー中',
-              textStyle: textStyle,
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UserFFScreen(
+                      user: me,
+                      index: 1,
+                    ),
+                  ),
+                );
+              },
+              child: _buildStat(
+                context: context,
+                count: me.followingCount,
+                label: 'フォロー中',
+                textStyle: textStyle,
+              ),
             ),
           ],
         ),

@@ -78,6 +78,7 @@ class UserRequestWidget extends ConsumerWidget {
         final textStyle = ThemeTextStyle(themeSize: themeSize);
 
         final notifier = ref.read(followingListNotifierProvider.notifier);
+        final followingState = ref.watch(followingListNotifierProvider);
         final isFollowing = notifier.isFollowing(user.userId);
 
         return Material(

@@ -1,5 +1,5 @@
-import 'package:app/domain/entity/follow_model.dart';
-import 'package:app/presentation/providers/firebase/firebase_firestore.dart';
+import 'package:app/core/utils/debug_print.dart';
+import 'package:app/data/datasource/firebase/firebase_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -21,10 +21,6 @@ class FirestoreFollowDataSource {
       _firestore.collection('followings');
   CollectionReference get _followersCollection =>
       _firestore.collection('followers');
-  /*CollectionReference get _followActivitiesCollection =>
-      _firestore.collection('follow_activities');
-  CollectionReference get _followStatsByUserCollection =>
-      _firestore.collection('follow_stats_by_user'); */
 
   Future<void> followUser(String userId, String targetId) async {
     // 自分自身をフォローしようとしていないかチェック
@@ -35,16 +31,18 @@ class FirestoreFollowDataSource {
     // 既にフォローしているかチェック
     final isAlreadyFollowing = await isFollowing(userId, targetId);
     if (isAlreadyFollowing) {
-      throw Exception('既にフォローしています');
+      // 既にフォローしている場合は成功とみなして早期リターン
+      DebugPrint('既にフォローしています: $userId -> $targetId');
+      return;
     }
 
     try {
       final batch = _firestore.batch();
-      final timestamp = FieldValue.serverTimestamp();
+      final now = DateTime.now();
       final followingData = {
         'data': FieldValue.arrayUnion([
           {
-            'createdAt': timestamp,
+            'createdAt': now,
             'userId': targetId,
           }
         ])
@@ -52,7 +50,7 @@ class FirestoreFollowDataSource {
       final followedData = {
         'data': FieldValue.arrayUnion([
           {
-            'createdAt': timestamp,
+            'createdAt': now,
             'userId': userId,
           }
         ])
@@ -67,14 +65,19 @@ class FirestoreFollowDataSource {
       batch.set(followerRef, followedData, SetOptions(merge: true));
 
       // 3. フォロー数とフォロワー数をインクリメント
-      batch.update(_usersCollection.doc(userId),
-          {'followingCount': FieldValue.increment(1)});
+      final myRef = _usersCollection.doc(userId);
+      batch.set(myRef, {'followingCount': FieldValue.increment(1)},
+          SetOptions(merge: true));
 
-      batch.update(_usersCollection.doc(targetId),
-          {'followerCount': FieldValue.increment(1)});
+      final userRef = _usersCollection.doc(targetId);
+
+      batch.set(userRef, {'followerCount': FieldValue.increment(1)},
+          SetOptions(merge: true));
 
       await batch.commit();
+      DebugPrint('フォローに成功しました: $userId -> $targetId');
     } catch (e) {
+      DebugPrint('フォロー操作に失敗しました: $e');
       // Firestoreの操作中にエラーが発生した場合
       throw Exception('フォロー操作に失敗しました: ${e.toString()}');
     }
@@ -89,7 +92,9 @@ class FirestoreFollowDataSource {
     // フォローしているかチェック
     final isCurrentlyFollowing = await isFollowing(userId, targetId);
     if (!isCurrentlyFollowing) {
-      throw Exception('フォローしていないユーザーをアンフォローすることはできません');
+      // フォローしていない場合は成功とみなして早期リターン
+      DebugPrint('フォローしていないユーザー: $userId -> $targetId');
+      return;
     }
 
     try {
@@ -103,7 +108,8 @@ class FirestoreFollowDataSource {
           followerList.where((item) => item['userId'] == userId).toList();
 
       if (followingToRemove.isEmpty || followerToRemove.isEmpty) {
-        throw Exception('フォロー関係が見つかりません');
+        DebugPrint('フォロー関係が見つかりません: $userId -> $targetId');
+        return; // エラーを投げずに早期リターン
       }
 
       final batch = _firestore.batch();
@@ -128,27 +134,47 @@ class FirestoreFollowDataSource {
           {'followerCount': FieldValue.increment(-1)});
 
       await batch.commit();
+      DebugPrint('アンフォローに成功しました: $userId -> $targetId');
     } catch (e) {
+      DebugPrint('アンフォロー操作に失敗しました: $e');
       throw Exception('アンフォロー操作に失敗しました: ${e.toString()}');
     }
   }
 
   /// ユーザーがフォローしている人のリストを取得
   Future<List<String>> getFollowing(String userId) async {
-    final list = await _getFollowingList(userId);
-    return list.map((item) => item['userId'] as String).toList();
+    try {
+      final list = await _getFollowingList(userId);
+      return list.map((item) => item['userId'] as String).toList();
+    } catch (e) {
+      DebugPrint('フォローリスト取得エラー: $e');
+      return []; // エラー時は空リストを返す
+    }
   }
 
   /// ユーザーのフォロワーリストを取得
   Future<List<String>> getFollowers(String userId) async {
-    final list = await _getFollowerList(userId);
-    return list.map((item) => item['userId'] as String).toList();
+    try {
+      final list = await _getFollowerList(userId);
+      return list.map((item) => item['userId'] as String).toList();
+    } catch (e) {
+      DebugPrint('フォロワーリスト取得エラー: $e');
+      return []; // エラー時は空リストを返す
+    }
   }
 
   /// ユーザーのフォロワーをリアルタイムで監視するStream
   Stream<List<String>> getFollowersStream(String userId) {
     return _followersCollection.doc(userId).snapshots().map((snapshot) {
+      if (!snapshot.exists) {
+        return <String>[];
+      }
+
       final data = snapshot.data() as Map<String, dynamic>? ?? {};
+      if (!data.containsKey('data')) {
+        return <String>[];
+      }
+
       final followersList = List<Map<String, dynamic>>.from(data['data'] ?? []);
       // フォロワーのリストをユーザーIDのリストに変換
       return followersList.map((item) => item['userId'] as String).toList();
@@ -157,23 +183,56 @@ class FirestoreFollowDataSource {
 
   /// ユーザーがターゲットをフォローしているかどうかを確認
   Future<bool> isFollowing(String userId, String targetId) async {
-    final list = await _getFollowingList(userId);
-    return list.any((item) => item['userId'] == targetId);
+    try {
+      final list = await _getFollowingList(userId);
+      return list.any((item) => item['userId'] == targetId);
+    } catch (e) {
+      DebugPrint('フォロー状態確認エラー: $e');
+      return false; // エラー時はフォローしていないと見なす
+    }
   }
 
+  // ここが最も重要な修正ポイント - ドキュメントが存在しない場合のエラー処理
   Future<List<Map<String, dynamic>>> _getFollowingList(String userId) async {
-    final ref = _followingsCollection.doc(userId);
-    final doc = await ref.get();
-    final data = doc.data() as Map<String, dynamic>;
-    final list = List<Map<String, dynamic>>.from(data['data'] ?? []);
-    return list;
+    try {
+      final ref = _followingsCollection.doc(userId);
+      final doc = await ref.get();
+
+      if (!doc.exists) {
+        return []; // ドキュメントが存在しない場合は空リスト
+      }
+
+      final data = doc.data() as Map<String, dynamic>? ?? {};
+      if (!data.containsKey('data')) {
+        return []; // データフィールドがない場合は空リスト
+      }
+
+      return List<Map<String, dynamic>>.from(data['data'] ?? []);
+    } catch (e) {
+      DebugPrint('_getFollowingList エラー: $e');
+      return []; // エラー時は空リスト
+    }
   }
 
+  // 同様の修正
   Future<List<Map<String, dynamic>>> _getFollowerList(String userId) async {
-    final ref = _followersCollection.doc(userId);
-    final doc = await ref.get();
-    final data = doc.data() as Map<String, dynamic>;
-    final list = List<Map<String, dynamic>>.from(data['data'] ?? []);
-    return list;
+    try {
+      final ref = _followersCollection.doc(userId);
+      final doc = await ref.get();
+
+      if (!doc.exists) {
+        return []; // ドキュメントが存在しない場合は空リスト
+      }
+
+      final data = doc.data() as Map<String, dynamic>? ?? {};
+      if (!data.containsKey('data')) {
+        return []; // データフィールドがない場合は空リスト
+      }
+
+      return List<Map<String, dynamic>>.from(data['data'] ?? []);
+    } catch (e) {
+      DebugPrint('_getFollowerList エラー: $e');
+      return []; // エラー時は空リスト
+    }
   }
 }

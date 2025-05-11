@@ -6,7 +6,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/onboarding_providers.dart';
 import 'package:app/domain/usecases/friends_usecase.dart';
 import 'package:app/domain/usecases/image_uploader_usecase.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/invite_code_usecase.dart';
 import 'package:app/domain/usecases/posts/current_status_post_usecase.dart';

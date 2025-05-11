@@ -1,5 +1,5 @@
 import 'package:algolia/algolia.dart';
-import 'package:app/presentation/providers/firebase/algolia.dart';
+import 'package:app/data/datasource/firebase/algolia.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const hitsPerPage = 30;

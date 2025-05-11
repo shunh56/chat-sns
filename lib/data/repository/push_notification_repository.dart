@@ -1,4 +1,5 @@
 import 'package:app/data/datasource/push_notification_datasource.dart';
+import 'package:app/domain/entity/push_notification_model.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,8 +20,6 @@ class PushNotificationRepository {
     try {
       await _datasource.sendCallNotification(
         user.fcmToken!,
-        //  '${me.name}',
-        //  '着信が来ました。',
         me.name,
         me.imageUrl,
       );
@@ -31,17 +30,13 @@ class PushNotificationRepository {
     }
   }
 
-  sendPushNotification(String fcmToken, String title, String body) async {
+  sendPushNotification(PushNotificationModel model) async {
     try {
-      await _datasource.sendPushNotification(fcmToken, title, body);
+      await _datasource.sendPushNotification(model.toMap());
     } on NotificationException {
       rethrow;
     } catch (e) {
       throw NotificationException('通知の送信に失敗しました');
     }
-  }
-
-  sendmulticast(List<String> fcmTokens, String title, String body) {
-    _datasource.sendMultiNotification(fcmTokens, title, body);
   }
 }

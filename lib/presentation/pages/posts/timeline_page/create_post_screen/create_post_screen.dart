@@ -7,7 +7,6 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/UNUSED/community_screen/model/community.dart';
 import 'package:app/presentation/components/dialogs/dialogs.dart';
 import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/images_widget.dart';
-import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/post_content_menu_widget.dart';
 import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/post_text_input_widget.dart';
 import 'package:app/presentation/providers/image/image_processor.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
@@ -439,9 +438,9 @@ class CreatePostScreen extends ConsumerWidget {
             //style: BorderStyle.dashed,
           ),
         ),
-        child: Row(
+        child: const Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             Icon(
               Icons.add,
               size: 16,
@@ -511,8 +510,8 @@ class CreatePostScreen extends ConsumerWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: Row(
-          children: const [
+        title: const Row(
+          children: [
             Icon(Icons.tag, color: ThemeColor.highlight, size: 20),
             Gap(8),
             Text('ハッシュタグを追加', style: TextStyle(color: ThemeColor.text)),
@@ -588,8 +587,8 @@ class CreatePostScreen extends ConsumerWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: Row(
-          children: const [
+        title: const Row(
+          children: [
             Icon(Icons.person, color: ThemeColor.highlight, size: 20),
             Gap(8),
             Text('メンションを追加', style: TextStyle(color: ThemeColor.text)),

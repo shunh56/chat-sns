@@ -19,9 +19,8 @@ class HttpsCallables {
     return _functions.httpsCallable('agora-generateAgoraToken');
   }
 
-  HttpsCallable pushNotification() {
-    return _functions.httpsCallable('pushNotification-sendPushNotification');
-  }
+  HttpsCallable get pushNotification =>
+      _functions.httpsCallable('pushNotification-sendPushNotificationV2');
 
   HttpsCallable pushNotificationMulticast() {
     return _functions.httpsCallable('pushNotification-sendMulticast');

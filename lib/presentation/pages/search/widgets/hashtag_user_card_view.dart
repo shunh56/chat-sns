@@ -91,8 +91,8 @@ class HashtagUserCardView extends ConsumerWidget {
           ],
         );
       },
-      error: (e, s) => SizedBox(),
-      loading: () => SizedBox(),
+      error: (e, s) => const SizedBox(),
+      loading: () => const SizedBox(),
     );
     return asyncValue.when(
       data: (users) {

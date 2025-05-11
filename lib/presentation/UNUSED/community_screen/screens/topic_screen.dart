@@ -5,7 +5,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/UNUSED/community_screen/model/topic.dart';
-import 'package:app/presentation/providers/firebase/firebase_firestore.dart';
+import 'package:app/data/datasource/firebase/firebase_firestore.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/topics_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

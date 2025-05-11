@@ -1,7 +1,7 @@
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/providers/push_notification_notifier.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/domain/usecases/push_notification_usecase.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
 import 'package:app/domain/usecases/activities_usecase.dart';
 import 'package:app/domain/usecases/posts/post_usecase.dart';
@@ -54,9 +54,7 @@ class AllPostsNotifier extends _$AllPostsNotifier {
     ref.read(postUsecaseProvider).incrementLikeCount(post.id, 1);
     if (user.userId != ref.read(authProvider).currentUser!.uid) {
       ref.read(activitiesUsecaseProvider).addLikeToPost(user, post);
-      ref
-          .read(pushNotificationNotifierProvider)
-          .sendPostReaction(user, "postLike");
+      ref.read(pushNotificationUsecaseProvider).sendPostLike(user);
     }
   }
 
@@ -67,9 +65,7 @@ class AllPostsNotifier extends _$AllPostsNotifier {
     ref.read(postUsecaseProvider).addReply(post.id, text);
     if (user.userId != ref.read(authProvider).currentUser!.uid) {
       ref.read(activitiesUsecaseProvider).addCommentToPost(user, post);
-      ref
-          .read(pushNotificationNotifierProvider)
-          .sendPostReaction(user, "postComment");
+      ref.read(pushNotificationUsecaseProvider).sendPostComment(user);
     }
   }
 

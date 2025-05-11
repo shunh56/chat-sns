@@ -55,6 +55,9 @@ class ActivitiesListNotifier extends StateNotifier<AsyncValue<List<Activity>>> {
   }
 
   readActivities() async {
+    final cache = state.asData?.value ?? [];
+    final updatedCache = cache.map((e) => e.copyWith(isSeen: true)).toList();
+    state = AsyncValue.data(updatedCache);
     usecase.readActivities();
   }
 

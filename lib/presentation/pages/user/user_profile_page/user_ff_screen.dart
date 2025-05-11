@@ -6,7 +6,7 @@ import 'package:app/presentation/components/tiles/user_request_widget.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/follow/followers_list_notifier.dart';
 import 'package:app/presentation/providers/follow/user_followings_followers.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,9 +16,11 @@ class UserFFScreen extends ConsumerWidget {
   const UserFFScreen({
     super.key,
     required this.user,
+    this.index = 0,
   });
 
   final UserAccount user;
+  final int index;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,6 +29,7 @@ class UserFFScreen extends ConsumerWidget {
 
     return DefaultTabController(
       length: 2,
+      initialIndex: index,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -177,7 +180,7 @@ class _FFListView extends ConsumerWidget {
 
     final users = user.userId == ref.read(authProvider).currentUser!.uid
         ? type == FFType.followers
-            ? ref.read(followersUserStreamProvider(null)).asData?.value ?? []
+            ? ref.watch(followersListNotifierProvider).asData?.value ?? []
             : ref.watch(followingListNotifierProvider).asData?.value ?? []
         : type == FFType.followers
             ? ref.watch(userFollowersProvider(user.userId)).asData?.value ?? []
@@ -188,7 +191,8 @@ class _FFListView extends ConsumerWidget {
         ? _buildEmptyState(textStyle)
         : ListView.builder(
             itemCount: users.length,
-            itemBuilder: (context, index) => UserRequestWidget(user: users[index]),
+            itemBuilder: (context, index) =>
+                UserRequestWidget(user: users[index]),
           );
   }
 

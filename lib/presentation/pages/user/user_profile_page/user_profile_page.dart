@@ -1661,39 +1661,47 @@ class FollowStatsSection extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
-    final followings = [];
-    //  ref.watch(userFollowingsProvider(user.userId)).asData?.value ?? [];
-    final followers = [];
-    //ref.watch(userFollowersProvider(user.userId)).asData?.value ?? [];
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => UserFFScreen(user: user),
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          children: [
-            _buildStat(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => UserFFScreen(user: user),
+                ),
+              );
+            },
+            child: _buildStat(
               context: context,
-              count: followers.length,
+              count: user.followerCount,
               label: 'フォロワー',
               textStyle: textStyle,
             ),
-            const Gap(24),
-            _buildStat(
+          ),
+          const Gap(24),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => UserFFScreen(
+                    user: user,
+                    index: 1,
+                  ),
+                ),
+              );
+            },
+            child: _buildStat(
               context: context,
-              count: followings.length,
+              count: user.followingCount,
               label: 'フォロー中',
               textStyle: textStyle,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

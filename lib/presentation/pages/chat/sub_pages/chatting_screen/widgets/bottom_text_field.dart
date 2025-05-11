@@ -8,7 +8,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/providers/push_notification_notifier.dart';
 import 'package:app/presentation/providers/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:app/domain/usecases/direct_message_usecase.dart';
@@ -155,17 +154,9 @@ class BottomTextField extends HookConsumerWidget {
   void _sendMessage(WidgetRef ref, TextEditingController controller) async {
     final text = ref.read(inputTextProvider);
     if (text.isEmpty) return;
-
     try {
       // メッセージ送信
       await ref.read(dmUsecaseProvider).sendMessage(text, user);
-
-      // メッセージリストの更新を促す
-      // この後、MessageListWidgetが新しいメッセージを検出してアニメーションを適用する
-
-      // 通知送信
-      ref.read(pushNotificationNotifierProvider).sendDm(user, text);
-
       // テキスト入力をクリア
       controller.clear();
       ref.read(inputTextProvider.notifier).state = "";

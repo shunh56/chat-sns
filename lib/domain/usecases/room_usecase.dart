@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/data/repository/room_repository.dart';
 import 'package:app/domain/usecases/image_uploader_usecase.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

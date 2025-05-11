@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:app/data/datasource/direct_message_datasource.dart';
 import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/message_overview.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/data/repository/direct_message_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

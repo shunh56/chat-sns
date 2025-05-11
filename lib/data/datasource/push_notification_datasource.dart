@@ -1,6 +1,5 @@
-import 'package:app/core/utils/debug_print.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/firebase/firebase_funcrtions.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_funcrtions.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,29 +27,22 @@ class PushNotificationDatasource {
   final HttpsCallables _callables;
 
   PushNotificationDatasource(this._auth, this._callables);
-  /*sendDm() {}
-
-  sendCurrentStatusPost() {}
-  sendPost() {}
-  sendVoiceChat() {}
-  sendFriendReqeust() {} */
 
   Future<void> sendPushNotification(
-      String fcmToken, String title, String body) async {
+      Map<String, dynamic> notificationData) async {
     try {
-      final HttpsCallable callable = _callables.pushNotification();
-
-      if (fcmToken.isEmpty) {
-        throw NotificationException('FCMトークンが無効です');
-      }
-
-      final results = await callable.call<Map<String, dynamic>>({
+      final HttpsCallable callable = _callables.pushNotification;
+      final results = await callable.call<Map<String, dynamic>>(
+          {'notification': notificationData}
+          /*{
         'fcmToken': fcmToken,
         'notification': {
           'title': title,
           'body': body,
         },
-      });
+      }
+      */
+          );
 
       if (results.data['error'] != null) {
         throw NotificationException(
@@ -59,19 +51,22 @@ class PushNotificationDatasource {
         );
       }
     } on FirebaseFunctionsException catch (e) {
-      switch (e.code) {
-        case 'not-found':
-          throw NotificationException('Cloud Function関数が見つかりません', code: e.code);
-        case 'permission-denied':
-          throw NotificationException('通知の送信権限がありません', code: e.code);
-        case 'invalid-argument':
-          throw NotificationException('無効なパラメータです', code: e.code);
-        default:
-          throw NotificationException('通知の送信に失敗しました: ${e.message}',
-              code: e.code);
-      }
+      _handleFunctionException(e);
     } catch (e) {
       throw NotificationException('予期せぬエラーが発生しました: ${e.toString()}');
+    }
+  }
+
+  void _handleFunctionException(FirebaseFunctionsException e) {
+    switch (e.code) {
+      case 'not-found':
+        throw NotificationException('Cloud Function関数が見つかりません', code: e.code);
+      case 'permission-denied':
+        throw NotificationException('通知の送信権限がありません', code: e.code);
+      case 'invalid-argument':
+        throw NotificationException('無効なパラメータです', code: e.code);
+      default:
+        throw NotificationException('通知の送信に失敗しました: ${e.message}', code: e.code);
     }
   }
 
@@ -123,7 +118,7 @@ class PushNotificationDatasource {
     }
   }
 
-  Future<void> sendMultiNotification(
+/*  Future<void> sendMultiNotification(
       List<String> fcmTokens, String title, String body) async {
     fcmTokens = fcmTokens.toSet().toList();
     try {
@@ -140,5 +135,5 @@ class PushNotificationDatasource {
     } catch (e) {
       DebugPrint('Error sending notification: $e');
     }
-  }
+  } */
 }

@@ -3,7 +3,7 @@
 // Package imports:
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/domain/usecases/posts/post_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

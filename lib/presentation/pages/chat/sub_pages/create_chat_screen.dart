@@ -4,7 +4,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/user_usecase.dart';
 import 'package:flutter/material.dart';

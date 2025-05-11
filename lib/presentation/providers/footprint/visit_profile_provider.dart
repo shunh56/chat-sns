@@ -1,6 +1,5 @@
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/usecases/footprint/visit_profile_usecase.dart';
-import 'package:app/presentation/providers/footprint/unread_count_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // 足あとを残す操作のプロバイダ

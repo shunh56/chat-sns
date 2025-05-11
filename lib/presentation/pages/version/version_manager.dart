@@ -1,5 +1,5 @@
 import 'package:app/core/utils/debug_print.dart';
-import 'package:app/presentation/providers/firebase/firebase_remote_config.dart';
+import 'package:app/data/datasource/firebase/firebase_remote_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 

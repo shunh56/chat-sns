@@ -95,6 +95,11 @@ class UserAccount extends HiveObject {
   @HiveField(25)
   final List<String> friendIds;
 
+  @HiveField(26)
+  final int followingCount;
+  @HiveField(27)
+  final int followerCount;
+
   UserAccount({
     required this.userId,
     required this.createdAt,
@@ -127,6 +132,11 @@ class UserAccount extends HiveObject {
     required this.location,
     required this.job,
     required this.friendIds,
+
+    //
+
+    required this.followingCount,
+    required this.followerCount,
   });
 
   factory UserAccount.fromJson(Map<String, dynamic> json) {
@@ -174,6 +184,8 @@ class UserAccount extends HiveObject {
       location: json["profile"]["location"] ?? "", // 追加
       job: json["profile"]["job"] ?? "",
       friendIds: json["friendIds"] ?? [],
+      followingCount: json["followingCount"] ?? 0,
+      followerCount: json["followerCount"] ?? 0,
     );
   }
 
@@ -246,6 +258,8 @@ class UserAccount extends HiveObject {
       location: "",
       job: "",
       friendIds: [],
+      followingCount: 0,
+      followerCount: 0,
     );
   }
 
@@ -293,6 +307,8 @@ class UserAccount extends HiveObject {
     String? job,
     List<String>? tags,
     List<String>? friendIds,
+    int? followingCount,
+    int? followerCount,
   }) {
     return UserAccount(
       userId: userId,
@@ -326,6 +342,8 @@ class UserAccount extends HiveObject {
       location: location ?? this.location,
       job: job ?? this.job,
       friendIds: friendIds ?? this.friendIds,
+      followingCount: followingCount ?? this.followingCount,
+      followerCount: followerCount ?? this.followerCount,
     );
   }
 
@@ -369,6 +387,8 @@ class UserAccount extends HiveObject {
       location: "",
       job: "",
       friendIds: [],
+      followingCount: 0,
+      followerCount: 0,
     );
   }
 

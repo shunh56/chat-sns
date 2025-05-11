@@ -3,7 +3,7 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/pages/settings/account_settings/sub/blocks_screen.dart';
 import 'package:app/presentation/pages/settings/account_settings/sub/mutes_screen.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:app/presentation/providers/users/muted_list.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';

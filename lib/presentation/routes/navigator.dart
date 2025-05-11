@@ -7,7 +7,7 @@ import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_profile_page.dart';
 import 'package:app/presentation/pages/posts/timeline_page/current_status_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/post_screen.dart';
-import 'package:app/presentation/providers/firebase/firebase_auth.dart';
+import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,12 +50,13 @@ class NavigationRouter {
     }
   }
 
-  goToChat(UserAccount user, {bool replace = false}) {
+  goToChat(UserAccount? user, {bool replace = false, String? userId}) {
+    userId = userId ?? user?.userId;
     if (replace) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => ChattingScreen(userId: user.userId),
+          builder: (_) => ChattingScreen(userId: userId!),
           settings: const RouteSettings(name: '/chatting_screen'),
         ),
       );
@@ -63,7 +64,7 @@ class NavigationRouter {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ChattingScreen(userId: user.userId),
+          builder: (_) => ChattingScreen(userId: userId!),
           settings: const RouteSettings(name: '/chatting_screen'),
         ),
       );
