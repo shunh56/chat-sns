@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/onboarding_providers.dart';
-import 'package:app/domain/usecases/friends_usecase.dart';
 import 'package:app/domain/usecases/image_uploader_usecase.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
@@ -199,7 +198,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
           .getInviteCode(user.usedCode!);
       if (code.getStatus == InviteCodeStatus.valid) {
         ref.read(inviteCodeUsecaseProvider).useCode(user.usedCode!);
-        ref.read(friendsUsecaseProvider).addFriend(code.userId);
+        // ref.read(friendsUsecaseProvider).addFriend(code.userId);
       }
     }
     final String userId = ref.watch(authProvider).currentUser!.uid;

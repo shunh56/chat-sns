@@ -2,7 +2,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/pages/onboarding/model.dart';
 import 'package:app/presentation/pages/onboarding/onboarding_state.dart';
-import 'package:app/presentation/pages/main_page.dart';
+import 'package:app/presentation/pages/main_page/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

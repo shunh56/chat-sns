@@ -1,5 +1,4 @@
 // lib/infrastructure/repositories/follow_repository_impl.dart
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/repository_interface/follow_repository.dart';
 import 'package:app/data/datasource/follow_datasource.dart';
 

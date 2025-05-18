@@ -213,6 +213,7 @@ flutter:
     - assets/images/icons/
     - assets/images/stickers/sunglass_babies/
     - assets/images/community/
+    - assets/images/popup/
     - assets/data/
 
   fonts:

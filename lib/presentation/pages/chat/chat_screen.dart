@@ -5,6 +5,8 @@ import 'package:app/domain/entity/message_overview.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/components/user_widget.dart';
+import 'package:app/presentation/providers/chats/dm_flag_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_screen.dart';
 import 'package:app/presentation/pages/chat/sub_pages/create_chat_screen.dart';
@@ -26,9 +28,9 @@ class ChatScreen extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final tabWidth = themeSize.screenWidth / 5;
-    final dms = ref.watch(dmOverviewListNotifierProvider).asData?.value ?? [];
-    bool flag = false;
-    for (var dm in dms) {
+    // final dms = ref.watch(dmOverviewListNotifierProvider).asData?.value ?? [];
+    //bool flag = false;
+    /*for (var dm in dms) {
       final q = dm.userInfoList.where(
           (item) => item.userId == ref.read(authProvider).currentUser!.uid);
       if (q.isNotEmpty) {
@@ -39,7 +41,7 @@ class ChatScreen extends ConsumerWidget {
       } else {
         flag = true;
       }
-    }
+    } */
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -85,7 +87,7 @@ class ChatScreen extends ConsumerWidget {
                               "メッセージ",
                               style: textStyle.w600(fontSize: 14),
                             ),
-                            if (flag)
+                            if (ref.watch(dmFlagProvider))
                               const Padding(
                                 padding: EdgeInsets.only(left: 4),
                                 child: CircleAvatar(
@@ -117,33 +119,29 @@ class ChatScreen extends ConsumerWidget {
                 children: [
                   Stack(
                     children: [
-                      ListView(
+                      Padding(
                         padding: EdgeInsets.only(
-                            top: themeSize.verticalPaddingSmall),
-                        children: const [
-                          ChatList(),
-                        ],
+                          top: themeSize.verticalPaddingSmall,
+                        ),
+                        child: const ChatList(),
                       ),
                       Positioned(
                         right: 12,
                         bottom: 12,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 96),
-                          child: FloatingActionButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const CreateChatsScreen(),
-                                ),
-                              );
-                            },
-                            backgroundColor: ThemeColor.highlight,
-                            child: const Icon(
-                              Icons.edit_outlined,
-                              color: ThemeColor.white,
-                              size: 28,
-                            ),
+                        child: FloatingActionButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CreateChatsScreen(),
+                              ),
+                            );
+                          },
+                          backgroundColor: ThemeColor.highlight,
+                          child: const Icon(
+                            Icons.edit_outlined,
+                            color: ThemeColor.white,
+                            size: 28,
                           ),
                         ),
                       ),
@@ -354,8 +352,7 @@ class ChatList extends ConsumerWidget {
         }
         return ListView.builder(
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 180),
+          padding: const EdgeInsets.only(bottom: 80),
           itemCount: list.length,
           itemBuilder: (context, index) {
             return ChatTile(overview: list[index]);
@@ -375,206 +372,200 @@ class ChatTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final myId = ref.watch(authProvider).currentUser!.uid;
-    final user =
-        ref.read(allUsersNotifierProvider).asData!.value[overview.userId];
-    if (user == null) return const SizedBox();
-    if (user.accountStatus != AccountStatus.normal) return const SizedBox();
 
-    final q = overview.userInfoList.where((item) => item.userId == myId);
-    bool unseenCheck = false;
-    if (q.isNotEmpty) {
-      final myInfo = q.first;
-      if (myInfo.lastOpenedAt.compareTo(overview.updatedAt) < 0) {
-        unseenCheck = true;
-      }
-    } else {
-      unseenCheck = true;
-    }
-    return InkWell(
-      onLongPress: () async {
-        final closed = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: Colors.grey[900],
-            title: Row(
-              children: [
-                UserIcon(
-                  user: user,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    final flag = ref.read(dmFlagHelperProvider).checkFlag(overview);
+
+    return UserWidget(
+        userId: overview.userId,
+        builder: (user) {
+          return InkWell(
+            onLongPress: () async {
+              final closed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  backgroundColor: Colors.grey[900],
+                  title: Row(
+                    children: [
+                      UserIcon(
+                        user: user,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              user.name,
+                              style: textStyle.w600(
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  content: Column(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user.name,
+                        'このチャットを閉じますか？',
                         style: textStyle.w600(
-                          fontSize: 20,
+                          fontSize: 16,
                           color: Colors.white,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'このチャットを閉じますか？',
-                  style: textStyle.w600(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.red.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.warning_rounded,
-                            size: 16,
-                            color: Colors.red[400],
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.red.withOpacity(0.3),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '注意事項',
-                            style: textStyle.w600(
-                              fontSize: 14,
-                              //  color: Colors.red[400],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.warning_rounded,
+                                  size: 16,
+                                  color: Colors.red[400],
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '注意事項',
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                    //  color: Colors.red[400],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '• チャットを閉じても履歴は消えません\n'
-                        '• 再度チャットを開始するには新しく始める必要があります',
-                        style: textStyle.w400(
-                          fontSize: 14,
+                            const SizedBox(height: 8),
+                            Text(
+                              '• チャットを閉じても履歴は消えません\n'
+                              '• 再度チャットを開始するには新しく始める必要があります',
+                              style: textStyle.w400(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(
+                        'キャンセル',
+                        style: textStyle.w600(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'チャットを閉じる',
+                        style:
+                            textStyle.w600(fontSize: 14, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                  actionsPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
                 ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  'キャンセル',
-                  style: textStyle.w600(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
+              );
+              if (closed == true) {
+                ref
+                    .read(dmOverviewListNotifierProvider.notifier)
+                    .leaveChat(user);
+              }
+            },
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChattingScreen(userId: user.userId),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                ),
-                child: Text(
-                  'チャットを閉じる',
-                  style: textStyle.w600(fontSize: 14, color: Colors.white),
-                ),
-              ),
-            ],
-            actionsPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-          ),
-        );
-        if (closed == true) {
-          ref.read(dmOverviewListNotifierProvider.notifier).leaveChat(user);
-        }
-      },
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ChattingScreen(userId: user.userId),
-          ),
-        );
-      },
-      splashColor: ThemeColor.accent,
-      highlightColor: ThemeColor.stroke,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        child: Row(
-          children: [
-            UserIcon(
-              user: user,
-              width: 60,
-              isCircle: true,
-            ),
-            const Gap(12),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              );
+            },
+            splashColor: ThemeColor.accent,
+            highlightColor: ThemeColor.stroke,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
                 children: [
-                  Text(
-                    user.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textStyle.w600(
-                      fontSize: 17,
+                  UserIcon(
+                    user: user,
+                    width: 60,
+                    isCircle: true,
+                  ),
+                  const Gap(12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textStyle.w600(
+                            fontSize: 17,
+                          ),
+                        ),
+                        const Gap(4),
+                        Text(
+                          overview.lastMessage.text,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textStyle.w400(
+                            fontSize: 15,
+                            color: ThemeColor.subText,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const Gap(4),
-                  Text(
-                    overview.lastMessage.text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textStyle.w400(
-                      fontSize: 15,
-                      color: ThemeColor.subText,
-                    ),
+                  const Gap(18),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        overview.lastMessage.createdAt.xxAgo,
+                        style: textStyle.w400(
+                          fontSize: 11,
+                          color: ThemeColor.subText,
+                        ),
+                      ),
+                      const Gap(12),
+                      CircleAvatar(
+                        radius: 4,
+                        backgroundColor:
+                            flag ? Colors.blue : Colors.transparent,
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            const Gap(18),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  overview.lastMessage.createdAt.xxAgo,
-                  style: textStyle.w400(
-                    fontSize: 11,
-                    color: ThemeColor.subText,
-                  ),
-                ),
-                const Gap(12),
-                CircleAvatar(
-                  radius: 4,
-                  backgroundColor:
-                      unseenCheck ? Colors.blue : Colors.transparent,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 }
 

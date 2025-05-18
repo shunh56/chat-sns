@@ -1,4 +1,4 @@
-import 'package:app/domain/entity/user.dart';
+/*import 'package:app/domain/entity/user.dart';
 import 'package:app/data/repository/friends_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,3 +37,4 @@ class FriendsUsecase {
     return _repository.deleteUser(user.userId);
   }
 }
+ */

@@ -1,4 +1,5 @@
 import 'package:app/core/debugParams/tester_accounts.dart';
+import 'package:app/core/utils/flavor.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/main.dart';
@@ -266,7 +267,7 @@ class SignInPage extends ConsumerWidget {
                     ],
                   ),
                   const Gap(12),
-                  flavor == "dev"
+                  Flavor.isDevEnv
                       ? Expanded(
                           child: ListView.builder(
                             itemCount: testerAccount.length,

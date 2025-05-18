@@ -30,12 +30,26 @@ class HashtagUserCardView extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            "同じ趣味のユーザー",
-            style: textStyle.w700(
-              fontSize: 20,
-              color: ThemeColor.white,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "同じ趣味の相手を探す",
+                style: textStyle.w700(
+                  fontSize: 20,
+                  color: ThemeColor.white,
+                ),
+              ),
+              const Gap(4),
+              Text(
+                "共通の趣味でつながろう",
+                style: textStyle.w400(
+                  fontSize: 14,
+                  color: const Color(0xFFB0B0B0),
+                  height: 1.5,
+                ),
+              ),
+            ],
           ),
         ),
         const Gap(12),

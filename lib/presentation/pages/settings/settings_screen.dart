@@ -1,3 +1,4 @@
+import 'package:app/core/utils/flavor.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/main.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
@@ -542,7 +543,7 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ],
                 ),
-                if (flavor != "appstore") ...[
+                if (!Flavor.isAppStoreEnv) ...[
                   const Gap(4),
                   Text(
                     info.packageName,

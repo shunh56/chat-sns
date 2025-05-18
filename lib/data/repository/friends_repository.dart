@@ -1,4 +1,4 @@
-import 'package:app/data/datasource/friends_datasource.dart';
+/*import 'package:app/data/datasource/friends_datasource.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final friendsRepositoryProvider = Provider(
@@ -39,3 +39,4 @@ class FriendsRepository {
     return _datasource.deleteUser(userId);
   }
 }
+ */

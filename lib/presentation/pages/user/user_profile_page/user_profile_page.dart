@@ -959,7 +959,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       BuildContext context, WidgetRef ref, UserAccount user) {
     final canvasTheme = CanvasTheme.defaultCanvasTheme();
     //final friendIds = ref.watch(friendIdsProvider);
-    const isFriend = false; //friendIds.contains(user.userId);
 
     return SizedBox(
       height: kToolbarHeight,
@@ -991,7 +990,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               borderRadius: BorderRadius.circular(24),
             ),
             menuItems: <FocusedMenuItem>[
-              if (isFriend)
+              /* if (isFriend)
                 FocusedMenuItem(
                   backgroundColor: ThemeColor.background,
                   title: const Text(
@@ -1000,7 +999,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                   onPressed: () {
                     UserBottomModelSheet(context).quitFriendBottomSheet(user);
                   },
-                ),
+                ), */
               FocusedMenuItem(
                 backgroundColor: ThemeColor.background,
                 title: const Text(
@@ -1473,7 +1472,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     );
   }
 
-  Widget _buildFriends(BuildContext context, WidgetRef ref,
+/*  Widget _buildFriends(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
     final themeSize = ref.watch(themeSizeProvider(context));
     const displayCount = 5;
@@ -1628,7 +1627,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         ],
       ),
     );
-  }
+  } */
 
   Widget box(CanvasTheme canvasTheme, Widget child) {
     return Row(

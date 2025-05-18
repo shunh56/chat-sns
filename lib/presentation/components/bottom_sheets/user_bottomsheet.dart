@@ -17,7 +17,7 @@ class UserBottomModelSheet {
   UserBottomModelSheet(this.context);
   final BuildContext context;
 
-  quitFriendBottomSheet(UserAccount user, {int count = 1}) {
+/*  quitFriendBottomSheet(UserAccount user, {int count = 1}) {
     showModalBottomSheet(
       isScrollControlled: true,
       backgroundColor: ThemeColor.background,
@@ -139,7 +139,7 @@ class UserBottomModelSheet {
         );
       },
     );
-  }
+  } */
 
   blockUserBottomSheet(UserAccount user, {int count = 1}) {
     showModalBottomSheet(

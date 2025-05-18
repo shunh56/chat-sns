@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:app/core/utils/debug_print.dart';
-import 'package:app/main.dart';
+import 'package:app/core/utils/flavor.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/data/datasource/firebase/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,7 +30,7 @@ class ImageUploadUsecase {
 
   Future<String> uploadIconImage(File imageFile) async {
     try {
-      DebugPrint("Starting upload with flavor: $flavor"); // flavorの確認
+      DebugPrint("Starting upload with flavor: ${Flavor.getEnv}"); // flavorの確認
       DebugPrint(
           "Storage instance: ${_storage.app.options.storageBucket}"); // Storage bucketの確認
 

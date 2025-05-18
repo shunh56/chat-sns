@@ -11,8 +11,16 @@ build-runner:
 	@echo "Activating build runner..."
 	flutter pub run build_runner build --delete-conflicting-outputs
 
+.PHONY: prepare-ios
+prepare-ios:
+	@echo "Copying xcconfig file to Flutter directory..."
+	@mkdir -p ios/Flutter
+	@touch ios/Flutter/DartDefines.xcconfig
+	@echo "Cleaning DartDefines.xcconfig..."
+	@: > ios/Flutter/DartDefines.xcconfig
+
 #dev-ios
-dev-profile:
+dev-profile: 
 	@echo "Starting dev profile build..."
 	$(FLUTTER) run --profile $(DART_DEFINE_DEV)
 

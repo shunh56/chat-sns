@@ -371,7 +371,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"${FLAVOR}\" = \"dev\" ]; then\n    cp \"$SRCROOT/Runner/GoogleService-Info-Dev.plist\" \"$SRCROOT/Runner/GoogleService-Info.plist\"\n    echo \"Production GoogleService-Info copied.\"\nelse\n    cp \"$SRCROOT/Runner/GoogleService-Info-Prod.plist\" \"$SRCROOT/Runner/GoogleService-Info.plist\"\n    echo \"Development GoogleService-Info copied.\"\nfi\n";
+			shellScript = "if [ \"${FLAVOR}\" = \"dev\" ]; then\n    echo \"Using development Firebase config\"\n    cp \"$SRCROOT/Runner/GoogleService-Info-Dev.plist\" \"$SRCROOT/Runner/GoogleService-Info.plist\"\n    echo \"Production GoogleService-Info copied.\"\nelse\n    echo \"Using production Firebase config\"\n    cp \"$SRCROOT/Runner/GoogleService-Info-Prod.plist\" \"$SRCROOT/Runner/GoogleService-Info.plist\"\n    echo \"Development GoogleService-Info copied.\"\nfi\n";
 		};
 		583CADB2D78DF896C6AE616D /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;

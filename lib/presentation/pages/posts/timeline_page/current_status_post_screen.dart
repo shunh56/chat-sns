@@ -6,6 +6,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/pages/main_page/heart_animation_overlay.dart';
 import 'package:app/presentation/pages/posts/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/providers/heart_animation_notifier.dart';

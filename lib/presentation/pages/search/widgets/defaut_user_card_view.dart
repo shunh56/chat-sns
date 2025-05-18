@@ -35,11 +35,11 @@ class DefaultUserCardView extends ConsumerWidget {
                   color: ThemeColor.white,
                 ),
               ),
-              const Gap(8),
+              const Gap(4),
               Text(
                 "新しく始めた人やアクティブなユーザーと\n趣味や興味を共有して仲良くなろう",
                 style: textStyle.w400(
-                  fontSize: 12,
+                  fontSize: 14,
                   color: const Color(0xFFB0B0B0),
                   height: 1.5,
                 ),

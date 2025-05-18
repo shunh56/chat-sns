@@ -1,7 +1,7 @@
+import 'package:app/core/utils/flavor.dart';
 import 'package:app/data/datasource/hive/user_datasource.dart';
 import 'package:app/data/datasource/user_datasource.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -67,7 +67,7 @@ class UserRepository {
   }
 
   bool _isCacheValid(Timestamp lastUpdated) {
-    return flavor != "dev" &&
+    return Flavor.isProdEnv &&
         ((Timestamp.now().seconds - lastUpdated.seconds) < _cacheExpiration);
   }
 

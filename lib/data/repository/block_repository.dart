@@ -1,23 +1,19 @@
 // Project imports:
 
 import 'package:app/data/datasource/block_datasource.dart';
-import 'package:app/data/datasource/friends_datasource.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final blockRepositoryProvider = Provider(
   (ref) => BlockRepository(
     ref.watch(blockDatasourceProvider),
-    ref.watch(friendsDatasourceProvider),
   ),
 );
 
 class BlockRepository {
   final BlockDatasource _blockDatasource;
-  final FriendsDatasource _friendsDatasource;
 
   BlockRepository(
     this._blockDatasource,
-    this._friendsDatasource,
   );
 
   Future<List<String>> getBlocks() async {
@@ -35,7 +31,7 @@ class BlockRepository {
   Future<void> blockUser(String userId) async {
     _blockDatasource.blockUser(userId);
     //TODO
-   /* _friendsDatasource.deleteFriend(userId);
+    /* _friendsDatasource.deleteFriend(userId);
     _friendsDatasource.deleteRequest(userId);
     _friendsDatasource.deleteRequested(userId); */
     return;

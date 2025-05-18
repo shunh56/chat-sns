@@ -1,7 +1,7 @@
+import 'package:app/core/utils/flavor.dart';
 import 'package:app/data/datasource/push_notification_datasource.dart';
 import 'package:app/domain/entity/push_notification_model.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/main.dart';
 import 'package:app/presentation/components/core/toast.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/data/repository/push_notification_repository.dart';
@@ -40,7 +40,7 @@ class PushNotificationUsecase {
       metadata: metadata ?? PushNotificationMetadata(),
     );
 
-    if (flavor == "dev") {
+    if (Flavor.isDevEnv) {
       await handleError(
         process: () async {
           await _repository.sendPushNotification(model);
@@ -141,7 +141,7 @@ class PushNotificationUsecase {
   // 通話通知
   sendCallNotification(UserAccount user) async {
     final me = ref.read(myAccountNotifierProvider).asData!.value;
-    if (flavor == "dev") {
+    if (Flavor.isDevEnv) {
       await handleError(
         process: () async {
           await _repository.sendCallNotification(user, me);

@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/pages/posts/timeline_page/timeline_page.dart';
+import 'package:app/presentation/pages/main_page/heart_animation_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

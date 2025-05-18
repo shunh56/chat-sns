@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 final signupProcessProvider = StateProvider.autoDispose((ref) => false);
-String platformOS = Platform.isAndroid ? "Android" : "iOS";
 
 class SignUpPage extends ConsumerWidget {
   const SignUpPage({super.key});

@@ -21,6 +21,14 @@ class AllUsersNotifier extends _$AllUsersNotifier {
     return const AsyncValue.data({});
   }
 
+  Future<UserAccount> getUserByUserId(String userId) async {
+    Map<String, UserAccount> cache = _getCache();
+    final user = await ref.read(userUsecaseProvider).getUserByUid(userId);
+    cache[user!.userId] = user;
+    state = AsyncValue.data(cache);
+    return user;
+  }
+
   Future<List<UserAccount>> getUserAccounts(List<String> userIds) async {
     // 現在のキャッシュを取得
     Map<String, UserAccount> cache = _getCache();

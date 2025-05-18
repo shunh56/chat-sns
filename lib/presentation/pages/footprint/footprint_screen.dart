@@ -1,3 +1,4 @@
+import 'package:app/core/analytics/screen_name.dart';
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
@@ -7,6 +8,7 @@ import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dar
 import 'package:app/presentation/providers/footprint/footprint_manager_provider.dart';
 import 'package:app/presentation/providers/footprint/visited_provider.dart';
 import 'package:app/presentation/providers/footprint/visitors_provider.dart';
+import 'package:app/presentation/providers/session_provider.dart';
 import 'package:app/presentation/providers/users/user_by_userId_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,6 +32,9 @@ class FootprintScreen extends HookConsumerWidget {
     // 足あとを表示時に既読にする
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(sessionStateProvider.notifier)
+            .trackScreenView(ScreenName.footprintPage.value);
         ref.read(footprintManagerProvider).markAllFootprintsSeen();
       });
       return null;
