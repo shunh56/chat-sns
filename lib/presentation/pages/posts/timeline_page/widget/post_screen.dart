@@ -1,161 +1,109 @@
+// lib/presentation/pages/posts/post_screen.dart
 import 'dart:math';
-
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
-import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/main_page/heart_animation_overlay.dart';
-import 'package:app/presentation/routes/page_transition.dart';
-import 'package:app/presentation/pages/user/post_images_screen.dart';
+import 'package:app/presentation/pages/posts/components/reactions/enhanced_reaction_button.dart';
+import 'package:app/presentation/pages/posts/components/vibe/vibe_indicator.dart';
+import 'package:app/presentation/pages/posts/components/media/interactive_media_viewer.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/post_widget.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/reply_widget.dart';
-import 'package:app/presentation/providers/heart_animation_notifier.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/posts/replies.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'dart:ui';
 
 final inputTextProvider = StateProvider.autoDispose((ref) => "");
 final controllerProvider =
     Provider.autoDispose((ref) => TextEditingController());
 
-class PostScreen extends ConsumerWidget {
+class PostScreen extends HookConsumerWidget {
   const PostScreen({super.key, required this.postRef, required this.user});
   final Post postRef;
   final UserAccount user;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id]!;
     final controller = ref.watch(controllerProvider);
+
+    // アニメーション用のコントローラー
+    final fadeController = useAnimationController(
+      duration: const Duration(milliseconds: 800),
+    );
+
+    final slideController = useAnimationController(
+      duration: const Duration(milliseconds: 600),
+    );
+
+    final fadeAnimation = useMemoized(
+      () => Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: fadeController,
+          curve: Curves.easeOut,
+        ),
+      ),
+      [fadeController],
+    );
+
+    final slideAnimation = useMemoized(
+      () => Tween<Offset>(
+        begin: const Offset(0, 0.1),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: slideController,
+          curve: Curves.easeOutCubic,
+        ),
+      ),
+      [slideController],
+    );
+
+    useEffect(() {
+      fadeController.forward();
+      slideController.forward();
+      return null;
+    }, []);
+
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(
-            title: Text(
-              post.title,
-              style: textStyle.w700(
-                fontSize: 16,
+          backgroundColor: const Color(0xFF0A0A0A), // ダークテーマ背景
+          appBar: _buildModernAppBar(context, post, textStyle),
+          body: FadeTransition(
+            opacity: fadeAnimation,
+            child: SlideTransition(
+              position: slideAnimation,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        _buildEnhancedPostSection(context, ref, post),
+                        _buildDivider(),
+                        _buildEnhancedReactionSection(context, ref, post),
+                        _buildDivider(),
+                        _buildPostRepliesList(context, ref, post),
+                      ],
+                    ),
+                  ),
+                  _buildModernInputSection(
+                      context, ref, post, controller, textStyle),
+                ],
               ),
             ),
-            titleSpacing: 0,
-            leading: GestureDetector(
-              onTap: () {
-                primaryFocus?.unfocus();
-                Navigator.pop(context);
-              },
-              child: const Icon(
-                Icons.arrow_back_ios,
-              ),
-            ),
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildPostSection(context, ref, post),
-                    const Gap(4),
-                    const Divider(
-                      height: 0,
-                      thickness: 0.8,
-                      color: ThemeColor.stroke,
-                    ),
-                    _buildPostBottomSection(context, ref, post),
-                    const Divider(
-                      height: 0,
-                      thickness: 0.8,
-                      color: ThemeColor.stroke,
-                    ),
-                    _buildPostRepliesList(context, ref, post),
-                  ],
-                ),
-              ),
-              Container(
-                width: MediaQuery.sizeOf(context).width,
-                padding: EdgeInsets.only(
-                  top: 12,
-                  left: 16,
-                  right: 16,
-                  bottom: MediaQuery.of(context).viewPadding.bottom,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: controller,
-                        keyboardType: TextInputType.multiline,
-                        minLines: 1,
-                        maxLines: 6,
-                        style: textStyle.w600(
-                          fontSize: 14,
-                        ),
-                        onChanged: (value) {
-                          ref.read(inputTextProvider.notifier).state = value;
-                        },
-                        onSubmitted: (value) {
-                          if (value.isNotEmpty) {
-                            ref
-                                .read(allPostsNotifierProvider.notifier)
-                                .addReply(user, post, value);
-                            controller.clear();
-                            ref.read(inputTextProvider.notifier).state = "";
-                            primaryFocus?.unfocus();
-                          }
-                        },
-                        decoration: InputDecoration(
-                          hintText: "コメントを入力",
-                          filled: true,
-                          isDense: true,
-                          fillColor: ThemeColor.stroke,
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          hintStyle: textStyle.w400(
-                            color: ThemeColor.subText,
-                            fontSize: 14,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-                    ref.watch(inputTextProvider).isNotEmpty
-                        ? GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () async {
-                              String text = ref.read(inputTextProvider);
-                              ref
-                                  .read(allPostsNotifierProvider.notifier)
-                                  .addReply(user, post, text);
-
-                              controller.clear();
-                              ref.read(inputTextProvider.notifier).state = "";
-                              primaryFocus?.unfocus();
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.only(left: 12),
-                              child: Icon(
-                                Icons.send,
-                                color: ThemeColor.highlight,
-                              ),
-                            ),
-                          )
-                        : const SizedBox(),
-                  ],
-                ),
-              ),
-            ],
           ),
         ),
         const HeartAnimationArea(),
@@ -163,251 +111,451 @@ class PostScreen extends ConsumerWidget {
     );
   }
 
-  _buildPostSection(BuildContext context, WidgetRef ref, Post post) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
-
-    return Container(
-      padding: const EdgeInsets.only(
-        top: 12,
-        left: 12,
-        right: 12,
-        bottom: 12,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              UserIcon(
-                user: user,
-                width: 40,
-                isCircle: true,
-              ),
-              const Gap(12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user.name,
-                      style: textStyle.w600(
-                        fontSize: 14,
-                        height: 1.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const Gap(4),
-                    Text(
-                      post.createdAt.xxAgo,
-                      style: textStyle.w400(
-                        fontSize: 12,
-                        color: const Color(0xFF9CA3AF),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const Gap(8),
-          Text(
-            post.title,
-            style: textStyle.w700(
-              fontSize: 16,
-            ),
-          ),
-          const Gap(6),
-          if (post.text != null)
-            BuildText(
-              text: post.text!,
-              isShort: false,
-            ),
-          if (post.mediaUrls.isNotEmpty) const Gap(8),
-          _buildImages(context, post),
-        ],
-      ),
-    );
-  }
-
-  _buildImages(BuildContext context, Post post) {
-    if (post.mediaUrls.isEmpty) return const SizedBox();
-
-    if (post.mediaUrls.length == 1) {
-      return GestureDetector(
+  // モダンなアプリバー
+  AppBar _buildModernAppBar(
+      BuildContext context, Post post, ThemeTextStyle textStyle) {
+    return AppBar(
+      backgroundColor: const Color(0xFF0A0A0A),
+      elevation: 0,
+      leading: GestureDetector(
         onTap: () {
-          Navigator.push(
-            context,
-            PageTransitionMethods.fadeIn(
-              PostImageHero(
-                imageUrls: post.mediaUrls,
-                aspectRatios: post.aspectRatios,
-                initialIndex: 0,
-              ),
-            ),
-          );
+          primaryFocus?.unfocus();
+          Navigator.pop(context);
         },
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: AspectRatio(
-            aspectRatio: post.aspectRatios.isNotEmpty
-                ? post.aspectRatios[0] < 1
-                    ? min(1 / post.aspectRatios[0], 16 / 9)
-                    : max(1 / post.aspectRatios[0], 4 / 5)
-                : 16 / 9,
-            child: CachedImage.postImage(
-              post.mediaUrls[0],
-              ms: 100,
-            ),
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.white,
+            size: 20,
           ),
         ),
-      );
-    }
-
-    return SizedBox(
-      height: 200,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: post.mediaUrls.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                PageTransitionMethods.fadeIn(
-                  PostImageHero(
-                    imageUrls: post.mediaUrls,
-                    aspectRatios: post.aspectRatios,
-                    initialIndex: index,
-                  ),
-                ),
-              );
-            },
-            child: Container(
-              width: 160,
-              margin: EdgeInsets.only(
-                  right: index < post.mediaUrls.length - 1 ? 8 : 0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: CachedImage.postImage(
-                  post.mediaUrls[index],
-                ),
-              ),
-            ),
-          );
-        },
       ),
-    );
-  }
-
-  _buildPostBottomSection(BuildContext context, WidgetRef ref, Post post) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final heartAnimationNotifier = ref.read(heartAnimationNotifierProvider);
-
-    return Container(
-      padding: const EdgeInsets.only(
-        top: 12,
-        left: 12,
-        right: 12,
-        bottom: 12,
+      title: Text(
+        post.title,
+        style: textStyle.w700(
+          fontSize: 16,
+          color: Colors.white,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTapDown: (details) {
-                  ref
-                      .read(allPostsNotifierProvider.notifier)
-                      .incrementLikeCount(user, post);
-                  heartAnimationNotifier.showHeart(
-                    context,
-                    details.globalPosition.dx,
-                    details.globalPosition.dy,
-                    (details.globalPosition.dy - details.localPosition.dy),
-                  );
-                },
-                child: Row(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 2),
-                      child: Icon(
-                        Icons.favorite_border_rounded,
-                        color: ThemeColor.cardSecondaryColor,
-                        size: 20,
-                      ),
-                    ),
-                    const Gap(4),
-                    SizedBox(
-                      width: 48,
-                      child: Text(
-                        post.likeCount.toString(),
-                        style: textStyle.numText(
-                          fontSize: 14,
-                          color: ThemeColor.cardSecondaryColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  // スクロールしてコメントセクションに移動する処理をここに追加できます
-                },
-                child: Row(
-                  children: [
-                    SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: SvgPicture.asset(
-                        "assets/images/icons/chat.svg",
-                        color: ThemeColor.cardSecondaryColor,
-                      ),
-                    ),
-                    const Gap(8),
-                    SizedBox(
-                      width: 48,
-                      child: Text(
-                        post.replyCount.toString(),
-                        style: textStyle.numText(
-                          fontSize: 14,
-                          color: ThemeColor.cardSecondaryColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+      titleSpacing: 8,
+      actions: [
+        Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
           ),
-          GestureDetector(
-            onTap: () {
-              PostBottomModelSheet(context).openPostAction(
-                post,
-                user,
-                hideComments: true,
-              );
+          child: IconButton(
+            onPressed: () {
+              // シェア機能
             },
-            child: const Icon(
-              Icons.more_horiz_rounded,
-              color: ThemeColor.cardSecondaryColor,
+            icon: const Icon(
+              Icons.share_outlined,
+              color: Colors.white,
               size: 20,
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  // 拡張された投稿セクション
+  Widget _buildEnhancedPostSection(
+      BuildContext context, WidgetRef ref, Post post) {
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            _getVibeColor(user).withOpacity(0.1),
+            Colors.transparent,
+            _getVibeColor(user).withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: _getVibeColor(user).withOpacity(0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _getVibeColor(user).withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildEnhancedHeader(post, textStyle),
+              const Gap(16),
+              _buildEnhancedContent(post, textStyle),
+              if (post.mediaUrls.isNotEmpty) ...[
+                const Gap(16),
+                _buildEnhancedMedia(context, post),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 拡張されたヘッダー
+  Widget _buildEnhancedHeader(Post post, ThemeTextStyle textStyle) {
+    return Row(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [
+                _getVibeColor(user),
+                _getVibeColor(user).withOpacity(0.7),
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _getVibeColor(user).withOpacity(0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(3),
+          child: UserIcon(
+            user: user,
+            width: 44,
+            isCircle: true,
+          ),
+        ),
+        const Gap(16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                user.name,
+                style: textStyle.w700(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+              const Gap(4),
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time_rounded,
+                    size: 14,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  const Gap(4),
+                  Text(
+                    post.createdAt.xxAgo,
+                    style: textStyle.w400(
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.7),
+                    ),
+                  ),
+                  const Gap(12),
+                  VibeIndicator(
+                    mood: _getVibeText(user, post),
+                    color: _getVibeColor(user),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 拡張されたコンテンツ
+  Widget _buildEnhancedContent(Post post, ThemeTextStyle textStyle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          post.title,
+          style: textStyle.w700(
+            fontSize: 20,
+            color: Colors.white,
+            height: 1.3,
+          ),
+        ),
+        if (post.text != null) ...[
+          const Gap(12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+            child: BuildText(
+              text: post.text!,
+              isShort: false,
+              isDynamicSize: true, // 動的サイズを有効化
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // 拡張されたメディア
+  Widget _buildEnhancedMedia(BuildContext context, Post post) {
+    return InteractiveMediaViewer(
+      mediaUrls: post.mediaUrls,
+      aspectRatios: post.aspectRatios,
+      onDoubleTap: (offset) {
+        // ダブルタップでリアクション
+      },
+    );
+  }
+
+  // 拡張されたリアクションセクション
+  Widget _buildEnhancedReactionSection(
+      BuildContext context, WidgetRef ref, Post post) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'リアクション',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white70,
+            ),
+          ),
+          const Gap(12),
+          EnhancedReactionButton(
+            post: post,
+            onReaction: (reaction) {
+              // リアクション処理
+            },
+          ),
         ],
       ),
     );
   }
 
-  _buildPostRepliesList(BuildContext context, WidgetRef ref, Post post) {
+  // モダンなディバイダー
+  Widget _buildDivider() {
+    return Container(
+      height: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Colors.white.withOpacity(0.1),
+            Colors.transparent,
+          ],
+        ),
+      ),
+    );
+  }
+
+  // モダンな入力セクション
+  Widget _buildModernInputSection(
+    BuildContext context,
+    WidgetRef ref,
+    Post post,
+    TextEditingController controller,
+    ThemeTextStyle textStyle,
+  ) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: 16,
+        left: 16,
+        right: 16,
+        bottom: MediaQuery.of(context).viewPadding.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        border: Border(
+          top: BorderSide(
+            color: Colors.white.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // ユーザーアイコン
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: _getVibeColor(user).withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: UserIcon(
+              user: user,
+              width: 32,
+              isCircle: true,
+            ),
+          ),
+          const Gap(12),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: TextField(
+                controller: controller,
+                keyboardType: TextInputType.multiline,
+                minLines: 1,
+                maxLines: 4,
+                style: textStyle.w400(
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+                onChanged: (value) {
+                  ref.read(inputTextProvider.notifier).state = value;
+                },
+                onSubmitted: (value) {
+                  if (value.isNotEmpty) {
+                    _submitReply(ref, post, value, controller);
+                  }
+                },
+                decoration: InputDecoration(
+                  hintText: "コメントを入力...",
+                  hintStyle: textStyle.w400(
+                    color: Colors.white.withOpacity(0.5),
+                    fontSize: 14,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const Gap(8),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            child: ref.watch(inputTextProvider).isNotEmpty
+                ? GestureDetector(
+                    onTap: () {
+                      String text = ref.read(inputTextProvider);
+                      _submitReply(ref, post, text, controller);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            _getVibeColor(user),
+                            _getVibeColor(user).withOpacity(0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _getVibeColor(user).withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  )
+                : Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Icon(
+                      Icons.send_rounded,
+                      color: Colors.white.withOpacity(0.3),
+                      size: 20,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPostRepliesList(BuildContext context, WidgetRef ref, Post post) {
     final asyncValue = ref.watch(postRepliesNotifierProvider(post.id));
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
       child: asyncValue.when(
         data: (list) {
+          if (list.isEmpty) {
+            return Container(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.chat_bubble_outline,
+                    size: 48,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  const Gap(16),
+                  Text(
+                    'まだコメントがありません',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Gap(8),
+                  Text(
+                    '最初のコメントを投稿してみましょう！',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.3),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -415,15 +563,94 @@ class PostScreen extends ConsumerWidget {
             padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
               final reply = list[index];
-              return ReplyWidget(reply: reply);
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: ReplyWidget(reply: reply),
+              );
             },
           );
         },
-        error: (e, s) => Text("error : $e, $s"),
-        loading: () {
-          return const SizedBox();
-        },
+        error: (e, s) => Container(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Colors.red.withOpacity(0.5),
+              ),
+              const Gap(16),
+              Text(
+                'コメントの読み込みに失敗しました',
+                style: TextStyle(
+                  color: Colors.red.withOpacity(0.7),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        loading: () => Container(
+          padding: const EdgeInsets.all(32),
+          child: Center(
+            child: CircularProgressIndicator(
+              color: _getVibeColor(user),
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  void _submitReply(
+    WidgetRef ref,
+    Post post,
+    String text,
+    TextEditingController controller,
+  ) {
+    ref.read(allPostsNotifierProvider.notifier).addReply(user, post, text);
+    controller.clear();
+    ref.read(inputTextProvider.notifier).state = "";
+    primaryFocus?.unfocus();
+  }
+
+  // ヘルパーメソッド
+  Color _getVibeColor(UserAccount user) {
+    switch (user.name.hashCode % 4) {
+      case 0:
+        return const Color(0xFF6B46C1);
+      case 1:
+        return const Color(0xFFEA580C);
+      case 2:
+        return const Color(0xFF0284C7);
+      case 3:
+        return const Color(0xFF059669);
+      default:
+        return const Color(0xFF6B46C1);
+    }
+  }
+
+  String _getVibeText(UserAccount user, Post post) {
+    // 投稿内容から気分を推測するロジック（前回実装したもの）
+    final content = '${post.title} ${post.text ?? ''}'.toLowerCase();
+
+    final vibeKeywords = {
+      'Creative': ['art', 'design', 'create', '作品', '創作', 'アート'],
+      'Energetic': ['workout', 'energy', '筋トレ', '運動', '元気'],
+      'Happy': ['happy', 'joy', '嬉しい', '楽しい', '幸せ'],
+      'Chill': ['relax', 'calm', 'リラックス', 'のんびり'],
+    };
+
+    for (final entry in vibeKeywords.entries) {
+      if (entry.value.any((keyword) => content.contains(keyword))) {
+        return entry.key;
+      }
+    }
+
+    final hour = post.createdAt.toDate().hour;
+    if (hour >= 6 && hour < 10) return 'Energetic';
+    if (hour >= 18 && hour < 22) return 'Chill';
+    return 'Happy';
   }
 }

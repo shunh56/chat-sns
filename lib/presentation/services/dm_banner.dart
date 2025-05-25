@@ -1,5 +1,4 @@
 // lib/presentation/components/notification/dm_notification_banner.dart
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/providers/dm_notification_provider.dart';
@@ -17,10 +16,6 @@ class DMNotificationBanner extends HookConsumerWidget {
     final dmNotificationState = ref.watch(dmNotificationProvider);
     final notification = dmNotificationState.notification;
     final isVisible = dmNotificationState.isVisible;
-
-    // デバッグ用のログ出力
-    DebugPrint(
-        "DMNotificationBanner build - isVisible: $isVisible, notification: ${notification != null}");
 
     // アニメーションコントローラー
     final animationController = useAnimationController(
@@ -44,7 +39,6 @@ class DMNotificationBanner extends HookConsumerWidget {
 
     // 表示状態に応じてアニメーション
     useEffect(() {
-      DebugPrint("DMNotificationBanner useEffect - isVisible: $isVisible");
       if (isVisible) {
         animationController.forward();
       } else {

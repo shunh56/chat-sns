@@ -14,9 +14,6 @@ class UserRequestWidget extends ConsumerWidget {
   final double padding;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
-
     return InkWell(
       onTap: () {
         ref.read(navigationRouterProvider(context)).goToProfile(user);
@@ -182,7 +179,7 @@ class UserRequestButton extends ConsumerWidget {
             splashColor: Colors.black.withOpacity(0.3),
             highlightColor: Colors.transparent,
             onTap: () {
-             /* showDialog(
+              /* showDialog(
                 context: context,
                 builder: (context) {
                   return showQuitRequestDialog(context, ref, user);
@@ -234,7 +231,7 @@ class UserRequestButton extends ConsumerWidget {
           splashColor: Colors.black.withOpacity(0.3),
           highlightColor: Colors.transparent,
           onTap: () {
-           // ref.read(relationUsecaseProvider).sendRequest(user.userId);
+            // ref.read(relationUsecaseProvider).sendRequest(user.userId);
           },
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
@@ -325,7 +322,7 @@ class FriendRequestDialog extends ConsumerWidget {
                     onPressed: () {
                       Navigator.of(context).pop();
 
-                     /* ref.read(friendsUsecaseProvider).addFriend(user.userId);
+                      /* ref.read(friendsUsecaseProvider).addFriend(user.userId);
                       ref
                           .read(relationUsecaseProvider)
                           .deleteRequested(user.userId); */

@@ -1,6 +1,6 @@
-import 'package:app/domain/entity/posts/blog.dart';
+/*import 'package:app/domain/entity/posts/UNUSED/blog.dart';
 import 'package:app/presentation/providers/state/create_post/blog.dart';
-import 'package:app/data/repository/posts/blog_repository.dart';
+import 'package:app/data/repository/posts/UNUSED/blog_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final blogUsecaseProvider = Provider(
@@ -29,3 +29,4 @@ class BlogUsecase {
     return _repository.uploadPost(state);
   }
 }
+ */

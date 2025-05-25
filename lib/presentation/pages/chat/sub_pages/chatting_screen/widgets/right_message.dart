@@ -10,31 +10,17 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/message.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/chats/dm_overview_list.dart';
-import 'package:app/presentation/providers/posts/all_current_status_posts.dart';
-import 'package:app/domain/usecases/posts/current_status_post_usecase.dart';
 
 import '../utils/animated_message.dart';
 
-final currentStatusPostProvider = FutureProvider.family(
-  (Ref ref, String postId) async {
-    final cache =
-        ref.watch(allCurrentStatusPostsNotifierProvider).asData?.value[postId];
-    if (cache != null) return cache;
-    final post =
-        await ref.read(currentStatusPostUsecaseProvider).getPost(postId);
-    ref.read(allCurrentStatusPostsNotifierProvider.notifier).addPosts([post]);
-    return post;
-  },
-);
-
 class RightMessage extends HookConsumerWidget {
   const RightMessage({
-    super.key, 
-    required this.message, 
-    required this.user, 
+    super.key,
+    required this.message,
+    required this.user,
     this.isLatest = false,
   });
-  
+
   final CoreMessage message;
   final UserAccount user;
   final bool isLatest;

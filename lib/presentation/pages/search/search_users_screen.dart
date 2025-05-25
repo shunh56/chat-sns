@@ -9,6 +9,7 @@ import 'package:app/presentation/pages/search/widgets/hashtag_user_card_view.dar
 import 'package:app/presentation/pages/search/widgets/top_feed.dart';
 import 'package:app/presentation/pages/search/sub_pages/search_params_screen.dart';
 import 'package:app/presentation/providers/activities_list_notifier.dart';
+import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 
 import 'package:app/presentation/providers/users/online_users.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,8 @@ class SearchUsersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeSize = ref.watch(themeSizeProvider(context));
+    final me = ref.read(myAccountNotifierProvider).asData!.value;
+    final showHashtagFeed = me.tags.isEmpty;
     return Scaffold(
       body: RefreshIndicator(
         backgroundColor: ThemeColor.accent,
@@ -30,10 +32,15 @@ class SearchUsersScreen extends ConsumerWidget {
           ref.read(recentUsersNotifierProvider.notifier).refresh();
         },
         child: ListView(
+          addAutomaticKeepAlives: true,
           children: [
             _buildAppBar(context, ref),
-            const Gap(12),
-            const SearchScreenTopFeed(),
+            const Gap(8),
+            if (showHashtagFeed)
+              const Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: SearchScreenTopFeed(),
+              ),
             const Gap(16),
             const DefaultUserCardView(),
             const Gap(32),
@@ -49,14 +56,9 @@ class SearchUsersScreen extends ConsumerWidget {
 _buildAppBar(BuildContext context, WidgetRef ref) {
   final themeSize = ref.watch(themeSizeProvider(context));
   final textStyle = ThemeTextStyle(themeSize: themeSize);
-  return AppBar(
-    backgroundColor: ThemeColor.background,
-    elevation: 0,
-    centerTitle: false,
-    leading: null,
-    automaticallyImplyLeading: false,
-    toolbarHeight: kToolbarHeight,
-    title: Row(
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    child: Row(
       children: [
         Text(
           appName,
@@ -98,32 +100,32 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
         const ActivityIcon(),
         const Gap(12),
         /* Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF222222),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
+            decoration: BoxDecoration(
+              color: const Color(0xFF222222),
               borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SearchParamsScreen(),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SearchParamsScreen(),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: SvgPicture.asset(
+                    "assets/svg/inbox.svg",
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SvgPicture.asset(
-                  "assets/svg/inbox.svg",
                 ),
               ),
             ),
           ),
-        ),
-        const Gap(12), */
+          const Gap(12), */
         Container(
           decoration: BoxDecoration(
             color: const Color(0xFF222222),

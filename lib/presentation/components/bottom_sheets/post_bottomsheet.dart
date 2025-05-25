@@ -1,6 +1,5 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
@@ -758,7 +757,7 @@ class PostBottomModelSheet {
     );
   }
 
-  openCurrentStatusPostAction(CurrentStatusPost post, UserAccount user) {
+ /* openCurrentStatusPostAction(CurrentStatusPost post, UserAccount user) {
     showModalBottomSheet(
       isScrollControlled: true,
       backgroundColor: ThemeColor.background,
@@ -1005,5 +1004,5 @@ class PostBottomModelSheet {
         );
       },
     );
-  }
+  } */
 }

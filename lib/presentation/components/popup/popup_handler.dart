@@ -4,7 +4,6 @@ import 'package:app/core/analytics/action_name.dart';
 import 'package:app/core/error/failure.dart'; // エラー体系用の新しいimport
 import 'package:app/core/utils/flavor.dart';
 import 'package:app/core/utils/logger.dart'; // 新しいロガーをインポート
-import 'package:app/data/datasource/firebase/firebase_firestore.dart';
 import 'package:app/presentation/components/popup/popups/hashtag_popup.dart';
 import 'package:app/presentation/pages/profile/subpages/edit_bio_screen.dart';
 import 'package:app/presentation/pages/profile/subpages/select_hashtag_screen.dart';

@@ -1,4 +1,3 @@
-import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/data/repository/direct_message_repository.dart';
 import 'package:app/domain/usecases/push_notification_usecase.dart';
@@ -22,10 +21,5 @@ class DirectMessageUsecase {
   ) {
     _ref.read(pushNotificationUsecaseProvider).sendDm(user, text);
     return _repository.sendMessage(text, user.userId);
-  }
-
-  sendCurrentStatusReply(
-      String text, UserAccount otherUser, CurrentStatusPost post) {
-    _repository.sendCurrentStatusReply(text, otherUser.userId, post.id);
   }
 }

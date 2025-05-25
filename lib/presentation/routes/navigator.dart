@@ -1,11 +1,9 @@
-import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_screen.dart';
 import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_profile_page.dart';
-import 'package:app/presentation/pages/posts/timeline_page/current_status_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/post_screen.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
@@ -66,31 +64,6 @@ class NavigationRouter {
         MaterialPageRoute(
           builder: (_) => ChattingScreen(userId: userId!),
           settings: const RouteSettings(name: '/chatting_screen'),
-        ),
-      );
-    }
-  }
-
-  goToCurrentStatusPost(CurrentStatusPost post, UserAccount user,
-      {bool replace = false}) {
-    if (replace) {
-      Navigator.pushReplacement(
-        context,
-        PageTransitionMethods.slideUp(
-          CurrentStatusPostScreen(
-            postRef: post,
-            user: user,
-          ),
-        ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        PageTransitionMethods.slideUp(
-          CurrentStatusPostScreen(
-            postRef: post,
-            user: user,
-          ),
         ),
       );
     }

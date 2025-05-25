@@ -379,7 +379,7 @@ class EditProfileScreens extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        "${tags.length}/3",
+                        "${tags.length}/5",
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 13,

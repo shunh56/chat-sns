@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/data/datasource/local/hashtags.dart';
@@ -12,10 +10,8 @@ import 'package:app/presentation/pages/report/report_user_screen.dart';
 import 'package:app/presentation/pages/user/user_profile_page/blocked_profile_screen.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_posts_list.dart';
-import 'package:app/presentation/pages/user/user_profile_page/users_friends_screen.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/users/blocks_list.dart';
-import 'package:app/domain/usecases/friends_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';

@@ -102,13 +102,23 @@ class PostRepository {
     return _datasource.incrementLikeCountToReply(postId, replyId, count);
   }
 
-  deletePostByUser(String postId){
+  deletePostByUser(String postId) {
     return _datasource.deletePostByUser(postId);
   }
-  deletePostByModerator(String postId){
+
+  deletePostByModerator(String postId) {
     return _datasource.deletePostByModerator(postId);
   }
-  deletePostByAdmin(String  postId){
+
+  deletePostByAdmin(String postId) {
     return _datasource.deletePostByAdmin(postId);
+  }
+
+  addReaction(String postId, String userId, String reactionType) {
+    return _datasource.addReaction(postId, userId, reactionType);
+  }
+
+  removeReaction(String postId, String userId, String reactionType) {
+    return _datasource.removeReaction(postId, userId, reactionType);
   }
 }

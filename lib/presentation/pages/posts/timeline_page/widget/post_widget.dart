@@ -8,12 +8,13 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/components/user_widget.dart';
+import 'package:app/presentation/pages/posts/timeline_page/widget/enhanced_post_widget.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/user/post_images_screen.dart';
 import 'package:app/presentation/providers/heart_animation_notifier.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,103 +31,116 @@ class PostWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (true) {
+      // 新しいアニメーション付きUI
+      return EnhancedPostWidget(
+        postRef: postRef,
+        index: 0, // デフォルト値、後でリスト内のインデックスに置き換え
+      );
+    }
+
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id];
     if (post == null) return const SizedBox();
-    final user = ref.read(allUsersNotifierProvider).asData!.value[post.userId];
-    if (user == null) return const SizedBox();
-    if (user.accountStatus != AccountStatus.normal) return const SizedBox();
+    //final user = ref.read(allUsersNotifierProvider).asData!.value[post.userId];
+    //if (user == null) return const SizedBox();
+    //if (user.accountStatus != AccountStatus.normal) return const SizedBox();
     if (post.isDeletedByUser ||
         post.isDeletedByModerator ||
         post.isDeletedByAdmin) {
       return const SizedBox();
     }
 
-    return GestureDetector(
-      onTap: () {
-        ref.read(navigationRouterProvider(context)).goToPost(post, user);
-      },
-      child: Container(
-        margin: const EdgeInsets.only(
-          top: 6,
-          bottom: 6,
-          left: 8,
-          right: 8,
-        ),
-        padding: const EdgeInsets.only(
-          top: 12,
-          left: 12,
-          right: 12,
-          bottom: 12,
-        ),
-        //padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
-          color: ThemeColor.cardColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: ThemeColor.cardBorderColor,
-            width: 1.2,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ユーザー名と時間
-
-            Row(
-              children: [
-                UserIcon(
-                  user: user,
-                  width: 28,
-                  isCircle: true,
-                ),
-                const Gap(8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.name,
-                        style: textStyle.w600(
-                          fontSize: 12,
-                          height: 1.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const Gap(2),
-                      Text(
-                        post.createdAt.xxAgo,
-                        style: textStyle.w400(
-                          fontSize: 10,
-                          color: const Color(0xFF9CA3AF),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    return UserWidget(
+      userId: post.userId,
+      builder: (user) {
+        return GestureDetector(
+          onTap: () {
+            ref.read(navigationRouterProvider(context)).goToPost(post, user);
+          },
+          child: Container(
+            margin: const EdgeInsets.only(
+              top: 6,
+              bottom: 6,
+              left: 8,
+              right: 8,
             ),
-
-            const Gap(8),
-            Text(
-              post.title,
-              style: textStyle.w700(
-                fontSize: 16,
+            padding: const EdgeInsets.only(
+              top: 12,
+              left: 12,
+              right: 12,
+              bottom: 12,
+            ),
+            //padding: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              color: ThemeColor.cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: ThemeColor.cardBorderColor,
+                width: 1.2,
               ),
             ),
-            const Gap(6),
-            // 投稿テキスト
-            if (post.text != null) BuildText(text: post.text!),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ユーザー名と時間
 
-            // 画像
-            if (post.mediaUrls.isNotEmpty) const Gap(8),
-            _buildImages(context, post),
-            _buildActionButton(context, ref, post, user),
-            // アクション
-          ],
-        ),
-      ),
+                Row(
+                  children: [
+                    UserIcon(
+                      user: user,
+                      width: 28,
+                      isCircle: true,
+                    ),
+                    const Gap(8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user.name,
+                            style: textStyle.w600(
+                              fontSize: 12,
+                              height: 1.0,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const Gap(2),
+                          Text(
+                            post.createdAt.xxAgo,
+                            style: textStyle.w400(
+                              fontSize: 10,
+                              color: const Color(0xFF9CA3AF),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const Gap(8),
+                Text(
+                  post.title,
+                  style: textStyle.w700(
+                    fontSize: 16,
+                  ),
+                ),
+                const Gap(6),
+                // 投稿テキスト
+                if (post.text != null) BuildText(text: post.text!),
+
+                // 画像
+                if (post.mediaUrls.isNotEmpty) const Gap(8),
+                _buildImages(context, post),
+                _buildActionButton(context, ref, post, user),
+                // アクション
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

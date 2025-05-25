@@ -28,6 +28,14 @@ final followersStreamProvider =
   return ref.watch(getFollowersStreamUsecaseProvider).call(targetUserId);
 });
 
+// フォロワー状態をチェックするための最適化されたプロバイダー
+final isFollowerProvider = Provider.family<bool, String>((ref, userId) {
+  return ref.watch(followersListNotifierProvider).maybeWhen(
+        data: (list) => list.any((user) => user.userId == userId),
+        orElse: () => false,
+      );
+});
+
 final followersListNotifierProvider = StateNotifierProvider.autoDispose<
     FollowersListNotifier, AsyncValue<List<UserAccount>>>(
   (ref) => FollowersListNotifier(
@@ -51,6 +59,9 @@ class FollowersListNotifier
 
   Future<void> initialize() async {
     try {
+      // disposeされていれば処理をスキップ
+      if (!mounted) return;
+
       state = const AsyncValue.loading();
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
@@ -65,14 +76,20 @@ class FollowersListNotifier
       // IDリストからユーザー情報を取得
       final users = await _getUsersFromIds(followerIds);
 
-      // 状態を更新
-      state = AsyncValue.data(users);
+      // disposeされていなければ状態を更新
+      if (mounted) {
+        // 状態を更新
+        state = AsyncValue.data(users);
+        DebugPrint("Followers list initialized with ${users.length} users");
 
-      // ストリームの監視を開始
-      _startListeningToFollowers(currentUser.uid);
+        // ストリームの監視を開始
+        _startListeningToFollowers(currentUser.uid);
+      }
     } catch (e, stack) {
-      DebugPrint("Error in initialize: $e");
-      state = AsyncValue.error(e, stack);
+      if (mounted) {
+        DebugPrint("Error in initialize followers: $e");
+        state = AsyncValue.error(e, stack);
+      }
     }
   }
 

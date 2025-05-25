@@ -105,12 +105,14 @@ class ThemeTextStyle {
   TextStyle w700({
     Color color = ThemeColor.text,
     double fontSize = 12.0,
+    double? height,
   }) {
     return TextStyle(
       color: color,
       fontSize: fontSize,
       fontWeight: FontWeight.w700,
       fontFamily: primary,
+      height: height,
     );
   }
 

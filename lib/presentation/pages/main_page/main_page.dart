@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:app/core/analytics/screen_name.dart';
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/popup/popup_handler.dart';
+import 'package:app/presentation/pages/chat/sub_pages/create_chat_screen.dart';
 import 'package:app/presentation/pages/main_page/drawer.dart';
 import 'package:app/presentation/pages/main_page/heart_animation_overlay.dart';
 import 'package:app/presentation/providers/chats/dm_flag_provider.dart';
@@ -20,8 +22,6 @@ import 'package:app/presentation/pages/search/search_users_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/timeline_page.dart';
 import 'package:app/presentation/pages/posts/timeline_page/voice_chat_screen.dart';
-import 'package:app/presentation/providers/chats/dm_overview_list.dart';
-import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
 import 'package:app/presentation/services/dm_banner.dart';
@@ -74,7 +74,6 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
 
   @override
   void dispose() {
-    ref.read(myAccountNotifierProvider.notifier).onClosed();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -254,6 +253,17 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
   }
 }
 
+final mainPageProvidersKeeper = Provider<void>((ref) {
+  // 重要なプロバイダーをキープ
+  ref.watch(followingListNotifierProvider);
+  ref.watch(followersListNotifierProvider);
+
+  // プロバイダーが破棄されないよう明示的にキープする
+  ref.keepAlive();
+
+  return;
+});
+
 class MainPage extends HookConsumerWidget {
   const MainPage({super.key});
 
@@ -262,12 +272,10 @@ class MainPage extends HookConsumerWidget {
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(sessionStateProvider.notifier).startSession();
-        ref.watch(followingListNotifierProvider);
-        ref.watch(followersListNotifierProvider);
+        ref.read(mainPageProvidersKeeper);
       });
       return null;
     }, const []);
-
     return Scaffold(
       drawer: const MainPageDrawer(),
       body: Stack(
@@ -279,10 +287,6 @@ class MainPage extends HookConsumerWidget {
               TimelinePage(),
               ChatScreen(),
               ProfileScreen(),
-              //ThreadsScreen(),
-              // PlaygroundScreen(),
-              //PovScreen(),
-              //InboxScreen(),
             ],
           ),
           const HeartAnimationArea(),
@@ -297,8 +301,10 @@ class MainPage extends HookConsumerWidget {
           child: const BottomBar(),
         ),
       ),
-      floatingActionButton: ref.watch(bottomNavIndexProvider) == 1
-          ? FloatingActionButton(
+      floatingActionButton: (() {
+        switch (ref.watch(bottomNavIndexProvider)) {
+          case 1:
+            return FloatingActionButton(
               heroTag: "create_post",
               onPressed: () {
                 Navigator.push(
@@ -314,8 +320,28 @@ class MainPage extends HookConsumerWidget {
                 color: ThemeColor.white,
                 size: 30,
               ),
-            )
-          : null,
+            );
+          case 2:
+            return FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CreateChatsScreen(),
+                  ),
+                );
+              },
+              backgroundColor: ThemeColor.highlight,
+              child: const Icon(
+                Icons.comment_outlined,
+                color: ThemeColor.white,
+                size: 28,
+              ),
+            );
+          default:
+            null;
+        }
+      }()),
     );
   }
 }
@@ -339,24 +365,7 @@ class BottomBar extends ConsumerWidget {
       unselectedLabelStyle: textStyle.w600(fontSize: 11),
       onTap: (value) {
         ref.watch(bottomNavIndexProvider.notifier).changeIndex(context, value);
-        switch (value) {
-          case 0:
-            ref
-                .read(sessionStateProvider.notifier)
-                .trackScreenView(ScreenName.homePage.value);
-          case 1:
-            ref
-                .read(sessionStateProvider.notifier)
-                .trackScreenView(ScreenName.timelinePage.value);
-          case 2:
-            ref
-                .read(sessionStateProvider.notifier)
-                .trackScreenView(ScreenName.chatPage.value);
-          case 3:
-            ref
-                .read(sessionStateProvider.notifier)
-                .trackScreenView(ScreenName.profilePage.value);
-        }
+        _handleTabSelection(ref, value);
       },
       currentIndex: ref.watch(bottomNavIndexProvider),
       items: [
@@ -370,6 +379,37 @@ class BottomBar extends ConsumerWidget {
             context, ref, "プロフィール", 3, "assets/images/icons/profile.svg"),
       ],
     );
+  }
+
+  void _handleTabSelection(WidgetRef ref, int value) {
+    try {
+      // セッション追跡の更新
+      switch (value) {
+        case 0:
+          ref
+              .read(sessionStateProvider.notifier)
+              .trackScreenView(ScreenName.homePage.value);
+          break;
+        case 1:
+          ref
+              .read(sessionStateProvider.notifier)
+              .trackScreenView(ScreenName.timelinePage.value);
+          break;
+        case 2:
+          ref
+              .read(sessionStateProvider.notifier)
+              .trackScreenView(ScreenName.chatPage.value);
+          break;
+        case 3:
+          ref
+              .read(sessionStateProvider.notifier)
+              .trackScreenView(ScreenName.profilePage.value);
+          break;
+      }
+    } catch (e) {
+      // エラーが発生した場合はログに記録
+      DebugPrint("タブ選択処理でエラーが発生しました: $e");
+    }
   }
 
   BottomNavigationBarItem _bottomNavItem(

@@ -2,10 +2,10 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/components/user_widget.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/user_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -116,12 +116,12 @@ class _CreateChatsScreenState extends ConsumerState<CreateChatsScreen> {
                     return ListView.builder(
                       itemCount: followingIds.length,
                       itemBuilder: (context, index) {
-                        final user = ref
-                            .read(allUsersNotifierProvider)
-                            .asData!
-                            .value[followingIds[index]]!;
-
-                        return CreateChatTile(user: user);
+                        return UserWidget(
+                          userId: followingIds[index],
+                          builder: (user) {
+                            return CreateChatTile(user: user);
+                          },
+                        );
                       },
                     );
                   }

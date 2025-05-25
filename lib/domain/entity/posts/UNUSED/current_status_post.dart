@@ -1,4 +1,4 @@
-import 'package:app/domain/entity/posts/timeline_post.dart';
+/*import 'package:app/domain/entity/posts/UNUSED/timeline_post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -75,3 +75,4 @@ class CurrentStatusPost extends PostBase {
     return seenUserIds.contains(FirebaseAuth.instance.currentUser!.uid);
   }
 }
+ */

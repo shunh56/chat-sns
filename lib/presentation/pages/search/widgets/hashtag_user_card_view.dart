@@ -29,7 +29,7 @@ class HashtagUserCardView extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -55,7 +55,7 @@ class HashtagUserCardView extends ConsumerWidget {
         const Gap(12),
         // GridViewでタグカードを表示
         GridView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           shrinkWrap: true, // Columnの中で使うためにshrinkWrapをtrue
           physics: const NeverScrollableScrollPhysics(), // 親スクロールに任せる
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

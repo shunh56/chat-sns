@@ -9,7 +9,6 @@ import 'package:app/presentation/components/user_widget.dart';
 import 'package:app/presentation/providers/chats/dm_flag_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_screen.dart';
-import 'package:app/presentation/pages/chat/sub_pages/create_chat_screen.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/chats/dm_overview_list.dart';
@@ -117,35 +116,11 @@ class ChatScreen extends ConsumerWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  Stack(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                          top: themeSize.verticalPaddingSmall,
-                        ),
-                        child: const ChatList(),
-                      ),
-                      Positioned(
-                        right: 12,
-                        bottom: 12,
-                        child: FloatingActionButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const CreateChatsScreen(),
-                              ),
-                            );
-                          },
-                          backgroundColor: ThemeColor.highlight,
-                          child: const Icon(
-                            Icons.edit_outlined,
-                            color: ThemeColor.white,
-                            size: 28,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: themeSize.verticalPaddingSmall,
+                    ),
+                    child: const ChatList(),
                   ),
                   const FollowingList(),
                 ],

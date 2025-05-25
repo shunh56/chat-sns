@@ -15,10 +15,10 @@ abstract class Failure {
 
 class PopupFailure extends Failure {
   const PopupFailure({
-    required String message,
-    required String code,
-    StackTrace? stackTrace,
-  }) : super(message: message, code: code, stackTrace: stackTrace);
+    required super.message,
+    required super.code,
+    super.stackTrace,
+  });
 
   factory PopupFailure.unknown(
       {required String message, StackTrace? stackTrace}) {

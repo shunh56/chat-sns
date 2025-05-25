@@ -1,5 +1,5 @@
-import 'package:app/domain/entity/posts/post.dart';
-import 'package:app/data/repository/posts/algolia_post_repository.dart';
+/*import 'package:app/domain/entity/posts/post.dart';
+import 'package:app/data/repository/posts/UNUSED/algolia_post_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final algoliaPostUsecaseProvider = Provider(
@@ -16,3 +16,4 @@ class AlgoliaPostUsecase {
     return _repository.getUserIdsPosts(friendIds,page:page);
   }
 }
+ */

@@ -47,6 +47,19 @@ class AllPostsNotifier extends _$AllPostsNotifier {
     state = AsyncValue.data(cache);
   }
 
+  Future<List<Post>> getPostsFromUserId(String userId) async {
+    final posts = await ref.read(postUsecaseProvider).getPostFromUserId(userId);
+    addPosts(posts);
+    return posts;
+  }
+
+  Future<List<Post>> getImagePostsFromUserId(String userId) async {
+    final posts =
+        await ref.read(postUsecaseProvider).getImagePostFromUserId(userId);
+    addPosts(posts);
+    return posts;
+  }
+
   incrementLikeCount(UserAccount user, Post post) {
     Map<String, Post> cache = state.asData != null ? state.asData!.value : {};
     cache[post.id]!.likeCount += 1;
@@ -96,5 +109,60 @@ class AllPostsNotifier extends _$AllPostsNotifier {
     cache[post.id] = post;
     state = AsyncValue.data(cache);
     ref.read(postUsecaseProvider).deletePostByAdmin(post);
+  }
+
+  Future<void> addReaction(
+      String postId, String userId, String reactionType) async {
+    try {
+      await ref
+          .read(postUsecaseProvider)
+          .addReaction(postId, userId, reactionType);
+
+      // ローカル状態も更新
+      final cache = state.asData?.value ?? {};
+      if (cache.containsKey(postId)) {
+        final updatedPost = cache[postId]!.addReaction(userId, reactionType);
+        cache[postId] = updatedPost;
+        state = AsyncValue.data(cache);
+      }
+    } catch (e) {
+      // エラーハンドリング
+      print('Failed to add reaction: $e');
+    }
+  }
+
+  Future<void> removeReaction(
+      String postId, String userId, String reactionType) async {
+    try {
+      await ref
+          .read(postUsecaseProvider)
+          .removeReaction(postId, userId, reactionType);
+
+      // ローカル状態も更新
+      final cache = state.asData?.value ?? {};
+      if (cache.containsKey(postId)) {
+        final updatedPost = cache[postId]!.removeReaction(userId, reactionType);
+        cache[postId] = updatedPost;
+        state = AsyncValue.data(cache);
+      }
+    } catch (e) {
+      // エラーハンドリング
+      print('Failed to remove reaction: $e');
+    }
+  }
+
+  Future<void> toggleReaction(
+      String postId, String userId, String reactionType) async {
+    try {
+      await ref
+          .read(postUsecaseProvider)
+          .toggleReaction(postId, userId, reactionType);
+
+      // 投稿データを再取得して状態を更新
+      // または楽観的更新を実装
+    } catch (e) {
+      // エラーハンドリング
+      print('Failed to toggle reaction: $e');
+    }
   }
 }

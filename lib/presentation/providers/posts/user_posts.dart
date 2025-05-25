@@ -1,6 +1,5 @@
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/posts/post_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,9 +21,38 @@ class UserPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
   final PostUsecase usecase;
 
   Future<void> initialize() async {
-    final posts = await usecase.getPostFromUserId(userId);
-    await ref.read(allUsersNotifierProvider.notifier).getUserAccounts([userId]);
-    ref.read(allPostsNotifierProvider.notifier).addPosts(posts);
+    final posts = await ref
+        .read(allPostsNotifierProvider.notifier)
+        .getPostsFromUserId(userId);
+    state = AsyncValue.data(posts);
+  }
+
+  refresh() async {
+    initialize();
+  }
+}
+
+final userImagePostsNotiferProvider = StateNotifierProvider.family<
+    UserImagePostsNotifier, AsyncValue<List<Post>>, String>((ref, userId) {
+  return UserImagePostsNotifier(
+    ref,
+    userId,
+    ref.watch(postUsecaseProvider),
+  )..initialize();
+});
+
+class UserImagePostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
+  UserImagePostsNotifier(this.ref, this.userId, this.usecase)
+      : super(const AsyncValue.loading());
+
+  final Ref ref;
+  final String userId;
+  final PostUsecase usecase;
+
+  Future<void> initialize() async {
+    final posts = await ref
+        .read(allPostsNotifierProvider.notifier)
+        .getImagePostsFromUserId(userId);
     state = AsyncValue.data(posts);
   }
 

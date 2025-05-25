@@ -1,6 +1,5 @@
 import 'package:app/core/utils/flavor.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/main.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/settings/account_settings/account_screen.dart';

@@ -1,4 +1,5 @@
 import 'package:app/domain/entity/posts/post.dart';
+import 'package:app/domain/entity/posts/post_reaction.dart';
 import 'package:app/domain/entity/reply.dart';
 import 'package:app/domain/usecases/image_uploader_usecase.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
@@ -83,5 +84,67 @@ class PostUsecase {
 
   deletePostByAdmin(Post post) {
     return _repository.deletePostByAdmin(post.id);
+  }
+
+  // リアクション追加
+  Future<void> addReaction(
+      String postId, String userId, String reactionType) async {
+    try {
+      await _repository.addReaction(postId, userId, reactionType);
+    } catch (e) {
+      throw Exception('Failed to add reaction: $e');
+    }
+  }
+
+  // リアクション削除
+  Future<void> removeReaction(
+      String postId, String userId, String reactionType) async {
+    try {
+      await _repository.removeReaction(postId, userId, reactionType);
+    } catch (e) {
+      throw Exception('Failed to remove reaction: $e');
+    }
+  }
+
+  // ユーザーの全リアクション削除（リアクション変更時）
+  Future<void> removeUserAllReactions(String postId, String userId) async {
+    try {
+      for (final reactionType in ReactionType.allTypes) {
+        await _repository.removeReaction(postId, userId, reactionType);
+      }
+    } catch (e) {
+      throw Exception('Failed to remove all reactions: $e');
+    }
+  }
+
+  // リアクション切り替え（既存があれば削除、なければ追加）
+  Future<void> toggleReaction(
+      String postId, String userId, String reactionType) async {
+    try {
+      final post = await _repository.getPost(postId);
+
+      if (post.hasUserReacted(userId, reactionType)) {
+        await removeReaction(postId, userId, reactionType);
+      } else {
+        // 他のリアクションを削除してから新しいリアクションを追加
+        await removeUserAllReactions(postId, userId);
+        await addReaction(postId, userId, reactionType);
+      }
+    } catch (e) {
+      throw Exception('Failed to toggle reaction: $e');
+    }
+  }
+
+  // 投稿のリアクション統計取得
+  Future<Map<String, int>> getReactionStats(String postId) async {
+    try {
+      final post = await _repository.getPost(postId);
+
+      return post.reactions.map(
+        (key, value) => MapEntry(key, value.count),
+      );
+    } catch (e) {
+      throw Exception('Failed to get reaction stats: $e');
+    }
   }
 }

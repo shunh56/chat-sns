@@ -8,7 +8,6 @@ import 'package:app/domain/usecases/image_uploader_usecase.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/invite_code_usecase.dart';
-import 'package:app/domain/usecases/posts/current_status_post_usecase.dart';
 import 'package:app/domain/usecases/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -74,13 +73,6 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     String? job,
   }) async {
     final user = state.asData!.value;
-    // もし前回と現在のステータスが異なる場合、ポストを作成
-    if (currentStatus != null && user.currentStatus != currentStatus) {
-      ref.read(currentStatusPostUsecaseProvider).addPost(
-            user.currentStatus.toJson(),
-            currentStatus.toJson(),
-          );
-    }
 
     // 新しいユーザー状態を作成
     final updatedUser = user.copyWith(
@@ -202,10 +194,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
       }
     }
     final String userId = ref.watch(authProvider).currentUser!.uid;
-    //Isolate
-    //get compressedImage
-    //compressedImage = ...
-    //userAccount =
+
     String? imageUrl = iconImage != null
         ? await ref.read(imageUploadUsecaseProvider).uploadIconImage(iconImage)
         : null;
@@ -217,7 +206,6 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     );
     state = AsyncValue.data(updatedUser);
     update(updatedUser);
-    updateCurrentStatus(updatedUser.currentStatus.copyWith(doing: doing));
     final otherIds = ref.read(selectedOtherIdsProvider);
     if (otherIds.isNotEmpty) {
       for (String userId in otherIds) {
@@ -296,20 +284,6 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
 
     state = AsyncValue.data(updatedUser);
     update(updatedUser);
-  }
-
-  updateCurrentStatus(CurrentStatus currentStatus) async {
-    final user = state.asData!.value;
-    final before = user.currentStatus;
-    if (before != currentStatus) {
-      final updatedUser = user.copyWith(currentStatus: currentStatus);
-
-      state = AsyncValue.data(updatedUser);
-      ref
-          .read(currentStatusPostUsecaseProvider)
-          .addPost(before.toJson(), currentStatus.toJson());
-      update(updatedUser);
-    }
   }
 
   updatePrivacy(Privacy privacy) {

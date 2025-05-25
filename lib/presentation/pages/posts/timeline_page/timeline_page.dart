@@ -2,9 +2,6 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
 import 'package:app/presentation/components/core/sticky_tabbar.dart';
-import 'package:app/presentation/pages/activities/activities_screen.dart';
-import 'package:app/presentation/UNUSED/community_screen/model/community.dart';
-import 'package:app/presentation/UNUSED/community_screen/screens/tabs.dart';
 import 'package:app/presentation/UNUSED/user_listview_testing_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/threads/following_posts.dart';
 import 'package:app/presentation/pages/posts/timeline_page/threads/public_posts.dart';
@@ -12,7 +9,6 @@ import 'package:app/presentation/pages/main_page/main_page.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 
 class TimelinePage extends ConsumerWidget {

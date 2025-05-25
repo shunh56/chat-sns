@@ -1,5 +1,5 @@
-import 'package:app/core/utils/debug_print.dart';
-import 'package:app/domain/entity/posts/current_status_post.dart';
+/*import 'package:app/core/utils/debug_print.dart';
+import 'package:app/domain/entity/posts/UNUSED/current_status_post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/domain/usecases/posts/current_status_post_usecase.dart';
@@ -101,3 +101,4 @@ class AllCurrentStatusPostsNotifier extends _$AllCurrentStatusPostsNotifier {
     return ref.read(currentStatusPostUsecaseProvider).addReply(post.id, text);
   } */
 }
+ */

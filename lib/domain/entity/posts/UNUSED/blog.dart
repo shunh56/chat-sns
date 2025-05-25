@@ -1,4 +1,4 @@
-import 'package:app/domain/entity/posts/timeline_post.dart';
+/*import 'package:app/domain/entity/posts/UNUSED/timeline_post.dart';
 
 class Blog extends PostBase {
   final String title;
@@ -36,3 +36,4 @@ class Blog extends PostBase {
     );
   }
 }
+ */

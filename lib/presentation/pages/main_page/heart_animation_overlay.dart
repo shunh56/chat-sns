@@ -1,4 +1,3 @@
-import 'package:app/presentation/pages/posts/timeline_page/timeline_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -1,5 +1,5 @@
-import 'package:app/domain/entity/posts/current_status_post.dart';
-import 'package:app/data/repository/posts/current_status_post_repository.dart';
+/*import 'package:app/domain/entity/posts/UNUSED/current_status_post.dart';
+import 'package:app/data/repository/posts/UNUSED/current_status_post_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final currentStatusPostUsecaseProvider = Provider(
@@ -46,3 +46,4 @@ class CurrentStatusPostUsecase {
     return _repository.addReply(id, text);
   }
 }
+ */

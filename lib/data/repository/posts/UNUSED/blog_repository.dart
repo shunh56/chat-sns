@@ -1,5 +1,5 @@
-import 'package:app/data/datasource/post/blog_datasource.dart';
-import 'package:app/domain/entity/posts/blog.dart';
+/*import 'package:app/data/datasource/post/blog_datasource.dart';
+import 'package:app/domain/entity/posts/UNUSED/blog.dart';
 import 'package:app/presentation/providers/state/create_post/blog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,3 +34,4 @@ class BlogRepository {
     return _datasource.uploadPost(title, contents);
   }
 }
+ */

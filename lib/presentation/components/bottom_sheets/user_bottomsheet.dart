@@ -7,7 +7,7 @@ import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/providers/auth_notifier.dart';
 import 'package:app/presentation/providers/chats/dm_overview_list.dart';
 import 'package:app/presentation/providers/users/blocks_list.dart';
-import 'package:app/domain/usecases/friends_usecase.dart';
+import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -457,6 +457,9 @@ class UserBottomModelSheet {
                       child: InkWell(
                         onTap: () async {
                           Navigator.popUntil(context, (route) => route.isFirst);
+                          ref
+                              .read(myAccountNotifierProvider.notifier)
+                              .onClosed();
                           ref.read(authNotifierProvider).signout();
                         },
                         borderRadius: BorderRadius.circular(12),

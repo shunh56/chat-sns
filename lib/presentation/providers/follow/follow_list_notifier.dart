@@ -9,6 +9,13 @@ import 'package:app/domain/usecases/push_notification_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+final isFollowingProvider = Provider.family<bool, String>((ref, userId) {
+  return ref.watch(followingListNotifierProvider).maybeWhen(
+        data: (list) => list.any((user) => user.userId == userId),
+        orElse: () => false,
+      );
+});
+
 /// フォロー中ユーザーのリストを管理するNotifierProvider
 final followingListNotifierProvider = StateNotifierProvider.autoDispose<
     FollowingListNotifier, AsyncValue<List<UserAccount>>>(
@@ -42,9 +49,11 @@ class FollowingListNotifier
   final GetFollowingUseCase getFollowingUseCase;
   final PushNotificationUsecase pushNotificationUsecase;
 
-  /// フォロー中ユーザーのリストを初期化
   Future<void> initialize() async {
     try {
+      // disposeされていなければ状態を更新しない
+      if (!mounted) return;
+
       state = const AsyncValue.loading();
 
       final currentUser = _auth.currentUser;
@@ -59,10 +68,17 @@ class FollowingListNotifier
       // IDリストからユーザー情報を取得
       final users = await _getUsersFromIds(followingIds);
 
-      state = AsyncValue.data(users);
-      DebugPrint("followings : $users");
+      // disposeされていなければ状態を更新する
+      if (mounted) {
+        state = AsyncValue.data(users);
+        DebugPrint("Following list initialized with ${users.length} users");
+      }
     } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      // disposeされていなければエラー状態を設定する
+      if (mounted) {
+        state = AsyncValue.error(e, stack);
+        DebugPrint("Error initializing following list: $e");
+      }
     }
   }
 
@@ -146,6 +162,7 @@ class FollowingListNotifier
   // Notifierが破棄されるときのクリーンアップ
   @override
   void dispose() {
+    DebugPrint("FOLLOWING LIST DISPOSED");
     // 必要に応じてクリーンアップロジックを追加
     super.dispose();
   }

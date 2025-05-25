@@ -1,5 +1,5 @@
-import 'package:app/data/datasource/post/current_status_post_datasource.dart';
-import 'package:app/domain/entity/posts/current_status_post.dart';
+/*import 'package:app/data/datasource/post/current_status_post_datasource.dart';
+import 'package:app/domain/entity/posts/UNUSED/current_status_post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,3 +71,4 @@ class CurrentStatusPostRepository {
     return _datasource.incrementLikeCountToReply(postId, replyId, count);
   }
 }
+ */

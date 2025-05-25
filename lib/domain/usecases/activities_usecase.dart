@@ -1,9 +1,7 @@
 import 'package:app/data/repository/activities_repository.dart';
 import 'package:app/domain/entity/activities.dart';
-import 'package:app/domain/entity/posts/current_status_post.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/data/repository/posts/current_status_post_repository.dart';
 import 'package:app/data/repository/posts/post_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,18 +9,16 @@ final activitiesUsecaseProvider = Provider(
   (ref) => ActivitiesUsecase(
     ref.watch(activitiesRepositoryProvider),
     ref.watch(postRepositoryProvider),
-    ref.watch(currentStatusPostRepositoryProvider),
   ),
 );
 
 class ActivitiesUsecase {
   final ActivitiesRepository _repository;
   final PostRepository _postRepository;
-  final CurrentStatusPostRepository _currentStatusPostRepository;
+
   ActivitiesUsecase(
     this._repository,
     this._postRepository,
-    this._currentStatusPostRepository,
   );
 
   Stream<List<Activity>> streamActivity() {
@@ -54,9 +50,5 @@ class ActivitiesUsecase {
 
   addCommentToPost(UserAccount user, Post post) async {
     return _repository.addCommentToPost(user.userId, post.id);
-  }
-
-  addLikeToCurrentStatusPost(UserAccount user, CurrentStatusPost post) async {
-    return _repository.addLikeToCurrentStatusPost(user.userId, post.id);
   }
 }

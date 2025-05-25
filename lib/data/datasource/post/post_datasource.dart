@@ -202,4 +202,79 @@ class PostDatasource {
       },
     );
   }
+
+  Future<void> addReaction(
+      String postId, String userId, String reactionType) async {
+   
+    final docRef = _firestore.collection(collectionName).doc(postId);
+
+    await _firestore.runTransaction((transaction) async {
+      final doc = await transaction.get(docRef);
+      if (!doc.exists) throw Exception('Post does not exist');
+
+      final data = doc.data()!;
+      final reactions = Map<String, dynamic>.from(data['reactions'] ?? {});
+
+      if (reactions.containsKey(reactionType)) {
+        final reactionData = Map<String, dynamic>.from(reactions[reactionType]);
+        final userIds = List<String>.from(reactionData['userIds'] ?? []);
+
+        if (!userIds.contains(userId)) {
+          userIds.add(userId);
+          reactionData['userIds'] = userIds;
+          reactionData['count'] = userIds.length;
+          reactionData['lastUpdated'] = FieldValue.serverTimestamp();
+          reactions[reactionType] = reactionData;
+        }
+      } else {
+        reactions[reactionType] = {
+          'type': reactionType,
+          'count': 1,
+          'userIds': [userId],
+          'lastUpdated': FieldValue.serverTimestamp(),
+        };
+      }
+
+      transaction.update(docRef, {
+        'reactions': reactions,
+        'likeCount': FieldValue.increment(1),
+      });
+    });
+  }
+
+  Future<void> removeReaction(
+      String postId, String userId, String reactionType) async {
+    final docRef = _firestore.collection('posts').doc(postId);
+
+    await _firestore.runTransaction((transaction) async {
+      final doc = await transaction.get(docRef);
+      if (!doc.exists) throw Exception('Post does not exist');
+
+      final data = doc.data()!;
+      final reactions = Map<String, dynamic>.from(data['reactions'] ?? {});
+
+      if (reactions.containsKey(reactionType)) {
+        final reactionData = Map<String, dynamic>.from(reactions[reactionType]);
+        final userIds = List<String>.from(reactionData['userIds'] ?? []);
+
+        if (userIds.contains(userId)) {
+          userIds.remove(userId);
+
+          if (userIds.isEmpty) {
+            reactions.remove(reactionType);
+          } else {
+            reactionData['userIds'] = userIds;
+            reactionData['count'] = userIds.length;
+            reactionData['lastUpdated'] = FieldValue.serverTimestamp();
+            reactions[reactionType] = reactionData;
+          }
+
+          transaction.update(docRef, {
+            'reactions': reactions,
+            'likeCount': FieldValue.increment(-1),
+          });
+        }
+      }
+    });
+  }
 }
