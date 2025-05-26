@@ -203,9 +203,8 @@ class PostDatasource {
     );
   }
 
-  Future<void> addReaction(
-      String postId, String userId, String reactionType) async {
-   
+  Future<void> addReaction(String postId, String reactionType) async {
+    final userId = _auth.currentUser!.uid;
     final docRef = _firestore.collection(collectionName).doc(postId);
 
     await _firestore.runTransaction((transaction) async {

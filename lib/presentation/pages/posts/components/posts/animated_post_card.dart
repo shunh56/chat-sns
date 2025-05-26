@@ -1,4 +1,5 @@
 // lib/presentation/components/posts/animated_post_card.dart
+import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 
@@ -113,7 +114,8 @@ class AnimatedPostCard extends HookConsumerWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    color: ThemeColor.background,
+                    /*gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
@@ -121,7 +123,7 @@ class AnimatedPostCard extends HookConsumerWidget {
                         Colors.transparent,
                         _getVibeColor(user).withOpacity(0.05),
                       ],
-                    ),
+                    ), */
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: _getVibeColor(user).withOpacity(0.3),
@@ -129,7 +131,7 @@ class AnimatedPostCard extends HookConsumerWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: _getVibeColor(user).withOpacity(0.2),
+                        color: _getVibeColor(user).withOpacity(0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -141,8 +143,7 @@ class AnimatedPostCard extends HookConsumerWidget {
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.black.withOpacity(0.1),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,9 +182,9 @@ class AnimatedPostCard extends HookConsumerWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: _getVibeColor(user).withOpacity(0.4),
+                  color: _getVibeColor(user).withOpacity(0.2),
                   blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  offset: const Offset(2, 2),
                 ),
               ],
             ),
@@ -271,6 +272,7 @@ class AnimatedPostCard extends HookConsumerWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: EnhancedReactionButton(
+        user: user,
         post: post,
         onReaction: (reaction) {},
       ),

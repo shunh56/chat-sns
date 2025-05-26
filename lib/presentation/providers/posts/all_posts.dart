@@ -67,7 +67,6 @@ class AllPostsNotifier extends _$AllPostsNotifier {
     ref.read(postUsecaseProvider).incrementLikeCount(post.id, 1);
     if (user.userId != ref.read(authProvider).currentUser!.uid) {
       ref.read(activitiesUsecaseProvider).addLikeToPost(user, post);
-      ref.read(pushNotificationUsecaseProvider).sendPostLike(user);
     }
   }
 
@@ -112,12 +111,11 @@ class AllPostsNotifier extends _$AllPostsNotifier {
   }
 
   Future<void> addReaction(
-      String postId, String userId, String reactionType) async {
+      UserAccount user, String postId, String reactionType) async {
+    final String userId = user.userId;
     try {
-      await ref
-          .read(postUsecaseProvider)
-          .addReaction(postId, userId, reactionType);
-
+      ref.read(pushNotificationUsecaseProvider).sendPostReaction(user);
+      await ref.read(postUsecaseProvider).addReaction(postId, reactionType);
       // ローカル状態も更新
       final cache = state.asData?.value ?? {};
       if (cache.containsKey(postId)) {

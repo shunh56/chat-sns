@@ -114,8 +114,8 @@ class PostRepository {
     return _datasource.deletePostByAdmin(postId);
   }
 
-  addReaction(String postId, String userId, String reactionType) {
-    return _datasource.addReaction(postId, userId, reactionType);
+  addReaction(String postId, String reactionType) {
+    return _datasource.addReaction(postId, reactionType);
   }
 
   removeReaction(String postId, String userId, String reactionType) {

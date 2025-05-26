@@ -677,7 +677,9 @@ class CreatePostScreen extends ConsumerWidget {
     if (compressedImageFile != null) {
       ref.read(imageListNotifierProvider.notifier).addItem(compressedImageFile);
     }
-    primaryFocus?.previousFocus();
+    if (primaryFocus != null) {
+      primaryFocus?.previousFocus();
+    }
   }
 
   // Helper method for camera selection

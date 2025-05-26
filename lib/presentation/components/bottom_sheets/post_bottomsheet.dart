@@ -8,7 +8,7 @@ import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/report/report_user_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/create_post_screen.dart';
-import 'package:app/presentation/pages/posts/timeline_page/voice_chat_screen.dart';
+import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/widget/reply_widget.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';

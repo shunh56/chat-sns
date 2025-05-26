@@ -91,7 +91,7 @@ class PushNotificationUsecase {
   }
 
   // いいね通知
-  Future<void> sendPostLike(UserAccount user) async {
+  Future<void> sendPostReaction(UserAccount user) async {
     final sender = _generateSender();
     await _sendPushNotification(
       type: PushNotificationType.like,
@@ -99,7 +99,7 @@ class PushNotificationUsecase {
       receiver: _generateReceiver(user),
       content: PushNotificationContent(
         title: sender.name,
-        body: "あなたの投稿にいいねしました。",
+        body: "あなたの投稿に反応しました。",
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/blog/blog_contents_input.dart';
+import 'package:app/presentation/pages/posts/timeline_page/_not_used/blog/blog_contents_input.dart';
 import 'package:app/presentation/providers/state/create_post/blog.dart';
 import 'package:app/presentation/providers/state/create_post/core.dart';
 import 'package:flutter/material.dart';

@@ -3,6 +3,7 @@ import 'package:app/core/utils/debug_print.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/posts/post_reaction.dart';
+import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/pages/posts/components/reactions/reaction_picker.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:flutter/material.dart';
@@ -12,11 +13,13 @@ import 'dart:math' as math;
 
 class EnhancedReactionButton extends HookConsumerWidget {
   final Post post;
+  final UserAccount user;
   final Function(String) onReaction;
 
   const EnhancedReactionButton({
     super.key,
     required this.post,
+    required this.user,
     required this.onReaction,
   });
 
@@ -54,7 +57,7 @@ class EnhancedReactionButton extends HookConsumerWidget {
 
       ref
           .read(allPostsNotifierProvider.notifier)
-          .addReaction(post.id, currentUserId, reactionType);
+          .addReaction(user, post.id, reactionType);
     }
 
     void showReactionPickerDialog() {

@@ -21,7 +21,7 @@ import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/search/search_users_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline_page/timeline_page.dart';
-import 'package:app/presentation/pages/posts/timeline_page/voice_chat_screen.dart';
+import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
 import 'package:app/presentation/services/dm_banner.dart';

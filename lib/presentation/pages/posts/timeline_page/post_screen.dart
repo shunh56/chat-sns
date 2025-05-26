@@ -6,6 +6,7 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
+import 'package:app/presentation/components/icons.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/main_page/heart_animation_overlay.dart';
 import 'package:app/presentation/pages/posts/components/reactions/enhanced_reaction_button.dart';
@@ -77,37 +78,33 @@ class PostScreen extends HookConsumerWidget {
       return null;
     }, []);
 
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: const Color(0xFF0A0A0A), // ダークテーマ背景
-          appBar: _buildModernAppBar(context, post, textStyle),
-          body: FadeTransition(
-            opacity: fadeAnimation,
-            child: SlideTransition(
-              position: slideAnimation,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        _buildEnhancedPostSection(context, ref, post),
-                        _buildDivider(),
-                        _buildEnhancedReactionSection(context, ref, post),
-                        _buildDivider(),
-                        _buildPostRepliesList(context, ref, post),
-                      ],
-                    ),
-                  ),
-                  _buildModernInputSection(
-                      context, ref, post, controller, textStyle),
-                ],
+    return Scaffold(
+      backgroundColor: const Color(0xFF0A0A0A), // ダークテーマ背景
+      appBar: _buildModernAppBar(context, post, textStyle),
+      body: FadeTransition(
+        opacity: fadeAnimation,
+        child: SlideTransition(
+          position: slideAnimation,
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    _buildEnhancedPostSection(context, ref, post),
+                    _buildDivider(),
+                    _buildEnhancedReactionSection(context, ref, post),
+                    _buildDivider(),
+                    _buildPostRepliesList(context, ref, post),
+                  ],
+                ),
               ),
-            ),
+              _buildModernInputSection(
+                  context, ref, post, controller, textStyle),
+            ],
           ),
         ),
-        const HeartAnimationArea(),
-      ],
+      ),
     );
   }
 
@@ -124,10 +121,6 @@ class PostScreen extends HookConsumerWidget {
         },
         child: Container(
           margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
           child: const Icon(
             Icons.arrow_back_ios_new,
             color: Colors.white,
@@ -148,16 +141,12 @@ class PostScreen extends HookConsumerWidget {
       actions: [
         Container(
           margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
           child: IconButton(
             onPressed: () {
               // シェア機能
             },
-            icon: const Icon(
-              Icons.share_outlined,
+            icon: Icon(
+              shareIcon,
               color: Colors.white,
               size: 20,
             ),
@@ -174,10 +163,14 @@ class PostScreen extends HookConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 8,
+      ),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        color: ThemeColor.background,
+        /*gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -185,7 +178,7 @@ class PostScreen extends HookConsumerWidget {
             Colors.transparent,
             _getVibeColor(user).withOpacity(0.05),
           ],
-        ),
+        ), */
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: _getVibeColor(user).withOpacity(0.3),
@@ -235,9 +228,9 @@ class PostScreen extends HookConsumerWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: _getVibeColor(user).withOpacity(0.4),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                color: _getVibeColor(user).withOpacity(0.2),
+                blurRadius: 8,
+                offset: const Offset(2, 2),
               ),
             ],
           ),
@@ -249,43 +242,42 @@ class PostScreen extends HookConsumerWidget {
           ),
         ),
         const Gap(16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                user.name,
-                style: textStyle.w700(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              user.name,
+              style: textStyle.w700(
+                fontSize: 16,
+                color: Colors.white,
               ),
-              const Gap(4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.access_time_rounded,
-                    size: 14,
+            ),
+            const Gap(4),
+            Row(
+              children: [
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 14,
+                  color: Colors.white.withOpacity(0.7),
+                ),
+                const Gap(4),
+                Text(
+                  post.createdAt.xxAgo,
+                  style: textStyle.w400(
+                    fontSize: 12,
                     color: Colors.white.withOpacity(0.7),
                   ),
-                  const Gap(4),
-                  Text(
-                    post.createdAt.xxAgo,
-                    style: textStyle.w400(
-                      fontSize: 12,
-                      color: Colors.white.withOpacity(0.7),
-                    ),
-                  ),
-                  const Gap(12),
-                  VibeIndicator(
-                    mood: _getVibeText(user, post),
-                    color: _getVibeColor(user),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
+        const Spacer(),
+        if (false)
+          VibeIndicator(
+            mood: _getVibeText(user, post),
+            color: _getVibeColor(user),
+          ),
       ],
     );
   }
@@ -355,6 +347,7 @@ class PostScreen extends HookConsumerWidget {
           ),
           const Gap(12),
           EnhancedReactionButton(
+            user: user,
             post: post,
             onReaction: (reaction) {
               // リアクション処理
@@ -563,10 +556,7 @@ class PostScreen extends HookConsumerWidget {
             padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
               final reply = list[index];
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: ReplyWidget(reply: reply),
-              );
+              return ReplyWidget(reply: reply);
             },
           );
         },

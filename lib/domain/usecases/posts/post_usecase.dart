@@ -87,10 +87,9 @@ class PostUsecase {
   }
 
   // リアクション追加
-  Future<void> addReaction(
-      String postId, String userId, String reactionType) async {
+  Future<void> addReaction(String postId, String reactionType) async {
     try {
-      await _repository.addReaction(postId, userId, reactionType);
+      await _repository.addReaction(postId, reactionType);
     } catch (e) {
       throw Exception('Failed to add reaction: $e');
     }
@@ -128,7 +127,7 @@ class PostUsecase {
       } else {
         // 他のリアクションを削除してから新しいリアクションを追加
         await removeUserAllReactions(postId, userId);
-        await addReaction(postId, userId, reactionType);
+        await addReaction(postId, reactionType);
       }
     } catch (e) {
       throw Exception('Failed to toggle reaction: $e');
