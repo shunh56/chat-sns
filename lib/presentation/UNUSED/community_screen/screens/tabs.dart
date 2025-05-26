@@ -17,8 +17,8 @@ import 'package:app/presentation/UNUSED/community_screen/screens/community_membe
 import 'package:app/presentation/UNUSED/community_screen/screens/create_topics_screen.dart';
 import 'package:app/presentation/UNUSED/community_screen/screens/room_screen.dart';
 import 'package:app/presentation/UNUSED/community_screen/screens/topic_screen.dart';
-import 'package:app/presentation/pages/posts/timeline_page/create_post_screen/create_post_screen.dart';
-import 'package:app/presentation/pages/posts/timeline_page/widget/post_widget.dart';
+import 'package:app/presentation/pages/posts/create/create_post_screen/create_post_screen.dart';
+import 'package:app/presentation/pages/posts/widget/post_widget.dart';
 import 'package:app/presentation/providers/community.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/data/datasource/firebase/firebase_firestore.dart';

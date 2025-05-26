@@ -4,7 +4,7 @@ import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_screen.dart';
 import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_profile_page.dart';
-import 'package:app/presentation/pages/posts/timeline_page/post_screen.dart';
+import 'package:app/presentation/pages/posts/post/post_detail_page.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
