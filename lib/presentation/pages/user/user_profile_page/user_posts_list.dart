@@ -1,5 +1,7 @@
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/components/user_widget.dart';
+import 'package:app/presentation/pages/posts/post/widgets/post_card/post_card.dart';
 import 'package:app/presentation/pages/posts/widget/post_widget.dart';
 import 'package:app/presentation/providers/posts/user_posts.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
@@ -41,7 +43,7 @@ class _UserPostsListState extends ConsumerState<UserPostsList>
                 child: SizedBox(
                   height: imageHeight,
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     scrollDirection: Axis.horizontal,
                     itemCount: list.length,
                     itemBuilder: (context, index) {
@@ -98,7 +100,11 @@ class _UserPostsListState extends ConsumerState<UserPostsList>
                 final post = list[index];
                 return Column(
                   children: [
-                    PostWidget(postRef: post),
+                    UserWidget(
+                      userId: widget.userId,
+                      builder: (user) => PostCard(postRef: post, user: user),
+                    ),
+                    // PostWidget(postRef: post),
                     //CustomPostWidget(postRef: post),
                   ],
                 );

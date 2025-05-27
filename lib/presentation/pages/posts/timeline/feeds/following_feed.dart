@@ -1,5 +1,7 @@
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/user_widget.dart';
+import 'package:app/presentation/pages/posts/post/widgets/post_card/post_card.dart';
 import 'package:app/presentation/pages/posts/widget/post_widget.dart';
 import 'package:app/presentation/providers/posts/following_posts.dart';
 import 'package:flutter/material.dart';
@@ -25,29 +27,15 @@ class _FollowingPostsThreadState extends ConsumerState<FollowingPostsThread>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    //final themeSize = ref.watch(themeSizeProvider(context));
-    //final textStyle = ThemeTextStyle(themeSize: themeSize);
     final postList = ref.watch(followingPostsNotifierProvider);
-    //final asyncValue = ref.watch(myAccountNotifierProvider);
-
-    /* final card = asyncValue.when(
-      data: (me) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: _buildCurrentStatus(context, ref, me),
-        );
-      },
-      error: (e, s) => const SizedBox(),
-      loading: () => const SizedBox(),
-    ); */
     return postList.when(
       data: (list) {
         return RefreshIndicator(
           color: ThemeColor.text,
           backgroundColor: ThemeColor.stroke,
           onRefresh: () async {
-            // ref.read(voiceChatListNotifierProvider.notifier).refresh();
             ref.read(followingPostsNotifierProvider.notifier).refresh();
+            // ref.read(voiceChatListNotifierProvider.notifier).refresh();
             /*ref
                 .read(friendsCurrentStatusPostsNotiferProvider.notifier)
                 .refresh(); */
@@ -70,20 +58,19 @@ class _FollowingPostsThreadState extends ConsumerState<FollowingPostsThread>
 
                   return Column(
                     children: [
-                      PostWidget(postRef: post),
+                      UserWidget(
+                        userId: post.userId,
+                        builder: (user) => PostCard(
+                          postRef: post,
+                          user: user,
+                        ),
+                      ),
                       /* if (index != 0 && index % 10 == 0)
                           NativeAdWidget(
                             id: const Uuid().v4(),
                           ), */
                     ],
                   );
-
-                  /*if (post is CurrentStatusPost) {
-                    return CurrentStatusPostWidget(
-                      postRef: post,
-                    );
-                  } */
-                  return const SizedBox();
                 },
               ),
             ],

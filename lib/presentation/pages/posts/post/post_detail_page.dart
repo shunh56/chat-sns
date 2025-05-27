@@ -12,8 +12,9 @@ import 'package:app/presentation/pages/main_page/heart_animation_overlay.dart';
 import 'package:app/presentation/pages/posts/enhanced_reaction_button.dart';
 import 'package:app/presentation/pages/posts/post/components/vibe/vibe_indicator.dart';
 import 'package:app/presentation/pages/posts/post/components/media/interactive_media_viewer.dart';
+import 'package:app/presentation/pages/posts/post/widgets/post_card/post_card.dart';
+import 'package:app/presentation/pages/posts/post/widgets/replies/reply_item.dart';
 import 'package:app/presentation/pages/posts/widget/post_widget.dart';
-import 'package:app/presentation/pages/posts/widget/reply_widget.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/posts/replies.dart';
 import 'package:flutter/material.dart';
@@ -89,11 +90,13 @@ class PostScreen extends HookConsumerWidget {
             children: [
               Expanded(
                 child: ListView(
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.only(top: 12),
                   children: [
-                    _buildEnhancedPostSection(context, ref, post),
-                    _buildDivider(),
-                    _buildEnhancedReactionSection(context, ref, post),
+                    PostCard(
+                      style: PostCardStyle.detail,
+                      postRef: postRef,
+                      user: user,
+                    ),
                     _buildDivider(),
                     _buildPostRepliesList(context, ref, post),
                   ],
@@ -153,208 +156,6 @@ class PostScreen extends HookConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-
-  // 拡張された投稿セクション
-  Widget _buildEnhancedPostSection(
-      BuildContext context, WidgetRef ref, Post post) {
-    final themeSize = ref.watch(themeSizeProvider(context));
-    final textStyle = ThemeTextStyle(themeSize: themeSize);
-
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: ThemeColor.background,
-        /*gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            _getVibeColor(user).withOpacity(0.1),
-            Colors.transparent,
-            _getVibeColor(user).withOpacity(0.05),
-          ],
-        ), */
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: _getVibeColor(user).withOpacity(0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: _getVibeColor(user).withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildEnhancedHeader(post, textStyle),
-              const Gap(16),
-              _buildEnhancedContent(post, textStyle),
-              if (post.mediaUrls.isNotEmpty) ...[
-                const Gap(16),
-                _buildEnhancedMedia(context, post),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 拡張されたヘッダー
-  Widget _buildEnhancedHeader(Post post, ThemeTextStyle textStyle) {
-    return Row(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [
-                _getVibeColor(user),
-                _getVibeColor(user).withOpacity(0.7),
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: _getVibeColor(user).withOpacity(0.2),
-                blurRadius: 8,
-                offset: const Offset(2, 2),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(3),
-          child: UserIcon(
-            user: user,
-            width: 44,
-            isCircle: true,
-          ),
-        ),
-        const Gap(16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              user.name,
-              style: textStyle.w700(
-                fontSize: 16,
-                color: Colors.white,
-              ),
-            ),
-            const Gap(4),
-            Row(
-              children: [
-                Icon(
-                  Icons.access_time_rounded,
-                  size: 14,
-                  color: Colors.white.withOpacity(0.7),
-                ),
-                const Gap(4),
-                Text(
-                  post.createdAt.xxAgo,
-                  style: textStyle.w400(
-                    fontSize: 12,
-                    color: Colors.white.withOpacity(0.7),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        const Spacer(),
-        if (false)
-          VibeIndicator(
-            mood: _getVibeText(user, post),
-            color: _getVibeColor(user),
-          ),
-      ],
-    );
-  }
-
-  // 拡張されたコンテンツ
-  Widget _buildEnhancedContent(Post post, ThemeTextStyle textStyle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          post.title,
-          style: textStyle.w700(
-            fontSize: 20,
-            color: Colors.white,
-            height: 1.3,
-          ),
-        ),
-        if (post.text != null) ...[
-          const Gap(12),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.1),
-                width: 1,
-              ),
-            ),
-            child: BuildText(
-              text: post.text!,
-              isShort: false,
-              isDynamicSize: true, // 動的サイズを有効化
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  // 拡張されたメディア
-  Widget _buildEnhancedMedia(BuildContext context, Post post) {
-    return InteractiveMediaViewer(
-      mediaUrls: post.mediaUrls,
-      aspectRatios: post.aspectRatios,
-      onDoubleTap: (offset) {
-        // ダブルタップでリアクション
-      },
-    );
-  }
-
-  // 拡張されたリアクションセクション
-  Widget _buildEnhancedReactionSection(
-      BuildContext context, WidgetRef ref, Post post) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'リアクション',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.white70,
-            ),
-          ),
-          const Gap(12),
-          EnhancedReactionButton(
-            user: user,
-            post: post,
-            onReaction: (reaction) {
-              // リアクション処理
-            },
-          ),
-        ],
-      ),
     );
   }
 
@@ -556,7 +357,7 @@ class PostScreen extends HookConsumerWidget {
             padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
               final reply = list[index];
-              return ReplyWidget(reply: reply);
+              return ReplyItem(reply: reply);
             },
           );
         },
@@ -619,28 +420,5 @@ class PostScreen extends HookConsumerWidget {
       default:
         return const Color(0xFF6B46C1);
     }
-  }
-
-  String _getVibeText(UserAccount user, Post post) {
-    // 投稿内容から気分を推測するロジック（前回実装したもの）
-    final content = '${post.title} ${post.text ?? ''}'.toLowerCase();
-
-    final vibeKeywords = {
-      'Creative': ['art', 'design', 'create', '作品', '創作', 'アート'],
-      'Energetic': ['workout', 'energy', '筋トレ', '運動', '元気'],
-      'Happy': ['happy', 'joy', '嬉しい', '楽しい', '幸せ'],
-      'Chill': ['relax', 'calm', 'リラックス', 'のんびり'],
-    };
-
-    for (final entry in vibeKeywords.entries) {
-      if (entry.value.any((keyword) => content.contains(keyword))) {
-        return entry.key;
-      }
-    }
-
-    final hour = post.createdAt.toDate().hour;
-    if (hour >= 6 && hour < 10) return 'Energetic';
-    if (hour >= 18 && hour < 22) return 'Chill';
-    return 'Happy';
   }
 }

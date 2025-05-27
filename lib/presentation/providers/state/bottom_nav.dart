@@ -17,7 +17,7 @@ class BottomNavIndex extends StateNotifier<int> {
     BuildContext context,
     int index,
   ) {
-    if (state + index == 0) {
+    if (state == 1 && index == 1) {
       if (ref.read(timelineScrollController).hasClients) {
         ref.read(timelineScrollController).animateTo(
               0,

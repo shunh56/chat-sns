@@ -1,4 +1,6 @@
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/user_widget.dart';
+import 'package:app/presentation/pages/posts/post/widgets/post_card/post_card.dart';
 import 'package:app/presentation/pages/posts/widget/post_widget.dart';
 import 'package:app/presentation/providers/posts/user_posts.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +33,10 @@ class _UserPostsThreadState extends ConsumerState<UserPostsThread>
             final post = list[index];
             return Column(
               children: [
-                PostWidget(postRef: post),
+                UserWidget(
+                  userId: post.userId,
+                  builder: (user) => PostCard(postRef: post, user: user),
+                ),
               ],
             );
           },

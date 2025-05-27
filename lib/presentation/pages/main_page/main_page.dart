@@ -8,6 +8,7 @@ import 'package:app/core/utils/variables.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/popup/popup_handler.dart';
+import 'package:app/presentation/pages/_new/discovery_screen.dart';
 import 'package:app/presentation/pages/chat/sub_pages/create_chat_screen.dart';
 import 'package:app/presentation/pages/main_page/drawer.dart';
 import 'package:app/presentation/pages/main_page/heart_animation_overlay.dart';
@@ -20,7 +21,7 @@ import 'package:app/presentation/pages/chat/chat_screen.dart';
 import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/search/search_users_screen.dart';
 import 'package:app/presentation/pages/posts/create/create_post_screen/create_post_screen.dart';
-import 'package:app/presentation/pages/posts/timeline_page.dart';
+import 'package:app/presentation/pages/posts/timeline/timeline_page.dart';
 import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
@@ -287,6 +288,7 @@ class MainPage extends HookConsumerWidget {
               TimelinePage(),
               ChatScreen(),
               ProfileScreen(),
+              DiscoveryScreen(),
             ],
           ),
           const HeartAnimationArea(),
@@ -377,6 +379,10 @@ class BottomBar extends ConsumerWidget {
             context, ref, "ソーシャル", 2, "assets/images/icons/chat.svg"),
         _bottomNavItem(
             context, ref, "プロフィール", 3, "assets/images/icons/profile.svg"),
+        BottomNavigationBarItem(
+          label: "new",
+          icon: Icon(Icons.new_label),
+        ),
       ],
     );
   }

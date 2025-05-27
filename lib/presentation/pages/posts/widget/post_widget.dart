@@ -9,7 +9,6 @@ import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart'
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/components/user_widget.dart';
-import 'package:app/presentation/pages/posts/widget/enhanced_post_widget.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/user/post_images_screen.dart';
@@ -31,14 +30,6 @@ class PostWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (true) {
-      // 新しいアニメーション付きUI
-      return EnhancedPostWidget(
-        postRef: postRef,
-        index: 0, // デフォルト値、後でリスト内のインデックスに置き換え
-      );
-    }
-
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final post = ref.watch(allPostsNotifierProvider).asData!.value[postRef.id];

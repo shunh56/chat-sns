@@ -1,4 +1,6 @@
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/user_widget.dart';
+import 'package:app/presentation/pages/posts/post/widgets/post_card/post_card.dart';
 import 'package:app/presentation/pages/posts/widget/post_widget.dart';
 import 'package:app/presentation/providers/posts/public_posts.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +39,13 @@ class _PublicPostsThreadState extends ConsumerState<PublicPostsThread>
             itemCount: list.length,
             itemBuilder: (context, index) {
               final post = list[index];
-              return PostWidget(postRef: post);
+              return UserWidget(
+                userId: post.userId,
+                builder: (user) => PostCard(
+                  postRef: post,
+                  user: user,
+                ),
+              );
             },
           ),
         );
