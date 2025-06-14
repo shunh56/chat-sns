@@ -25,8 +25,7 @@ class UserRequestWidget extends ConsumerWidget {
           children: [
             UserIcon(
               user: user,
-              width: 48,
-              isCircle: true,
+              r: 48,
             ),
             const Gap(12),
             Expanded(
@@ -75,8 +74,7 @@ class UserRequestWidget extends ConsumerWidget {
         final textStyle = ThemeTextStyle(themeSize: themeSize);
 
         final notifier = ref.read(followingListNotifierProvider.notifier);
-        final followingState = ref.watch(followingListNotifierProvider);
-        final isFollowing = notifier.isFollowing(user.userId);
+        final isFollowing = ref.watch(isFollowingProvider(user.userId));
 
         return Material(
           color: isFollowing ? Colors.blue : ThemeColor.white,
@@ -129,7 +127,7 @@ class UserRequestButton extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
-    const subscribed = false;
+    //const subscribed = false;
     final requests = []; // ref.watch(requestIdsProvider);
     final requesteds = []; // ref.watch(requestedIdsProvider);
 

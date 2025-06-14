@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/permissions/photo_permission.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/profile/subpages/select_hashtag_screen.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/dialogs/dialogs.dart';
@@ -234,56 +235,29 @@ class EditProfileScreens extends ConsumerWidget {
               Center(
                 child: Stack(
                   children: [
-                    ref.watch(iconImageStateProvider) != null
-                        ? Container(
-                            width: imageHeight,
-                            height: imageHeight,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(imageHeight * 2 / 9),
-                              image: DecorationImage(
-                                image: FileImage(
-                                    ref.watch(iconImageStateProvider)!),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          )
-                        : ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(imageHeight * 2 / 9),
-                            child: Container(
-                              height: imageHeight,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      child: ref.watch(iconImageStateProvider) != null
+                          ? Container(
                               width: imageHeight,
-                              color: ThemeColor.accent,
-                              child: me.imageUrl != null
-                                  ? CachedNetworkImage(
-                                      imageUrl: me.imageUrl!,
-                                      fadeInDuration:
-                                          const Duration(milliseconds: 120),
-                                      imageBuilder: (context, imageProvider) =>
-                                          Container(
-                                        height: imageHeight,
-                                        width: imageHeight,
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          image: DecorationImage(
-                                            image: imageProvider,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                      placeholder: (context, url) =>
-                                          const SizedBox(),
-                                      errorWidget: (context, url, error) =>
-                                          const SizedBox(),
-                                    )
-                                  : const Icon(
-                                      Icons.person_outline,
-                                      size: imageHeight * 0.8,
-                                      color: ThemeColor.stroke,
-                                    ),
+                              height: imageHeight,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.circular(imageHeight / 2),
+                                image: DecorationImage(
+                                  image: FileImage(
+                                      ref.watch(iconImageStateProvider)!),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            )
+                          : UserIcon(
+                              user: me,
+                              r: imageHeight / 2,
+                              enableDecoration: false,
+                              navDisabled: true,
                             ),
-                          ),
+                    ),
                     Positioned(
                       right: 0,
                       bottom: 0,

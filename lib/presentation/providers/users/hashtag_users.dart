@@ -21,22 +21,25 @@ class HashTagUsersNotifier
   Future<void> initialize() async {
     final res = await ref
         .read(allUsersNotifierProvider.notifier)
-        .getUsersByHashTag(tagId, oneOnly: true);
+        .getUsersByHashTag(tagId);
     res.removeWhere((user) => user.isMe);
     state = AsyncValue.data(res);
   }
 
   Future<void> loadMore() async {
     final currentList = state.asData?.value ?? [];
-    final res = await ref
-        .read(allUsersNotifierProvider.notifier)
-        .getUsersByHashTag(tagId);
-    res.removeWhere((user) => user.isMe);
-    final existingUserIds = currentList.map((user) => user.userId).toSet();
-    final newUniqueUsers =
-        res.where((user) => !existingUserIds.contains(user.userId)).toList();
-
-    // 重複なしで新しいリストを作成
-    state = AsyncValue.data([...currentList, ...newUniqueUsers]);
+    if (currentList.isEmpty) {
+      return initialize();
+    } else {
+      final String lastUserId = currentList.last.userId;
+      final res = await ref
+          .read(allUsersNotifierProvider.notifier)
+          .loadMoreUsersByHashTag(tagId, lastUserId);
+      res.removeWhere((user) => user.isMe);
+      final existingUserIds = currentList.map((user) => user.userId).toSet();
+      final newUniqueUsers =
+          res.where((user) => !existingUserIds.contains(user.userId)).toList();
+      state = AsyncValue.data([...currentList, ...newUniqueUsers]);
+    }
   }
 }

@@ -49,10 +49,16 @@ class ReportUserScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Gap(12),
               Row(
                 children: [
-                  UserIcon(user: user),
-                  const Gap(8),
+                  UserIcon(
+                    user: user,
+                    enableDecoration: false,
+                    navDisabled: true,
+                    r: 24,
+                  ),
+                  const Gap(12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -73,7 +79,7 @@ class ReportUserScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              const Gap(32),
+              const Gap(24),
               Text(
                 "報告内容を入力してください",
                 style: textStyle.w600(),

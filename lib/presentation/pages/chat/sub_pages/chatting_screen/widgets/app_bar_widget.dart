@@ -1,3 +1,4 @@
+import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/follow/followers_list_notifier.dart';
 import 'package:flutter/material.dart';
@@ -37,15 +38,10 @@ class ChatAppBar extends ConsumerWidget {
           title: Row(
             children: [
               // ユーザーアイコン（タップでプロフィールへ）
-              GestureDetector(
-                onTap: () => ref
-                    .read(navigationRouterProvider(context))
-                    .goToProfile(user),
-                child: CachedImage.userIcon(
-                  user.imageUrl,
-                  user.name,
-                  18,
-                ),
+              UserIcon(
+                user: user,
+                r: 18,
+                enableDecoration: false,
               ),
               const SizedBox(width: 8),
 
@@ -111,10 +107,8 @@ class ChatAppBar extends ConsumerWidget {
   Future<void> _handleCallButtonTap(BuildContext context, WidgetRef ref) async {
     HapticFeedback.mediumImpact();
 
-    final followingNotifier = ref.watch(followingListNotifierProvider.notifier);
-    final followerNotifier = ref.watch(followersListNotifierProvider.notifier);
-    final isFollowing = followingNotifier.isFollowing(user.userId);
-    final isFollowed = followerNotifier.isFollower(user.userId);
+    final isFollowing = ref.watch(isFollowerProvider(user.userId));
+    final isFollowed = ref.watch(isFollowerProvider(user.userId));
     final isMutualFollow = isFollowing && isFollowed;
 
     final blockeds =

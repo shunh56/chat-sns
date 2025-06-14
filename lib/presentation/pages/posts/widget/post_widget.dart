@@ -1,4 +1,4 @@
-import 'dart:math';
+/*import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
@@ -81,8 +81,8 @@ class PostWidget extends ConsumerWidget {
                   children: [
                     UserIcon(
                       user: user,
-                      width: 28,
-                      isCircle: true,
+                      r: 28,
+                     
                     ),
                     const Gap(8),
                     Expanded(
@@ -887,3 +887,4 @@ class TextConfig {
     required this.lineHeight,
   });
 }
+ */

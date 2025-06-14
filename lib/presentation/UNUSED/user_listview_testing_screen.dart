@@ -44,7 +44,7 @@ class NewScreen extends ConsumerWidget {
                 curve: Curves.easeInOutQuint,
                 child: UserIcon(
                   user: users[index % len],
-                  width: isFocused ? focusedHeight : height,
+                  r: isFocused ? focusedHeight : height,
                 ),
               ),
             ),

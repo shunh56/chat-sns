@@ -2,6 +2,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/search/sub_pages/user_card_stack_screen.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/routes/navigator.dart';
@@ -206,31 +207,10 @@ class DefaultUserCardView extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // プロフィール画像
-            Container(
-              width: 108,
-              height: 108,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: ThemeColor.stroke,
-                  width: 1.2,
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: user.imageUrl != null
-                    ? CachedImage.userIcon(user.imageUrl, user.name, 0)
-                    : Container(
-                        color: ThemeColor.surface,
-                        child: Center(
-                          child: Icon(
-                            Icons.person,
-                            size: 36,
-                            color: ThemeColor.icon.withOpacity(0.6),
-                          ),
-                        ),
-                      ),
-              ),
+            UserIcon(
+              user: user,
+              enableDecoration: false,
+              r: 54,
             ),
             const Gap(8),
 

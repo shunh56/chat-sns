@@ -44,8 +44,8 @@ class ActivitiesUsecase {
     return _repository.readActitivies();
   }
 
-  addLikeToPost(UserAccount user, Post post) async {
-    return _repository.addLikeToPost(user.userId, post.id);
+  addReactionToPost(UserAccount user, String postId) async {
+    return _repository.addReactionToPost(user.userId, postId);
   }
 
   addCommentToPost(UserAccount user, Post post) async {

@@ -27,15 +27,11 @@ class ActivitiesRepository {
     return _datasource.readActivities();
   }
 
-  addLikeToPost(String userId, String postId) async {
-    return _datasource.addLikeToPost(userId, postId);
+  addReactionToPost(String userId, String postId) async {
+    return _datasource.addReactionToPost(userId, postId);
   }
 
   addCommentToPost(String userId, String postId) async {
     return _datasource.addCommentToPost(userId, postId);
-  }
-
-  addLikeToCurrentStatusPost(String userId, String postId) async {
-    return _datasource.addLikeToCurrentStatusPost(userId, postId);
   }
 }

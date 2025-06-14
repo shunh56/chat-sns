@@ -31,26 +31,19 @@ class FollowingPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
 
   Future<void> initialize() async {
     final myId = ref.read(authProvider).currentUser!.uid;
-    List<Post> posts = [];
+    final postsNotifier = ref.read(allPostsNotifierProvider.notifier);
+
     final asyncValue = ref.read(followingListNotifierProvider);
+
     asyncValue.maybeWhen(
-      data: (users) async {
+      data: (followingIds) async {
         if (initialized) return;
         initialized = true;
-        final friendIds = users.map((relation) => relation.userId);
-        List<Future<List<Post>>> futures = [];
-        final userIds = [...friendIds, myId];
-        futures.add(postUsecase.getPostFromUserIds(userIds));
-        //futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
-        await Future.wait(futures);
-        for (var item in futures) {
-          final list = await item;
-          ref
-              .read(allPostsNotifierProvider.notifier)
-              .addPosts(list);
-          posts.addAll(list);
-        }
+
+        final userIds = [...followingIds, myId];
+        final posts = await postsNotifier.getPostsFromUserIds(userIds);
         posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
         if (mounted) {
           state = AsyncValue.data(posts);
         }
@@ -64,27 +57,22 @@ class FollowingPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
   }
 
   Future<void> refresh() async {
-    List<Post> posts = [];
-    List<Future<List<Post>>> futures = [];
     final myId = ref.read(authProvider).currentUser!.uid;
-    final friendIds = []; // ref.read(friendIdsProvider);
-    final List<String> userIds = [...friendIds, myId];
-    futures.add(postUsecase.getPostFromUserIds(userIds));
-    //futures.add(currentStatusPostUsecase.getPostFromUserIds(userIds));
-    await Future.wait(futures);
-    for (var item in futures) {
-      final list = await item;
-      ref.read(allPostsNotifierProvider.notifier).addPosts(list);
-      posts.addAll(list);
-    }
+    final postsNotifier = ref.read(allPostsNotifierProvider.notifier);
+
+    final followingIds =
+        ref.read(followingListNotifierProvider).asData?.value ?? [];
+    final List<String> userIds = [...followingIds, myId];
+    final posts = await postsNotifier.getPostsFromUserIds(userIds);
     posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
     if (mounted) {
       state = AsyncValue.data(posts);
     }
   }
 /*
   Future<void> load() async {
-    if (ref.read(friendIdsProvider).length > 30) {
+    if (ref.read(followingIdsProvider).length > 30) {
       final cache = state.asData?.value ?? [];
       final list = await fetch(page: (cache.length) ~/ hitsPerPage);
       state = AsyncValue.data([...cache, ...list]);
@@ -95,15 +83,15 @@ class FollowingPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
     final myId = ref.read(authProvider).currentUser!.uid;
     List<Post> posts = [];
 
-    final friendIds = ref.read(friendIdsProvider);
+    final followingIds = ref.read(followingIdsProvider);
 
     List<Future<List<Post>>> futures = [];
 
-    if (friendIds.length > 30) {
+    if (followingIds.length > 30) {
       futures.add(_algoliaPostUsecase
-          .getUserIdsPosts([...friendIds, myId], page: page));
+          .getUserIdsPosts([...followingIds, myId], page: page));
     }
-    for (String userId in friendIds) {
+    for (String userId in followingIds) {
       futures.add(currentStatusPostUsecase.getUsersPosts(userId));
     }
     await Future.wait(futures);

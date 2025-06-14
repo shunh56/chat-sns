@@ -190,7 +190,7 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
     if (wasLiked) {
       // フォロー時のフィードバック
       final notifier = ref.read(followingListNotifierProvider.notifier);
-      final isFollowing = notifier.isFollowing(user.userId);
+      final isFollowing = ref.watch(isFollowingProvider(user.userId));
       if (!isFollowing) {
         try {
           await notifier.followUser(user);
@@ -677,99 +677,97 @@ class _UserCardStackScreenState extends ConsumerState<UserCardStackScreen>
   }
 
   Widget _buildCompletionScreen(int followCount) {
-    return Container(
-      child: Center(
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.85,
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 32),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.15),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: ThemeColor.accent.withOpacity(0.2),
-                blurRadius: 30,
-                spreadRadius: 5,
-              ),
-            ],
+    return Center(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.85,
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 32),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.15),
+            width: 1.5,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.black.withOpacity(0.3),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
-                    width: 1.5,
-                  ),
-                ),
-                child: Icon(
-                  Icons.check_rounded,
-                  size: 48,
-                  color: Colors.white.withOpacity(0.9),
-                ),
-              ),
-              const Gap(24),
-              const Text(
-                'スワイプ完了',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
+          boxShadow: [
+            BoxShadow(
+              color: ThemeColor.accent.withOpacity(0.2),
+              blurRadius: 30,
+              spreadRadius: 5,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.black.withOpacity(0.3),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1.5,
                 ),
               ),
-              const Gap(16),
-              Container(
-                height: 1,
-                width: 40,
-                color: Colors.white.withOpacity(0.2),
-                margin: const EdgeInsets.symmetric(vertical: 8),
+              child: Icon(
+                Icons.check_rounded,
+                size: 48,
+                color: Colors.white.withOpacity(0.9),
               ),
-              const Gap(16),
-              Text(
-                followCount > 0
-                    ? '$followCount人のユーザーをフォローしました'
-                    : '全てのユーザーを見終わりました',
+            ),
+            const Gap(24),
+            const Text(
+              'スワイプ完了',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const Gap(16),
+            Container(
+              height: 1,
+              width: 40,
+              color: Colors.white.withOpacity(0.2),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+            ),
+            const Gap(16),
+            Text(
+              followCount > 0
+                  ? '$followCount人のユーザーをフォローしました'
+                  : '全てのユーザーを見終わりました',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.7),
+                letterSpacing: 0.3,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const Gap(40),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 36, vertical: 16),
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: const Text(
+                'ホームへ',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withOpacity(0.7),
+                  fontWeight: FontWeight.w600,
                   letterSpacing: 0.3,
                 ),
-                textAlign: TextAlign.center,
               ),
-              const Gap(40),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 36, vertical: 16),
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: const Text(
-                  'ホームへ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

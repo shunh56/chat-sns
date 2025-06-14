@@ -52,7 +52,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildContainer(
             "アカウント設定",
             [
-              _buildTopTile(
+              _buildSingleTile(
                 context,
                 _tileContent(
                   Icons.person_outline_rounded,
@@ -374,6 +374,29 @@ class SettingsScreen extends ConsumerWidget {
         const Gap(4),
         ...children,
       ],
+    );
+  }
+
+  Widget _buildSingleTile(BuildContext context, Widget child,
+      {Widget? page, Function? function}) {
+    return Material(
+      color: ThemeColor.accent,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () {
+          if (function != null) {
+            function();
+          }
+          if (page != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => page),
+            );
+          }
+        },
+        child: child,
+      ),
     );
   }
 

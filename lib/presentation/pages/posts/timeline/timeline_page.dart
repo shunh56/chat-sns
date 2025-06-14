@@ -295,10 +295,12 @@ class DefaultTabs extends ConsumerWidget {
               ),
             ];
           },
-          body: const TabBarView(children: [
-            PublicPostsThread(),
-            FollowingPostsThread(),
-          ]),
+          body: const TabBarView(
+            children: [
+              PublicPostsThread(),
+              FollowingPostsThread(),
+            ],
+          ),
         ),
       ),
     );

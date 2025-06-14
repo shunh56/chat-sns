@@ -43,7 +43,7 @@ class PostActionBar extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
       child: EnhancedReactionButton(
         user: user,
         post: post,

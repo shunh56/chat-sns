@@ -389,8 +389,8 @@ class _MessageItemState extends ConsumerState<MessageItem>
             children: [
               UserIcon(
                 user: user,
-                width: 32,
-                isCircle: true,
+                r: 32,
+              
               ),
               const Gap(12),
               Flexible(

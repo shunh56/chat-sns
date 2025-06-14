@@ -163,8 +163,8 @@ class CommunityCard extends ConsumerWidget {
                             final user = snapshot.data![0];
                             return UserIcon(
                               user: user,
-                              width: 40,
-                              isCircle: true,
+                              r: 40,
+                         
                             );
                           },
                         ),

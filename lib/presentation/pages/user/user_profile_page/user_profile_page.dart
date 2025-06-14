@@ -4,6 +4,7 @@ import 'package:app/data/datasource/local/hashtags.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:app/presentation/providers/footprint/footprint_manager_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/report/report_user_screen.dart';
@@ -343,15 +344,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     children: [
                       Container(
                         height: thumbnailHeight,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              canvasTheme.bgColor,
-                              canvasTheme.boxBgColor,
-                            ],
-                          ),
+                        decoration: PostCardStyling.getUserTopbarDecoration(
+                          VibeColorManager.getVibeColor(user),
                         ),
                       ),
                       Positioned(
@@ -377,7 +371,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               // プロフィール画像
-                              UserIconCanvasIcon(user: user),
+                              UserIcon(
+                                user: user,
+                                iconType: IconType.profile,
+                              ),
 
                               if (user.links.isShown)
                                 Padding(
@@ -783,10 +780,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
             bottom: 32, // 下からの距離
             left: 0,
             right: 0,
-            child: (ref.watch(followingListNotifierProvider).asData?.value ??
-                        [])
-                    .map((_) => _.userId)
-                    .contains(user.userId)
+            child: ref.watch(isFollowingProvider(user.userId))
                 ? Row(
                     children: [
                       Expanded(
@@ -911,7 +905,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         final textStyle = ThemeTextStyle(themeSize: themeSize);
         final user = widget.user;
         final notifier = ref.read(followingListNotifierProvider.notifier);
-        final isFollowing = notifier.isFollowing(user.userId);
+        final isFollowing = ref.watch(isFollowingProvider(user.userId));
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Material(

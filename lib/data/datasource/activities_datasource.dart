@@ -53,8 +53,8 @@ class ActivitiesDatasource {
     }
   }
 
-  addLikeToPost(String userId, String postId) async {
-    final id = "${postId}_postLike";
+  addReactionToPost(String userId, String postId) async {
+    final id = "${postId}_postReaction";
     final snapshot = await _firestore
         .collection("users")
         .doc(userId)
@@ -65,7 +65,7 @@ class ActivitiesDatasource {
       snapshot.reference.set({
         "id": id,
         "refId": postId,
-        "actionType": "postLike",
+        "actionType": "postReaction",
         "userIds": [_auth.currentUser!.uid],
         "updatedAt": Timestamp.now(),
         "isSeen": false,

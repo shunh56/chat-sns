@@ -23,8 +23,7 @@ class VoiceChatDialogs {
           left: i * 28,
           child: UserIcon(
             user: users[i],
-            width: 40,
-            isCircle: true,
+            r: 40,
           ),
         ),
       );
@@ -77,8 +76,7 @@ class VoiceChatDialogs {
                             padding: const EdgeInsets.only(right: 8, bottom: 8),
                             child: UserIcon(
                               user: user,
-                              width: 48,
-                              isCircle: true,
+                              r: 48,
                             ),
                           ),
                         )

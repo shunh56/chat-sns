@@ -1,4 +1,7 @@
 // lib/presentation/pages/posts/post/widgets/post_card/post_header.dart
+import 'package:app/core/utils/theme.dart';
+import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
+import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,6 +53,15 @@ class PostHeader extends ConsumerWidget {
               mood: vibeText,
               color: vibeColor,
             ),
+          GestureDetector(
+            onTap: () {
+              PostBottomModelSheet(context).openPostAction(post, user);
+            },
+            child: Icon(
+              Icons.more_horiz_outlined,
+              color: ThemeColor.subText,
+            ),
+          ),
         ],
       ),
     );
@@ -57,32 +69,7 @@ class PostHeader extends ConsumerWidget {
 
   /// ユーザーアバターを構築
   Widget _buildUserAvatar(Color vibeColor) {
-    return GestureDetector(
-      onTap: onUserTap,
-      child: Container(
-        decoration: PostCardStyling.getUserIconDecoration(vibeColor),
-        padding: const EdgeInsets.all(2),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(
-            isDetailView ? 22 : 20,
-          ),
-          child: SizedBox(
-            width: isDetailView ? 44 : 40,
-            height: isDetailView ? 44 : 40,
-            child: user.imageUrl != null
-                ? CachedImage.userIcon(user.imageUrl!, user.name, 22)
-                : Container(
-                    color: const Color(0xFF2A2A2A),
-                    child: Icon(
-                      Icons.person,
-                      size: isDetailView ? 24 : 20,
-                      color: Colors.white.withOpacity(0.6),
-                    ),
-                  ),
-          ),
-        ),
-      ),
-    );
+    return UserIcon(user: user);
   }
 
   /// ユーザー情報を構築

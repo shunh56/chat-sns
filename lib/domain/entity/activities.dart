@@ -43,6 +43,7 @@ class Activity {
 }
 
 enum ActionType {
+  postReaction,
   postLike, // => 〇〇があなたの投稿にいいねしました。
   postComment, // => 〇〇があなたの投稿にコメントしました
   currentStatusPostLike, // => 〇〇があなたのステータスにいいねしました。
@@ -52,6 +53,8 @@ enum ActionType {
 class ActionTypeConverter {
   static ActionType fromString(String type) {
     switch (type) {
+      case "postReaction":
+        return ActionType.postReaction;
       case "postLike":
         return ActionType.postLike;
       case "postComment":

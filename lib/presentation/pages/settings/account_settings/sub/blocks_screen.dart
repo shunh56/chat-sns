@@ -50,8 +50,8 @@ class BlocksScreen extends ConsumerWidget {
                   
                     UserIcon(
                             user: user,
-                            width: 48,
-                            isCircle: true,
+                            r: 48,
+                          
                           ),
                     const Gap(12),
                     Column(

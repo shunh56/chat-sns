@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -10,7 +11,7 @@ import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/routes/navigator.dart';
 
 // ユーザーIDごとにメッセージを固定するためのプロバイダー
-final welcomeMessageProvider = 
+final welcomeMessageProvider =
     StateProvider.family<String, String>((ref, userId) {
   // ランダムなウェルカムメッセージリスト（静的に定義）
   final messages = [
@@ -21,7 +22,7 @@ final welcomeMessageProvider =
     "新しい物語の始まりだ！ここからチャットの冒険がスタートします。さぁ、話を続けよう！",
     "{name}さんとのチャットの世界へようこそ！ここからが本格的な会話の始まりだ。楽しんでね！"
   ];
-  
+
   // 固定のランダムメッセージを選択
   final randInt = Random().nextInt(messages.length);
   return messages[randInt];
@@ -48,15 +49,9 @@ class WelcomeMessageWidget extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () {
-              ref.read(navigationRouterProvider(context)).goToProfile(user);
-            },
-            child: CachedImage.userIcon(
-              user.imageUrl,
-              user.name,
-              48,
-            ),
+          UserIcon(
+            user: user,
+            r: 48,
           ),
           const Gap(8),
           Text(

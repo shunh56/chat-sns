@@ -213,8 +213,6 @@ class PostScreen extends HookConsumerWidget {
             ),
             child: UserIcon(
               user: user,
-              width: 32,
-              isCircle: true,
             ),
           ),
           const Gap(12),
@@ -320,7 +318,7 @@ class PostScreen extends HookConsumerWidget {
         data: (list) {
           if (list.isEmpty) {
             return Container(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.only(top: 120),
               child: Column(
                 children: [
                   Icon(

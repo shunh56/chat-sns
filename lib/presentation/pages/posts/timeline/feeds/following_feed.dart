@@ -40,41 +40,30 @@ class _FollowingPostsThreadState extends ConsumerState<FollowingPostsThread>
                 .read(friendsCurrentStatusPostsNotiferProvider.notifier)
                 .refresh(); */
           },
-          child: ListView(
-            children: [
-              //const VoiceChatSection(),
-              //const CurrentStatusPostsSection(),
-              /*Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: card,
-              ), */
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 96),
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  final post = list[index];
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 96),
+            itemCount: list.length,
+            itemBuilder: (context, index) {
+              final post = list[index];
 
-                  return Column(
-                    children: [
-                      UserWidget(
-                        userId: post.userId,
-                        builder: (user) => PostCard(
-                          postRef: post,
-                          user: user,
-                        ),
-                      ),
-                      /* if (index != 0 && index % 10 == 0)
-                          NativeAdWidget(
-                            id: const Uuid().v4(),
-                          ), */
-                    ],
-                  );
-                },
-              ),
-            ],
-            //),
+              return Column(
+                children: [
+                  UserWidget(
+                    userId: post.userId,
+                    builder: (user) => PostCard(
+                      postRef: post,
+                      user: user,
+                    ),
+                  ),
+                  /* if (index != 0 && index % 10 == 0)
+                      NativeAdWidget(
+                        id: const Uuid().v4(),
+                      ), */
+                ],
+              );
+            },
           ),
         );
       },

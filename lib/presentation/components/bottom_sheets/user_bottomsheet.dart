@@ -177,7 +177,7 @@ class UserBottomModelSheet {
                   ),
                   const Gap(24),
 
-                  UserIcon(user: user, width: 72),
+                  UserIcon(user: user, r: 54),
                   const Gap(12),
 
                   Text(
@@ -192,14 +192,14 @@ class UserBottomModelSheet {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "・このユーザーは$appName上であなたのプロフィールやコンテンツを閲覧できなくなります。",
+                        "このユーザーは$appName上であなたのプロフィールやコンテンツを閲覧できなくなります。",
                         style: textStyle.w400(
                           color: ThemeColor.subText,
                         ),
                       ),
                       const Gap(12),
                       Text(
-                        "・ブロックしたことは相手に通知されません。",
+                        "ブロックしたことは相手に通知されません。",
                         style: textStyle.w400(
                           color: ThemeColor.subText,
                         ),
@@ -299,7 +299,7 @@ class UserBottomModelSheet {
                   ),
                   const Gap(24),
 
-                  UserIcon(user: user, width: 72),
+                  UserIcon(user: user, r: 72),
                   const Gap(12),
 
                   Text(
@@ -402,7 +402,7 @@ class UserBottomModelSheet {
                   ),
                   const Gap(24),
 
-                  UserIcon(user: user, width: 72),
+                  UserIcon(user: user, r: 72),
                   const Gap(12),
 
                   Text(
@@ -524,7 +524,7 @@ class UserBottomModelSheet {
                   ),
                   const Gap(24),
 
-                  UserIcon(user: user, width: 72),
+                  UserIcon(user: user, r: 72),
                   const Gap(12),
 
                   Text(

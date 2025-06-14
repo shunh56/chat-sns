@@ -1,4 +1,5 @@
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
+import 'package:app/core/utils/flavor.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/activities.dart';
@@ -48,7 +49,7 @@ class ActivitiesScreen extends HookConsumerWidget {
         }
         return ListView.builder(
           itemCount: list.length,
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.only(bottom: 24),
           itemBuilder: (context, index) {
             final activity = list[index];
             return Column(
@@ -112,7 +113,9 @@ class ActivityTile extends ConsumerWidget {
     if (users.length > 2) {
       users = users.sublist(0, 2);
     }
-
+    if (activity.actionType == ActionType.none) {
+      return const SizedBox();
+    }
     return InkWell(
       splashColor: ThemeColor.stroke,
       highlightColor: Colors.white.withOpacity(0.1),
@@ -121,8 +124,7 @@ class ActivityTile extends ConsumerWidget {
             .read(activitiesListNotifierProvider.notifier)
             .readActivity(activity);
         try {
-          if (activity.actionType == ActionType.postLike ||
-              activity.actionType == ActionType.postComment) {
+          if (activity.actionType.toString().startsWith("ActionType.post")) {
             final post =
                 await ref.read(postUsecaseProvider).getPost(activity.refId);
             activity.post = post;
@@ -159,7 +161,7 @@ class ActivityTile extends ConsumerWidget {
                                 left: 0,
                                 child: UserIcon(
                                   user: users[0],
-                                  width: 36,
+                                  r: 18,
                                 ),
                               ),
                               Positioned(
@@ -167,14 +169,14 @@ class ActivityTile extends ConsumerWidget {
                                 right: 0,
                                 child: UserIcon(
                                   user: users[1],
-                                  width: 36,
+                                  r: 18,
                                 ),
                               ),
                             ],
                           )
                         : UserIcon(
                             user: users[0],
-                            width: 54,
+                            r: 54,
                           ),
                   ),
                   const Gap(12),
@@ -238,7 +240,14 @@ class ActivityTile extends ConsumerWidget {
     final Color iconColor;
 
     switch (type) {
+      case ActionType.postReaction:
+        iconData = Icons.emoji_emotions_outlined;
+        iconColor = Colors.yellow;
+        break;
       case ActionType.postLike:
+        iconData = Icons.favorite_outline_rounded;
+        iconColor = Colors.pinkAccent;
+        break;
       case ActionType.currentStatusPostLike:
         iconData = Icons.favorite_outline_rounded;
         iconColor = Colors.pinkAccent;
@@ -248,7 +257,7 @@ class ActivityTile extends ConsumerWidget {
         iconColor = Colors.blue;
         break;
       case ActionType.none:
-        return const SizedBox(); // 空のウィジェットを返す
+        return Text(type.toString()); // 空のウィジェットを返す
     }
 
     return Icon(
@@ -260,6 +269,8 @@ class ActivityTile extends ConsumerWidget {
 
   String contentText(ActionType type) {
     switch (type) {
+      case ActionType.postReaction:
+        return "があなたの投稿にリアクションしました。";
       case ActionType.postLike:
         return "があなたの投稿にいいねしました";
       case ActionType.postComment:

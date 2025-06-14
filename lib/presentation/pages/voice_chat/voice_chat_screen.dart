@@ -454,8 +454,8 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
                                 Center(
                                   child: UserIcon(
                                     user: user,
-                                    width: 80,
-                                    isCircle: true,
+                                    r: 80,
+                                 
                                   ),
                                 ),
                                 Positioned(
@@ -537,8 +537,8 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
                                         Center(
                                           child: UserIcon(
                                             user: users[i],
-                                            width: 64,
-                                            isCircle: true,
+                                        r: 64,
+                                          
                                           ),
                                         ),
                                         Positioned(
@@ -610,8 +610,8 @@ class _VoiceChatFeedState extends ConsumerState<VoiceChatFeed> {
                                               Center(
                                                 child: UserIcon(
                                                   user: users[i + 1],
-                                                  width: 64,
-                                                  isCircle: true,
+                                                r: 64,
+                                                
                                                 ),
                                               ),
                                               Positioned(

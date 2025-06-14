@@ -58,7 +58,8 @@ class PostsTab extends ConsumerWidget {
                 itemCount: list.length,
                 itemBuilder: (context, index) {
                   final post = list[index];
-                  return PostWidget(postRef: post);
+
+                  return SizedBox(); //PostWidget(postRef: post);
                 },
               ),
             );
@@ -500,8 +501,7 @@ class TopicCard extends ConsumerWidget {
                             children: [
                               UserIcon(
                                 user: user,
-                                width: 20,
-                                isCircle: true,
+                                r: 20,
                               ),
                               const Gap(12),
                               Text(
@@ -1030,8 +1030,7 @@ class RoomCard extends ConsumerWidget {
                           padding: const EdgeInsets.only(right: 8),
                           child: UserIcon(
                             user: participants[index],
-                            isCircle: true,
-                            width: 40,
+                            r: 40,
                           ),
                         );
                       },

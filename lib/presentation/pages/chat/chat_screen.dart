@@ -26,7 +26,7 @@ class ChatScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final tabWidth = themeSize.screenWidth / 5;
+    final tabWidth = themeSize.screenWidth / 4;
     // final dms = ref.watch(dmOverviewListNotifierProvider).asData?.value ?? [];
     //bool flag = false;
     /*for (var dm in dms) {
@@ -88,10 +88,13 @@ class ChatScreen extends ConsumerWidget {
                             ),
                             if (ref.watch(dmFlagProvider))
                               const Padding(
-                                padding: EdgeInsets.only(left: 4),
+                                padding: EdgeInsets.only(
+                                  top: 2,
+                                  left: 8,
+                                ),
                                 child: CircleAvatar(
                                   radius: 4, // サイズを小さくする
-                                  backgroundColor: Colors.blue,
+                                  backgroundColor: Colors.red,
                                 ),
                               )
                           ],
@@ -113,16 +116,11 @@ class ChatScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            Expanded(
+            const Expanded(
               child: TabBarView(
                 children: [
-                  Padding(
-                    padding: EdgeInsets.only(
-                      top: themeSize.verticalPaddingSmall,
-                    ),
-                    child: const ChatList(),
-                  ),
-                  const FollowingList(),
+                  ChatList(),
+                  FollowingList(),
                 ],
               ),
             ),
@@ -140,61 +138,25 @@ class FollowingList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    final List<UserAccount> followingRelations =
+    //TODO フォロー中のユーザーの並び順を変える
+    final List<String> followingIds =
         ref.watch(followingListNotifierProvider).asData?.value ?? [];
-    final userIds = followingRelations.map((_) => _.userId).toList();
-    return followingRelations.isEmpty
-        ? _buildEmptyState(textStyle)
-        : FutureBuilder(
-            future: ref
-                .read(allUsersNotifierProvider.notifier)
-                .getUserAccounts(userIds),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return ListTile(
-                  leading: const Icon(
-                    Icons.error_outline,
-                    color: ThemeColor.error,
-                  ),
-                  title: Text(
-                    'エラーが発生しました',
-                    style: textStyle.w400(
-                      fontSize: 14,
-                      color: ThemeColor.error,
-                    ),
-                  ),
-                );
-              }
 
-              if (!snapshot.hasData) {
-                return ListTile(
-                  leading: const SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                  title: Text(
-                    'Loading...',
-                    style: textStyle.w400(fontSize: 14),
-                  ),
-                );
-              }
-              final users = snapshot.data ?? [];
-              users.sort((a, b) => b.lastOpenedAt.compareTo(a.lastOpenedAt));
-              return ListView.builder(
-                shrinkWrap: true,
-                padding: EdgeInsets.only(
-                  top: themeSize.verticalPaddingSmall,
-                  bottom: 120,
-                ),
-                itemCount: users.length,
-                itemBuilder: (context, index) => UserTile(
-                  user: users[index],
-                ),
-              );
-            },
+    return followingIds.isEmpty
+        ? _buildEmptyState(textStyle)
+        : ListView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.only(
+              top: themeSize.verticalPaddingSmall,
+              bottom: 120,
+            ),
+            itemCount: followingIds.length,
+            itemBuilder: (context, index) => UserWidget(
+              userId: followingIds[index],
+              builder: (user) {
+                return UserTile(user: user);
+              },
+            ),
           );
   }
 
@@ -255,8 +217,7 @@ class UserTile extends ConsumerWidget {
               children: [
                 UserIcon(
                   user: user,
-                  width: 60,
-                  isCircle: true,
+                  r: 30,
                 ),
                 const Gap(18),
                 Expanded(
@@ -486,8 +447,7 @@ class ChatTile extends ConsumerWidget {
                 children: [
                   UserIcon(
                     user: user,
-                    width: 60,
-                    isCircle: true,
+                    r: 30,
                   ),
                   const Gap(12),
                   Expanded(
@@ -529,10 +489,13 @@ class ChatTile extends ConsumerWidget {
                         ),
                       ),
                       const Gap(12),
-                      CircleAvatar(
-                        radius: 4,
-                        backgroundColor:
-                            flag ? Colors.blue : Colors.transparent,
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: CircleAvatar(
+                          radius: 4,
+                          backgroundColor:
+                              flag ? Colors.red : Colors.transparent,
+                        ),
                       ),
                     ],
                   ),
@@ -544,7 +507,7 @@ class ChatTile extends ConsumerWidget {
   }
 }
 
-class FollowingUsers extends ConsumerWidget {
+/*class FollowingUsers extends ConsumerWidget {
   const FollowingUsers({
     super.key,
     required this.builder,
@@ -736,3 +699,4 @@ class FollowingOnlineListView extends ConsumerWidget {
     );
   }
 }
+ */

@@ -54,7 +54,7 @@ class _CreateChatsScreenState extends ConsumerState<CreateChatsScreen> {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final searchResults = ref.watch(userSearchProvider(searchQuery));
     final filters = [ref.read(authProvider).currentUser!.uid];
-    final followings =
+    final followingIds =
         ref.watch(followingListNotifierProvider).asData?.value ?? [];
 
     return Scaffold(
@@ -103,8 +103,6 @@ class _CreateChatsScreenState extends ConsumerState<CreateChatsScreen> {
             child: searchResults.when(
               data: (users) {
                 if (searchQuery.isEmpty) {
-                  final followingIds =
-                      followings.map((relation) => relation.userId).toList();
                   if (followingIds.isEmpty) {
                     return const Center(
                       child: Text(
@@ -193,8 +191,8 @@ class CreateChatTile extends ConsumerWidget {
               children: [
                 UserIcon(
                   user: user,
-                  width: 48,
-                  isCircle: true,
+                  r: 24,
+                  enableDecoration: false,
                 ),
                 const Gap(12),
                 Expanded(

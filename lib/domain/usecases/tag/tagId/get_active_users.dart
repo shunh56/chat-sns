@@ -4,17 +4,20 @@ import 'package:app/domain/entity/tag_stat.dart';
 import 'package:app/domain/repository_interface/tag_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final getPopularTagsUsecaseProvider = Provider<GetPopularTagsUsecase>((ref) {
+final getActiveUsersProvider = Provider<GetActiveUsers>((ref) {
   final repository = ref.watch(tagRepositoryProvider);
-  return GetPopularTagsUsecase(repository);
+  return GetActiveUsers(
+    repository
+  );
 });
 
-class GetPopularTagsUsecase {
+class GetActiveUsers {
   final TagRepository repository;
+  
 
-  GetPopularTagsUsecase(this.repository);
+  GetActiveUsers(this.repository);
 
-  Future<List<TagInfo>> execute(int limit) async {
-    return await repository.getPopularTags(limit: limit);
+  Future<List<TagUser>> execute(String tagId,{String? lastUserId,}) async {
+    return await repository.getActiveUsers(tagId,);
   }
 }

@@ -4,21 +4,20 @@ import 'package:app/domain/usecases/follow/follow_user_usecase.dart';
 import 'package:app/domain/usecases/follow/get_following_usecase.dart';
 import 'package:app/domain/usecases/follow/unfollow_user_usecase.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/push_notification_usecase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final isFollowingProvider = Provider.family<bool, String>((ref, userId) {
   return ref.watch(followingListNotifierProvider).maybeWhen(
-        data: (list) => list.any((user) => user.userId == userId),
+        data: (list) => list.any((id) => id == userId),
         orElse: () => false,
       );
 });
 
 /// フォロー中ユーザーのリストを管理するNotifierProvider
 final followingListNotifierProvider = StateNotifierProvider.autoDispose<
-    FollowingListNotifier, AsyncValue<List<UserAccount>>>(
+    FollowingListNotifier, AsyncValue<List<String>>>(
   (ref) {
     return FollowingListNotifier(
       ref,
@@ -31,8 +30,7 @@ final followingListNotifierProvider = StateNotifierProvider.autoDispose<
   },
 );
 
-class FollowingListNotifier
-    extends StateNotifier<AsyncValue<List<UserAccount>>> {
+class FollowingListNotifier extends StateNotifier<AsyncValue<List<String>>> {
   FollowingListNotifier(
     this.ref,
     this._auth,
@@ -40,7 +38,7 @@ class FollowingListNotifier
     this.unfollowUseCase,
     this.getFollowingUseCase,
     this.pushNotificationUsecase,
-  ) : super(const AsyncValue<List<UserAccount>>.loading());
+  ) : super(const AsyncValue<List<String>>.loading());
 
   final Ref ref;
   final FirebaseAuth _auth;
@@ -66,12 +64,14 @@ class FollowingListNotifier
       final followingIds = await getFollowingUseCase(currentUser.uid);
 
       // IDリストからユーザー情報を取得
-      final users = await _getUsersFromIds(followingIds);
+      // final users = await _getUsersFromIds(followingIds);
 
       // disposeされていなければ状態を更新する
       if (mounted) {
-        state = AsyncValue.data(users);
-        DebugPrint("Following list initialized with ${users.length} users");
+        state = AsyncValue.data(followingIds);
+
+        DebugPrint(
+            "Following list initialized with ${followingIds.length} users");
       }
     } catch (e, stack) {
       // disposeされていなければエラー状態を設定する
@@ -89,14 +89,14 @@ class FollowingListNotifier
       if (currentUser == null) {
         throw Exception('ユーザーがログインしていません');
       }
-      final listToUpdate = List<UserAccount>.from(state.value ?? []);
+      final listToUpdate = List<String>.from(state.value ?? []);
       // すでにフォロー中の場合は処理を行わない
-      if (listToUpdate.any((u) => u.userId == user.userId)) {
+      if (listToUpdate.any((id) => id == user.userId)) {
         return;
       }
 
       // 楽観的更新（Optimistic update）
-      listToUpdate.add(user);
+      listToUpdate.add(user.userId);
       state = AsyncValue.data(listToUpdate);
 
       // 実際のAPIコール
@@ -124,10 +124,10 @@ class FollowingListNotifier
       if (currentUser == null) {
         throw Exception('ユーザーがログインしていません');
       }
-      final listToUpdate = List<UserAccount>.from(state.value ?? []);
+      final listToUpdate = List<String>.from(state.value ?? []);
 
       // 楽観的更新（Optimistic update）
-      listToUpdate.removeWhere((item) => item.userId == user.userId);
+      listToUpdate.removeWhere((id) => id == user.userId);
       state = AsyncValue.data(listToUpdate);
 
       // 実際のAPIコール
@@ -143,20 +143,6 @@ class FollowingListNotifier
       // 一貫性を確保するために再初期化
       await initialize();
     }
-  }
-
-  /// ユーザーがフォロー中かどうかを確認する
-  bool isFollowing(String userId) {
-    final currentState = state;
-    if (!currentState.hasValue) return false;
-    return currentState.value!.any((user) => user.userId == userId);
-  }
-
-  /// IDリストからユーザー情報を取得するヘルパーメソッド
-  Future<List<UserAccount>> _getUsersFromIds(List<String> userIds) async {
-    final userProvider = ref.read(allUsersNotifierProvider.notifier);
-    final users = await userProvider.getUserAccounts(userIds);
-    return users;
   }
 
   // Notifierが破棄されるときのクリーンアップ

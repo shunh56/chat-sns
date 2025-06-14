@@ -1,4 +1,5 @@
 // lib/presentation/pages/posts/post/components/styling/post_styling.dart
+import 'package:app/core/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/entity/posts/post.dart';
@@ -47,32 +48,118 @@ class VibeColorManager {
 class VibeTextAnalyzer {
   static const Map<String, List<String>> _vibeKeywords = {
     'Creative': [
-      'art', 'design', 'create', 'draw', 'paint', 'music', 'write', 'photo',
-      'アート', '作品', '創作', '描い', '作っ', '音楽', '写真', 'デザイン'
+      'art',
+      'design',
+      'create',
+      'draw',
+      'paint',
+      'music',
+      'write',
+      'photo',
+      'アート',
+      '作品',
+      '創作',
+      '描い',
+      '作っ',
+      '音楽',
+      '写真',
+      'デザイン'
     ],
     'Energetic': [
-      'workout', 'run', 'energy', 'power', 'strong', 'active', 'sport',
-      '筋トレ', '運動', 'ワークアウト', '走っ', 'スポーツ', '元気', 'パワー'
+      'workout',
+      'run',
+      'energy',
+      'power',
+      'strong',
+      'active',
+      'sport',
+      '筋トレ',
+      '運動',
+      'ワークアウト',
+      '走っ',
+      'スポーツ',
+      '元気',
+      'パワー'
     ],
     'Happy': [
-      'happy', 'joy', 'smile', 'laugh', 'fun', 'good', 'great', 'awesome',
-      '嬉しい', '楽しい', '幸せ', '最高', 'ハッピー', '笑', '喜び'
+      'happy',
+      'joy',
+      'smile',
+      'laugh',
+      'fun',
+      'good',
+      'great',
+      'awesome',
+      '嬉しい',
+      '楽しい',
+      '幸せ',
+      '最高',
+      'ハッピー',
+      '笑',
+      '喜び'
     ],
     'Chill': [
-      'relax', 'calm', 'peaceful', 'quiet', 'rest', 'coffee', 'tea', 'sunset',
-      'リラックス', 'のんびり', '落ち着', '静か', '休憩', 'コーヒー', '夕日'
+      'relax',
+      'calm',
+      'peaceful',
+      'quiet',
+      'rest',
+      'coffee',
+      'tea',
+      'sunset',
+      'リラックス',
+      'のんびり',
+      '落ち着',
+      '静か',
+      '休憩',
+      'コーヒー',
+      '夕日'
     ],
     'Inspired': [
-      'inspire', 'motivate', 'dream', 'goal', 'achieve', 'success', 'future',
-      'インスピレーション', '夢', '目標', '達成', '成功', '未来', 'やる気'
+      'inspire',
+      'motivate',
+      'dream',
+      'goal',
+      'achieve',
+      'success',
+      'future',
+      'インスピレーション',
+      '夢',
+      '目標',
+      '達成',
+      '成功',
+      '未来',
+      'やる気'
     ],
     'Focused': [
-      'work', 'study', 'focus', 'concentrate', 'learn', 'code', 'project',
-      '仕事', '勉強', '集中', '学習', 'プロジェクト', 'コード', '作業'
+      'work',
+      'study',
+      'focus',
+      'concentrate',
+      'learn',
+      'code',
+      'project',
+      '仕事',
+      '勉強',
+      '集中',
+      '学習',
+      'プロジェクト',
+      'コード',
+      '作業'
     ],
     'Excited': [
-      'excited', 'amazing', 'wow', 'incredible', 'fantastic', 'love',
-      'わくわく', 'すごい', '興奮', '素晴らしい', '大好き', '最高'
+      'excited',
+      'amazing',
+      'wow',
+      'incredible',
+      'fantastic',
+      'love',
+      'わくわく',
+      'すごい',
+      '興奮',
+      '素晴らしい',
+      '大好き',
+      '最高'
     ],
   };
 
@@ -133,9 +220,9 @@ class PostCardStyling {
   /// 投稿カードの基本装飾を取得
   static BoxDecoration getCardDecoration(Color vibeColor) {
     return BoxDecoration(
-      color: const Color(0xFF1A1A1A), // ThemeColor.background
+      color: ThemeColor.cardColor,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(
+      /*border: Border.all(
         color: vibeColor.withOpacity(0.3),
         width: 1,
       ),
@@ -145,7 +232,7 @@ class PostCardStyling {
           blurRadius: 10,
           offset: const Offset(0, 4),
         ),
-      ],
+      ], */
     );
   }
 
@@ -166,6 +253,20 @@ class PostCardStyling {
           offset: const Offset(2, 2),
         ),
       ],
+    );
+  }
+
+  static BoxDecoration getUserTopbarDecoration(Color vibeColor) {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          ThemeColor.background,
+          Color.alphaBlend(vibeColor.withOpacity(0.3), ThemeColor.background)
+        ],
+        stops: [0.1, 0.9],
+      ),
     );
   }
 

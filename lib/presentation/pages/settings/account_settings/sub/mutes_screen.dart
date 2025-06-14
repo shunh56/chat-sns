@@ -48,8 +48,8 @@ class MutesScreen extends ConsumerWidget {
                   children: [
                   UserIcon(
                             user: user,
-                            width: 48,
-                            isCircle: true,
+                            r: 48,
+                         
                           ),
                     const Gap(12),
                     Text(user.username),

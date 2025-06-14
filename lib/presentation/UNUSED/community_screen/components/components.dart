@@ -107,8 +107,8 @@ class UserStackIcons extends ConsumerWidget {
             ),
             child: UserIcon(
               user: users[i],
-              width: imageRadius * 2,
-              isCircle: true,
+              r: imageRadius * 2,
+             
               navDisabled: true,
             ),
           ),

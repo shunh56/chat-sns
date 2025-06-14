@@ -31,25 +31,24 @@ final followersStreamProvider =
 // フォロワー状態をチェックするための最適化されたプロバイダー
 final isFollowerProvider = Provider.family<bool, String>((ref, userId) {
   return ref.watch(followersListNotifierProvider).maybeWhen(
-        data: (list) => list.any((user) => user.userId == userId),
+        data: (list) => list.any((id) => id == userId),
         orElse: () => false,
       );
 });
 
 final followersListNotifierProvider = StateNotifierProvider.autoDispose<
-    FollowersListNotifier, AsyncValue<List<UserAccount>>>(
+    FollowersListNotifier, AsyncValue<List<String>>>(
   (ref) => FollowersListNotifier(
     ref,
     ref.watch(authProvider),
   )..initialize(),
 );
 
-class FollowersListNotifier
-    extends StateNotifier<AsyncValue<List<UserAccount>>> {
+class FollowersListNotifier extends StateNotifier<AsyncValue<List<String>>> {
   FollowersListNotifier(
     this.ref,
     this._auth,
-  ) : super(const AsyncValue<List<UserAccount>>.loading());
+  ) : super(const AsyncValue<List<String>>.loading());
 
   final Ref ref;
   final FirebaseAuth _auth;
@@ -74,13 +73,13 @@ class FollowersListNotifier
           await ref.read(getFollowersUsecaseProvider).call(currentUser.uid);
 
       // IDリストからユーザー情報を取得
-      final users = await _getUsersFromIds(followerIds);
 
       // disposeされていなければ状態を更新
       if (mounted) {
         // 状態を更新
-        state = AsyncValue.data(users);
-        DebugPrint("Followers list initialized with ${users.length} users");
+        state = AsyncValue.data(followerIds);
+        DebugPrint(
+            "Followers list initialized with ${followerIds.length} users");
 
         // ストリームの監視を開始
         _startListeningToFollowers(currentUser.uid);
@@ -106,11 +105,10 @@ class FollowersListNotifier
 
         try {
           // IDリストからユーザー情報を取得
-          final followers = await _getUsersFromIds(followerIds);
 
           // 状態を更新
           if (mounted) {
-            state = AsyncValue.data(followers);
+            state = AsyncValue.data(followerIds);
           }
         } catch (e) {
           DebugPrint("Error updating followers: $e");
@@ -135,14 +133,6 @@ class FollowersListNotifier
     });
   }
 
-  /// 特定のユーザーがフォロワーかどうかをチェック
-  bool isFollower(String userId) {
-    return state.whenOrNull(
-          data: (followers) => followers.any((user) => user.userId == userId),
-        ) ??
-        false;
-  }
-
   /// 特定のユーザーのフォロワーリストを一度だけ取得
   Future<List<UserAccount>> getFollowers({String? userId}) async {
     try {
@@ -154,45 +144,11 @@ class FollowersListNotifier
 
       final userIds =
           await ref.read(getFollowersUsecaseProvider).call(targetUserId);
-      return await _getUsersFromIds(userIds);
+      return await ref
+          .read(allUsersNotifierProvider.notifier)
+          .getUserAccounts(userIds);
     } catch (e) {
       DebugPrint("Error getting followers: $e");
-      return [];
-    }
-  }
-
-  /// フォロワーをソートする
-  List<UserAccount> sortFollowers(List<UserAccount> followers,
-      {FollowerSortOption sortOption = FollowerSortOption.latestFirst}) {
-    // ソートの前にコピーを作成して元のリストを変更しない
-    final sortedFollowers = List<UserAccount>.from(followers);
-
-    switch (sortOption) {
-      case FollowerSortOption.nameAscending:
-        sortedFollowers.sort((a, b) => a.name.compareTo(b.name));
-        break;
-      case FollowerSortOption.nameDescending:
-        sortedFollowers.sort((a, b) => b.name.compareTo(a.name));
-        break;
-      // 他のソートオプションは必要に応じて追加
-      // ただし最新順/古い順はフォロー日時のデータが必要です
-      default:
-        // デフォルトはそのまま
-        break;
-    }
-    return sortedFollowers;
-  }
-
-  /// IDリストからユーザー情報を取得するヘルパーメソッド
-  Future<List<UserAccount>> _getUsersFromIds(List<String> userIds) async {
-    if (userIds.isEmpty) return [];
-
-    try {
-      final userProvider = ref.read(allUsersNotifierProvider.notifier);
-      final users = await userProvider.getUserAccounts(userIds);
-      return users;
-    } catch (e) {
-      DebugPrint("Error fetching users from IDs: $e");
       return [];
     }
   }

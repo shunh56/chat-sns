@@ -18,95 +18,50 @@ class ReplyItem extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final user =
         ref.read(allUsersNotifierProvider).asData!.value[reply.userId]!;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            // タップ時のアクション（リプライの詳細表示など）
-          },
-          borderRadius: BorderRadius.circular(12),
-          splashColor: theme.colorScheme.primary.withOpacity(0.1),
-          highlightColor: theme.colorScheme.primary.withOpacity(0.05),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            /*
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: theme.colorScheme.outline.withOpacity(0.1),
-                width: 0.5,
-              ),
-            ), 
-            */
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ユーザーアバター（コンパクト）
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ユーザーアバター（コンパクト）
 
-                UserIcon(
-                  user: user,
-                  isCircle: true,
-                  width: 40,
-                ),
-
-                const Gap(12),
-
-                // メインコンテンツエリア
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // ヘッダー（名前とタイムスタンプ）
-                      _buildHeader(user, textStyle, theme),
-
-                      const Gap(10),
-
-                      // リプライ内容
-                      _buildContent(textStyle, theme),
-
-                      //const Gap(8),
-
-                      // アクションバー（コンパクト）
-                      // _buildCompactActionBar(theme),
-                    ],
-                  ),
-                ),
-              ],
+            UserIcon(
+              user: user,
             ),
-          ),
+
+            const Gap(12),
+
+            // メインコンテンツエリア
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // ヘッダー（名前とタイムスタンプ）
+                  _buildHeader(user, textStyle),
+
+                  const Gap(10),
+
+                  // リプライ内容
+                  _buildContent(textStyle),
+
+                  //const Gap(8),
+
+                  // アクションバー（コンパクト）
+                  // _buildCompactActionBar(theme),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildUserAvatar(dynamic user, ThemeData theme) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: UserIconPostIcon(user: user),
-      ),
-    );
-  }
-
-  Widget _buildHeader(dynamic user, ThemeTextStyle textStyle, ThemeData theme) {
+  Widget _buildHeader(dynamic user, ThemeTextStyle textStyle) {
     return Row(
       children: [
         // ユーザー名（シンプル）
@@ -119,7 +74,7 @@ class ReplyItem extends ConsumerWidget {
                   height: 1.2,
                 )
                 .copyWith(
-                  color: theme.colorScheme.onSurface,
+                  //color: theme.colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
             overflow: TextOverflow.ellipsis,
@@ -141,16 +96,12 @@ class ReplyItem extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(ThemeTextStyle textStyle, ThemeData theme) {
+  Widget _buildContent(ThemeTextStyle textStyle) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.1),
+        color: ThemeColor.accent,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.08),
-          width: 1,
-        ),
       ),
       child: Text(
         reply.text,

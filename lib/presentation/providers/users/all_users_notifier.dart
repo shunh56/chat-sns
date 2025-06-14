@@ -1,6 +1,8 @@
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/data/datasource/hive/hive_boxes.dart';
+import 'package:app/domain/entity/tag_stat.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/domain/usecases/tag/tagId/get_active_users.dart';
 import 'package:app/domain/usecases/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -127,13 +129,20 @@ class AllUsersNotifier extends _$AllUsersNotifier {
     return res;
   }
 
-  Future<List<UserAccount>> getUsersByHashTag(String tagId,
-      {bool oneOnly = false}) async {
-    final users =
-        await ref.read(userUsecaseProvider).searchUserByTag(tagId, oneOnly);
-    addUserAccounts(users);
-    final res = filterUsers(users);
-    return res;
+  Future<List<UserAccount>> getUsersByHashTag(String tagId) async {
+    final List<TagUser> res =
+        await ref.read(getActiveUsersProvider).execute(tagId);
+    final userIds = res.map((item) => item.userId).toList();
+    return await getUserAccounts(userIds);
+  }
+
+  Future<List<UserAccount>> loadMoreUsersByHashTag(
+      String tagId, String userId) async {
+    final List<TagUser> res = await ref
+        .read(getActiveUsersProvider)
+        .execute(tagId, lastUserId: userId);
+    final userIds = res.map((item) => item.userId).toList();
+    return await getUserAccounts(userIds);
   }
 
   Future<List<UserAccount>> getNewUsers({Timestamp? createdAt}) async {

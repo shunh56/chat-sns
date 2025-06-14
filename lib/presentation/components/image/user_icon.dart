@@ -1,5 +1,8 @@
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
+import 'package:app/presentation/providers/state/bottom_nav.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -240,130 +243,256 @@ class UserIconStoryIcon extends ConsumerWidget {
   }
 }
 
+enum IconType {
+  post,
+  profile,
+}
+
 class UserIcon extends ConsumerWidget {
   const UserIcon({
     super.key,
     required this.user,
-    this.width = 60.0,
+    this.iconType = IconType.post,
     this.navDisabled = false,
-    this.isCircle = false,
+    this.enableDecoration = true,
+    this.r,
   });
   final UserAccount user;
-  final double width;
+  final double? r;
+  final IconType iconType;
   final bool navDisabled;
-  final bool isCircle;
+  final bool enableDecoration;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    double radius = isCircle ? width / 2 : width * 2 / 9;
-
+    double radius;
+    if (r != null) {
+      radius = r!;
+    } else {
+      switch (iconType) {
+        case IconType.post:
+          radius = 20;
+        case IconType.profile:
+          radius = 56;
+        default:
+          radius = 20;
+      }
+    }
+    final vibeColor = VibeColorManager.getVibeColor(user);
     return GestureDetector(
-      onTap: () {
-        if (!navDisabled) {
-          ref.read(navigationRouterProvider(context)).goToProfile(user);
-        }
-      },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: Container(
-          color: ThemeColor.accent,
-          height: width,
-          width: width,
-          child: user.imageUrl != null
-              ? CachedNetworkImage(
-                  imageUrl: user.imageUrl!,
-                  fadeInDuration: const Duration(milliseconds: 120),
-                  imageBuilder: (context, imageProvider) => Container(
-                    height: width,
-                    width: width,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      image: DecorationImage(
-                        image: imageProvider,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+      onTap: navDisabled
+          ? null
+          : () {
+              // プロフィールアイコンで画像が存在する場合はオーバーレイ表示
+              if (iconType == IconType.profile && user.imageUrl != null) {
+                _showImageOverlay(context, user);
+              } else {
+                // それ以外はプロフィール画面に遷移
+
+                ref.read(navigationRouterProvider(context)).goToProfile(user);
+              }
+            },
+      child: iconType == IconType.profile
+          ? Hero(
+              tag: 'user_icon_${user.userId}_${iconType.name}',
+              child: Container(
+                decoration: enableDecoration
+                    ? PostCardStyling.getUserIconDecoration(vibeColor)
+                    : null,
+                padding: enableDecoration
+                    ? const EdgeInsets.all(2)
+                    : EdgeInsets.zero,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(radius),
+                  child: SizedBox(
+                    width: radius * 2,
+                    height: radius * 2,
+                    child: user.imageUrl != null
+                        ? CachedImage.userIcon(
+                            user.imageUrl!, user.name, radius)
+                        : Container(
+                            color: const Color(0xFF2A2A2A),
+                            child: Icon(
+                              Icons.person,
+                              size: radius,
+                              color: Colors.white.withOpacity(0.6),
+                            ),
+                          ),
                   ),
-                  placeholder: (context, url) => const SizedBox(),
-                  errorWidget: (context, url, error) => const SizedBox(),
-                )
-              : Icon(
-                  Icons.person_outline,
-                  size: width * 0.8,
-                  color: ThemeColor.stroke,
                 ),
-        ),
+              ),
+            )
+          : Container(
+              decoration: enableDecoration
+                  ? PostCardStyling.getUserIconDecoration(vibeColor)
+                  : null,
+              padding:
+                  enableDecoration ? const EdgeInsets.all(2) : EdgeInsets.zero,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius),
+                child: SizedBox(
+                  width: radius * 2,
+                  height: radius * 2,
+                  child: user.imageUrl != null
+                      ? CachedImage.userIcon(user.imageUrl!, user.name, radius)
+                      : Container(
+                          color: const Color(0xFF2A2A2A),
+                          child: Icon(
+                            Icons.person,
+                            size: radius,
+                            color: Colors.white.withOpacity(0.6),
+                          ),
+                        ),
+                ),
+              ),
+            ),
+    );
+  }
+
+  void _showImageOverlay(BuildContext context, UserAccount user) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black.withOpacity(0.8),
+        barrierDismissible: true,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return UserImageOverlay(
+            user: user,
+            heroTag: 'user_icon_${user.userId}_${iconType.name}',
+          );
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
       ),
     );
   }
 }
 
-class UserIconCanvasIcon extends ConsumerWidget {
-  const UserIconCanvasIcon({
+// 画像オーバーレイウィジェット
+class UserImageOverlay extends StatefulWidget {
+  const UserImageOverlay({
     super.key,
     required this.user,
-    this.theme,
+    required this.heroTag,
   });
+
   final UserAccount user;
-  final CanvasTheme? theme;
+  final String heroTag;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final canvasTheme = CanvasTheme.defaultCanvasTheme();
-    //final canvasTheme = theme ?? user.canvasTheme;
-    const double imageHeight = 80.0;
-    return Container(
-      padding: EdgeInsets.all(canvasTheme.iconStrokeWidth),
-      decoration: BoxDecoration(
-        gradient: !canvasTheme.iconHideBorder
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  canvasTheme.iconGradientStartColor,
-                  canvasTheme.iconGradientEndColor,
-                ],
-              )
-            : null,
-        borderRadius: BorderRadius.circular(
-          canvasTheme.iconRadius + 12,
-        ),
-      ),
-      child: Container(
-        padding: EdgeInsets.all(12 - canvasTheme.iconStrokeWidth),
-        decoration: BoxDecoration(
-          color: canvasTheme.bgColor,
-          borderRadius: BorderRadius.circular(
-            canvasTheme.iconRadius + 12 - canvasTheme.iconStrokeWidth,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(canvasTheme.iconRadius),
-          child: Container(
-            color: ThemeColor.accent,
-            height: imageHeight,
-            width: imageHeight,
-            child: user.imageUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: user.imageUrl!,
-                    fadeInDuration: const Duration(milliseconds: 120),
-                    imageBuilder: (context, imageProvider) => Container(
-                      height: imageHeight,
-                      width: imageHeight,
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                          image: imageProvider,
-                          fit: BoxFit.cover,
+  State<UserImageOverlay> createState() => _UserImageOverlayState();
+}
+
+class _UserImageOverlayState extends State<UserImageOverlay>
+    with SingleTickerProviderStateMixin {
+  late TransformationController _transformationController;
+  late AnimationController _animationController;
+  Animation<Matrix4>? _animationReset;
+
+  @override
+  void initState() {
+    super.initState();
+    _transformationController = TransformationController();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _resetAnimation() {
+    _animationReset = Matrix4Tween(
+      begin: _transformationController.value,
+      end: Matrix4.identity(),
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _animationReset!.addListener(() {
+      _transformationController.value = _animationReset!.value;
+    });
+    _animationController.forward(from: 0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const double radius = 120;
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: Colors.transparent,
+          child: Stack(
+            children: [
+              // メイン画像表示エリア
+              Center(
+                child: Hero(
+                  tag: widget.heroTag,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(radius),
+                    child: InteractiveViewer(
+                      transformationController: _transformationController,
+                      minScale: 0.5,
+                      maxScale: 2.0,
+                      onInteractionEnd: (details) {
+                        // ズームアウトしすぎた場合はリセット
+                        if (_transformationController.value
+                                .getMaxScaleOnAxis() <
+                            1.0) {
+                          _resetAnimation();
+                        }
+                      },
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.9,
+                          maxHeight: MediaQuery.of(context).size.height * 0.8,
+                        ),
+                        child: UserIcon(
+                          user: widget.user,
+                          r: radius,
+                          navDisabled: true,
                         ),
                       ),
                     ),
-                    placeholder: (context, url) => const SizedBox(),
-                    errorWidget: (context, url, error) => const SizedBox(),
-                  )
-                : const Icon(
-                    Icons.person_outline,
-                    size: imageHeight * 0.8,
-                    color: ThemeColor.stroke,
                   ),
+                ),
+              ),
+
+              // 閉じるボタン
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 16,
+                right: 16,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

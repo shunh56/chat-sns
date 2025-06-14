@@ -6,6 +6,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/profile/subpages/edit_bio_screen.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dart';
@@ -50,9 +51,7 @@ class ProfileScreen extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue = ref.watch(myAccountNotifierProvider);
 
-    final statusBarHeight = MediaQuery.of(context).padding.top;
     final thumbnailHeight = themeSize.screenWidth * 0.35;
-    const height = 112.0;
 
     return asyncValue.when(
       data: (me) {
@@ -73,15 +72,8 @@ class ProfileScreen extends ConsumerWidget {
                         children: [
                           Container(
                             height: thumbnailHeight,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  canvasTheme.bgColor,
-                                  canvasTheme.boxBgColor,
-                                ],
-                              ),
+                            decoration: PostCardStyling.getUserTopbarDecoration(
+                              VibeColorManager.getVibeColor(me),
                             ),
                           ),
                           Positioned(
@@ -90,51 +82,18 @@ class ProfileScreen extends ConsumerWidget {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text(
-                                      'BLANK',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
+                                    const Spacer(),
+                                    GestureDetector(
+                                      onTap: () {
+                                        ProfileBottomSheet(context)
+                                            .openBottomSheet(me);
+                                      },
+                                      child: Icon(
+                                        Icons.settings_outlined,
+                                        color: canvasTheme.profileTextColor,
                                       ),
                                     ),
-                                    Row(
-                                      children: [
-                                        /* GestureDetector(
-                                          onTap: () {
-                                            ref
-                                                .read(canvasThemeProvider
-                                                    .notifier)
-                                                .state = canvasTheme;
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    const EditCanvasThemeScreen(),
-                                              ),
-                                            );
-                                          },
-                                          child: Icon(
-                                            Icons.palette_outlined,
-                                            color: canvasTheme.profileTextColor,
-                                          ),
-                                        ),
-                                        const Gap(12), */
-                                        GestureDetector(
-                                          onTap: () {
-                                            ProfileBottomSheet(context)
-                                                .openBottomSheet(me);
-                                          },
-                                          child: Icon(
-                                            Icons.settings_outlined,
-                                            color: canvasTheme.profileTextColor,
-                                          ),
-                                        ),
-                                      ],
-                                    )
                                   ],
                                 ),
                               ),
@@ -149,7 +108,11 @@ class ProfileScreen extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   // プロフィール画像
-                                  UserIconCanvasIcon(user: me),
+
+                                  UserIcon(
+                                    user: me,
+                                    iconType: IconType.profile,
+                                  ),
 
                                   if (me.links.isShown)
                                     Padding(

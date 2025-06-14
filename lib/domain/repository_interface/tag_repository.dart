@@ -6,21 +6,11 @@ abstract class TagRepository {
   Future<void> updateUserTagsImmediate(
       List<String> newTags, List<String> previousTags);
 
-  // 即時処理：ユーザーのタグリスト取得
-  Future<List<String>> getUserTags(String userId);
-
-  // 定時処理：全タグの統計情報更新
-  Future<void> updateTagStatsDaily();
+  Future<TagInfo> getTagInfo(String tagId);
 
   // 統計情報取得
-  Future<TagStat> getTagStat(String tagId);
-  Future<List<TagStat>> getPopularTags({int limit = 10});
+  Future<List<TagInfo>> getPopularTags({int limit = 5});
 
   // タグを選択しているユーザー取得
-  Future<List<String>> getUsersByTag(String tagId,
-      {int limit = 20, String? lastUserId});
-
-  // タグの使用履歴取得
-  Future<List<TagHistory>> getTagHistory(String tagId,
-      {required DateTime startDate, required DateTime endDate});
+  Future<List<TagUser>> getActiveUsers(String tagId, {String? lastUserId});
 }

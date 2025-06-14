@@ -154,7 +154,7 @@ class BlockedProfileScreen extends ConsumerWidget {
           children: [
             UserIcon(
               user: user,
-              width: 72,
+              r: 72,
               navDisabled: true,
             ),
             Positioned.fill(

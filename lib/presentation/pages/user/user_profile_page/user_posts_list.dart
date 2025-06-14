@@ -102,10 +102,11 @@ class _UserPostsListState extends ConsumerState<UserPostsList>
                   children: [
                     UserWidget(
                       userId: widget.userId,
-                      builder: (user) => PostCard(postRef: post, user: user),
+                      builder: (user) => PostCard(
+                        postRef: post,
+                        user: user,
+                      ),
                     ),
-                    // PostWidget(postRef: post),
-                    //CustomPostWidget(postRef: post),
                   ],
                 );
               },

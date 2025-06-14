@@ -288,7 +288,6 @@ class MainPage extends HookConsumerWidget {
               TimelinePage(),
               ChatScreen(),
               ProfileScreen(),
-              DiscoveryScreen(),
             ],
           ),
           const HeartAnimationArea(),
@@ -379,10 +378,6 @@ class BottomBar extends ConsumerWidget {
             context, ref, "ソーシャル", 2, "assets/images/icons/chat.svg"),
         _bottomNavItem(
             context, ref, "プロフィール", 3, "assets/images/icons/profile.svg"),
-        BottomNavigationBarItem(
-          label: "new",
-          icon: Icon(Icons.new_label),
-        ),
       ],
     );
   }
@@ -454,7 +449,7 @@ class BottomBar extends ConsumerWidget {
 
                     child: CircleAvatar(
                       radius: 4, // サイズを小さくする
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Colors.red,
                     ),
                   ),
                 );

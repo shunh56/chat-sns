@@ -135,7 +135,7 @@ class RoomScreen extends ConsumerWidget {
                         }
                         final user = snapshot.data![0];
                         return ListTile(
-                          leading: UserIcon(user: user, width: 40),
+                          leading: UserIcon(user: user, r: 40),
                           title: Text(
                             user.name,
                             style: textStyle.w600(fontSize: 16),

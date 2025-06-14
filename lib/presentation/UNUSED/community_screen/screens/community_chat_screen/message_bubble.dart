@@ -41,8 +41,8 @@ class ChatMessageBubble extends ConsumerWidget {
             children: [
               UserIcon(
                 user: user,
-                width: 36,
-                isCircle: true,
+                r: 36,
+               
               ),
               const SizedBox(width: 12),
               Expanded(

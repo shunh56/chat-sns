@@ -70,8 +70,8 @@ class VoiceChatSection extends ConsumerWidget {
                   ),
                   child: UserIcon(
                     user: users[i],
-                    width: 36,
-                    isCircle: true,
+                    r: 36,
+                  
                   ),
                 ),
               ),

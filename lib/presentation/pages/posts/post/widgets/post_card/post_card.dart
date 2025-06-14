@@ -108,18 +108,10 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
           : null,
       child: Container(
         margin: _getCardMargin(),
-        decoration: _getCardDecoration(vibeColor),
+        decoration: PostCardStyling.getCardDecoration(vibeColor),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(_getBorderRadius()),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.1),
-              ),
-              child: _buildCardContent(context, ref, post),
-            ),
-          ),
+          child: _buildCardContent(context, ref, post),
         ),
       ),
     );
@@ -185,23 +177,7 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
 
   /// カードマージンを取得
   EdgeInsets _getCardMargin() {
-    switch (style) {
-      case PostCardStyle.timeline:
-        return const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
-
-      case PostCardStyle.detail:
-      default:
-        return EdgeInsets.zero;
-    }
-  }
-
-  /// カード装飾を取得
-  BoxDecoration _getCardDecoration(Color vibeColor) {
-    if (style == PostCardStyle.detail) {
-      return PostCardStyling.getCardDecoration(vibeColor);
-    }
-
-    return PostCardStyling.getCardDecoration(vibeColor);
+    return const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
   }
 
   /// ボーダー半径を取得

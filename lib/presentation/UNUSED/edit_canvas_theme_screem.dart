@@ -550,7 +550,7 @@ class EditCanvasThemeScreen extends ConsumerWidget {
                     ),
                     child: Column(
                       children: [
-                        UserIconCanvasIcon(user: me, theme: canvasTheme),
+                        UserIcon(user: me,iconType: IconType.profile,),
                         /*const Gap(8),
                         Text(
                           !canvasTheme.iconHideLevel ? "LEVEL 1" : "",

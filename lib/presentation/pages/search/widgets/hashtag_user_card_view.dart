@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/data/datasource/local/hashtags.dart';
+import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/image/image.dart';
+import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/search/sub_pages/user_card_stack_screen.dart';
 import 'package:app/presentation/providers/users/hashtag_users.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
@@ -108,13 +112,39 @@ class HashtagUserCardView extends ConsumerWidget {
       error: (e, s) => const SizedBox(),
       loading: () => const SizedBox(),
     );
+    final cardBg = asyncTagStat.when(
+      data: (data) {
+        return CachedImage.usersCard(data.imageUrl);
+      },
+      error: (e, s) => const SizedBox(),
+      loading: () => const SizedBox(),
+    );
     return asyncValue.when(
       data: (users) {
         if (users.isEmpty) {
-          return _buildEmptyCard(tagName, textStyle);
+          //return _buildEmptyCard(tagName, textStyle);
         }
 
-        final user = users.first;
+        final userList = users.sublist(0, min(users.length, 3));
+        const diff = 30.0;
+        final Widget iconStacks = users.isEmpty
+            ? const SizedBox()
+            : SizedBox(
+                width: 44 + 30 * (userList.length - 1),
+                height: 44,
+                child: Stack(
+                  children: List.generate(
+                    userList.length,
+                    (int index) {
+                      return Positioned(
+                        left: index * diff,
+                        child: UserIcon(user: userList[index]),
+                      );
+                    },
+                  ),
+                ),
+              );
+
         return GestureDetector(
           onTap: () async {
             await ref
@@ -122,7 +152,10 @@ class HashtagUserCardView extends ConsumerWidget {
                 .loadMore();
             final loadedUsers =
                 ref.read(hashTagUsersNotifierProvider(tagId)).asData!.value;
-            loadedUsers.removeWhere((user) => user.isMe);
+            if (loadedUsers.isEmpty) {
+              showMessage("最近このタグを選択したユーザーがいません。");
+              return;
+            }
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -145,9 +178,7 @@ class HashtagUserCardView extends ConsumerWidget {
                 fit: StackFit.expand,
                 children: [
                   // ユーザー画像
-                  user.imageUrl != null
-                      ? CachedImage.usersCard(user.imageUrl!)
-                      : const SizedBox(),
+                  cardBg,
                   // 暗くするオーバーレイ
                   Container(
                     decoration: BoxDecoration(
@@ -155,6 +186,11 @@ class HashtagUserCardView extends ConsumerWidget {
                     ),
                   ),
                   statsWidget,
+                  Positioned(
+                    bottom: 12,
+                    left: 12,
+                    child: iconStacks,
+                  )
                 ],
               ),
             ),

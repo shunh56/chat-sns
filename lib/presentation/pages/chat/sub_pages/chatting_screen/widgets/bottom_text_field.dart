@@ -28,11 +28,8 @@ class BottomTextField extends HookConsumerWidget {
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom + 24;
 
     // フォロー関連の状態取得
-
-    final followingNotifier = ref.watch(followingListNotifierProvider.notifier);
-    final followerNotifier = ref.watch(followersListNotifierProvider.notifier);
-    final isFollowing = followingNotifier.isFollowing(user.userId);
-    final isFollowed = followerNotifier.isFollower(user.userId);
+    final isFollowing = ref.watch(isFollowingProvider(user.userId));
+    final isFollowed = ref.watch(isFollowerProvider(user.userId));
     final isMutualFollow = isFollowing && isFollowed;
 
     // ブロック関連の状態取得

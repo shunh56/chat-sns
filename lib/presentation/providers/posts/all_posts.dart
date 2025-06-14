@@ -47,6 +47,14 @@ class AllPostsNotifier extends _$AllPostsNotifier {
     state = AsyncValue.data(cache);
   }
 
+  Future<List<Post>> getPostsFromUserIds(List<String> userIds,
+      {bool onlyPublic = false}) async {
+    final posts =
+        await ref.read(postUsecaseProvider).getPostFromUserIds(userIds);
+    addPosts(posts);
+    return posts;
+  }
+
   Future<List<Post>> getPostsFromUserId(String userId) async {
     final posts = await ref.read(postUsecaseProvider).getPostFromUserId(userId);
     addPosts(posts);
@@ -65,9 +73,6 @@ class AllPostsNotifier extends _$AllPostsNotifier {
     cache[post.id]!.likeCount += 1;
     state = AsyncValue.data(cache);
     ref.read(postUsecaseProvider).incrementLikeCount(post.id, 1);
-    if (user.userId != ref.read(authProvider).currentUser!.uid) {
-      ref.read(activitiesUsecaseProvider).addLikeToPost(user, post);
-    }
   }
 
   addReply(UserAccount user, Post post, String text) {
@@ -116,6 +121,9 @@ class AllPostsNotifier extends _$AllPostsNotifier {
     try {
       ref.read(pushNotificationUsecaseProvider).sendPostReaction(user);
       await ref.read(postUsecaseProvider).addReaction(postId, reactionType);
+      if (user.userId != ref.read(authProvider).currentUser!.uid) {
+        ref.read(activitiesUsecaseProvider).addReactionToPost(user, postId);
+      }
       // ローカル状態も更新
       final cache = state.asData?.value ?? {};
       if (cache.containsKey(postId)) {

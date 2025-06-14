@@ -122,6 +122,9 @@ class NotificationHandler {
     }
   }
 
+  //TODO DMの通知バナーのみ対応しているので、投稿やフォローなどにも対応できるようにする。
+  void _showPostReactionBanner(PushNotificationModel notification) {}
+
   // 通知タップ時の処理
   Future<void> handleNotificationTap(RemoteMessage message) async {
     final data = message.data;

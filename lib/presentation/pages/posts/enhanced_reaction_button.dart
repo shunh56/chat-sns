@@ -1,13 +1,17 @@
 // lib/presentation/pages/posts/components/reactions/enhanced_reaction_button.dart
 import 'package:app/core/utils/debug_print.dart';
+import 'package:app/core/utils/theme.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/posts/post_reaction.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/pages/posts/post/components/reactions/reaction_picker.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'dart:math' as math;
 
@@ -132,14 +136,16 @@ class EnhancedReactionButton extends HookConsumerWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: _getReactionColor(reactionType)
-                                .withOpacity(0.15),
                             borderRadius: BorderRadius.circular(100),
+                            color: ThemeColor.stroke,
+                            /*color: _getReactionColor(reactionType)
+                                .withOpacity(0.15),
+                           
                             border: Border.all(
                               color: _getReactionColor(reactionType)
                                   .withOpacity(0.3),
                               width: 1.5,
-                            ),
+                            ), 
                             boxShadow: [
                               BoxShadow(
                                 color: hasUserReacted
@@ -151,13 +157,14 @@ class EnhancedReactionButton extends HookConsumerWidget {
                                 spreadRadius: hasUserReacted ? 1 : 0,
                               ),
                             ],
+                            */
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               // 絵文字にグロー効果
                               Container(
-                                decoration: hasUserReacted
+                                /* decoration: hasUserReacted
                                     ? BoxDecoration(
                                         boxShadow: [
                                           BoxShadow(
@@ -169,7 +176,7 @@ class EnhancedReactionButton extends HookConsumerWidget {
                                           ),
                                         ],
                                       )
-                                    : null,
+                                    : null, */
                                 child: Text(
                                   _getEmojiForReaction(reactionType),
                                   style: TextStyle(
@@ -188,24 +195,23 @@ class EnhancedReactionButton extends HookConsumerWidget {
                                 ),
                               ),
 
-                              if (reactionCount > 0) const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 6,
                                   vertical: 2,
                                 ),
-                                decoration: BoxDecoration(
+                                /*decoration: BoxDecoration(
                                   color: hasUserReacted
                                       ? _getReactionColor(reactionType)
                                           .withOpacity(0.2)
                                       : null,
                                   borderRadius: BorderRadius.circular(10),
-                                ),
+                                ), */
                                 child: Text(
                                   reactionCount.toString(),
                                   style: TextStyle(
                                     color: hasUserReacted
-                                        ? _getReactionColor(reactionType)
+                                        ? Colors.white
                                         : Colors.white.withOpacity(0.3),
                                     fontWeight: FontWeight.w600,
                                     fontSize: 11,
@@ -224,28 +230,23 @@ class EnhancedReactionButton extends HookConsumerWidget {
           ),
 
           // より洗練されたヒントテキスト
-          if (getDisplayReactions().length == 1)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.touch_app_outlined,
-                    size: 12,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(width: 4),
+
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              children: [
+                if (post.replyCount > 0)
                   Text(
-                    '長押しで他のリアクション',
+                    '${post.replyCount}件の返信',
                     style: TextStyle(
                       color: Colors.grey.shade500,
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
+          ),
         ],
       ),
     );

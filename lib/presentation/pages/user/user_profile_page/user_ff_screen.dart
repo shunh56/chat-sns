@@ -2,6 +2,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/tiles/user_request_widget.dart';
+import 'package:app/presentation/components/user_widget.dart';
 
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/follow/followers_list_notifier.dart';
@@ -178,7 +179,7 @@ class _FFListView extends ConsumerWidget {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
-    final users = user.userId == ref.read(authProvider).currentUser!.uid
+    final ids = user.userId == ref.read(authProvider).currentUser!.uid
         ? type == FFType.followers
             ? ref.watch(followersListNotifierProvider).asData?.value ?? []
             : ref.watch(followingListNotifierProvider).asData?.value ?? []
@@ -187,12 +188,16 @@ class _FFListView extends ConsumerWidget {
             : ref.watch(userFollowingsProvider(user.userId)).asData?.value ??
                 [];
 
-    return users.isEmpty
+    return ids.isEmpty
         ? _buildEmptyState(textStyle)
         : ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (context, index) =>
-                UserRequestWidget(user: users[index]),
+            itemCount: ids.length,
+            itemBuilder: (context, index) => UserWidget(
+              userId: ids[index],
+              builder: (user) {
+                return UserRequestWidget(user: user);
+              },
+            ),
           );
   }
 
