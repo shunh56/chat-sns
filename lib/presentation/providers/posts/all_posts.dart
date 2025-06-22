@@ -1,3 +1,4 @@
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/usecases/push_notification_usecase.dart';
@@ -117,20 +118,23 @@ class AllPostsNotifier extends _$AllPostsNotifier {
 
   Future<void> addReaction(
       UserAccount user, String postId, String reactionType) async {
-    final String userId = user.userId;
+    //final String userId = user.userId;
+    final myId = ref.read(authProvider).currentUser!.uid;
     try {
       ref.read(pushNotificationUsecaseProvider).sendPostReaction(user);
       await ref.read(postUsecaseProvider).addReaction(postId, reactionType);
-      if (user.userId != ref.read(authProvider).currentUser!.uid) {
+      if (user.userId != myId) {
         ref.read(activitiesUsecaseProvider).addReactionToPost(user, postId);
       }
       // ローカル状態も更新
       final cache = state.asData?.value ?? {};
       if (cache.containsKey(postId)) {
-        final updatedPost = cache[postId]!.addReaction(userId, reactionType);
+        final updatedPost = cache[postId]!.addReaction(myId, reactionType);
         cache[postId] = updatedPost;
         state = AsyncValue.data(cache);
       }
+      DebugPrint(
+          "state :  ${cache[postId]?.reactions.map((k, v) => MapEntry(k, v.userIds))}");
     } catch (e) {
       // エラーハンドリング
       print('Failed to add reaction: $e');

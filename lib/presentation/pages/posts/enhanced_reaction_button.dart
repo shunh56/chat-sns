@@ -9,6 +9,7 @@ import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart'
 import 'package:app/presentation/pages/posts/post/components/reactions/reaction_picker.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
@@ -45,6 +46,7 @@ class EnhancedReactionButton extends HookConsumerWidget {
       showDialog(
         context: context,
         barrierColor: Colors.transparent,
+        barrierDismissible: true,
         builder: (context) =>
             ParticleEffectOverlay(selectedEmoji: selectedEmoji),
       );
@@ -302,46 +304,31 @@ class ParticleEffectOverlay extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useAnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1500),
     );
 
-    // より多様なパーティクル（選択された絵文字と装飾）
-    final particles = useMemoized(() {
-      final particleList = <EnhancedParticleData>[];
+    // ハプティック実行済みフラグを管理
+    final hapticExecuted = useRef<Set<int>>({});
 
-      // メイン絵文字パーティクル（大きめ）
-      for (int i = 0; i < 5; i++) {
-        final angle = (i / 5) * 2 * math.pi;
+    final particles = useMemoized(() {
+      final particleList = <FloatingParticleData>[];
+
+      for (int i = 0; i < 8; i++) {
+        final startX = 0.2 + (i / 7) * 0.6;
+        final endX = startX + (math.Random().nextDouble() - 0.5) * 0.3;
+
         particleList.add(
-          EnhancedParticleData(
-            x: 0.5,
-            y: 0.5,
-            targetX: 0.5 + math.cos(angle) * 0.3,
-            targetY: 0.5 + math.sin(angle) * 0.3,
-            size: 24.0,
+          FloatingParticleData(
+            id: i, // IDを追加
+            startX: startX,
+            endX: endX.clamp(0.1, 0.9),
+            startY: 1.2,
+            endY: -0.2,
+            size: 36.0 + math.Random().nextDouble() * 36,
             delay: i * 0.1,
             emoji: selectedEmoji,
-            isMainEmoji: true,
-            rotationSpeed: (math.Random().nextDouble() - 0.5) * 4,
-          ),
-        );
-      }
-
-      // 装飾パーティクル（小さめのスパークル）
-      for (int i = 0; i < 15; i++) {
-        final angle = math.Random().nextDouble() * 2 * math.pi;
-        final distance = 0.15 + math.Random().nextDouble() * 0.4;
-        particleList.add(
-          EnhancedParticleData(
-            x: 0.5,
-            y: 0.5,
-            targetX: 0.5 + math.cos(angle) * distance,
-            targetY: 0.5 + math.sin(angle) * distance,
-            size: 8.0 + math.Random().nextDouble() * 6,
-            delay: i * 0.05,
-            emoji: ['✨', '💫', '⭐', '🌟'][i % 4],
-            isMainEmoji: false,
-            rotationSpeed: (math.Random().nextDouble() - 0.5) * 6,
+            horizontalDrift: (math.Random().nextDouble() - 0.5) * 0.15,
+            rotationSpeed: (math.Random().nextDouble() - 0.5) * 2,
           ),
         );
       }
@@ -349,17 +336,40 @@ class ParticleEffectOverlay extends HookConsumerWidget {
       return particleList;
     }, [selectedEmoji]);
 
+    // アニメーションの監視とハプティック実行
     useEffect(() {
+      void animationListener() {
+        for (final particle in particles) {
+          final particleProgress =
+              (controller.value - particle.delay).clamp(0.0, 1.0);
+
+          // パーティクルが開始したタイミング（初回のみ）
+          if (particleProgress > 0 &&
+              !hapticExecuted.value.contains(particle.id)) {
+            hapticExecuted.value.add(particle.id);
+
+            HapticFeedback.lightImpact();
+          }
+        }
+      }
+
+      controller.addListener(animationListener);
+      return () => controller.removeListener(animationListener);
+    }, [particles]);
+
+    useEffect(() {
+      // アニメーション開始時にリセット
+      hapticExecuted.value.clear();
+
       controller.forward().then((_) {
         Navigator.of(context).pop();
       });
       return null;
     }, []);
 
-    return Container(
-      color: Colors.transparent,
+    return IgnorePointer(
       child: CustomPaint(
-        painter: EnhancedParticlePainter(
+        painter: FloatingParticlePainter(
           animation: controller,
           particles: particles,
         ),
@@ -367,6 +377,285 @@ class ParticleEffectOverlay extends HookConsumerWidget {
       ),
     );
   }
+}
+
+// パーティクルデータにIDを追加
+class FloatingParticleData {
+  final int id; // 追加
+  final double startX;
+  final double endX;
+  final double startY;
+  final double endY;
+  final double size;
+  final double delay;
+  final String emoji;
+  final double horizontalDrift;
+  final double rotationSpeed;
+
+  FloatingParticleData({
+    required this.id, // 追加
+    required this.startX,
+    required this.endX,
+    required this.startY,
+    required this.endY,
+    required this.size,
+    required this.delay,
+    required this.emoji,
+    required this.horizontalDrift,
+    required this.rotationSpeed,
+  });
+}
+
+// 上昇アニメーション用のペインター
+class FloatingParticlePainter extends CustomPainter {
+  final Animation<double> animation;
+  final List<FloatingParticleData> particles;
+
+  FloatingParticlePainter({
+    required this.animation,
+    required this.particles,
+  }) : super(repaint: animation);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final particle in particles) {
+      final rawProgress = (animation.value - particle.delay).clamp(0.0, 1.0);
+      if (rawProgress <= 0) continue;
+
+      // より自然な上昇カーブ（最初は速く、後半は減速）
+      final progress = Curves.easeOutQuart.transform(rawProgress);
+
+      // Y座標の計算（下から上へ）
+      final y = size.height *
+          (particle.startY + (particle.endY - particle.startY) * progress);
+
+      // X座標の計算（軽い揺らぎ付き）
+      final baseX =
+          particle.startX + (particle.endX - particle.startX) * progress;
+      final driftOffset =
+          math.sin(progress * math.pi * 3) * particle.horizontalDrift;
+      final x = size.width * (baseX + driftOffset);
+
+      // 透明度の計算（フェードイン→フェードアウト）
+      late double opacity;
+      if (progress < 0.15) {
+        // 最初の15%でフェードイン
+        opacity = progress / 0.15;
+      } else if (progress > 0.8) {
+        // 最後の20%でフェードアウト
+        opacity = (1.0 - progress) / 0.2;
+      } else {
+        // 中間は完全に表示
+        opacity = 1.0;
+      }
+      opacity = opacity.clamp(0.0, 1.0);
+
+      // サイズの変化（最初少し小さく、中間で通常サイズ、最後やや大きく）
+      late double scale;
+      if (progress < 0.2) {
+        scale = 0.7 + (progress / 0.2) * 0.3; // 0.7 → 1.0
+      } else if (progress > 0.7) {
+        scale = 1.0 + ((progress - 0.7) / 0.3) * 0.2; // 1.0 → 1.2
+      } else {
+        scale = 1.0;
+      }
+
+      final currentSize = particle.size * scale;
+
+      // 回転角度
+      final rotation = particle.rotationSpeed * progress * 2 * math.pi;
+
+      // 絵文字を描画
+      _drawFloatingEmoji(
+        canvas,
+        particle.emoji,
+        Offset(x, y),
+        currentSize,
+        opacity,
+        rotation,
+      );
+    }
+  }
+
+  void _drawFloatingEmoji(
+    Canvas canvas,
+    String emoji,
+    Offset position,
+    double size,
+    double opacity,
+    double rotation,
+  ) {
+    canvas.save();
+    canvas.translate(position.dx, position.dy);
+    canvas.rotate(rotation);
+
+    final textStyle = TextStyle(
+      fontSize: size,
+      shadows: [
+        Shadow(
+          color: Colors.black.withOpacity(0.15 * opacity),
+          blurRadius: 2,
+          offset: const Offset(0.5, 1),
+        ),
+        // 軽いグロー効果
+        Shadow(
+          color: Colors.white.withOpacity(0.1 * opacity),
+          blurRadius: 6,
+          offset: Offset.zero,
+        ),
+      ],
+    );
+
+    final textSpan = TextSpan(text: emoji, style: textStyle);
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout();
+
+    // 中央揃えで描画
+    final offset = Offset(
+      -textPainter.width / 2,
+      -textPainter.height / 2,
+    );
+
+    // 透明度を適用
+    canvas.saveLayer(
+      Rect.fromLTWH(
+        offset.dx,
+        offset.dy,
+        textPainter.width,
+        textPainter.height,
+      ),
+      Paint()..color = Colors.white.withOpacity(opacity),
+    );
+
+    textPainter.paint(canvas, offset);
+    canvas.restore();
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// シンプル化されたパーティクルデータ
+class SimpleParticleData {
+  final double angle;
+  final double distance;
+  final double size;
+  final double delay;
+  final String emoji;
+
+  SimpleParticleData({
+    required this.angle,
+    required this.distance,
+    required this.size,
+    required this.delay,
+    required this.emoji,
+  });
+}
+
+// シンプルで効果的なパーティクルペインター
+class SimpleParticlePainter extends CustomPainter {
+  final Animation<double> animation;
+  final List<SimpleParticleData> particles;
+
+  SimpleParticlePainter({
+    required this.animation,
+    required this.particles,
+  }) : super(repaint: animation);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+
+    for (final particle in particles) {
+      final progress = (animation.value - particle.delay).clamp(0.0, 1.0);
+      if (progress <= 0) continue;
+
+      // より自然なイージング（弾むような動き）
+      final easedProgress = Curves.elasticOut.transform(progress);
+
+      // 位置計算（中心から放射状に）
+      final currentDistance =
+          particle.distance * easedProgress * size.width * 0.3;
+      final x = centerX + math.cos(particle.angle) * currentDistance;
+      final y = centerY + math.sin(particle.angle) * currentDistance;
+
+      // フェードアウト効果（最後の30%で透明に）
+      final opacity =
+          progress < 0.7 ? 1.0 : (1.0 - (progress - 0.7) / 0.3).clamp(0.0, 1.0);
+
+      // サイズアニメーション（開始時に少し大きく）
+      final scale = progress < 0.3
+          ? 0.5 + (progress / 0.3) * 0.7 // 0.5 → 1.2
+          : 1.2 - (progress - 0.3) / 0.7 * 0.2; // 1.2 → 1.0
+
+      final currentSize = particle.size * scale;
+
+      // 絵文字を描画
+      _drawEmoji(
+        canvas,
+        particle.emoji,
+        Offset(x, y),
+        currentSize,
+        opacity,
+      );
+    }
+  }
+
+  void _drawEmoji(
+    Canvas canvas,
+    String emoji,
+    Offset position,
+    double size,
+    double opacity,
+  ) {
+    final textStyle = TextStyle(
+      fontSize: size,
+      shadows: [
+        Shadow(
+          color: Colors.black.withOpacity(0.2 * opacity),
+          blurRadius: 3,
+          offset: const Offset(1, 1),
+        ),
+      ],
+    );
+
+    final textSpan = TextSpan(text: emoji, style: textStyle);
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout();
+
+    // 中央揃えで描画
+    final offset = Offset(
+      position.dx - textPainter.width / 2,
+      position.dy - textPainter.height / 2,
+    );
+
+    // 透明度を適用
+    canvas.saveLayer(
+      Rect.fromLTWH(
+        offset.dx,
+        offset.dy,
+        textPainter.width,
+        textPainter.height,
+      ),
+      Paint()..color = Colors.white.withOpacity(opacity),
+    );
+
+    textPainter.paint(canvas, offset);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 // 拡張されたパーティクルデータクラス

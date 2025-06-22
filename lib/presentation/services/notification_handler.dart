@@ -176,7 +176,7 @@ class NotificationHandler {
   void _showDevModeBottomModal(BuildContext context,
       PushNotificationModel notification, Map<String, dynamic> rawData,
       {bool isFromTap = false}) {
-    showModalBottomSheet(
+/*    showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: ThemeColor.background,
@@ -284,7 +284,7 @@ class NotificationHandler {
           );
         });
       },
-    );
+    ); */
   }
 
   // セクション表示用ウィジェット

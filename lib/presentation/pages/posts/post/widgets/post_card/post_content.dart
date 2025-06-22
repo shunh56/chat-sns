@@ -22,13 +22,16 @@ class PostContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTitle(),
-          if (post.text != null) ...[
+          if (post.title.isNotEmpty) ...[
+            const Gap(8),
+            _buildTitle(),
+          ],
+          if (post.text.isNotEmpty) ...[
             const Gap(6),
             _buildTextContent(),
           ],
@@ -43,15 +46,10 @@ class PostContent extends ConsumerWidget {
 
   /// タイトルを構築
   Widget _buildTitle() {
-    final fontSize = 16.0;
-    final fontWeight = FontWeight.w700;
-
     return Text(
       post.title,
       style: PostTextStyles.getHeaderText(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-      ),
+          fontSize: 16, fontWeight: FontWeight.w700),
       maxLines: null,
       overflow: null,
     );
@@ -60,7 +58,7 @@ class PostContent extends ConsumerWidget {
   /// テキストコンテンツを構築
   Widget _buildTextContent() {
     return LinkifiedText(
-      text: post.text!,
+      text: post.text,
       style: _getTextStyle(),
       maxLines: maxLines ?? _getDefaultMaxLines(),
       overflow: TextOverflow.ellipsis,

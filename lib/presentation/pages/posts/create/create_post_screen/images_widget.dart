@@ -17,38 +17,73 @@ class _PostImagesWidgetState extends ConsumerState<PostImagesWidget> {
   Widget build(BuildContext context) {
     final images = ref.watch(imageListNotifierProvider);
     final themeSize = ref.watch(themeSizeProvider(context));
-    if (images.isNotEmpty) {
-      return Container(
-        margin: const EdgeInsets.only(top: 8),
+    if (images.isEmpty) return const SizedBox();
+    final w = MediaQuery.of(context).size.width;
+    if (images.length == 1) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: FadeTransitionWidget(
+          child: Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: SizedBox(
+                  width: w,
+                  child: Image.file(
+                    images[0],
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.black.withOpacity(0.5),
+                  ),
+                  child: GestureDetector(
+                    onTap: () async {
+                      ref
+                          .read(imageListNotifierProvider.notifier)
+                          .removeItem(0);
+                    },
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    } else {
+      return SizedBox(
         height: 200,
         child: ListView.builder(
           shrinkWrap: true,
           itemCount: images.length,
           scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(
-            horizontal: themeSize.horizontalPadding - 4,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           itemBuilder: (context, index) {
             return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
+              margin: const EdgeInsets.symmetric(horizontal: 8),
               child: FadeTransitionWidget(
                 child: Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
+                      borderRadius: BorderRadius.circular(12),
+                      child: SizedBox(
                         width: 160,
                         height: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.black.withOpacity(0.15),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            images[index],
-                            fit: BoxFit.cover,
-                          ),
+                        child: Image.file(
+                          images[index],
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -83,6 +118,5 @@ class _PostImagesWidgetState extends ConsumerState<PostImagesWidget> {
         ),
       );
     }
-    return const SizedBox();
   }
 }

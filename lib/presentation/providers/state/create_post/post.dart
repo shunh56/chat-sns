@@ -14,7 +14,7 @@ final mentionsProvider = StateProvider.autoDispose<List<String>>((ref) => []);
 class PostState {
   final String id;
   final String userId;
-  final String title;
+  final String? title;
   final String? text;
   final List<File> images;
   final List<String> hashtags;
@@ -35,7 +35,7 @@ class PostState {
   });
 
   // タイトルか本文のどちらかは必須
-  get isReadyToUpload => title.isNotEmpty;
+  get isReadyToUpload => title != null || text != null;
 
   toJson(List<double> aspectRatios, List<String> imageUrls) {
     return {

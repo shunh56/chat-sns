@@ -57,7 +57,7 @@ class PostMediaGallery extends HookConsumerWidget {
     this.maxHeight = 400,
     this.borderRadius = 12,
     this.enableFilters = true,
-    this.enableInteraction = true,
+    this.enableInteraction = false,
     this.onImageTap,
     this.onDoubleTap,
   });

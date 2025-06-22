@@ -218,6 +218,7 @@ class UserTile extends ConsumerWidget {
                 UserIcon(
                   user: user,
                   r: 30,
+                  enableDecoration: false,
                 ),
                 const Gap(18),
                 Expanded(

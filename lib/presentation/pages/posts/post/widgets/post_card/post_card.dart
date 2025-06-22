@@ -1,4 +1,5 @@
 // lib/presentation/pages/posts/post/widgets/post_card/post_card.dart
+import 'package:app/presentation/pages/posts/enhanced_reaction_button.dart';
 import 'package:app/presentation/pages/posts/post/components/animations/post_animation.dart';
 import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
@@ -33,7 +34,6 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
     this.style = PostCardStyle.timeline,
     this.index = 0,
     this.showVibeIndicator = false,
-    this.enableInteraction = true,
     this.onTap,
     this.onDoubleTap,
     this.onReaction,
@@ -46,7 +46,7 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
   final PostCardStyle style;
   final int index;
   final bool showVibeIndicator;
-  final bool enableInteraction;
+
   final VoidCallback? onTap;
   final Function(Offset position)? onDoubleTap;
   final Function(String reactionType)? onReaction;
@@ -57,7 +57,6 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
   Widget build(BuildContext context, WidgetRef ref) {
     final post = ref.watch(allPostsNotifierProvider).asData?.value[postRef.id];
     if (post == null) return const SizedBox();
-
     if (user.accountStatus != AccountStatus.normal) return const SizedBox();
     if (post.isDeletedByUser ||
         post.isDeletedByModerator ||
@@ -131,10 +130,18 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
         ),
 
         // コンテンツ
-        _buildContent(post),
+        PostContent(post: post),
 
         // メディア
-        if (post.mediaUrls.isNotEmpty) _buildMedia(post),
+        if (post.mediaUrls.isNotEmpty) ...[
+          const Gap(4),
+          PostMediaGallery(
+            mediaUrls: post.mediaUrls,
+            aspectRatios: post.aspectRatios,
+            borderRadius: 12,
+            onDoubleTap: onDoubleTap,
+          )
+        ],
 
         // アクションバー
         _buildActionBar(context, ref, post),
@@ -142,36 +149,22 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
     );
   }
 
-  /// コンテンツの構築
-  Widget _buildContent(Post post) {
-    return PostContent(
-      post: post,
-    );
-  }
-
-  /// メディアの構築
-  Widget _buildMedia(Post post) {
-    return PostMediaGallery(
-      mediaUrls: post.mediaUrls,
-      aspectRatios: post.aspectRatios,
-      enableInteraction: enableInteraction,
-      borderRadius: 12,
-      onDoubleTap: onDoubleTap,
-    );
-  }
-
   /// アクションバーの構築
   Widget _buildActionBar(BuildContext context, WidgetRef ref, Post post) {
-    final actionBarStyle = _getActionBarStyle();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: EnhancedReactionButton(
+        post: post,
+        user: user,
 
-    return PostActionBar(
-      post: post,
-      user: user,
-      style: actionBarStyle,
-      onReaction: onReaction,
-      onComment: onComment,
-      onShare: onShare,
-      onMore: () => _handleMoreTap(context, ref, post),
+        // onComment: onComment,
+        // onShare: onShare,
+        // onMore: () => _handleMoreTap(context, ref, post),
+
+        onReaction: (reaction) {
+          onReaction?.call(reaction);
+        },
+      ),
     );
   }
 

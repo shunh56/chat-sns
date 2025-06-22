@@ -33,14 +33,12 @@ class PostTextInputWidget extends ConsumerWidget {
       decoration: InputDecoration(
         contentPadding: EdgeInsets.zero,
         isDense: true,
-        hintText: "本文を入力...",
+        hintText: "メッセージを入力...",
         hintStyle: textStyle.w500(
           fontSize: 14,
           color: ThemeColor.subText,
         ),
-        counterStyle: textStyle.numText(
-          color: ThemeColor.subText,
-        ),
+        counterText: "",
         border: InputBorder.none,
       ),
     );

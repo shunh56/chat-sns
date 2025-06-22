@@ -9,6 +9,7 @@ import 'package:app/presentation/pages/main_page/main_page.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 
 class TimelinePage extends ConsumerWidget {
@@ -146,29 +147,18 @@ class DefaultTabs extends ConsumerWidget {
                       padding: EdgeInsets.symmetric(
                         horizontal: themeSize.horizontalPadding,
                       ),
-                      child: Row(
+                      child: Stack(
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              ref
-                                  .watch(scaffoldKeyProvider)
-                                  .currentState
-                                  ?.openDrawer();
-                            },
-                            onDoubleTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const NewScreen(),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              appName,
-                              style: textStyle.appbarText(),
+                          Center(
+                            child: SizedBox(
+                              height: 72,
+                              width: 72,
+                              child: SvgPicture.asset(
+                                'assets/images/icons/bg_transparent.svg',
+                              ),
                             ),
                           ),
-                          const Expanded(child: SizedBox()),
+
                           // subscriptionLogo,
                           // const Gap(12),
                           //const ActivityIcon(),

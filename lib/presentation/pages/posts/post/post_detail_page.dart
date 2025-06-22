@@ -94,7 +94,7 @@ class PostScreen extends HookConsumerWidget {
                   children: [
                     PostCard(
                       style: PostCardStyle.detail,
-                      postRef: postRef,
+                      postRef: post,
                       user: user,
                     ),
                     _buildDivider(),
@@ -132,7 +132,7 @@ class PostScreen extends HookConsumerWidget {
         ),
       ),
       title: Text(
-        post.title,
+        post.title ?? user.name,
         style: textStyle.w700(
           fontSize: 16,
           color: Colors.white,

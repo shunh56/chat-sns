@@ -165,7 +165,7 @@ class ThemeTextStyle {
           ? 16
           : japanese
               ? 20
-              : 20,
+              : 24,
       fontWeight: FontWeight.w600,
       fontFamily: japanese ? primary : null,
     );

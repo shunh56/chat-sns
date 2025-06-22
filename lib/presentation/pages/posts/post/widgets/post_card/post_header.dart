@@ -172,7 +172,7 @@ class PostDetailHeader extends ConsumerWidget {
       children: [
         // タイトル
         Text(
-          post.title,
+          post.title ?? "NULL TITLE",
           style: PostTextStyles.getHeaderText(
             fontSize: 20,
             fontWeight: FontWeight.w700,

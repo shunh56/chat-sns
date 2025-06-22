@@ -7,7 +7,7 @@ class Post {
   final String id;
   final String userId;
   final String title;
-  final String? text;
+  final String text;
   final Timestamp createdAt;
   final Timestamp updatedAt;
   final List<String> mediaUrls;
@@ -28,7 +28,7 @@ class Post {
     required this.id,
     required this.userId,
     required this.title,
-    this.text,
+    required this.text,
     required this.createdAt,
     required this.updatedAt,
     required this.mediaUrls,
@@ -61,8 +61,8 @@ class Post {
     return Post(
       id: json["id"],
       userId: json["userId"],
-      title: json["title"] ?? "TITLE HERE",
-      text: json["text"],
+      title: json["title"] ?? "",
+      text: json["text"] ?? "",
       createdAt: json["createdAt"],
       updatedAt: json["updatedAt"] ?? json["createdAt"],
       mediaUrls: List<String>.from(json["mediaUrls"] ?? []),

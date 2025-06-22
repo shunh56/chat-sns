@@ -1,6 +1,7 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
+import 'package:app/presentation/UNUSED/user_listview_testing_screen.dart';
 import 'package:app/presentation/pages/activities/activities_screen.dart';
 import 'package:app/presentation/pages/footprint/footprint_screen.dart';
 import 'package:app/presentation/pages/footprint/widget/footprint_badge.dart';
@@ -8,6 +9,7 @@ import 'package:app/presentation/pages/search/widgets/defaut_user_card_view.dart
 import 'package:app/presentation/pages/search/widgets/hashtag_user_card_view.dart';
 import 'package:app/presentation/pages/search/widgets/top_feed.dart';
 import 'package:app/presentation/pages/search/sub_pages/search_params_screen.dart';
+import 'package:app/presentation/pages/searchv2/search_users_screenv2.dart';
 import 'package:app/presentation/providers/activities_list_notifier.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 
@@ -24,6 +26,7 @@ class SearchUsersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.read(myAccountNotifierProvider).asData!.value;
     final showHashtagFeed = me.tags.isEmpty;
+    //return SearchUsersScreenV2();
     return Scaffold(
       body: RefreshIndicator(
         backgroundColor: ThemeColor.accent,
@@ -60,11 +63,21 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
     padding: const EdgeInsets.symmetric(horizontal: 12),
     child: Row(
       children: [
-        Text(
-          appName,
-          style: textStyle.w600(
-            fontSize: 28,
-            color: ThemeColor.white,
+        GestureDetector(
+          onDoubleTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NewScreen(),
+              ),
+            );
+          },
+          child: Text(
+            appName,
+            style: textStyle.w600(
+              fontSize: 28,
+              color: ThemeColor.white,
+            ),
           ),
         ),
         const Spacer(),

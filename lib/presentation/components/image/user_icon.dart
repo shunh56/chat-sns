@@ -254,7 +254,7 @@ class UserIcon extends ConsumerWidget {
     required this.user,
     this.iconType = IconType.post,
     this.navDisabled = false,
-    this.enableDecoration = true,
+    this.enableDecoration = false,
     this.r,
   });
   final UserAccount user;
