@@ -9,7 +9,6 @@ abstract class Failure {
     this.stackTrace,
   });
 
-  @override
   List<Object?> get props => [message, code];
 }
 

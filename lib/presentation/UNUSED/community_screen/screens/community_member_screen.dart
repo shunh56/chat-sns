@@ -21,7 +21,6 @@ class CommunityMemberScreen extends ConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final asyncValue =
         ref.watch(communityMembersNotifierProvider(community.id));
-    final scrollController = ScrollController();
     /*scrollController.addListener(() async {
       if (scrollController.position.pixels >
           scrollController.position.maxScrollExtent + 120) {

@@ -6,18 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final visitProfileProvider = Provider(
   (ref) => VisitProfileProvider(
     ref.watch(visitProfileUsecaseProvider),
-    ref,
   ),
 );
 
 class VisitProfileProvider {
   final VisitProfileUsecase _visitProfileUsecase;
-  final Ref _ref;
   
   // 処理中のプロフィールIDを記憶（短時間に連続アクセスを防止）
   final Set<String> _processingIds = {};
   
-  VisitProfileProvider(this._visitProfileUsecase, this._ref);
+  VisitProfileProvider(this._visitProfileUsecase);
   
   Future<void> visitProfile(UserAccount user) async {
     // すでに処理中なら何もしない（連続アクセス防止）

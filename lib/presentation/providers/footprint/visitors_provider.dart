@@ -12,18 +12,13 @@ final visitorsProvider = StateNotifierProvider.autoDispose<VisitorsNotifier,
   ref.keepAlive();
   return VisitorsNotifier(
     ref.watch(getVisitorsUsecaseProvider),
-    ref.watch(streamVisitorsUsecaseProvider),
   );
 });
 
 class VisitorsNotifier extends StateNotifier<AsyncValue<List<Footprint>>> {
   final GetVisitorsUsecase _getVisitorsUsecase;
-  final StreamVisitorsUsecase _streamVisitorsUsecase;
 
-  // ストリームの購読を管理
-  StreamSubscription<List<Footprint>>? _subscription;
-
-  VisitorsNotifier(this._getVisitorsUsecase, this._streamVisitorsUsecase)
+  VisitorsNotifier(this._getVisitorsUsecase)
       : super(const AsyncValue.loading()) {
     _loadVisitors();
   }

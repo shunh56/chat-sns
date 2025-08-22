@@ -54,7 +54,7 @@ class DMNotificationBanner extends HookConsumerWidget {
 
     final senderId = notification.sender.userId;
     final senderName = notification.sender.name;
-    final messageText = notification.content.body ?? "新しいメッセージ";
+    final messageText = notification.content.body;
     final senderImage = notification.sender.imageUrl;
 
     return Positioned(

@@ -5,23 +5,20 @@ import 'package:app/data/datasource/firebase/firebase_funcrtions.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/domain/usecases/push_notification_usecase.dart';
 import 'package:app/domain/usecases/voice_chat_usecase.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final voipUsecaseProvider = Provider(
   (ref) => VoipUsecase(
     ref,
     ref.watch(pushNotificationUsecaseProvider),
-    ref.watch(functionsProvider),
   ),
 );
 
 class VoipUsecase {
   final Ref _ref;
   final PushNotificationUsecase _pushNotificationUsecase;
-  final FirebaseFunctions _functions;
 
-  VoipUsecase(this._ref, this._pushNotificationUsecase, this._functions);
+  VoipUsecase(this._ref, this._pushNotificationUsecase);
   callUser(UserAccount user) async {
     final voipCallable = _ref.read(httpsCallableProvider).voip();
     final me = _ref.read(myAccountNotifierProvider).asData!.value;

@@ -48,9 +48,9 @@ class HiveBoxes {
   static Future<void> clearAllBoxes() async {
     try {
       await Hive.deleteBoxFromDisk('userAccount');
-      print('Successfully cleared all Hive data');
+      DebugPrint('Successfully cleared all Hive data');
     } catch (e) {
-      print('Error clearing Hive data: $e');
+      DebugPrint('Error clearing Hive data: $e');
     }
   }
 }

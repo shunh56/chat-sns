@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:app/core/utils/debug_print.dart';
 import 'package:app/data/providers/story_providers.dart';
 import 'package:app/domain/entity/story/story.dart';
 import 'package:app/domain/repository_interface/story_repository.dart';
@@ -63,7 +64,7 @@ class ImageCompressor {
 
       return File(result.path);
     } catch (e) {
-      print('画像の圧縮に失敗しました: $e');
+      DebugPrint('画像の圧縮に失敗しました: $e');
       return null;
     }
   }
@@ -133,17 +134,17 @@ class UploadStoryUsecase {
         // 圧縮に成功した場合は圧縮したファイルを使用
         if (compressedFile != null) {
           finalMediaPath = compressedFile.path;
-          print(
+          DebugPrint(
               '画像を最適化しました: ${originalFile.lengthSync()}バイト → ${compressedFile.lengthSync()}バイト');
         } else {
-          print('画像の最適化に失敗しました。元のファイルを使用します。');
+          DebugPrint('画像の最適化に失敗しました。元のファイルを使用します。');
         }
       }
 
       // リポジトリを通じてアップロード
       await _storyRepository.uploadStory(story, finalMediaPath);
     } catch (e) {
-      print('ストーリーのアップロードに失敗しました: $e');
+      DebugPrint('ストーリーのアップロードに失敗しました: $e');
       throw Exception('Failed to upload story: $e');
     }
   }

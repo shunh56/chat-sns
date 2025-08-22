@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
@@ -357,7 +356,6 @@ class NotificationCounterNotifier
     state = state.copyWith(isAnimating: true);
 
     // 3秒固定のアニメーション
-    int totalDuration = 1000;
     int incrementInterval = 1;
     int totalSteps = 1;
 
@@ -440,14 +438,6 @@ class AnimatedNotificationCounter extends HookConsumerWidget {
       ),
     );
 
-    final glowAnimation = useAnimation(
-      Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-          parent: animationController,
-          curve: Curves.easeInOut,
-        ),
-      ),
-    );
 
     final counterState = ref.watch(notificationCounterProvider(count));
     final counterNotifier =

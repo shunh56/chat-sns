@@ -137,7 +137,7 @@ class AllPostsNotifier extends _$AllPostsNotifier {
           "state :  ${cache[postId]?.reactions.map((k, v) => MapEntry(k, v.userIds))}");
     } catch (e) {
       // エラーハンドリング
-      print('Failed to add reaction: $e');
+      DebugPrint('Failed to add reaction: $e');
     }
   }
 
@@ -157,7 +157,7 @@ class AllPostsNotifier extends _$AllPostsNotifier {
       }
     } catch (e) {
       // エラーハンドリング
-      print('Failed to remove reaction: $e');
+      DebugPrint('Failed to remove reaction: $e');
     }
   }
 
@@ -172,7 +172,7 @@ class AllPostsNotifier extends _$AllPostsNotifier {
       // または楽観的更新を実装
     } catch (e) {
       // エラーハンドリング
-      print('Failed to toggle reaction: $e');
+      DebugPrint('Failed to toggle reaction: $e');
     }
   }
 }

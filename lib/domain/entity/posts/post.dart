@@ -1,5 +1,4 @@
 // lib/domain/entity/posts/post.dart の修正
-import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/posts/post_reaction.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -107,7 +106,7 @@ class Post {
 
   // ヘルパーメソッド
   int getTotalReactionCount() {
-    return reactions.values.fold(0, (sum, reaction) => sum + reaction.count);
+    return reactions.values.fold(0, (accumulator, reaction) => accumulator + reaction.count);
   }
 
   int getReactionCount(String type) {
@@ -200,6 +199,6 @@ class Post {
   }
 
   static int _calculateTotalLikes(Map<String, PostReaction> reactions) {
-    return reactions.values.fold(0, (sum, reaction) => sum + reaction.count);
+    return reactions.values.fold(0, (accumulator, reaction) => accumulator + reaction.count);
   }
 }

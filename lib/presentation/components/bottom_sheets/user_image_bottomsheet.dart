@@ -1,7 +1,6 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/images/images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +21,6 @@ class UserImageBottomSheet {
       builder: (context) {
         return Consumer(
           builder: (context, ref, child) {
-            final myId = ref.watch(authProvider).currentUser!.uid;
             final themeSize = ref.watch(themeSizeProvider(context));
             final textStyle = ThemeTextStyle(themeSize: themeSize);
 

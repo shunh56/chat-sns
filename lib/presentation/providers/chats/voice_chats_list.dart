@@ -22,7 +22,6 @@ class VoiceChatListNotifier extends StateNotifier<AsyncValue<List<VoiceChat>>> {
           const AsyncValue.loading(),
         );
 
-  final Ref _ref;
 
   final VoiceChatUsecase _usecase;
 

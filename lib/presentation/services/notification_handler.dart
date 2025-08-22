@@ -1,5 +1,4 @@
 // lib/services/notification_handler.dart
-import 'dart:convert';
 import 'package:app/core/utils/variables.dart';
 import 'package:app/domain/entity/push_notification_model.dart';
 import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_screen.dart';
@@ -35,12 +34,7 @@ class NotificationHandler {
   final Ref ref;
   static const bool isDevMode = true;
 
-  // 静的インスタンス
-  static NotificationHandler? _instance;
-
-  NotificationHandler(this.ref) {
-    _instance = this;
-  }
+  NotificationHandler(this.ref);
   // バックグラウンド通知用ハンドラー - グローバル関数として定義
   static Future<void> handleBackgroundMessage(RemoteMessage message) async {
     HapticFeedback.vibrate();
@@ -69,7 +63,6 @@ class NotificationHandler {
   // フォアグラウンド通知を処理するメソッド
   Future<void> handleForegroundMessage(RemoteMessage message) async {
     final data = message.data;
-    final type = data['type'];
 
     DebugPrint('Foreground notification received: $data');
 
@@ -128,7 +121,6 @@ class NotificationHandler {
   // 通知タップ時の処理
   Future<void> handleNotificationTap(RemoteMessage message) async {
     final data = message.data;
-    final type = data['type'];
 
     DebugPrint('Notification tapped: $data');
 
@@ -185,8 +177,7 @@ class NotificationHandler {
       ),
       builder: (context) {
         return Consumer(builder: (context, ref, child) {
-          final themeSize = ref.watch(themeSizeProvider(context));
-          final textStyle = ThemeTextStyle(themeSize: themeSize);
+                final textStyle = ThemeTextStyle(themeSize: themeSize);
           return DraggableScrollableSheet(
             initialChildSize: 0.6,
             minChildSize: 0.4,
@@ -388,8 +379,8 @@ class NotificationHandler {
   Future<void> _handleDmNotification(PushNotificationModel notification) async {
     // インアプリ通知を表示
     NotificationService.showPushNotification(
-      title: notification.content.title ?? notification.sender.name,
-      body: notification.content.body ?? "新しいメッセージが届いています",
+      title: notification.content.title,
+      body: notification.content.body,
       payload: {
         'type': 'dm',
         'senderId': notification.sender.userId,
@@ -401,8 +392,8 @@ class NotificationHandler {
   Future<void> _handleLikeNotification(
       PushNotificationModel notification) async {
     NotificationService.showPushNotification(
-      title: notification.content.title ?? notification.sender.name,
-      body: notification.content.body ?? "あなたの投稿にいいねしました",
+      title: notification.content.title,
+      body: notification.content.body,
       payload: {
         'type': 'like',
         'senderId': notification.sender.userId,
@@ -414,8 +405,8 @@ class NotificationHandler {
   Future<void> _handleCommentNotification(
       PushNotificationModel notification) async {
     NotificationService.showPushNotification(
-      title: notification.content.title ?? notification.sender.name,
-      body: notification.content.body ?? "あなたの投稿にコメントしました",
+      title: notification.content.title,
+      body: notification.content.body,
       payload: {
         'type': 'comment',
         'senderId': notification.sender.userId,
@@ -428,8 +419,8 @@ class NotificationHandler {
   Future<void> _handleFollowNotification(
       PushNotificationModel notification) async {
     NotificationService.showPushNotification(
-      title: notification.content.title ?? notification.sender.name,
-      body: notification.content.body ?? "あなたをフォローしました",
+      title: notification.content.title,
+      body: notification.content.body,
       payload: {
         'type': 'follow',
         'senderId': notification.sender.userId,
@@ -440,8 +431,8 @@ class NotificationHandler {
   Future<void> _handleFriendRequestNotification(
       PushNotificationModel notification) async {
     NotificationService.showPushNotification(
-      title: notification.content.title ?? notification.sender.name,
-      body: notification.content.body ?? "フレンドリクエストが届きました",
+      title: notification.content.title,
+      body: notification.content.body,
       payload: {
         'type': 'friendRequest',
         'senderId': notification.sender.userId,
@@ -452,8 +443,8 @@ class NotificationHandler {
   Future<void> _handleDefaultNotification(
       PushNotificationModel notification) async {
     NotificationService.showPushNotification(
-      title: notification.content.title ?? "新しい通知",
-      body: notification.content.body ?? "",
+      title: notification.content.title,
+      body: notification.content.body,
       payload: {'type': 'default'},
     );
   }

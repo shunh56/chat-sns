@@ -62,8 +62,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       return BlockedProfileScreen(user: user, state: "blocked");
     }
 
-    final statusBarHeight = MediaQuery.of(context).padding.top;
-    const height = 112.0;
     final thumbnailHeight = themeSize.screenWidth * 0.35;
 
     return Scaffold(
@@ -1026,7 +1024,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
   Widget _buildCurrentStatus(BuildContext context, WidgetRef ref,
       CanvasTheme canvasTheme, UserAccount user) {
-    final themeSize = ref.watch(themeSizeProvider(context));
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,

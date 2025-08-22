@@ -9,7 +9,7 @@ import 'package:app/presentation/providers/footprint/footprint_manager_provider.
 import 'package:app/presentation/providers/footprint/visited_provider.dart';
 import 'package:app/presentation/providers/footprint/visitors_provider.dart';
 import 'package:app/presentation/providers/session_provider.dart';
-import 'package:app/presentation/providers/users/user_by_userId_provider.dart';
+import 'package:app/presentation/providers/users/user_by_user_id_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';

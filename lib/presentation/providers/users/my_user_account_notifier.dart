@@ -209,9 +209,7 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     final otherIds = ref.read(selectedOtherIdsProvider);
     if (otherIds.isNotEmpty) {
       for (String userId in otherIds) {
-        final otherUser =
-            ref.read(allUsersNotifierProvider).asData!.value[userId]!;
-        //ref.read(relationUsecaseProvider).sendRequest(otherUser.userId);
+        //ref.read(relationUsecaseProvider).sendRequest(userId);
       }
     }
   }

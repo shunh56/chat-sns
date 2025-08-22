@@ -295,7 +295,6 @@ class StoryRepositoryImpl implements StoryRepository {
   @override
   Future<List<Story>> getStoriesByTag(String tagId) async {
     try {
-      final now = Timestamp.now();
       final query = await _firestore
           .collection('stories')
           .where('tags', arrayContains: tagId)
