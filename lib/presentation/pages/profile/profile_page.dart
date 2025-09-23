@@ -72,9 +72,6 @@ class ProfileScreen extends ConsumerWidget {
                         children: [
                           Container(
                             height: thumbnailHeight,
-                            decoration: PostCardStyling.getUserTopbarDecoration(
-                              VibeColorManager.getVibeColor(me),
-                            ),
                           ),
                           Positioned(
                             child: SafeArea(

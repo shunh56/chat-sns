@@ -5,14 +5,11 @@ import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/posts/post_reaction.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/pages/posts/post/components/reactions/reaction_picker.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'dart:math' as math;
 
@@ -105,7 +102,7 @@ class EnhancedReactionButton extends HookConsumerWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -232,23 +229,23 @@ class EnhancedReactionButton extends HookConsumerWidget {
           ),
 
           // より洗練されたヒントテキスト
-
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Row(
-              children: [
-                if (post.replyCount > 0)
-                  Text(
-                    '${post.replyCount}件の返信',
-                    style: TextStyle(
-                      color: Colors.grey.shade500,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
+          if (post.replyCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  if (post.replyCount > 0)
+                    Text(
+                      '${post.replyCount}件の返信',
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

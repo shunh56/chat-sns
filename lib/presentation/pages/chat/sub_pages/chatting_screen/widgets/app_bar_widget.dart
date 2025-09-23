@@ -1,5 +1,4 @@
 import 'package:app/presentation/components/image/user_icon.dart';
-import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/follow/followers_list_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,8 +9,6 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/presentation/components/image/image.dart';
-import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:app/domain/usecases/voip_usecase.dart';
@@ -41,7 +38,6 @@ class ChatAppBar extends ConsumerWidget {
               UserIcon(
                 user: user,
                 r: 18,
-                enableDecoration: false,
               ),
               const SizedBox(width: 8),
 
@@ -121,7 +117,8 @@ class ChatAppBar extends ConsumerWidget {
       return;
     }
 
-    if (isMutualFollow) {
+    //TODO
+    if (isMutualFollow || true) {
       final vc = await ref.read(voipUsecaseProvider).callUser(user);
       Navigator.pushReplacement(
         context,

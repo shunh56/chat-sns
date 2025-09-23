@@ -2,7 +2,6 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/user_widget.dart';
 import 'package:app/presentation/pages/posts/post/widgets/post_card/post_card.dart';
-import 'package:app/presentation/pages/posts/widget/post_widget.dart';
 import 'package:app/presentation/providers/posts/user_posts.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/presentation/routes/navigator.dart';

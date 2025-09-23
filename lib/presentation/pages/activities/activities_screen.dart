@@ -1,4 +1,3 @@
-
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
@@ -184,7 +183,6 @@ class ActivityTile extends ConsumerWidget {
                                 child: UserIcon(
                                   user: users[0],
                                   r: 18,
-                                  enableDecoration: false,
                                 ),
                               ),
                               Positioned(
@@ -193,7 +191,6 @@ class ActivityTile extends ConsumerWidget {
                                 child: UserIcon(
                                   user: users[1],
                                   r: 18,
-                                  enableDecoration: false,
                                 ),
                               ),
                             ],
@@ -201,7 +198,6 @@ class ActivityTile extends ConsumerWidget {
                         : UserIcon(
                             user: users[0],
                             r: 24,
-                            enableDecoration: false,
                           ),
                   ),
                   const Gap(12),
@@ -438,7 +434,6 @@ class AnimatedNotificationCounter extends HookConsumerWidget {
       ),
     );
 
-
     final counterState = ref.watch(notificationCounterProvider(count));
     final counterNotifier =
         ref.read(notificationCounterProvider(count).notifier);
@@ -499,7 +494,7 @@ class AnimatedNotificationCounter extends HookConsumerWidget {
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.only(top: 48, bottom: 40),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

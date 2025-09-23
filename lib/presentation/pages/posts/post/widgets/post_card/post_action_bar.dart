@@ -1,15 +1,10 @@
 // lib/presentation/pages/posts/post/widgets/post_card/post_action_bar.dart
 import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/pages/posts/enhanced_reaction_button.dart';
-import 'package:app/presentation/providers/heart_animation_notifier.dart';
-import 'package:app/presentation/providers/posts/all_posts.dart';
-import 'package:app/presentation/routes/navigator.dart';
 import 'package:gap/gap.dart';
 
 /// アクションバーのスタイル

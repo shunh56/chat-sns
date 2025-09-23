@@ -49,7 +49,7 @@ class ReportUserScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Gap(12),
+              const Gap(12),
               Row(
                 children: [
                   UserIcon(

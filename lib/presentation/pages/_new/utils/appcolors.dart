@@ -22,7 +22,7 @@ class AppColors {
         primaryBlue,
       ];
 
-  static LinearGradient get titleGradient => LinearGradient(
+  static LinearGradient get titleGradient => const LinearGradient(
         colors: [primaryPink, primaryPurple, primaryBlue, primaryYellow],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,

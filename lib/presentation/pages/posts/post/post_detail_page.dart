@@ -1,29 +1,18 @@
 // lib/presentation/pages/posts/post_screen.dart
-import 'dart:math';
-import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/icons.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
-import 'package:app/presentation/pages/main_page/heart_animation_overlay.dart';
-import 'package:app/presentation/pages/posts/enhanced_reaction_button.dart';
-import 'package:app/presentation/pages/posts/post/components/vibe/vibe_indicator.dart';
-import 'package:app/presentation/pages/posts/post/components/media/interactive_media_viewer.dart';
 import 'package:app/presentation/pages/posts/post/widgets/post_card/post_card.dart';
 import 'package:app/presentation/pages/posts/post/widgets/replies/reply_item.dart';
-import 'package:app/presentation/pages/posts/widget/post_widget.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/posts/replies.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
-import 'dart:ui';
 
 final inputTextProvider = StateProvider.autoDispose((ref) => "");
 final controllerProvider =
@@ -93,7 +82,6 @@ class PostScreen extends HookConsumerWidget {
                   padding: const EdgeInsets.only(top: 12),
                   children: [
                     PostCard(
-                      style: PostCardStyle.detail,
                       postRef: post,
                       user: user,
                     ),

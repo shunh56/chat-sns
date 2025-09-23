@@ -536,7 +536,7 @@ class QuickActionMenu extends StatelessWidget {
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [
             AppColors.backgroundDark,
             AppColors.backgroundMedium,

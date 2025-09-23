@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/footprint.dart';
 import 'package:app/domain/usecases/footprint/get_visitors_usecase.dart';
-import 'package:app/domain/usecases/footprint/stream_visitors_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // 訪問者リストのステート（キャッシュ）

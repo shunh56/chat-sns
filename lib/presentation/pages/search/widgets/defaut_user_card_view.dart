@@ -1,7 +1,6 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/search/sub_pages/user_card_stack_screen.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';

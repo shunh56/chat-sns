@@ -215,87 +215,6 @@ class VibeTextAnalyzer {
   }
 }
 
-/// 投稿カードのスタイリングを管理するクラス
-class PostCardStyling {
-  /// 投稿カードの基本装飾を取得
-  static BoxDecoration getCardDecoration(Color vibeColor) {
-    return BoxDecoration(
-      color: ThemeColor.cardColor,
-      borderRadius: BorderRadius.circular(20),
-      /*border: Border.all(
-        color: vibeColor.withOpacity(0.3),
-        width: 1,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: vibeColor.withOpacity(0.1),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ], */
-    );
-  }
-
-  /// ユーザーアイコンの装飾を取得
-  static BoxDecoration getUserIconDecoration(Color vibeColor) {
-    return BoxDecoration(
-      shape: BoxShape.circle,
-      gradient: LinearGradient(
-        colors: [
-          vibeColor,
-          vibeColor.withOpacity(0.7),
-        ],
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: vibeColor.withOpacity(0.2),
-          blurRadius: 8,
-          offset: const Offset(2, 2),
-        ),
-      ],
-    );
-  }
-
-  static BoxDecoration getUserTopbarDecoration(Color vibeColor) {
-    return BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          ThemeColor.background,
-          Color.alphaBlend(vibeColor.withOpacity(0.3), ThemeColor.background)
-        ],
-        stops: [0.1, 0.9],
-      ),
-    );
-  }
-
-  /// リアクションボタンの装飾を取得
-  static BoxDecoration getReactionButtonDecoration(
-    Color reactionColor,
-    bool hasUserReacted,
-  ) {
-    return BoxDecoration(
-      color: reactionColor.withOpacity(0.15),
-      borderRadius: BorderRadius.circular(100),
-      border: Border.all(
-        color: reactionColor.withOpacity(0.3),
-        width: 1.5,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: hasUserReacted
-              ? reactionColor.withOpacity(0.1)
-              : Colors.black.withOpacity(0.05),
-          blurRadius: hasUserReacted ? 8 : 4,
-          offset: const Offset(0, 2),
-          spreadRadius: hasUserReacted ? 1 : 0,
-        ),
-      ],
-    );
-  }
-}
-
 /// エモジとアイコンを管理するクラス
 class PostEmojiManager {
   /// リアクションタイプに対応する絵文字を取得
@@ -341,9 +260,6 @@ class PostEmojiManager {
         return {'icon': '💫', 'text': 'Inspired'};
     }
   }
-
-  /// 装飾用の小さなパーティクル絵文字リスト
-  static const List<String> decorativeEmojis = ['✨', '💫', '⭐', '🌟'];
 }
 
 /// フィルター名を管理するクラス

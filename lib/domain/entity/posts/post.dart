@@ -1,5 +1,6 @@
 // lib/domain/entity/posts/post.dart の修正
 import 'package:app/domain/entity/posts/post_reaction.dart';
+import 'package:app/domain/entity/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Post {
@@ -106,7 +107,8 @@ class Post {
 
   // ヘルパーメソッド
   int getTotalReactionCount() {
-    return reactions.values.fold(0, (accumulator, reaction) => accumulator + reaction.count);
+    return reactions.values
+        .fold(0, (accumulator, reaction) => accumulator + reaction.count);
   }
 
   int getReactionCount(String type) {
@@ -199,6 +201,15 @@ class Post {
   }
 
   static int _calculateTotalLikes(Map<String, PostReaction> reactions) {
-    return reactions.values.fold(0, (accumulator, reaction) => accumulator + reaction.count);
+    return reactions.values
+        .fold(0, (accumulator, reaction) => accumulator + reaction.count);
+  }
+
+  bool isValidPost(UserAccount user) {
+    if (user.accountStatus != AccountStatus.normal) return false;
+    if (isDeletedByUser || isDeletedByModerator || isDeletedByAdmin) {
+      return false;
+    }
+    return true;
   }
 }

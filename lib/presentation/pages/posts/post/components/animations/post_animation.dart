@@ -1,7 +1,8 @@
 // lib/presentation/pages/posts/post/components/animations/post_animations.dart
-import 'package:app/presentation/pages/posts/post/widgets/post_card/post_card.dart';
+import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'dart:math' as math;
 
 /// 投稿カード用のアニメーション管理クラス
@@ -26,10 +27,11 @@ class PostAnimations {
 /// 投稿カードのアニメーションを管理するHook
 PostAnimations usePostAnimations({
   required int index,
+  required String postId,
+  required WidgetRef ref,
   Duration slideDuration = const Duration(milliseconds: 600),
   Duration fadeDuration = const Duration(milliseconds: 800),
   Duration scaleDuration = const Duration(milliseconds: 200),
-  PostCardStyle style = PostCardStyle.timeline,
 }) {
   final slideController = useAnimationController(
     duration:
@@ -46,7 +48,7 @@ PostAnimations usePostAnimations({
 
   final slideAnimation = useMemoized(
     () => Tween<Offset>(
-      begin: Offset(0, style == PostCardStyle.timeline ? 0.3 : 0.5),
+      begin: const Offset(0, 0.3),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
@@ -84,12 +86,21 @@ PostAnimations usePostAnimations({
   );
 
   useEffect(() {
-    Future.delayed(Duration(milliseconds: index * 100), () {
-      slideController.forward();
-      fadeController.forward();
-    });
+    final animatedPosts = ref.read(animatedPostsProvider.notifier);
+    final hasBeenAnimated = animatedPosts.hasBeenAnimated(postId);
+    
+    if (hasBeenAnimated) {
+      slideController.value = 1.0;
+      fadeController.value = 1.0;
+    } else {
+      Future.delayed(Duration(milliseconds: index * 100), () {
+        slideController.forward();
+        fadeController.forward();
+        animatedPosts.addAnimatedPost(postId);
+      });
+    }
     return null;
-  }, []);
+  }, [postId]);
 
   return PostAnimations(
     slideController: slideController,

@@ -1,16 +1,13 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/core/values.dart';
 import 'package:app/presentation/components/core/sticky_tabbar.dart';
-import 'package:app/presentation/UNUSED/user_listview_testing_screen.dart';
 import 'package:app/presentation/pages/posts/timeline/feeds/following_feed.dart';
 import 'package:app/presentation/pages/posts/timeline/feeds/public_feed.dart';
-import 'package:app/presentation/pages/main_page/main_page.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class TimelinePage extends ConsumerWidget {
   const TimelinePage({super.key});
@@ -124,19 +121,30 @@ class TimelinePage extends ConsumerWidget {
   }
 }
 
-class DefaultTabs extends ConsumerWidget {
+class DefaultTabs extends HookConsumerWidget {
   const DefaultTabs({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
+    final scrollController = ref.watch(timelineScrollController);
+
+    ref.listen(scrollToTopProvider, (previous, next) {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
 
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         body: NestedScrollView(
-          controller: ref.watch(timelineScrollController),
+          controller: scrollController,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return [
               SliverList(

@@ -96,7 +96,7 @@ class _CosmicLoadingWidgetState extends State<CosmicLoadingWidget>
               width: 8,
               height: 8,
               margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.primaryBlue,
                 shape: BoxShape.circle,
               ),
@@ -147,7 +147,7 @@ class CosmicLoadingPainter extends CustomPainter {
     final starSize = 12 + pulse * 8;
 
     final starPaint = Paint()
-      ..shader = LinearGradient(
+      ..shader = const LinearGradient(
         colors: [AppColors.primaryYellow, AppColors.primaryOrange],
       ).createShader(Rect.fromCircle(center: center, radius: starSize))
       ..style = PaintingStyle.fill;

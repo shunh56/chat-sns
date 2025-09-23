@@ -121,7 +121,7 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
         height: 60,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [

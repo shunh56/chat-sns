@@ -1,8 +1,6 @@
 import 'dart:math';
 
-import 'package:app/presentation/providers/heart_animation_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -29,11 +27,11 @@ class InteractiveMediaViewer extends HookConsumerWidget {
   final Function(Offset)? onDoubleTap;
 
   const InteractiveMediaViewer({
-    Key? key,
+    super.key,
     required this.mediaUrls,
     required this.aspectRatios,
     this.onDoubleTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -141,7 +139,7 @@ class InteractiveMediaViewer extends HookConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.photo_library,
                         color: Colors.white,
                         size: 12,
@@ -170,7 +168,7 @@ class InteractiveMediaViewer extends HookConsumerWidget {
             ],
 
             // ハートアニメーション
-            ...hearts.map((heart) => _buildHeartAnimation(heart)).toList(),
+            ...hearts.map((heart) => _buildHeartAnimation(heart)),
 
             // 操作ヒント
             Positioned(
@@ -266,7 +264,7 @@ class InteractiveMediaViewer extends HookConsumerWidget {
   }
 
   Widget _buildImageStackIndicator() {
-    return Container(
+    return SizedBox(
       width: 48,
       height: 60, // 5:4の比率 (48:60 = 4:5)
       child: Stack(
@@ -338,8 +336,9 @@ class InteractiveMediaViewer extends HookConsumerWidget {
               final displayIndex =
                   shouldShowDots ? currentIndex - 2 + index : index;
 
-              if (shouldShowDots && displayIndex >= totalPages)
-                return SizedBox();
+              if (shouldShowDots && displayIndex >= totalPages) {
+                return const SizedBox();
+              }
 
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 2),

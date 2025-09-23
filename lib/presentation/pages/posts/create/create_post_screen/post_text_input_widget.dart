@@ -18,7 +18,7 @@ class PostTextInputWidget extends ConsumerWidget {
     return TextField(
       keyboardType: TextInputType.multiline,
       maxLines: null,
-      maxLength: 500,
+      maxLength: 40,
       autofocus: false,
       cursorColor: ThemeColor.highlight,
       style: textStyle.w500(
@@ -33,7 +33,7 @@ class PostTextInputWidget extends ConsumerWidget {
       decoration: InputDecoration(
         contentPadding: EdgeInsets.zero,
         isDense: true,
-        hintText: "メッセージを入力...",
+        hintText: "今どんな気分？",
         hintStyle: textStyle.w500(
           fontSize: 14,
           color: ThemeColor.subText,

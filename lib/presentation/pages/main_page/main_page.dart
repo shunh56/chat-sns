@@ -8,7 +8,6 @@ import 'package:app/core/utils/variables.dart';
 import 'package:app/presentation/components/core/shader.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/components/popup/popup_handler.dart';
-import 'package:app/presentation/pages/_new/discovery_screen.dart';
 import 'package:app/presentation/pages/chat/sub_pages/create_chat_screen.dart';
 import 'package:app/presentation/pages/main_page/drawer.dart';
 import 'package:app/presentation/pages/main_page/heart_animation_overlay.dart';
@@ -23,8 +22,10 @@ import 'package:app/presentation/pages/search/search_users_screen.dart';
 import 'package:app/presentation/pages/posts/create/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline/timeline_page.dart';
 import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
+import 'package:app/presentation/v2/tempo_app.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
+import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:app/presentation/services/dm_banner.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
@@ -284,8 +285,8 @@ class MainPage extends HookConsumerWidget {
           IndexedStack(
             index: ref.watch(bottomNavIndexProvider),
             children: const [
-              SearchUsersScreen(),
               TimelinePage(),
+              SearchUsersScreen(),
               ChatScreen(),
               ProfileScreen(),
             ],
@@ -304,7 +305,7 @@ class MainPage extends HookConsumerWidget {
       ),
       floatingActionButton: (() {
         switch (ref.watch(bottomNavIndexProvider)) {
-          case 1:
+          case 0:
             return FloatingActionButton(
               heroTag: "create_post",
               onPressed: () {
@@ -365,8 +366,24 @@ class BottomBar extends ConsumerWidget {
       selectedLabelStyle: textStyle.w600(fontSize: 11),
       unselectedLabelStyle: textStyle.w600(fontSize: 11),
       onTap: (value) {
-        ref.watch(bottomNavIndexProvider.notifier).changeIndex(context, value);
-        _handleTabSelection(ref, value);
+        if (value == 4) {
+          // Tempo v2画面に遷移
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const TempoApp(),
+              fullscreenDialog: true,
+            ),
+          );
+        } else {
+          final currentIndex = ref.read(bottomNavIndexProvider);
+          if (value == currentIndex && value == 0) {
+            ref.read(scrollToTopProvider.notifier).scrollToTop();
+          }
+          ref
+              .watch(bottomNavIndexProvider.notifier)
+              .changeIndex(context, value);
+          _handleTabSelection(ref, value);
+        }
       },
       currentIndex: ref.watch(bottomNavIndexProvider),
       items: [
@@ -378,6 +395,24 @@ class BottomBar extends ConsumerWidget {
             context, ref, "ソーシャル", 2, "assets/images/icons/chat.svg"),
         _bottomNavItem(
             context, ref, "プロフィール", 3, "assets/images/icons/profile.svg"),
+        // Tempo v2 Access Button
+        BottomNavigationBarItem(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF6366F1), Color(0xFFEC4899)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.auto_awesome,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+          label: "Tempo",
+        ),
       ],
     );
   }
@@ -389,12 +424,12 @@ class BottomBar extends ConsumerWidget {
         case 0:
           ref
               .read(sessionStateProvider.notifier)
-              .trackScreenView(ScreenName.homePage.value);
+              .trackScreenView(ScreenName.timelinePage.value);
           break;
         case 1:
           ref
               .read(sessionStateProvider.notifier)
-              .trackScreenView(ScreenName.timelinePage.value);
+              .trackScreenView(ScreenName.homePage.value);
           break;
         case 2:
           ref

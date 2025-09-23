@@ -9,7 +9,6 @@ import 'package:app/presentation/pages/search/widgets/defaut_user_card_view.dart
 import 'package:app/presentation/pages/search/widgets/hashtag_user_card_view.dart';
 import 'package:app/presentation/pages/search/widgets/top_feed.dart';
 import 'package:app/presentation/pages/search/sub_pages/search_params_screen.dart';
-import 'package:app/presentation/pages/searchv2/search_users_screenv2.dart';
 import 'package:app/presentation/providers/activities_list_notifier.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 

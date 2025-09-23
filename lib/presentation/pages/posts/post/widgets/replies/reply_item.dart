@@ -86,7 +86,7 @@ class ReplyItem extends ConsumerWidget {
         // タイムスタンプ（軽量）
         Text(
           "• ${reply.createdAt.xxAgo}",
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
             color: ThemeColor.subText,
             fontWeight: FontWeight.w400,
@@ -105,7 +105,7 @@ class ReplyItem extends ConsumerWidget {
       ),
       child: Text(
         reply.text,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 14,
           color: ThemeColor.text,
           fontWeight: FontWeight.w400,

@@ -342,9 +342,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     children: [
                       Container(
                         height: thumbnailHeight,
-                        decoration: PostCardStyling.getUserTopbarDecoration(
-                          VibeColorManager.getVibeColor(user),
-                        ),
                       ),
                       Positioned(
                         child: SafeArea(

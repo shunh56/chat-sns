@@ -3,7 +3,6 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/message_overview.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/components/user_widget.dart';
 import 'package:app/presentation/providers/chats/dm_flag_provider.dart';
@@ -12,9 +11,6 @@ import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_s
 import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/chats/dm_overview_list.dart';
-import 'package:app/data/datasource/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
-import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -218,7 +214,6 @@ class UserTile extends ConsumerWidget {
                 UserIcon(
                   user: user,
                   r: 30,
-                  enableDecoration: false,
                 ),
                 const Gap(18),
                 Expanded(

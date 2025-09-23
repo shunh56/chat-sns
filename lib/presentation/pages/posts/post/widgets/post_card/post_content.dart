@@ -22,25 +22,18 @@ class PostContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (post.title.isNotEmpty) ...[
-            const Gap(8),
-            _buildTitle(),
-          ],
-          if (post.text.isNotEmpty) ...[
-            const Gap(6),
-            _buildTextContent(),
-          ],
-          if (post.hashtags.isNotEmpty) ...[
-            const Gap(8),
-            _buildHashtags(),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (post.text.isNotEmpty) ...[
+          const Gap(4),
+          _buildTextContent(),
         ],
-      ),
+        if (post.hashtags.isNotEmpty) ...[
+          const Gap(8),
+          _buildHashtags(),
+        ],
+      ],
     );
   }
 

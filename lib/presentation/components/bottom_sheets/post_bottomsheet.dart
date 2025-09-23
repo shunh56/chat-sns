@@ -13,6 +13,7 @@ import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/posts/replies.dart';
+import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:app/domain/usecases/voice_chat_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -635,11 +636,19 @@ class PostBottomModelSheet {
                               GestureDetector(
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () {
+                                  // 削除アニメーション開始
                                   ref
-                                      .read(allPostsNotifierProvider.notifier)
-                                      .deletePostByUser(post);
-                                  showMessage("投稿を削除しました。");
+                                      .read(deletingPostsProvider.notifier)
+                                      .startDeleting(post.id);
                                   Navigator.pop(context);
+                                  
+                                  // アニメーション後に実際の削除処理
+                                  Future.delayed(const Duration(milliseconds: 400), () {
+                                    ref
+                                        .read(allPostsNotifierProvider.notifier)
+                                        .deletePostByUser(post);
+                                    showMessage("投稿を削除しました。");
+                                  });
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(

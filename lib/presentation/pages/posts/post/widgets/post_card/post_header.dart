@@ -34,7 +34,7 @@ class PostHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final vibeColor = VibeColorManager.getVibeColor(user);
     final vibeText = VibeTextAnalyzer.analyzePostVibe(user, post);
-
+    return _buildUserAvatar(vibeColor);
     return Padding(
       padding: EdgeInsets.fromLTRB(
         16,
@@ -57,7 +57,7 @@ class PostHeader extends ConsumerWidget {
             onTap: () {
               PostBottomModelSheet(context).openPostAction(post, user);
             },
-            child: Icon(
+            child: const Icon(
               Icons.more_horiz_outlined,
               color: ThemeColor.subText,
             ),
@@ -75,8 +75,7 @@ class PostHeader extends ConsumerWidget {
   /// ユーザー情報を構築
   Widget _buildUserInfo() {
     return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
           // ユーザー名
           Text(
@@ -91,24 +90,15 @@ class PostHeader extends ConsumerWidget {
           const Gap(2),
 
           // タイムスタンプとアイコン
-          Row(
-            children: [
-              Icon(
-                Icons.access_time_rounded,
-                size: 14,
-                color: Colors.white.withOpacity(0.7),
-              ),
-              const Gap(4),
-              Text(
-                post.createdAt.xxAgo,
-                style: PostTextStyles.getTimestampText(),
-              ),
-              if (isDetailView) ...[
-                const Gap(8),
-                _buildPrivacyIndicator(),
-              ],
-            ],
+          const Gap(4),
+          Text(
+            post.createdAt.xxAgo,
+            style: PostTextStyles.getTimestampText(),
           ),
+          if (isDetailView) ...[
+            const Gap(8),
+            _buildPrivacyIndicator(),
+          ],
         ],
       ),
     );
@@ -137,16 +127,15 @@ class PostDetailHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vibeColor = VibeColorManager.getVibeColor(user);
-    final vibeText = VibeTextAnalyzer.analyzePostVibe(user, post);
-
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: 12,
         vertical: 8,
       ),
       padding: const EdgeInsets.all(20),
-      decoration: PostCardStyling.getCardDecoration(vibeColor),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -181,7 +170,7 @@ class PostDetailHeader extends ConsumerWidget {
         ),
 
         // テキスト内容
-        if (post.text != null) ...[
+        ...[
           const Gap(12),
           Container(
             padding: const EdgeInsets.all(16),
@@ -194,7 +183,7 @@ class PostDetailHeader extends ConsumerWidget {
               ),
             ),
             child: Text(
-              post.text!,
+              post.text,
               style: PostTextStyles.getContentText(
                 fontSize: 16,
                 height: 1.5,

@@ -334,7 +334,7 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.favorite,
                 color: AppColors.primaryPink,
                 size: 12,

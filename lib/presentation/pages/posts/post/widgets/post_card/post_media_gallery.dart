@@ -2,7 +2,6 @@
 import 'dart:math';
 import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:app/presentation/components/image/image.dart';

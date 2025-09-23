@@ -49,7 +49,7 @@ class CreatePostScreen extends ConsumerWidget {
                     community!.name,
                     style: textStyle.w600(fontSize: 16),
                   )
-                : const Text('新規投稿',
+                : const Text('今どうしてる？',
                     style: TextStyle(
                         color: ThemeColor.text, fontWeight: FontWeight.w600)),
             centerTitle: true,
@@ -82,37 +82,28 @@ class CreatePostScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Gap(12),
-                          // Title and Content Card
-                          TextField(
-                            keyboardType: TextInputType.text,
-                            maxLines: 1,
-                            maxLength: 24,
-                            style: textStyle.w700(fontSize: 18),
-                            onChanged: (text) {
-                              ref.read(titleTextProvider.notifier).state = text;
-                            },
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.zero,
-                              isDense: true,
-                              hintText: "タイトルを入力...",
-                              hintStyle: textStyle.w700(
-                                fontSize: 18,
-                                color: ThemeColor.subText,
+                          const Gap(24),
+
+                          Row(
+                            children: [
+                              UserIcon(
+                                user: me,
+                                enableDecoration: false,
+                                r: 20,
                               ),
-                              counterText: "",
-                              border: InputBorder.none,
-                            ),
+                              const Gap(12),
+                              Expanded(
+                                child: Text(
+                                  me.name,
+                                  style: textStyle.w600(
+                                    fontSize: 14,
+                                    color: ThemeColor.text,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const Gap(16),
-
-                          UserIcon(
-                            user: me,
-                            enableDecoration: false,
-                            r: 24,
-                          ),
-
-                          const Gap(12),
                           // Post content input
                           const PostTextInputWidget(),
 
@@ -155,13 +146,13 @@ class CreatePostScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Column(
                           children: [
-                            const Gap(12),
+                            const Gap(8),
                             Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
+                              spacing: 6,
+                              runSpacing: 6,
                               children: [
                                 ...hashtags.map(
-                                  (tag) => _buildChip(
+                                  (tag) => _buildSimpleChip(
                                     context,
                                     text: '#$tag',
                                     onDelete: () {
@@ -255,7 +246,7 @@ class CreatePostScreen extends ConsumerWidget {
                                               .read(allPostsNotifierProvider
                                                   .notifier)
                                               .createPost(postState);
-                                          showMessage("送信を開始しました。");
+                                          showMessage("シェアしました！");
                                           Navigator.pop(context);
                                         }
                                       : null,
@@ -277,7 +268,7 @@ class CreatePostScreen extends ConsumerWidget {
                                       const Icon(Icons.send, size: 16),
                                       const Gap(8),
                                       Text(
-                                        "送信",
+                                        "シェア",
                                         style: TextStyle(
                                           color: postState.isReadyToUpload
                                               ? ThemeColor.white
@@ -302,8 +293,8 @@ class CreatePostScreen extends ConsumerWidget {
           ),
         );
       },
-      error: (e, s) => Scaffold(),
-      loading: () => Scaffold(),
+      error: (e, s) => const Scaffold(),
+      loading: () => const Scaffold(),
     );
   }
 
@@ -386,6 +377,40 @@ class CreatePostScreen extends ConsumerWidget {
           ],
         ),
       ],
+    );
+  }
+
+  // Simple chip design for casual posting
+  Widget _buildSimpleChip(BuildContext context,
+      {required String text, required VoidCallback onDelete}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: ThemeColor.highlight.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: const TextStyle(
+              color: ThemeColor.highlight,
+              fontWeight: FontWeight.w400,
+              fontSize: 12,
+            ),
+          ),
+          const Gap(4),
+          GestureDetector(
+            onTap: onDelete,
+            child: const Icon(
+              Icons.close,
+              size: 14,
+              color: ThemeColor.highlight,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -64,7 +64,7 @@ class _StatBubbleState extends State<StatBubble>
     return Tooltip(
       message: widget.tooltip,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [
             AppColors.backgroundDark,
             AppColors.backgroundMedium,
@@ -147,7 +147,7 @@ class _StatBubbleState extends State<StatBubble>
                               ),
                               const SizedBox(width: 6),
                               ShaderMask(
-                                shaderCallback: (bounds) => LinearGradient(
+                                shaderCallback: (bounds) => const LinearGradient(
                                   colors: [
                                     AppColors.primaryBlue,
                                     AppColors.primaryPurple,

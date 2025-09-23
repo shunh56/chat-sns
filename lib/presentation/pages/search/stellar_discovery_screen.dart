@@ -11,7 +11,6 @@ import 'package:app/presentation/providers/users/online_users.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class StellarDiscoveryScreen extends HookConsumerWidget {
@@ -127,7 +126,19 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
                 const Spacer(),
                 
                 // フローティングコントロール
-                const FloatingControls(),
+                FloatingControls(
+                  onZoomIn: () {
+                    zoomLevel.value = (zoomLevel.value * 1.2).clamp(0.5, 3.0);
+                  },
+                  onZoomOut: () {
+                    zoomLevel.value = (zoomLevel.value / 1.2).clamp(0.5, 3.0);
+                  },
+                  onReset: () {
+                    zoomLevel.value = 1.0;
+                    rotationX.value = 0.0;
+                    rotationY.value = 0.0;
+                  },
+                ),
                 
                 const SizedBox(height: 20),
               ],
@@ -149,14 +160,14 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
       final radius = isNewUser ? 150.0 : 250.0;
       final height = random.nextDouble() * 100 - 50;
       
-      return Positioned(
-        left: MediaQuery.of(entry.value as BuildContext).size.width / 2 + radius * math.cos(angle) - 40,
-        top: MediaQuery.of(entry.value as BuildContext).size.height / 2 + radius * math.sin(angle) + height - 40,
-        child: StellarUserWidget(
-          user: user,
-          isNewUser: isNewUser,
-          size: 80,
-        ),
+      return StellarUserWidget(
+        user: user,
+        orbitRadius: radius,
+        angle: angle,
+        isActive: user.isOnline,
+        onTap: () {
+          // ユーザープロフィールを開く
+        },
       );
     }).toList();
   }

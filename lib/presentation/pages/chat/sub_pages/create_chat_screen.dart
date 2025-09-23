@@ -192,7 +192,6 @@ class CreateChatTile extends ConsumerWidget {
                 UserIcon(
                   user: user,
                   r: 24,
-                  enableDecoration: false,
                 ),
                 const Gap(12),
                 Expanded(

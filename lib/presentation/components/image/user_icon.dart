@@ -277,7 +277,6 @@ class UserIcon extends ConsumerWidget {
           radius = 20;
       }
     }
-    final vibeColor = VibeColorManager.getVibeColor(user);
     return GestureDetector(
       onTap: navDisabled
           ? null
@@ -295,9 +294,6 @@ class UserIcon extends ConsumerWidget {
           ? Hero(
               tag: 'user_icon_${user.userId}_${iconType.name}',
               child: Container(
-                decoration: enableDecoration
-                    ? PostCardStyling.getUserIconDecoration(vibeColor)
-                    : null,
                 padding: enableDecoration
                     ? const EdgeInsets.all(2)
                     : EdgeInsets.zero,
@@ -322,9 +318,6 @@ class UserIcon extends ConsumerWidget {
               ),
             )
           : Container(
-              decoration: enableDecoration
-                  ? PostCardStyling.getUserIconDecoration(vibeColor)
-                  : null,
               padding:
                   enableDecoration ? const EdgeInsets.all(2) : EdgeInsets.zero,
               child: ClipRRect(

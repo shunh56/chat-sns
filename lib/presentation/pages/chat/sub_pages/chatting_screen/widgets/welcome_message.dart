@@ -7,8 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/image/image.dart';
-import 'package:app/presentation/routes/navigator.dart';
 
 // ユーザーIDごとにメッセージを固定するためのプロバイダー
 final welcomeMessageProvider =

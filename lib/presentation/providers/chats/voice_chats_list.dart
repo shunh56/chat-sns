@@ -9,19 +9,16 @@ final vcStreamProvider = StreamProvider.family(
 final voiceChatListNotifierProvider = StateNotifierProvider.autoDispose<
     VoiceChatListNotifier, AsyncValue<List<VoiceChat>>>(
   (ref) => VoiceChatListNotifier(
-    ref,
     ref.watch(voiceChatUsecaseProvider),
   )..init(),
 );
 
 class VoiceChatListNotifier extends StateNotifier<AsyncValue<List<VoiceChat>>> {
   VoiceChatListNotifier(
-    this._ref,
     this._usecase,
   ) : super(
           const AsyncValue.loading(),
         );
-
 
   final VoiceChatUsecase _usecase;
 
