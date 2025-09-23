@@ -1,5 +1,4 @@
 // lib/presentation/pages/posts/post/components/styling/post_styling.dart
-import 'package:app/core/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/entity/posts/post.dart';

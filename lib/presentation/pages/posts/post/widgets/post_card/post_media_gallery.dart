@@ -79,10 +79,7 @@ class PostMediaGallery extends HookConsumerWidget {
     final galleryState = ref.watch(mediaGalleryStateProvider(galleryId));
     final layoutType = this.layoutType ?? _determineLayoutType();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: _buildMediaLayout(context, ref, galleryId, galleryState, layoutType),
-    );
+    return _buildMediaLayout(context, ref, galleryId, galleryState, layoutType);
   }
 
   /// レイアウトタイプを決定

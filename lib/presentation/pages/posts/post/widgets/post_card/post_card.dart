@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/pages/posts/post/components/animations/post_animation.dart';
-import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
 import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';

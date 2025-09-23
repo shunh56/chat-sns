@@ -4,7 +4,6 @@ import 'package:app/data/datasource/local/hashtags.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
-import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:app/presentation/providers/footprint/footprint_manager_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/report/report_user_screen.dart';

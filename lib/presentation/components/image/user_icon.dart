@@ -1,7 +1,6 @@
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/image.dart';
-import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';

@@ -36,6 +36,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+const tempoMode = false;
 final scaffoldKeyProvider = Provider<GlobalKey<ScaffoldState>>((ref) {
   return GlobalKey<ScaffoldState>();
 });
@@ -285,8 +286,8 @@ class MainPage extends HookConsumerWidget {
           IndexedStack(
             index: ref.watch(bottomNavIndexProvider),
             children: const [
-              TimelinePage(),
               SearchUsersScreen(),
+              TimelinePage(),
               ChatScreen(),
               ProfileScreen(),
             ],
@@ -389,30 +390,29 @@ class BottomBar extends ConsumerWidget {
       items: [
         _bottomNavItem(context, ref, "ホーム", 0, "assets/images/icons/home.svg"),
         _bottomNavItem(
-            context, ref, "探す", 1, "assets/images/icons/search_normal.svg"),
-        //_bottomNavItem(context, ref, "投稿", 2, "assets/images/icons/send.svg"),
+            context, ref, "タイムライン", 1, "assets/images/icons/send.svg"),
         _bottomNavItem(
             context, ref, "ソーシャル", 2, "assets/images/icons/chat.svg"),
         _bottomNavItem(
             context, ref, "プロフィール", 3, "assets/images/icons/profile.svg"),
-        // Tempo v2 Access Button
-        BottomNavigationBarItem(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF6366F1), Color(0xFFEC4899)],
+        if (tempoMode)
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6366F1), Color(0xFFEC4899)],
+                ),
+                borderRadius: BorderRadius.circular(12),
               ),
-              borderRadius: BorderRadius.circular(12),
+              child: const Icon(
+                Icons.auto_awesome,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
-            child: const Icon(
-              Icons.auto_awesome,
-              color: Colors.white,
-              size: 18,
-            ),
+            label: "Tempo",
           ),
-          label: "Tempo",
-        ),
       ],
     );
   }

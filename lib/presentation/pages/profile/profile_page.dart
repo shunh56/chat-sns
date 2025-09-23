@@ -6,7 +6,6 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/profile_bottomsheet.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
-import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/profile/subpages/edit_bio_screen.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dart';

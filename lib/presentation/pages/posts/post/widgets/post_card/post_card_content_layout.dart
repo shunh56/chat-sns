@@ -1,3 +1,4 @@
+import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:app/domain/entity/posts/post.dart';
@@ -57,13 +58,17 @@ class PostCardContentLayout extends ConsumerWidget {
 
               // メディア
               if (post.mediaUrls.isNotEmpty) ...[
-                const Gap(8),
+                const Gap(12),
                 PostMediaGallery(
                   mediaUrls: post.mediaUrls,
                   aspectRatios: post.aspectRatios,
                   borderRadius: 12,
                   onDoubleTap: onDoubleTap,
                 )
+              ],
+              if (post.hashtags.isNotEmpty) ...[
+                const Gap(12),
+                _buildHashtags(),
               ],
 
               // アクションバー
@@ -79,6 +84,47 @@ class PostCardContentLayout extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  /// ハッシュタグを構築
+  Widget _buildHashtags() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children:
+          post.hashtags.map((hashtag) => _buildHashtagChip(hashtag)).toList(),
+    );
+  }
+
+  /// ハッシュタグチップを構築
+  Widget _buildHashtagChip(String hashtag, {bool isCompact = false}) {
+    return GestureDetector(
+      onTap: () {
+        // ハッシュタグタップの処理
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 6 : 8,
+          vertical: isCompact ? 2 : 4,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.blue.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.blue.withOpacity(0.3),
+            width: 0.5,
+          ),
+        ),
+        child: Text(
+          '#$hashtag',
+          style: PostTextStyles.getContentText(
+            fontSize: isCompact ? 10 : 12,
+            color: Colors.blue,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
     );
   }
 }
