@@ -261,9 +261,6 @@ final mainPageProvidersKeeper = Provider<void>((ref) {
   ref.watch(followingListNotifierProvider);
   ref.watch(followersListNotifierProvider);
 
-  // プロバイダーが破棄されないよう明示的にキープする
-  ref.keepAlive();
-
   return;
 });
 

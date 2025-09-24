@@ -16,7 +16,7 @@ final isFollowingProvider = Provider.family<bool, String>((ref, userId) {
 });
 
 /// フォロー中ユーザーのリストを管理するNotifierProvider
-final followingListNotifierProvider = StateNotifierProvider.autoDispose<
+final followingListNotifierProvider = StateNotifierProvider<
     FollowingListNotifier, AsyncValue<List<String>>>(
   (ref) {
     return FollowingListNotifier(

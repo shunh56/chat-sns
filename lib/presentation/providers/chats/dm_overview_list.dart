@@ -4,7 +4,7 @@ import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/direct_message_overview_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final dmOverviewListNotifierProvider = StateNotifierProvider.autoDispose<
+final dmOverviewListNotifierProvider = StateNotifierProvider<
     DmOverviewListNotifier, AsyncValue<List<DMOverview>>>(
   (ref) =>
       DmOverviewListNotifier(ref, ref.watch(dmOverviewUsecaseProvider))..init(),

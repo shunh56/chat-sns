@@ -36,7 +36,7 @@ final isFollowerProvider = Provider.family<bool, String>((ref, userId) {
       );
 });
 
-final followersListNotifierProvider = StateNotifierProvider.autoDispose<
+final followersListNotifierProvider = StateNotifierProvider<
     FollowersListNotifier, AsyncValue<List<String>>>(
   (ref) => FollowersListNotifier(
     ref,
