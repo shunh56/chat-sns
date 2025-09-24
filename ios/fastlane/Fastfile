@@ -44,15 +44,18 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # アプリのビルド（Ad-hoc署名でFirebase配布用）
+    # アプリのビルド（Development署名で自動配布）
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
-      export_method: "ad-hoc",
+      export_method: "development",
       output_directory: "./build",
       output_name: "app.ipa",
       export_options: {
-        signingStyle: "automatic"
+        signingStyle: "automatic",
+        compileBitcode: false,
+        uploadBitcode: false,
+        uploadSymbols: true
       }
     )
 
