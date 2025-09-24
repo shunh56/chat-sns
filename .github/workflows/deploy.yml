@@ -94,7 +94,7 @@ jobs:
         path: |
           certificate.p12
           build.keychain
-        key: ios-cert-${{ secrets.IOS_CERTIFICATE_BASE64 }}
+        key: ios-cert-${{ hashFiles('ios/Runner.xcodeproj/project.pbxproj') }}-v1
 
     - name: Setup signing certificate
       if: steps.cert-cache.outputs.cache-hit != 'true'
