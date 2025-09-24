@@ -120,7 +120,7 @@ class PostScreen extends HookConsumerWidget {
         ),
       ),
       title: Text(
-        post.title ,
+        post.title,
         style: textStyle.w700(
           fontSize: 16,
           color: Colors.white,

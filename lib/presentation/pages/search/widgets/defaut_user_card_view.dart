@@ -319,7 +319,7 @@ class DefaultUserCardView extends ConsumerWidget {
           ),
         );
       */
-     },
+      },
     );
   }
 }

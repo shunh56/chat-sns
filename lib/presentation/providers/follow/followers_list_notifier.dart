@@ -36,8 +36,8 @@ final isFollowerProvider = Provider.family<bool, String>((ref, userId) {
       );
 });
 
-final followersListNotifierProvider = StateNotifierProvider<
-    FollowersListNotifier, AsyncValue<List<String>>>(
+final followersListNotifierProvider =
+    StateNotifierProvider<FollowersListNotifier, AsyncValue<List<String>>>(
   (ref) => FollowersListNotifier(
     ref,
     ref.watch(authProvider),

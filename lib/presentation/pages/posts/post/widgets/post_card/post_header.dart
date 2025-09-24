@@ -84,7 +84,7 @@ class PostDetailHeader extends ConsumerWidget {
       children: [
         // タイトル
         Text(
-          post.title ,
+          post.title,
           style: PostTextStyles.getHeaderText(
             fontSize: 20,
             fontWeight: FontWeight.w700,
