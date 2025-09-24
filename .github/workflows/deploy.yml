@@ -12,7 +12,7 @@ env:
 
 jobs:
   deploy-ios:
-    if: false # Temporarily disabled - iOS certificate setup pending
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: macos-latest
 
     steps:
