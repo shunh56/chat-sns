@@ -1,15 +1,10 @@
 // lib/presentation/pages/posts/post/widgets/post_card/post_header.dart
-import 'package:app/core/utils/theme.dart';
-import 'package:app/presentation/components/bottom_sheets/post_bottomsheet.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/posts/post/components/style/post_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/components/image/image.dart';
-import 'package:app/presentation/pages/posts/post/components/vibe/vibe_indicator.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:gap/gap.dart';
 
@@ -89,7 +84,7 @@ class PostDetailHeader extends ConsumerWidget {
       children: [
         // タイトル
         Text(
-          post.title ?? "NULL TITLE",
+          post.title ,
           style: PostTextStyles.getHeaderText(
             fontSize: 20,
             fontWeight: FontWeight.w700,

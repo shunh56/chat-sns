@@ -1,4 +1,3 @@
-import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/transition/fade_transition_widget.dart';
 import 'package:app/presentation/providers/state/create_post/core.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +15,7 @@ class _PostImagesWidgetState extends ConsumerState<PostImagesWidget> {
   @override
   Widget build(BuildContext context) {
     final images = ref.watch(imageListNotifierProvider);
-    final themeSize = ref.watch(themeSizeProvider(context));
+    //final themeSize = ref.watch(themeSizeProvider(context));
     if (images.isEmpty) return const SizedBox();
     final w = MediaQuery.of(context).size.width;
     if (images.length == 1) {

@@ -440,7 +440,7 @@ class AnimatedNotificationCounter extends HookConsumerWidget {
 
     // アニメーション実行済みフラグの監視と制御
     final hasAnimationExecuted = ref.watch(animationExecutedProvider);
-    final setAnimationExecuted = ref.read(animationExecutedProvider.notifier);
+    //final setAnimationExecuted = ref.read(animationExecutedProvider.notifier);
 
     // 初回アニメーション開始（一度だけ実行）
     useEffect(() {

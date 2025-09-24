@@ -9,7 +9,6 @@ import 'package:app/presentation/pages/search/widgets/stellar_user_widget.dart';
 import 'package:app/presentation/pages/search/widgets/floating_controls.dart';
 import 'package:app/presentation/providers/users/online_users.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -22,7 +21,7 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
 
     // 3D コントローラー
-    final controller3D = useMemoized(() => Flutter3DController());
+    //final controller3D = useMemoized(() => Flutter3DController());
 
     // ズームレベルとローテーション
     final zoomLevel = useState(1.0);
@@ -154,7 +153,7 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
 
   List<Widget> _buildUserPlanets(List<UserAccount> users,
       {required bool isNewUser}) {
-    final random = math.Random();
+    //final random = math.Random();
     return users.asMap().entries.map((entry) {
       final index = entry.key;
       final user = entry.value;
@@ -162,7 +161,7 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
       // 3D空間での位置計算
       final angle = (index / users.length) * 2 * math.pi;
       final radius = isNewUser ? 150.0 : 250.0;
-      final height = random.nextDouble() * 100 - 50;
+      //final height = random.nextDouble() * 100 - 50;
 
       return StellarUserWidget(
         user: user,

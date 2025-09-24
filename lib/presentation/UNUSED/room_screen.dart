@@ -140,11 +140,7 @@ class MessageBubble extends HookConsumerWidget {
                   ),
                   if (isMyMessage) ...[
                     const SizedBox(width: 4),
-                    Icon(
-                      true ? Icons.done_all : Icons.done,
-                      size: 16,
-                      color: true ? Colors.blue : Colors.grey[600],
-                    ),
+                    const Icon(Icons.done_all, size: 16, color: Colors.blue),
                   ],
                 ],
               ),

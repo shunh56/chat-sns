@@ -164,7 +164,7 @@ class VibeTextAnalyzer {
 
   /// 投稿内容からバイブテキストを分析
   static String analyzePostVibe(UserAccount user, Post post) {
-    final content = '${post.title} ${post.text ?? ''}'.toLowerCase();
+    final content = '${post.title} ${post.text }'.toLowerCase();
 
     // ハッシュタグからの判定
     for (final hashtag in post.hashtags) {

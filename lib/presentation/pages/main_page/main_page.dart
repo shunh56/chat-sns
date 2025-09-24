@@ -192,7 +192,7 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
           if (navigatorKey.currentState != null) {
             // extra データから通話に必要な情報を取得
             final callId = event.body['extra']?['id'] as String?;
-            final uuid = event.body['id'] as String?;
+            //final uuid = event.body['id'] as String?;
             if (callId != null) {
               /*navigatorKey.currentState!.push(
               MaterialPageRoute(

@@ -28,7 +28,7 @@ class FloatingControls extends HookWidget {
       duration: const Duration(milliseconds: 500),
     );
 
-    final fadeAnimation = useAnimation(
+/*    final fadeAnimation = useAnimation(
       Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
           parent: fadeController,
@@ -44,7 +44,7 @@ class FloatingControls extends HookWidget {
           curve: Curves.elasticOut,
         ),
       ),
-    );
+    ); */
 
     useEffect(() {
       if (isVisible) {

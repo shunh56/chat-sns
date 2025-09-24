@@ -31,13 +31,16 @@ class Community {
     if (id.isEmpty) throw ArgumentError('id cannot be empty');
     if (name.isEmpty) throw ArgumentError('name cannot be empty');
     if (description.isEmpty) throw ArgumentError('description cannot be empty');
-    if (thumbnailImageUrl.isEmpty)
+    if (thumbnailImageUrl.isEmpty) {
       throw ArgumentError('thumbnailImageUrl cannot be empty');
+    }
     if (memberCount < 0) throw ArgumentError('memberCount cannot be negative');
-    if (messageCount < 0)
+    if (messageCount < 0) {
       throw ArgumentError('messageCount cannot be negative');
-    if (moderators.isEmpty)
+    }
+    if (moderators.isEmpty) {
       throw ArgumentError('moderators list cannot be empty');
+    }
     if (userId.isEmpty) throw ArgumentError('userId cannot be empty');
   }
 

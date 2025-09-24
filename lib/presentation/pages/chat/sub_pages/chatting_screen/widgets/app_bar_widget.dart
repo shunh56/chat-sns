@@ -126,8 +126,6 @@ class ChatAppBar extends ConsumerWidget {
           builder: (_) => VoiceChatScreen(id: vc.id),
         ),
       );
-    } else {
-      showMessage("相互フォローでないと通話はできません。");
     }
   }
 }
