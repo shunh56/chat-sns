@@ -11,13 +11,14 @@ import 'package:gap/gap.dart';
 
 /// メディア表示のレイアウトタイプ
 enum MediaLayoutType {
-  single,    // 単一画像
-  multiple,  // 複数画像
-  grid,      // グリッド表示
+  single, // 単一画像
+  multiple, // 複数画像
+  grid, // グリッド表示
 }
 
 /// メディアギャラリーの状態プロバイダー
-final mediaGalleryStateProvider = StateProvider.family<MediaGalleryState, String>(
+final mediaGalleryStateProvider =
+    StateProvider.family<MediaGalleryState, String>(
   (ref, galleryId) => MediaGalleryState(),
 );
 
@@ -75,7 +76,8 @@ class PostMediaGallery extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (mediaUrls.isEmpty) return const SizedBox();
 
-    final galleryId = useMemoized(() => mediaUrls.hashCode.toString(), [mediaUrls]);
+    final galleryId =
+        useMemoized(() => mediaUrls.hashCode.toString(), [mediaUrls]);
     final galleryState = ref.watch(mediaGalleryStateProvider(galleryId));
     final layoutType = this.layoutType ?? _determineLayoutType();
 
@@ -150,7 +152,7 @@ class PostMediaGallery extends HookConsumerWidget {
     MediaGalleryState galleryState,
   ) {
     final pageController = usePageController();
-    
+
     return _buildImageContainer(
       context: context,
       ref: ref,
@@ -164,8 +166,8 @@ class PostMediaGallery extends HookConsumerWidget {
               controller: pageController,
               itemCount: mediaUrls.length,
               onPageChanged: (index) {
-                ref.read(mediaGalleryStateProvider(galleryId).notifier)
-                    .update((state) => state.copyWith(currentImageIndex: index));
+                ref.read(mediaGalleryStateProvider(galleryId).notifier).update(
+                    (state) => state.copyWith(currentImageIndex: index));
               },
               itemBuilder: (context, index) {
                 return _buildFilteredImage(
@@ -178,22 +180,24 @@ class PostMediaGallery extends HookConsumerWidget {
               },
             ),
           ),
-          
+
           // ページインジケーター
           if (mediaUrls.length > 1)
             Positioned(
               bottom: 8,
               left: 0,
               right: 0,
-              child: _buildPageIndicator(galleryState.currentImageIndex, mediaUrls.length),
+              child: _buildPageIndicator(
+                  galleryState.currentImageIndex, mediaUrls.length),
             ),
-            
+
           // 画像カウンター
           if (mediaUrls.length > 1)
             Positioned(
               top: 8,
               right: 8,
-              child: _buildImageCounter(galleryState.currentImageIndex, mediaUrls.length),
+              child: _buildImageCounter(
+                  galleryState.currentImageIndex, mediaUrls.length),
             ),
         ],
       ),
@@ -226,7 +230,7 @@ class PostMediaGallery extends HookConsumerWidget {
             if (index == 5 && mediaUrls.length > 6) {
               return _buildMoreImagesOverlay(context, index);
             }
-            
+
             return _buildFilteredImage(
               mediaUrls[index],
               galleryState.currentFilterIndex,
@@ -254,7 +258,7 @@ class PostMediaGallery extends HookConsumerWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           child: child,
         ),
-        
+
         // フィルター名表示
         if (enableFilters && galleryState.currentFilterIndex > 0)
           Positioned(
@@ -262,7 +266,7 @@ class PostMediaGallery extends HookConsumerWidget {
             left: 8,
             child: _buildFilterIndicator(galleryState.currentFilterIndex),
           ),
-          
+
         // 操作ヒント
         if (enableInteraction)
           Positioned(
@@ -283,7 +287,7 @@ class PostMediaGallery extends HookConsumerWidget {
     Function(Offset)? onDoubleTap,
   }) {
     final filters = MediaFilterManager.getFilters();
-    
+
     return GestureDetector(
       onTap: onTap,
       onDoubleTapDown: (details) {
@@ -333,7 +337,8 @@ class PostMediaGallery extends HookConsumerWidget {
                 width: isActive ? 8 : 6,
                 height: isActive ? 8 : 6,
                 decoration: BoxDecoration(
-                  color: isActive ? Colors.white : Colors.white.withOpacity(0.5),
+                  color:
+                      isActive ? Colors.white : Colors.white.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(4),
                 ),
               );
@@ -395,10 +400,9 @@ class PostMediaGallery extends HookConsumerWidget {
 
   /// 操作ヒントを構築
   Widget _buildInteractionHint() {
-    final hintText = mediaUrls.length > 1
-        ? 'スワイプで画像切替・ダブルタップでフィルター'
-        : 'ダブルタップでフィルター';
-        
+    final hintText =
+        mediaUrls.length > 1 ? 'スワイプで画像切替・ダブルタップでフィルター' : 'ダブルタップでフィルター';
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -418,7 +422,7 @@ class PostMediaGallery extends HookConsumerWidget {
   /// 追加画像オーバーレイを構築
   Widget _buildMoreImagesOverlay(BuildContext context, int index) {
     final remainingCount = mediaUrls.length - 5;
-    
+
     return GestureDetector(
       onTap: () => _handleImageTap(context, index),
       child: Stack(
@@ -450,7 +454,7 @@ class PostMediaGallery extends HookConsumerWidget {
   /// 最適なアスペクト比を計算
   double _calculateOptimalAspectRatio() {
     if (aspectRatios.isEmpty) return 16 / 9;
-    
+
     final avgRatio = aspectRatios.reduce((a, b) => a + b) / aspectRatios.length;
     return avgRatio < 1 ? min(1 / avgRatio, 16 / 9) : max(1 / avgRatio, 4 / 5);
   }

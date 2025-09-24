@@ -31,10 +31,13 @@ class Community {
     if (id.isEmpty) throw ArgumentError('id cannot be empty');
     if (name.isEmpty) throw ArgumentError('name cannot be empty');
     if (description.isEmpty) throw ArgumentError('description cannot be empty');
-    if (thumbnailImageUrl.isEmpty) throw ArgumentError('thumbnailImageUrl cannot be empty');
+    if (thumbnailImageUrl.isEmpty)
+      throw ArgumentError('thumbnailImageUrl cannot be empty');
     if (memberCount < 0) throw ArgumentError('memberCount cannot be negative');
-    if (messageCount < 0) throw ArgumentError('messageCount cannot be negative');
-    if (moderators.isEmpty) throw ArgumentError('moderators list cannot be empty');
+    if (messageCount < 0)
+      throw ArgumentError('messageCount cannot be negative');
+    if (moderators.isEmpty)
+      throw ArgumentError('moderators list cannot be empty');
     if (userId.isEmpty) throw ArgumentError('userId cannot be empty');
   }
 
@@ -48,9 +51,14 @@ class Community {
       messageCount: json['messageCount'] as int? ?? 0,
       createdAt: json['createdAt'] as Timestamp? ?? Timestamp.now(),
       updatedAt: json['updatedAt'] as Timestamp? ?? Timestamp.now(),
-      moderators: (json['moderators'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      moderators: (json['moderators'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       userId: json['userId'] as String? ?? '',
-      tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              [],
     );
   }
 

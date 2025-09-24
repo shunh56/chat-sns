@@ -13,7 +13,7 @@ class OnboardingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
-    
+
     return Scaffold(
       body: Stack(
         children: [
@@ -50,7 +50,7 @@ class OnboardingScreen extends ConsumerWidget {
                     },
                   ),
                 ),
-                
+
                 // Page content
                 Expanded(
                   child: PageView(
@@ -62,14 +62,14 @@ class OnboardingScreen extends ConsumerWidget {
                       InputImageUrlScreen(),
                       AccountConfirmScreen(),
                     ],
-                    onPageChanged: (value) => 
+                    onPageChanged: (value) =>
                         ref.read(pageIndexProvider.notifier).state = value,
                   ),
                 ),
               ],
             ),
           ),
-          
+
           // Loading overlay
           if (ref.watch(creatingProcessProvider))
             Container(
@@ -79,7 +79,8 @@ class OnboardingScreen extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(ThemeColor.primary),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(ThemeColor.primary),
                     ),
                     SizedBox(height: 16),
                     Text(

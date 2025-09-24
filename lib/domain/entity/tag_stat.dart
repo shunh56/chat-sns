@@ -25,7 +25,8 @@ class TagInfo {
       count: json['count'] ?? 111,
       createdAt: json['createAt'] ?? Timestamp.now(),
       updatedAt: json['updatedAt'] ?? Timestamp.now(),
-      imageUrl: json['imageUrl'] ?? "https://i.pinimg.com/736x/d0/c0/f7/d0c0f7cf9fe0223de9b250f87fd61344.jpg",
+      imageUrl: json['imageUrl'] ??
+          "https://i.pinimg.com/736x/d0/c0/f7/d0c0f7cf9fe0223de9b250f87fd61344.jpg",
     );
   }
 }
@@ -44,7 +45,7 @@ class TagUser {
     this.updatedAt,
   });
 
-  factory TagUser.fromJson( Map<String, dynamic> json) {
+  factory TagUser.fromJson(Map<String, dynamic> json) {
     return TagUser(
       userId: json['id'],
       isActive: json['isActive'] ?? true,

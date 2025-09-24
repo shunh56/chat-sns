@@ -38,11 +38,11 @@ class LinkifiedText extends StatelessWidget {
     r'https?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?',
     caseSensitive: false,
   );
-  
+
   static final _hashtagPattern = RegExp(
     r'#[a-zA-Z0-9_\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+',
   );
-  
+
   static final _mentionPattern = RegExp(r'@[a-zA-Z0-9_]+');
 
   @override
@@ -68,7 +68,7 @@ class LinkifiedText extends StatelessWidget {
 
     // 動的サイズ計算（BuildTextの機能を統合）
     final length = text.replaceAll(_urlPattern, '').length;
-    
+
     if (length <= 10) {
       return const _TextConfig(
         fontSize: 24.0,
@@ -134,37 +134,37 @@ class LinkifiedText extends StatelessWidget {
     // URL
     allMatches.addAll(
       _urlPattern.allMatches(text).map(
-        (match) => _Match(
-          match.start,
-          match.end,
-          _MatchType.url,
-          match.group(0)!,
-        ),
-      ),
+            (match) => _Match(
+              match.start,
+              match.end,
+              _MatchType.url,
+              match.group(0)!,
+            ),
+          ),
     );
 
     // ハッシュタグ
     allMatches.addAll(
       _hashtagPattern.allMatches(text).map(
-        (match) => _Match(
-          match.start,
-          match.end,
-          _MatchType.hashtag,
-          match.group(0)!,
-        ),
-      ),
+            (match) => _Match(
+              match.start,
+              match.end,
+              _MatchType.hashtag,
+              match.group(0)!,
+            ),
+          ),
     );
 
     // メンション
     allMatches.addAll(
       _mentionPattern.allMatches(text).map(
-        (match) => _Match(
-          match.start,
-          match.end,
-          _MatchType.mention,
-          match.group(0)!,
-        ),
-      ),
+            (match) => _Match(
+              match.start,
+              match.end,
+              _MatchType.mention,
+              match.group(0)!,
+            ),
+          ),
     );
   }
 
@@ -185,13 +185,16 @@ class LinkifiedText extends StatelessWidget {
       case _MatchType.url:
         return TextSpan(
           text: match.text,
-          style: linkStyle ?? TextStyle(
-            fontSize: isDynamicSize ? (config.fontSize - 2).clamp(12.0, 16.0) : 14.0,
-            fontWeight: FontWeight.w500,
-            height: config.lineHeight,
-            color: Colors.blue,
-            decoration: TextDecoration.underline,
-          ),
+          style: linkStyle ??
+              TextStyle(
+                fontSize: isDynamicSize
+                    ? (config.fontSize - 2).clamp(12.0, 16.0)
+                    : 14.0,
+                fontWeight: FontWeight.w500,
+                height: config.lineHeight,
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
           recognizer: TapGestureRecognizer()
             ..onTap = () => _handleLinkTap(match.text),
         );
@@ -199,12 +202,13 @@ class LinkifiedText extends StatelessWidget {
       case _MatchType.hashtag:
         return TextSpan(
           text: match.text,
-          style: hashtagStyle ?? TextStyle(
-            fontSize: config.fontSize,
-            fontWeight: FontWeight.w500,
-            height: config.lineHeight,
-            color: Colors.blue,
-          ),
+          style: hashtagStyle ??
+              TextStyle(
+                fontSize: config.fontSize,
+                fontWeight: FontWeight.w500,
+                height: config.lineHeight,
+                color: Colors.blue,
+              ),
           recognizer: TapGestureRecognizer()
             ..onTap = () => _handleHashtagTap(match.text.substring(1)),
         );
@@ -212,12 +216,13 @@ class LinkifiedText extends StatelessWidget {
       case _MatchType.mention:
         return TextSpan(
           text: match.text,
-          style: mentionStyle ?? TextStyle(
-            fontSize: config.fontSize,
-            fontWeight: FontWeight.w500,
-            height: config.lineHeight,
-            color: Colors.blue,
-          ),
+          style: mentionStyle ??
+              TextStyle(
+                fontSize: config.fontSize,
+                fontWeight: FontWeight.w500,
+                height: config.lineHeight,
+                color: Colors.blue,
+              ),
           recognizer: TapGestureRecognizer()
             ..onTap = () => _handleMentionTap(match.text.substring(1)),
         );

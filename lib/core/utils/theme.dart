@@ -54,13 +54,10 @@ class ThemeColor {
   static const highlight = Colors.blue;
   static const subText = Color(0xFF808080);
 
-
-
-  //new 
+  //new
   static const cardColor = Color(0xFF1F1F1F);
   static const cardBorderColor = Color(0xFF3E3E3E);
   static const cardSecondaryColor = Color(0xFF9A9A9A);
-
 }
 
 /*

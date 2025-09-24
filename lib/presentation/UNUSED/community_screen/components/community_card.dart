@@ -164,7 +164,6 @@ class CommunityCard extends ConsumerWidget {
                             return UserIcon(
                               user: user,
                               r: 40,
-                         
                             );
                           },
                         ),

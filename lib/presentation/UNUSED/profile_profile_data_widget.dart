@@ -73,7 +73,8 @@ class ProfileDataFeed extends ConsumerWidget {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(100),
                       color: ThemeColor.beige,
@@ -95,9 +96,10 @@ class ProfileDataFeed extends ConsumerWidget {
               children: tags
                   .map(
                     (tag) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: ThemeColor.highlight,
@@ -141,7 +143,8 @@ class ProfileDataFeed extends ConsumerWidget {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(100),
                       color: ThemeColor.beige,
@@ -163,9 +166,10 @@ class ProfileDataFeed extends ConsumerWidget {
               children: socialTags
                   .map(
                     (tag) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: ThemeColor.highlight,
@@ -209,7 +213,8 @@ class ProfileDataFeed extends ConsumerWidget {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(100),
                       color: ThemeColor.beige,
@@ -231,9 +236,10 @@ class ProfileDataFeed extends ConsumerWidget {
               children: musicTags
                   .map(
                     (tag) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: ThemeColor.highlight,
@@ -277,7 +283,8 @@ class ProfileDataFeed extends ConsumerWidget {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(100),
                       color: ThemeColor.beige,
@@ -299,9 +306,10 @@ class ProfileDataFeed extends ConsumerWidget {
               children: lifestyleTags
                   .map(
                     (tag) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: ThemeColor.highlight,

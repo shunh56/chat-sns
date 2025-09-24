@@ -99,9 +99,7 @@ class SubsctiptionBottomSheet {
                           width: 72,
                           child: TabBar(
                             isScrollable: true,
-                            onTap: (val) {
-                              
-                            },
+                            onTap: (val) {},
                             indicator: const BoxDecoration(
                               shape: BoxShape.circle,
                               color: ThemeColor.button,

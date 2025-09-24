@@ -390,7 +390,6 @@ class _MessageItemState extends ConsumerState<MessageItem>
               UserIcon(
                 user: user,
                 r: 32,
-              
               ),
               const Gap(12),
               Flexible(

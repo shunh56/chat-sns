@@ -24,8 +24,7 @@ class StatBubble extends StatefulWidget {
   State<StatBubble> createState() => _StatBubbleState();
 }
 
-class _StatBubbleState extends State<StatBubble>
-    with TickerProviderStateMixin {
+class _StatBubbleState extends State<StatBubble> with TickerProviderStateMixin {
   late AnimationController _hoverController;
   late AnimationController _pulseController;
   late AnimationController _sparkleController;
@@ -34,17 +33,17 @@ class _StatBubbleState extends State<StatBubble>
   @override
   void initState() {
     super.initState();
-    
+
     _hoverController = AnimationController(
       duration: AppConstants.fastAnimation,
       vsync: this,
     );
-    
+
     _pulseController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
-    
+
     _sparkleController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
@@ -93,12 +92,14 @@ class _StatBubbleState extends State<StatBubble>
             ]),
             builder: (context, child) {
               final hoverScale = 1.0 + (_hoverController.value * 0.1);
-              final pulseGlow = sin(_pulseController.value * 2 * pi) * 0.5 + 0.5;
-              
+              final pulseGlow =
+                  sin(_pulseController.value * 2 * pi) * 0.5 + 0.5;
+
               return Transform.scale(
                 scale: hoverScale,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -117,7 +118,8 @@ class _StatBubbleState extends State<StatBubble>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primaryBlue.withOpacity(pulseGlow * 0.3),
+                        color:
+                            AppColors.primaryBlue.withOpacity(pulseGlow * 0.3),
                         blurRadius: _isHovered ? 20 : 10,
                         spreadRadius: _isHovered ? 2 : 1,
                       ),
@@ -132,7 +134,7 @@ class _StatBubbleState extends State<StatBubble>
                     children: [
                       // Sparkle effects
                       if (_isHovered) _buildSparkleEffects(),
-                      
+
                       // Main content
                       Column(
                         mainAxisSize: MainAxisSize.min,
@@ -147,7 +149,8 @@ class _StatBubbleState extends State<StatBubble>
                               ),
                               const SizedBox(width: 6),
                               ShaderMask(
-                                shaderCallback: (bounds) => const LinearGradient(
+                                shaderCallback: (bounds) =>
+                                    const LinearGradient(
                                   colors: [
                                     AppColors.primaryBlue,
                                     AppColors.primaryPurple,
@@ -185,9 +188,8 @@ class _StatBubbleState extends State<StatBubble>
           ),
         ),
       ),
-    ).animate(delay: widget.delay)
-      .fadeIn(duration: 800.ms)
-      .slideY(begin: 0.3, end: 0, duration: 800.ms, curve: Curves.easeOutBack);
+    ).animate(delay: widget.delay).fadeIn(duration: 800.ms).slideY(
+        begin: 0.3, end: 0, duration: 800.ms, curve: Curves.easeOutBack);
   }
 
   Widget _buildSparkleEffects() {

@@ -23,7 +23,6 @@ class BlogContentMenu extends ConsumerWidget {
         children: [
           GestureDetector(
             onTap: () async {
-              
               final item = ref.watch(inputTextProvider);
               if (item.isNotEmpty) {
                 contentListNotifier.addContent(item);

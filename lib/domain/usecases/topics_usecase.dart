@@ -25,7 +25,7 @@ class TopicsUsecase {
     return _repository.createTopic(state);
   }
 
-  sendMessage(String topicId,String text){
-    return _repository.sendMessage(topicId,text);
+  sendMessage(String topicId, String text) {
+    return _repository.sendMessage(topicId, text);
   }
 }

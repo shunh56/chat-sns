@@ -55,8 +55,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
               Wrap(
                 children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -70,8 +72,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -85,8 +89,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -100,8 +106,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -115,8 +123,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -130,8 +140,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -145,8 +157,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -160,8 +174,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -175,8 +191,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -190,8 +208,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -205,8 +225,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -220,8 +242,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -235,8 +259,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -250,8 +276,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -265,8 +293,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -280,8 +310,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -295,8 +327,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -310,8 +344,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -325,8 +361,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -340,8 +378,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -355,8 +395,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -383,8 +425,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
               Wrap(
                 children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -398,8 +442,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -413,8 +459,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -428,8 +476,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -443,8 +493,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -458,8 +510,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -486,8 +540,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
               Wrap(
                 children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -501,8 +557,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -516,8 +574,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -531,8 +591,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -546,8 +608,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -561,8 +625,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -576,8 +642,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -604,8 +672,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
               Wrap(
                 children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -619,8 +689,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -634,8 +706,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -649,8 +723,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),
@@ -664,8 +740,10 @@ class EditMusicTagsScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
                         color: Colors.black.withOpacity(0.3)),

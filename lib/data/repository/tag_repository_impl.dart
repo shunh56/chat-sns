@@ -20,8 +20,8 @@ class TagRepositoryImpl implements TagRepository {
     await _datasource.updateUserTagsImmediate(newTags, previousTags);
   }
 
-  @override 
-  Future<TagInfo> getTagInfo(String tagId)async{
+  @override
+  Future<TagInfo> getTagInfo(String tagId) async {
     final res = await _datasource.getTag(tagId);
     return TagInfo.fromJson(res);
   }
@@ -36,11 +36,6 @@ class TagRepositoryImpl implements TagRepository {
   Future<List<TagUser>> getActiveUsers(String tagId,
       {String? lastUserId}) async {
     final res = await _datasource.getActiveUsers(tagId, lastUserId: lastUserId);
-    return res
-        .map(
-          (json) =>
-              TagUser.fromJson(json)
-        )
-        .toList();
+    return res.map((json) => TagUser.fromJson(json)).toList();
   }
 }

@@ -4,7 +4,7 @@ class Follow {
   final String userId;
   final String followerId;
   final DateTime createdAt;
-  
+
   Follow({
     required this.userId,
     required this.followerId,
@@ -14,13 +14,13 @@ class Follow {
 
 // フォロー統計情報を扱うエンティティ
 class FollowStats {
-  final int followingCount;  // usersコレクションから取得
-  final int followerCount;   // usersコレクションから取得
-  final int followingCountLastDay;  // follow_stats_by_userコレクションから取得
+  final int followingCount; // usersコレクションから取得
+  final int followerCount; // usersコレクションから取得
+  final int followingCountLastDay; // follow_stats_by_userコレクションから取得
   final int followingCountLastWeek; // follow_stats_by_userコレクションから取得
-  final int followerCountLastDay;   // follow_stats_by_userコレクションから取得
-  final int followerCountLastWeek;  // follow_stats_by_userコレクションから取得
-  
+  final int followerCountLastDay; // follow_stats_by_userコレクションから取得
+  final int followerCountLastWeek; // follow_stats_by_userコレクションから取得
+
   FollowStats({
     this.followingCount = 0,
     this.followerCount = 0,
@@ -41,19 +41,19 @@ class FollowStats {
     return FollowStats(
       followingCount: followingCount ?? this.followingCount,
       followerCount: followerCount ?? this.followerCount,
-      followingCountLastDay: followingCountLastDay ?? this.followingCountLastDay,
-      followingCountLastWeek: followingCountLastWeek ?? this.followingCountLastWeek,
+      followingCountLastDay:
+          followingCountLastDay ?? this.followingCountLastDay,
+      followingCountLastWeek:
+          followingCountLastWeek ?? this.followingCountLastWeek,
       followerCountLastDay: followerCountLastDay ?? this.followerCountLastDay,
-      followerCountLastWeek: followerCountLastWeek ?? this.followerCountLastWeek,
+      followerCountLastWeek:
+          followerCountLastWeek ?? this.followerCountLastWeek,
     );
   }
 }
 
 // フォローアクティビティの種類
-enum FollowActivityType {
-  follow,
-  unfollow
-}
+enum FollowActivityType { follow, unfollow }
 
 // フォローアクティビティを表すエンティティ
 class FollowActivity {
@@ -62,7 +62,7 @@ class FollowActivity {
   final String toUserId;
   final FollowActivityType activityType;
   final DateTime createdAt;
-  
+
   FollowActivity({
     required this.id,
     required this.fromUserId,

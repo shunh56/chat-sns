@@ -32,7 +32,7 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
   late AnimationController _hoverController;
   late AnimationController _tapController;
   late AnimationController _pulseController;
-  
+
   bool _isHovered = false;
   bool _isPressed = false;
   Offset _panStart = Offset.zero;
@@ -128,7 +128,8 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
                       children: [
                         _buildEnhancedPlanetCore(size),
                         _buildEnhancedUserAvatar(size),
-                        if (_isHovered || _isPressed) _buildEnhancedCompatibilityIndicator(size),
+                        if (_isHovered || _isPressed)
+                          _buildEnhancedCompatibilityIndicator(size),
                         //if (widget.user.isOnline) _buildOnlineIndicator(size),
                         _buildInteractionRipples(size),
                       ],
@@ -352,10 +353,8 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
           ),
         ),
       ),
-    )
-        .animate()
-        .fadeIn(duration: 300.ms)
-        .slideY(begin: 0.5, end: 0, duration: 300.ms, curve: Curves.easeOutBack);
+    ).animate().fadeIn(duration: 300.ms).slideY(
+        begin: 0.5, end: 0, duration: 300.ms, curve: Curves.easeOutBack);
   }
 
   Widget _buildOnlineIndicator(double size) {
@@ -398,7 +397,7 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
 
   Widget _buildInteractionRipples(double size) {
     if (!_isPressed && !_isHovered) return const SizedBox.shrink();
-    
+
     return Positioned.fill(
       child: CustomPaint(
         painter: RipplePainter(
@@ -414,7 +413,7 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
     setState(() {
       _isPressed = pressed;
     });
-    
+
     if (pressed) {
       HapticFeedback.lightImpact();
     }
@@ -436,7 +435,7 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
     _tapController.forward().then((_) {
       _tapController.reset();
     });
-    
+
     HapticFeedback.mediumImpact();
     _showSuccessEffect();
     widget.onTap();
@@ -458,7 +457,7 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
   void _handlePanEnd(DragEndDetails details) {
     final delta = details.localPosition - _panStart;
     final distance = delta.distance;
-    
+
     if (distance > 50) {
       SwipeDirection direction;
       if (delta.dx.abs() > delta.dy.abs()) {
@@ -466,7 +465,7 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
       } else {
         direction = delta.dy > 0 ? SwipeDirection.down : SwipeDirection.up;
       }
-      
+
       widget.onSwipe(direction);
     }
   }
@@ -527,7 +526,8 @@ class _StellarUserWidgetState extends State<StellarUserWidget>
       )
           .animate()
           .fadeIn(duration: 400.ms)
-          .slideY(begin: 0.5, end: 0, duration: 600.ms, curve: Curves.easeOutBack)
+          .slideY(
+              begin: 0.5, end: 0, duration: 600.ms, curve: Curves.easeOutBack)
           .then(delay: 2000.ms)
           .fadeOut(duration: 500.ms)
           .slideY(begin: 0, end: -0.5, duration: 500.ms),
@@ -560,23 +560,23 @@ class RipplePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (progress == 0) return;
-    
+
     final center = Offset(size.width / 2, size.height / 2);
     final maxRadius = size.width / 2;
     final radius = maxRadius * progress;
-    
+
     final paint = Paint()
       ..color = color.withOpacity((1 - progress) * 0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    
+
     canvas.drawCircle(center, radius, paint);
-    
+
     if (isPressed) {
       final innerPaint = Paint()
         ..color = color.withOpacity(0.1)
         ..style = PaintingStyle.fill;
-      
+
       canvas.drawCircle(center, radius * 0.8, innerPaint);
     }
   }

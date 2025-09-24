@@ -85,19 +85,21 @@ class InputUsernameScreen extends ConsumerWidget {
             ),
           const Spacer(flex: 2),
           ElevatedButton(
-            onPressed: !username.isUsername ? null : () async {
-              final alreadyUsed = await ref
-                  .read(userUsecaseProvider)
-                  .checkUsername(username);
-              if (alreadyUsed) {
-                showMessage("そのユーザーネームは既に使用されています");
-              } else {
-                ref.read(pageControllerProvider).nextPage(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              }
-            },
+            onPressed: !username.isUsername
+                ? null
+                : () async {
+                    final alreadyUsed = await ref
+                        .read(userUsecaseProvider)
+                        .checkUsername(username);
+                    if (alreadyUsed) {
+                      showMessage("そのユーザーネームは既に使用されています");
+                    } else {
+                      ref.read(pageControllerProvider).nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                    }
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColor.primary,
               foregroundColor: ThemeColor.text,
