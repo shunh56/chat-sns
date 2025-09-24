@@ -1,9 +1,9 @@
 .PHONY: dev prod clean dev-debug dev-profile dev-release prod-debug prod-profile prod-release build-dev build-prod
 
 FLUTTER = flutter
-DART_DEFINE_DEV = --dart-define=FLAVOR=dev --dart-define-from-file=dart_defines/dev.env
-DART_DEFINE_PROD = --dart-define=FLAVOR=prod --dart-define-from-file=dart_defines/prod.env
-DART_DEFINE_APPSTORE = --dart-define=FLAVOR=appstore --dart-define-from-file=dart_defines/appstore.env
+DART_DEFINE_DEV = --dart-define-from-file=dart_defines/dev.env
+DART_DEFINE_PROD = --dart-define-from-file=dart_defines/prod.env
+DART_DEFINE_APPSTORE = --dart-define-from-file=dart_defines/appstore.env
 
 
 #build runner
