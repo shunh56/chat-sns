@@ -30,7 +30,7 @@ platform :android do
       groups: "testers",
       release_notes: "自動ビルド from #{environment} environment",
       android_artifact_type: "APK",
-      android_artifact_path: "../../build/app/outputs/flutter-apk/app-#{environment}-release.apk"
+      android_artifact_path: "../../build/app/outputs/apk/#{environment}/release/app-#{environment}-release.apk"
     )
   end
 
