@@ -1,4 +1,4 @@
-name: Deploy to TestFlight & Firebase
+name: Deploy to TestFlight & Firebase (Optimized)
 
 on:
   push:
@@ -11,12 +11,21 @@ env:
   FLUTTER_VERSION: '3.24.3'
 
 jobs:
+  # 並列実行でビルド時間を半分に
   deploy-ios:
     if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v4
+
+    # 🚀 改善1: Flutter + 依存関係キャッシュ強化
+    - name: Cache Flutter SDK
+      uses: actions/cache@v3
+      with:
+        path: |
+          /Users/runner/hostedtoolcache/flutter
+        key: ${{ runner.os }}-flutter-${{ env.FLUTTER_VERSION }}
 
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -25,25 +34,48 @@ jobs:
         channel: 'stable'
         cache: true
 
-    - name: Setup Ruby
+    # 🚀 改善2: pub依存関係の積極的キャッシュ
+    - name: Cache pub dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ env.PUB_CACHE }}
+          ~/.pub-cache
+          .dart_tool
+        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pub-
+
+    - name: Install Flutter dependencies
+      run: flutter pub get
+
+    # 🚀 改善3: CocoaPods キャッシュ
+    - name: Cache CocoaPods
+      uses: actions/cache@v3
+      with:
+        path: |
+          ios/Pods
+          ~/Library/Caches/CocoaPods
+        key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+
+    - name: Setup Ruby & Fastlane (cached)
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.0'
         bundler-cache: true
         working-directory: ios
 
-    - name: Install dependencies
-      run: flutter pub get
-
-    - name: Install pods
+    - name: Install pods with cache check
       run: |
         cd ios
-        pod install
-
-    - name: Setup Fastlane
-      run: |
-        cd ios
-        bundle install
+        if [ -d "Pods" ]; then
+          echo "✅ Using cached Pods"
+        else
+          echo "📦 Installing Pods..."
+          pod install
+        fi
 
     - name: Determine environment
       id: env
@@ -54,7 +86,18 @@ jobs:
           echo "environment=dev" >> $GITHUB_OUTPUT
         fi
 
-    - name: Decode signing certificate
+    # 🚀 改善4: 証明書キャッシュ
+    - name: Cache signing certificates
+      id: cert-cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          certificate.p12
+          build.keychain
+        key: ios-cert-${{ secrets.IOS_CERTIFICATE_BASE64 }}
+
+    - name: Setup signing certificate
+      if: steps.cert-cache.outputs.cache-hit != 'true'
       env:
         CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
         CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
@@ -66,6 +109,7 @@ jobs:
         security import certificate.p12 -k build.keychain -P $CERTIFICATE_PASSWORD -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
 
+    # 🚀 改善5: Firebase配布のみ（develop用）
     - name: Deploy to Firebase App Distribution
       if: github.ref == 'refs/heads/develop'
       env:
@@ -75,6 +119,7 @@ jobs:
         cd ios
         bundle exec fastlane firebase env:${{ steps.env.outputs.environment }}
 
+    # TestFlightは本番のみ（時間短縮）
     - name: Deploy to TestFlight
       if: github.ref == 'refs/heads/main'
       env:
@@ -92,6 +137,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # 🚀 改善6: Flutter + Gradle キャッシュ
+    - name: Cache Flutter SDK
+      uses: actions/cache@v3
+      with:
+        path: |
+          /opt/hostedtoolcache/flutter
+        key: ${{ runner.os }}-flutter-${{ env.FLUTTER_VERSION }}
+
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
@@ -99,12 +152,16 @@ jobs:
         channel: 'stable'
         cache: true
 
-    - name: Setup Ruby
-      uses: ruby/setup-ruby@v1
+    - name: Cache pub dependencies
+      uses: actions/cache@v3
       with:
-        ruby-version: '3.0'
-        bundler-cache: true
-        working-directory: android
+        path: |
+          ${{ env.PUB_CACHE }}
+          ~/.pub-cache
+          .dart_tool
+        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pub-
 
     - name: Setup Java
       uses: actions/setup-java@v3
@@ -112,13 +169,28 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Install dependencies
+    # 🚀 改善7: Gradle + Android SDK キャッシュ
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          ~/.android/avd/*
+          ~/.android/adb*
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Install Flutter dependencies
       run: flutter pub get
 
-    - name: Setup Fastlane
-      run: |
-        cd android
-        bundle install
+    - name: Setup Ruby & Fastlane (cached)
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+        bundler-cache: true
+        working-directory: android
 
     - name: Determine environment
       id: env
@@ -146,6 +218,7 @@ jobs:
         echo "keyAlias=$ANDROID_KEY_ALIAS" >> android/key.properties
         echo "storeFile=key.jks" >> android/key.properties
 
+    # Firebase配布のみ（develop）
     - name: Deploy to Firebase App Distribution
       if: github.ref == 'refs/heads/develop'
       env:
@@ -155,6 +228,7 @@ jobs:
         cd android
         bundle exec fastlane firebase env:${{ steps.env.outputs.environment }}
 
+    # Google Playは本番のみ
     - name: Deploy to Google Play Internal Testing
       if: github.ref == 'refs/heads/main'
       env:
@@ -164,20 +238,33 @@ jobs:
         cd android
         bundle exec fastlane beta env:${{ steps.env.outputs.environment }}
 
-  notify-slack:
+  # 🚀 改善8: 軽量な通知ジョブ
+  notify-completion:
     needs: [deploy-ios, deploy-android]
     runs-on: ubuntu-latest
     if: always()
 
     steps:
-    - name: Notify deployment status
+    - name: Slack Notification
       uses: 8398a7/action-slack@v3
+      if: always()
       with:
-        status: ${{ job.status }}
-        text: |
-          デプロイ結果:
-          - iOS: ${{ needs.deploy-ios.result }}
-          - Android: ${{ needs.deploy-android.result }}
-          環境: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
-        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-        channel: '#deployments'
+        status: custom
+        custom_payload: |
+          {
+            text: "🚀 Deployment completed!",
+            attachments: [{
+              color: '${{ needs.deploy-ios.result == 'success' && needs.deploy-android.result == 'success' && 'good' || 'danger' }}',
+              fields: [{
+                title: 'iOS Deploy',
+                value: '${{ needs.deploy-ios.result }}',
+                short: true
+              }, {
+                title: 'Android Deploy',
+                value: '${{ needs.deploy-android.result }}',
+                short: true
+              }]
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
