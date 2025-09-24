@@ -1,0 +1,75 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build and upload to Google Play Internal Testing"
+  lane :beta do
+    # Flutterビルド
+    sh("flutter build appbundle --release")
+
+    # Google Play Internal Testingへアップロード
+    upload_to_play_store(
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Build for Firebase App Distribution"
+  lane :firebase do |options|
+    # 環境変数から環境を取得（dev/prod）
+    environment = options[:env] || "dev"
+
+    # Makefileを使用してAPKビルド（環境別）
+    sh("cd ../.. && flutter build apk --flavor #{environment} --release --dart-define=FLAVOR=#{environment} --dart-define-from-file=dart_defines/#{environment}.env")
+
+    # Firebase App Distributionへアップロード
+    firebase_app_distribution(
+      app: ENV["FIREBASE_APP_ID_ANDROID"],
+      groups: "testers",
+      release_notes: "自動ビルド from #{environment} environment",
+      android_artifact_type: "APK",
+      android_artifact_path: "../../build/app/outputs/flutter-apk/app-#{environment}-release.apk"
+    )
+  end
+
+  desc "Build and sign APK"
+  lane :build do
+    # バージョン番号を取得
+    version_name = flutter_version()["version_name"]
+    version_code = Time.now.to_i
+
+    # Flutterビルド
+    sh("flutter build apk --release --build-name=#{version_name} --build-number=#{version_code}")
+
+    puts "✅ APK built successfully"
+    puts "📍 Location: build/app/outputs/flutter-apk/app-release.apk"
+  end
+
+  desc "Promote from internal to production"
+  lane :promote do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end
+
+# Flutterのバージョン情報を取得するヘルパーメソッド
+def flutter_version()
+  pubspec = File.read("../pubspec.yaml")
+  version_line = pubspec.lines.find { |line| line.start_with?("version:") }
+  version = version_line.split(":").last.strip
+  version_parts = version.split("+")
+
+  {
+    "version_name" => version_parts[0],
+    "version_code" => version_parts[1] || "1"
+  }
+end

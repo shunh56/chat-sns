@@ -165,9 +165,10 @@ class _PostHeaderInfo extends StatelessWidget {
               // タイムスタンプ
               Text(
                 post.createdAt.xxAgo,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF999999),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white.withOpacity(0.7),
                 ),
               ),
             ],

@@ -196,6 +196,7 @@ dev_dependencies:
   hive_generator: ^2.0.1
   freezed:
   json_serializable: ^6.5.4
+  cider: ^0.2.7
 
 flutter_launcher_icons:
   android: "launcher_icon"

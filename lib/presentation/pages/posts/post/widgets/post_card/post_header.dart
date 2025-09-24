@@ -33,84 +33,12 @@ class PostHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vibeColor = VibeColorManager.getVibeColor(user);
-    final vibeText = VibeTextAnalyzer.analyzePostVibe(user, post);
     return _buildUserAvatar(vibeColor);
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        isDetailView ? 20 : 16,
-        16,
-        0,
-      ),
-      child: Row(
-        children: [
-          _buildUserAvatar(vibeColor),
-          const Gap(12),
-          _buildUserInfo(),
-          const Spacer(),
-          if (showVibeIndicator)
-            VibeIndicator(
-              mood: vibeText,
-              color: vibeColor,
-            ),
-          GestureDetector(
-            onTap: () {
-              PostBottomModelSheet(context).openPostAction(post, user);
-            },
-            child: const Icon(
-              Icons.more_horiz_outlined,
-              color: ThemeColor.subText,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   /// ユーザーアバターを構築
   Widget _buildUserAvatar(Color vibeColor) {
     return UserIcon(user: user);
-  }
-
-  /// ユーザー情報を構築
-  Widget _buildUserInfo() {
-    return Expanded(
-      child: Row(
-        children: [
-          // ユーザー名
-          Text(
-            user.name,
-            style: PostTextStyles.getHeaderText(
-              fontSize: isDetailView ? 16 : 16,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const Gap(2),
-
-          // タイムスタンプとアイコン
-          const Gap(4),
-          Text(
-            post.createdAt.xxAgo,
-            style: PostTextStyles.getTimestampText(),
-          ),
-          if (isDetailView) ...[
-            const Gap(8),
-            _buildPrivacyIndicator(),
-          ],
-        ],
-      ),
-    );
-  }
-
-  /// プライバシーインジケーターを構築
-  Widget _buildPrivacyIndicator() {
-    return Icon(
-      post.isPublic ? Icons.public_outlined : Icons.lock_outline,
-      size: 14,
-      color: Colors.white.withOpacity(0.5),
-    );
   }
 }
 
@@ -191,79 +119,6 @@ class PostDetailHeader extends ConsumerWidget {
             ),
           ),
         ],
-      ],
-    );
-  }
-}
-
-/// コンパクトなヘッダー（リスト表示用）
-class CompactPostHeader extends ConsumerWidget {
-  const CompactPostHeader({
-    super.key,
-    required this.user,
-    required this.post,
-    this.onUserTap,
-  });
-
-  final UserAccount user;
-  final Post post;
-  final VoidCallback? onUserTap;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: onUserTap,
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: VibeColorManager.getVibeColor(user).withOpacity(0.3),
-                width: 2,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: user.imageUrl != null
-                  ? CachedImage.userIcon(user.imageUrl!, user.name, 14)
-                  : Container(
-                      color: const Color(0xFF2A2A2A),
-                      child: Icon(
-                        Icons.person,
-                        size: 16,
-                        color: Colors.white.withOpacity(0.6),
-                      ),
-                    ),
-            ),
-          ),
-        ),
-        const Gap(8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                user.name,
-                style: PostTextStyles.getHeaderText(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Gap(2),
-              Text(
-                post.createdAt.xxAgo,
-                style: PostTextStyles.getTimestampText(
-                  fontSize: 10,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }

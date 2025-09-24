@@ -1,0 +1,85 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do |options|
+    # 環境変数から環境を取得（dev/prod/appstore）
+    environment = options[:env] || "dev"
+
+    # アプリIDの設定
+    app_identifier = "com.blank.sns"
+
+    # 証明書とプロファイルの取得（Match使用）
+    # 初回設定時はコメントアウトして手動で設定
+    # match(type: "appstore", readonly: true)
+
+    # ビルド番号の自動インクリメント
+    increment_build_number(
+      build_number: latest_testflight_build_number + 1,
+      xcodeproj: "Runner.xcodeproj"
+    )
+
+    # Flutterビルド（Makefileのコマンドを使用）
+    sh("cd ../.. && make build-#{environment}")
+
+    # TestFlightへアップロード
+    upload_to_testflight(
+      ipa: "../../build/ios/ipa/*.ipa",
+      skip_waiting_for_build_processing: true,
+      changelog: "自動ビルド from #{environment} environment"
+    )
+  end
+
+  desc "Build for Firebase App Distribution"
+  lane :firebase do
+    # アプリIDの設定
+    app_identifier = "com.blank.sns"
+
+    # AdHocビルド用の証明書
+    # match(type: "adhoc", readonly: true)
+
+    # ビルド番号の自動インクリメント
+    increment_build_number(
+      build_number: Time.now.to_i,
+      xcodeproj: "Runner.xcodeproj"
+    )
+
+    # アプリのビルド
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "ad-hoc",
+      output_directory: "./build",
+      output_name: "app.ipa"
+    )
+
+    # Firebase App Distributionへアップロード
+    firebase_app_distribution(
+      app: ENV["FIREBASE_APP_ID_IOS"],
+      groups: "testers",
+      release_notes: "自動ビルド from develop branch"
+    )
+  end
+
+  desc "Setup certificates and provisioning profiles"
+  lane :setup_certs do
+    # Matchの初期設定（初回のみ実行）
+    match(
+      type: "development",
+      app_identifier: "com.blank.sns",
+      readonly: false
+    )
+
+    match(
+      type: "adhoc",
+      app_identifier: "com.blank.sns",
+      readonly: false
+    )
+
+    match(
+      type: "appstore",
+      app_identifier: "com.blank.sns",
+      readonly: false
+    )
+  end
+end
