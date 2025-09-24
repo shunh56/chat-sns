@@ -44,13 +44,16 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # アプリのビルド
+    # アプリのビルド（自動署名）
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
-      export_method: "ad-hoc",
+      export_method: "development",
       output_directory: "./build",
-      output_name: "app.ipa"
+      output_name: "app.ipa",
+      export_options: {
+        signingStyle: "automatic"
+      }
     )
 
     # Firebase App Distributionへアップロード
