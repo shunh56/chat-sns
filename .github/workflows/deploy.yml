@@ -49,14 +49,14 @@ jobs:
     - name: Install Flutter dependencies
       run: flutter pub get
 
-    # 🚀 改善3: CocoaPods キャッシュ
+    # 🚀 改善3: CocoaPods キャッシュ (pubspec.lock含む)
     - name: Cache CocoaPods
       uses: actions/cache@v3
       with:
         path: |
           ios/Pods
           ~/Library/Caches/CocoaPods
-        key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+        key: ${{ runner.os }}-pods-${{ hashFiles('pubspec.lock', 'ios/Podfile') }}-v2
         restore-keys: |
           ${{ runner.os }}-pods-
 
@@ -67,10 +67,14 @@ jobs:
         bundler-cache: true
         working-directory: ios
 
-    - name: Install pods with cache check
+    - name: Install pods (force install if no Podfile.lock)
       run: |
         cd ios
-        if [ -d "Pods" ]; then
+        if [ ! -f "Podfile.lock" ]; then
+          echo "🔄 No Podfile.lock found, force installing pods..."
+          rm -rf Pods
+          pod install
+        elif [ -d "Pods" ]; then
           echo "✅ Using cached Pods"
         else
           echo "📦 Installing Pods..."
