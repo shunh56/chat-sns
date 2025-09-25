@@ -1254,13 +1254,13 @@ packages:
     source: hosted
     version: "6.1.0"
   image_cropper_platform_interface:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: image_cropper_platform_interface
-      sha256: "2d8db8f4b638e448fa89a1e77cd8f053b4547472bd3ae073169e86626d03afef"
+      sha256: "39c6539571bda7ce666e0a2f450246a5d42187406eef8f486a3d64f1d9381637"
       url: "https://pub.dev"
     source: hosted
-    version: "7.2.0"
+    version: "6.1.0"
   image_picker:
     dependency: "direct main"
     description:

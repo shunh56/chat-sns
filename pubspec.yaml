@@ -185,6 +185,7 @@ dependency_overrides:
   http: ^0.13.0
   agora_rtm: ^2.2.2
   agora_rtc_engine: ^6.5.3
+  image_cropper_platform_interface: ^6.1.0
      
   
 
