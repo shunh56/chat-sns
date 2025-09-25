@@ -50,22 +50,36 @@ end
 
 post_install do |installer|
 
-  bitcode_strip_path = `xcrun --find bitcode_strip`.chop!
-  def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
-    framework_path = File.join(Dir.pwd, framework_relative_path)
-    command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
-    puts "Stripping bitcode: #{command}"
-    system(command)
+  # Debug duplicate frameworks
+  puts "=== Checking for duplicate frameworks ==="
+  installer.pods_project.targets.each do |target|
+    puts "#{target.name}:"
+    if target.respond_to?(:frameworks_build_phase) && target.frameworks_build_phase
+      target.frameworks_build_phase.files.each do |file|
+        if file.display_name && file.display_name.include?("aosl")
+          puts "  Found aosl framework: #{file.display_name}"
+        end
+      end
+    end
   end
-  framework_paths = [
-    # Agora SDKのフレームワークパスを指定（Podsディレクトリ確認してパスをコピーすればOK）
-    "Pods/AgoraRtcEngine_iOS/AgoraRtcKit.xcframework/ios-arm64_armv7/AgoraRtcKit.framework/AgoraRtcKit",
-    "Pods/AgoraRtm_iOS/AgoraRtmKit.xcframework/ios-arm64_armv7/AgoraRtmKit.framework/AgoraRtmKit"
-  ]
-  framework_paths.each do |framework_relative_path|
-    strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+  puts "=== End framework check ==="
+
+  # Remove duplicate aosl.xcframework
+  installer.pods_project.targets.each do |target|
+    if target.respond_to?(:frameworks_build_phase) && target.frameworks_build_phase
+      files_to_remove = []
+      target.frameworks_build_phase.files.each do |file|
+        if file.display_name && file.display_name.include?("aosl.xcframework")
+          files_to_remove << file
+        end
+      end
+      # Keep only the first instance, remove duplicates
+      files_to_remove[1..-1]&.each do |file|
+        puts "Removing duplicate framework: #{file.display_name}"
+        target.frameworks_build_phase.remove_file_reference(file)
+      end
+    end
   end
-  
 
   installer.aggregate_targets.each do |target|
     target.xcconfigs.each do |variant, xcconfig|

@@ -184,6 +184,7 @@ dependency_overrides:
   camera: ^0.11.0
   http: ^0.13.0
   agora_rtm: ^2.2.2
+  agora_rtc_engine: ^6.5.3
      
   
 
