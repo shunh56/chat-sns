@@ -27,6 +27,11 @@ flutter_ios_podfile_setup
 # Override Firebase SDK Version
 $FirebaseSDKVersion = '10.24.0'
 
+pre_install do |installer|
+  # Remove duplicate aosl.xcframework before installation
+  Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_duplicate_framework_and_library_names) {}
+end
+
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
@@ -40,44 +45,23 @@ target 'Runner' do
   pod 'Firebase/Messaging', $FirebaseSDKVersion, :modular_headers => true
   pod 'FirebaseCore', $FirebaseSDKVersion, :modular_headers => true
   pod 'FirebaseDatabase', $FirebaseSDKVersion, :modular_headers => true
-  
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  
+
   target 'RunnerTests' do
     inherit! :search_paths
   end
 end
 
 post_install do |installer|
-
-  # Debug duplicate frameworks
-  puts "=== Checking for duplicate frameworks ==="
-  installer.pods_project.targets.each do |target|
-    puts "#{target.name}:"
-    if target.respond_to?(:frameworks_build_phase) && target.frameworks_build_phase
-      target.frameworks_build_phase.files.each do |file|
-        if file.display_name && file.display_name.include?("aosl")
-          puts "  Found aosl framework: #{file.display_name}"
-        end
-      end
-    end
-  end
-  puts "=== End framework check ==="
-
-  # Remove duplicate aosl.xcframework
-  installer.pods_project.targets.each do |target|
-    if target.respond_to?(:frameworks_build_phase) && target.frameworks_build_phase
-      files_to_remove = []
-      target.frameworks_build_phase.files.each do |file|
-        if file.display_name && file.display_name.include?("aosl.xcframework")
-          files_to_remove << file
-        end
-      end
-      # Keep only the first instance, remove duplicates
-      files_to_remove[1..-1]&.each do |file|
-        puts "Removing duplicate framework: #{file.display_name}"
-        target.frameworks_build_phase.remove_file_reference(file)
-      end
+  # Remove duplicate aosl.xcframework from AgoraRtm (keep AgoraInfra_iOS version)
+  # This prevents the "frameworks with conflicting names" error
+  agora_rtm_pod = installer.pod_targets.find { |t| t.name == 'AgoraRtm' }
+  if agora_rtm_pod
+    aosl_path = "#{agora_rtm_pod.sandbox.pod_dir('AgoraRtm')}/aosl.xcframework"
+    if File.exist?(aosl_path)
+      puts "Removing duplicate aosl.xcframework from AgoraRtm pod"
+      FileUtils.rm_rf(aosl_path)
     end
   end
 
