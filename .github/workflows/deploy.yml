@@ -91,19 +91,24 @@ jobs:
           build.keychain
         key: ios-cert-${{ hashFiles('ios/Runner.xcodeproj/project.pbxproj') }}-v1
 
-    - name: Setup Apple ID for Automatic Signing
+    - name: Setup App Store Connect API Key for Automatic Signing
       env:
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-        TEAM_ID: ${{ secrets.TEAM_ID }}
+        API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+        API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
       run: |
-        # Store App Store Connect credentials
-        xcrun notarytool store-credentials "AC_PASSWORD" \
-          --apple-id "$APPLE_ID" \
-          --team-id "$TEAM_ID" \
-          --password "$APPLE_APP_SPECIFIC_PASSWORD" 2>/dev/null || true
+        # Create API Key directory
+        mkdir -p ~/private_keys
 
-        echo "Apple ID configured for automatic signing"
+        # Create API Key file
+        echo "$API_KEY_CONTENT" > ~/private_keys/AuthKey_${API_KEY_ID}.p8
+
+        # Set environment variables for xcodebuild
+        echo "APP_STORE_CONNECT_API_KEY_ID=$API_KEY_ID" >> $GITHUB_ENV
+        echo "APP_STORE_CONNECT_API_ISSUER_ID=$API_ISSUER_ID" >> $GITHUB_ENV
+        echo "APP_STORE_CONNECT_API_KEY_PATH=$HOME/private_keys/AuthKey_${API_KEY_ID}.p8" >> $GITHUB_ENV
+
+        echo "App Store Connect API Key configured"
 
     # 🚀 改善5: Firebase配布のみ（develop用）
     - name: Deploy to Firebase App Distribution
