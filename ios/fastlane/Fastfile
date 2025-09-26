@@ -41,18 +41,20 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # Flutterビルド（iOS部分のみ）
-    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env")
+    # Flutterビルドを先に実行（dart-definesを適用するため）
+    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
 
-    # gymでIPAをビルド（automatic signing with API Key）
+    # gymでアーカイブ+署名+エクスポート（allowProvisioningUpdatesフラグ付き）
     gym(
       scheme: "Runner",
       workspace: "Runner.xcworkspace",
+      configuration: "Release",
       export_method: "ad-hoc",
+      skip_build_archive: false,
+      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9",
       export_options: {
         signingStyle: "automatic",
         teamID: "CDQBCQRWL9",
-        allowProvisioningUpdates: true,
         compileBitcode: false,
         uploadBitcode: false,
         uploadSymbols: true,
@@ -60,7 +62,8 @@ platform :ios do
         provisioningProfiles: {
           "com.blank.sns" => "Automatic"
         }
-      }
+      },
+      export_xcargs: "-allowProvisioningUpdates"
     )
 
     # Firebase App Distributionへアップロード
