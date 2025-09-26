@@ -1,0 +1,11 @@
+git_url("https://github.com/shunh56/ios-certificates.git")
+
+storage_mode("git")
+
+type("development")
+
+app_identifier(["com.blank.sns"])
+
+username("shunhihara0707@gmail.com")
+
+team_id("CDQBCQRWL9")
