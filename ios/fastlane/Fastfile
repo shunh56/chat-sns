@@ -44,13 +44,34 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # Flutterビルドとアーカイブ（automatic signingで）
-    sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist")
+    # Flutterビルド（署名なし）
+    sh("cd ../.. && flutter build ios --release --no-codesign --dart-define-from-file=dart_defines/#{environment}.env")
+
+    # gymでアーカイブとIPA作成（automatic signing）
+    gym(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "development",
+      skip_build_archive: true,
+      archive_path: "../../build/ios/archive/Runner.xcarchive",
+      output_directory: "./build",
+      output_name: "app.ipa",
+      export_options: {
+        signingStyle: "automatic",
+        teamID: "CDQBCQRWL9",
+        compileBitcode: false,
+        uploadBitcode: false,
+        uploadSymbols: true,
+        provisioningProfiles: {
+          "com.blank.sns" => "match Development com.blank.sns"
+        }
+      }
+    )
 
     # Firebase App Distributionへアップロード
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID_IOS"],
-      ipa_path: "../../build/ios/ipa/通話SNS.ipa",
+      ipa_path: "./build/app.ipa",
       groups: "testers",
       release_notes: "自動ビルド from #{environment} environment"
     )
