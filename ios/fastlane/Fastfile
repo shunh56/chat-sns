@@ -41,20 +41,32 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # App Store Connect API Key設定とFlutterビルド
-    build_cmd = "cd ../.. && DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist"
+    # Flutterビルド（iOS部分のみ）
+    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env")
 
-    # API Key情報を環境変数で渡す
-    if ENV["APP_STORE_CONNECT_API_KEY_ID"]
-      build_cmd += " -- --allowProvisioningUpdates"
-    end
-
-    sh(build_cmd)
+    # gymでIPAをビルド（automatic signing with API Key）
+    gym(
+      scheme: "Runner",
+      workspace: "Runner.xcworkspace",
+      export_method: "ad-hoc",
+      export_options: {
+        signingStyle: "automatic",
+        teamID: "CDQBCQRWL9",
+        allowProvisioningUpdates: true,
+        compileBitcode: false,
+        uploadBitcode: false,
+        uploadSymbols: true,
+        signingCertificate: "Apple Distribution",
+        provisioningProfiles: {
+          "com.blank.sns" => "Automatic"
+        }
+      }
+    )
 
     # Firebase App Distributionへアップロード
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID_IOS"],
-      ipa_path: "../../build/ios/ipa/通話SNS.ipa",
+      ipa_path: lane_context[SharedValues::IPA_OUTPUT_PATH],
       groups: "testers",
       release_notes: "自動ビルド from #{environment} environment"
     )
