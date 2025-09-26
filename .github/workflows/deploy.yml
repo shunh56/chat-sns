@@ -59,18 +59,7 @@ jobs:
         bundler-cache: true
         working-directory: ios
 
-    - name: Install pods (with conflict resolution)
-      run: |
-        cd ios
-        echo "🧹 Cleaning previous pod installation..."
-        rm -rf Pods Podfile.lock .symlinks
-
-        echo "🔄 Installing fresh pods..."
-        pod deintegrate || true
-        pod repo update
-        pod install --repo-update
-
-        echo "✅ Pods installed successfully"
+    # Pod installはFastlane内で実行するため、ここではスキップ
 
     - name: Determine environment
       id: env

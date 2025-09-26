@@ -41,17 +41,28 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # Flutterビルドを先に実行（dart-definesを適用するため）
-    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
+    # Flutter依存関係を取得
+    sh("cd ../.. && flutter pub get")
 
-    # gymでアーカイブ+署名+エクスポート（allowProvisioningUpdatesフラグ付き）
+    # Podをクリーンインストール
+    sh("pod deintegrate || true")
+    sh("pod install --repo-update")
+
+    # dart-definesをBase64エンコード
+    dart_defines_file = File.read("../dart_defines/#{environment}.env")
+    dart_defines_encoded = dart_defines_file.split("\n").map { |line|
+      line.strip
+    }.reject(&:empty?).join(",")
+    dart_defines_base64 = Base64.strict_encode64(dart_defines_encoded)
+
+    # gymでビルド+アーカイブ+署名+エクスポート（allowProvisioningUpdatesフラグ付き）
     gym(
       scheme: "Runner",
       workspace: "Runner.xcworkspace",
       configuration: "Release",
       export_method: "ad-hoc",
       skip_build_archive: false,
-      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9",
+      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9 DART_DEFINES=#{dart_defines_base64} FLUTTER_BUILD_MODE=release",
       export_options: {
         signingStyle: "automatic",
         teamID: "CDQBCQRWL9",

@@ -126,9 +126,9 @@ Error (Xcode): No profiles for 'com.blank.sns' were found: Xcode couldn't find a
 
 ---
 
-### 🔄 方法5: `flutter build ios --no-codesign` + `gym`（現在テスト中）
+### ❌ 方法5: `flutter build ios --no-codesign` + `gym`（第1版）
 
-**コミット**: (次のコミット)
+**コミット**: f0f6174
 
 **実装内容**:
 ```ruby
@@ -142,24 +142,62 @@ gym(
   configuration: "Release",
   export_method: "ad-hoc",
   xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9",
-  export_options: {
-    signingStyle: "automatic",
-    teamID: "CDQBCQRWL9",
-    # ...
-  },
-  export_xcargs: "-allowProvisioningUpdates"
+  # ...
+)
+```
+
+**結果**: ❌ 失敗
+```
+Parse Issue (Xcode): A template argument list is expected after a name prefixed by the template keyword
+/Users/runner/work/chat-sns/chat-sns/ios/Pods/gRPC-Core/src/core/lib/promise/detail/basic_seq.h:102:37
+```
+
+**考察**:
+- `flutter build ios`がgRPC-Coreの依存関係をビルドする際にC++コンパイルエラー
+- Xcodeバージョンまたはコンパイラの互換性問題
+- pod installのタイミングや設定に問題がある可能性
+
+---
+
+### 🔄 方法6: gymで直接ビルド（Flutter CLIをスキップ）（現在テスト中）
+
+**コミット**: (次のコミット)
+
+**実装内容**:
+```ruby
+# Flutter依存関係を取得
+sh("cd ../.. && flutter pub get")
+
+# Podをクリーンインストール
+sh("pod deintegrate || true")
+sh("pod install --repo-update")
+
+# dart-definesをBase64エンコード
+dart_defines_file = File.read("../dart_defines/#{environment}.env")
+dart_defines_encoded = dart_defines_file.split("\n").join(",")
+dart_defines_base64 = Base64.strict_encode64(dart_defines_encoded)
+
+# gymでビルド+アーカイブ+署名+エクスポート
+gym(
+  scheme: "Runner",
+  workspace: "Runner.xcworkspace",
+  configuration: "Release",
+  export_method: "ad-hoc",
+  xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9 DART_DEFINES=#{dart_defines_base64} FLUTTER_BUILD_MODE=release",
+  # ...
 )
 ```
 
 **期待される動作**:
-- `flutter build ios --no-codesign`で署名をスキップ
-- gymの`xcargs`で`-allowProvisioningUpdates`をxcodebuildに渡す
-- App Store Connect API Keyを使用して自動的にプロビジョニングプロファイルを生成
+- Flutter CLIを完全にスキップし、gymが直接xcodebuildを実行
+- DART_DEFINESをxcodebuild引数として渡す
+- Pod依存関係をFastlane内でクリーンインストール
+- `xcargs`で`-allowProvisioningUpdates`を確実に適用
 
 **理論的根拠**:
-- `--no-codesign`フラグにより、Flutterビルド時の署名エラーを回避
-- gymが署名を完全に制御し、`xcargs`でxcodebuildに直接フラグを渡す
-- `export_xcargs`でエクスポート時にも`-allowProvisioningUpdates`を適用
+- Flutter CLIの制約を完全に回避
+- gymがビルドプロセス全体を制御
+- Pod依存関係の問題を最小化
 
 **結果**: 🔄 テスト中
 
