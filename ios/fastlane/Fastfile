@@ -41,29 +41,17 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # Flutter依存関係を取得
-    sh("cd ../.. && flutter pub get")
+    # Flutterビルド（dart-definesを適用）
+    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
 
-    # Podをクリーンインストール
-    sh("pod deintegrate || true")
-    sh("pod install --repo-update")
-
-    # dart-definesをBase64エンコード
-    dart_defines_path = File.expand_path("../../dart_defines/#{environment}.env", __dir__)
-    dart_defines_file = File.read(dart_defines_path)
-    dart_defines_encoded = dart_defines_file.split("\n").map { |line|
-      line.strip
-    }.reject(&:empty?).join(",")
-    dart_defines_base64 = Base64.strict_encode64(dart_defines_encoded)
-
-    # gymでビルド+アーカイブ+署名+エクスポート（allowProvisioningUpdatesフラグ付き）
+    # gymでアーカイブ+署名+エクスポートのみ（allowProvisioningUpdatesフラグ付き）
     gym(
       scheme: "Runner",
       workspace: "Runner.xcworkspace",
       configuration: "Release",
       export_method: "ad-hoc",
       skip_build_archive: false,
-      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9 DART_DEFINES=#{dart_defines_base64} FLUTTER_BUILD_MODE=release",
+      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9",
       export_options: {
         signingStyle: "automatic",
         teamID: "CDQBCQRWL9",
@@ -75,7 +63,8 @@ platform :ios do
           "com.blank.sns" => "Automatic"
         }
       },
-      export_xcargs: "-allowProvisioningUpdates"
+      export_xcargs: "-allowProvisioningUpdates",
+      verbose: true
     )
 
     # Firebase App Distributionへアップロード

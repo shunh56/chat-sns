@@ -159,9 +159,9 @@ Parse Issue (Xcode): A template argument list is expected after a name prefixed 
 
 ---
 
-### 🔄 方法6: gymで直接ビルド（Flutter CLIをスキップ）（現在テスト中）
+### ❌ 方法6: gymで直接ビルド（Flutter CLIをスキップ）
 
-**コミット**: (次のコミット)
+**コミット**: dfc6259, 5a9e992
 
 **実装内容**:
 ```ruby
@@ -173,31 +173,56 @@ sh("pod deintegrate || true")
 sh("pod install --repo-update")
 
 # dart-definesをBase64エンコード
-dart_defines_file = File.read("../dart_defines/#{environment}.env")
-dart_defines_encoded = dart_defines_file.split("\n").join(",")
 dart_defines_base64 = Base64.strict_encode64(dart_defines_encoded)
 
 # gymでビルド+アーカイブ+署名+エクスポート
 gym(
-  scheme: "Runner",
-  workspace: "Runner.xcworkspace",
-  configuration: "Release",
-  export_method: "ad-hoc",
   xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9 DART_DEFINES=#{dart_defines_base64} FLUTTER_BUILD_MODE=release",
   # ...
 )
 ```
 
-**期待される動作**:
-- Flutter CLIを完全にスキップし、gymが直接xcodebuildを実行
-- DART_DEFINESをxcodebuild引数として渡す
-- Pod依存関係をFastlane内でクリーンインストール
-- `xcargs`で`-allowProvisioningUpdates`を確実に適用
+**結果**: ❌ 失敗
+```
+** ARCHIVE FAILED **
+The following build commands failed:
+    Archiving workspace Runner with scheme Runner
+(1 failure)
+```
 
-**理論的根拠**:
-- Flutter CLIの制約を完全に回避
-- gymがビルドプロセス全体を制御
-- Pod依存関係の問題を最小化
+**考察**:
+- gymがFlutter特有のビルドステップをスキップしてしまう
+- DART_DEFINESをxcodebuild引数として渡すだけでは不十分
+- Flutter CLIの前処理（コード生成など）が必要
+
+---
+
+### 🔄 方法7: `flutter build ios --no-codesign` + gym（verbose有効）（現在テスト中）
+
+**コミット**: (次のコミット)
+
+**実装内容**:
+```ruby
+# Flutterビルド（dart-definesを適用、署名なし）
+sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
+
+# gymでアーカイブ+署名+エクスポートのみ
+gym(
+  scheme: "Runner",
+  workspace: "Runner.xcworkspace",
+  configuration: "Release",
+  export_method: "ad-hoc",
+  xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9",
+  export_xcargs: "-allowProvisioningUpdates",
+  verbose: true
+)
+```
+
+**期待される動作**:
+- `flutter build ios --no-codesign`でFlutterビルド（署名スキップ）
+- 前回のgRPCエラーが解決されている
+- gymの`xcargs`で`-allowProvisioningUpdates`を適用
+- verbose出力で詳細なエラーを確認
 
 **結果**: 🔄 テスト中
 
