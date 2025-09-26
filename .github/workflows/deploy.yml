@@ -116,6 +116,11 @@ jobs:
       env:
         FIREBASE_APP_ID_IOS: ${{ secrets.FIREBASE_APP_ID_IOS_DEV }}
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+        APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
       run: |
         cd ios
         bundle exec fastlane firebase env:${{ steps.env.outputs.environment }}

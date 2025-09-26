@@ -41,7 +41,7 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # FlutterでIPAビルド（automatic signing with provisioning updates）
+    # FlutterでIPAビルド（automatic signing with API Key）
     sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist")
 
     # Firebase App Distributionへアップロード

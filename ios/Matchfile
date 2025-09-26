@@ -9,3 +9,6 @@ app_identifier(["com.blank.sns"])
 username("shunhihara0707@gmail.com")
 
 team_id("CDQBCQRWL9")
+
+# App Store Connect API Key使用
+api_key_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
