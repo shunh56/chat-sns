@@ -103,12 +103,19 @@ jobs:
         # Create API Key file
         echo "$API_KEY_CONTENT" > ~/private_keys/AuthKey_${API_KEY_ID}.p8
 
-        # Set environment variables for xcodebuild
+        # Set file permissions
+        chmod 600 ~/private_keys/AuthKey_${API_KEY_ID}.p8
+
+        # Export environment variables for xcodebuild
         echo "APP_STORE_CONNECT_API_KEY_ID=$API_KEY_ID" >> $GITHUB_ENV
         echo "APP_STORE_CONNECT_API_ISSUER_ID=$API_ISSUER_ID" >> $GITHUB_ENV
         echo "APP_STORE_CONNECT_API_KEY_PATH=$HOME/private_keys/AuthKey_${API_KEY_ID}.p8" >> $GITHUB_ENV
 
-        echo "App Store Connect API Key configured"
+        # Set xcodebuild authentication environment variables
+        echo "FASTLANE_USER=" >> $GITHUB_ENV
+        echo "FASTLANE_PASSWORD=" >> $GITHUB_ENV
+
+        echo "✅ App Store Connect API Key configured at ~/private_keys/AuthKey_${API_KEY_ID}.p8"
 
     # 🚀 改善5: Firebase配布のみ（develop用）
     - name: Deploy to Firebase App Distribution

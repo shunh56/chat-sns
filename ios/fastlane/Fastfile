@@ -41,8 +41,15 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # FlutterでIPAビルド（automatic signing with API Key）
-    sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist")
+    # App Store Connect API Key設定とFlutterビルド
+    build_cmd = "cd ../.. && DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist"
+
+    # API Key情報を環境変数で渡す
+    if ENV["APP_STORE_CONNECT_API_KEY_ID"]
+      build_cmd += " -- --allowProvisioningUpdates"
+    end
+
+    sh(build_cmd)
 
     # Firebase App Distributionへアップロード
     firebase_app_distribution(
