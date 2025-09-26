@@ -18,8 +18,6 @@ class RoomUsecase {
 
   RoomUsecase(this._ref, this._repository);
 
-  
-
   sendMessage(String text) {
     return _repository.sendMessage(text);
   }

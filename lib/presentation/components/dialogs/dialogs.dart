@@ -116,12 +116,6 @@ showGalleryPermissionDialog(
   );
 }
 
-
-
-
-
-
-
 /*class DialogsProvider {
   Future<void> showNewFriendDialog(UserAccount user) async {
     final themeSize = ref.watch(themeSizeProvider(context));

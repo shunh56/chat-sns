@@ -47,12 +47,10 @@ class BlocksScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Row(
                   children: [
-                  
                     UserIcon(
-                            user: user,
-                            r: 48,
-                          
-                          ),
+                      user: user,
+                      r: 48,
+                    ),
                     const Gap(12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +72,6 @@ class BlocksScreen extends ConsumerWidget {
                     const Expanded(child: SizedBox()),
                     GestureDetector(
                       onTap: () {
-                        
                         ref
                             .read(blocksListNotifierProvider.notifier)
                             .unblockUser(user);

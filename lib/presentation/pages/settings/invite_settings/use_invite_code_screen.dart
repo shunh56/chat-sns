@@ -5,7 +5,8 @@ class UseInviteCodeScreen extends ConsumerStatefulWidget {
   const UseInviteCodeScreen({super.key});
 
   @override
-  ConsumerState<UseInviteCodeScreen> createState() => _UseInviteCodeScreenState();
+  ConsumerState<UseInviteCodeScreen> createState() =>
+      _UseInviteCodeScreenState();
 }
 
 class _UseInviteCodeScreenState extends ConsumerState<UseInviteCodeScreen> {

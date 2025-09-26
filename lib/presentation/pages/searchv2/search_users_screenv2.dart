@@ -12,7 +12,5 @@ class SearchUsersScreenV2 extends ConsumerWidget {
     );
   }
 
-  _topUsers(BuildContext context, WidgetRef ref) {
-    
-  }
+  _topUsers(BuildContext context, WidgetRef ref) {}
 }

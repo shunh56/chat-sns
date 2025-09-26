@@ -36,15 +36,16 @@ class TempoStatus {
       mood: json['mood'] ?? '😊',
       userId: json['userId'] ?? '',
       location: TempoLocation.fromJson(json['location'] ?? {}),
-      weather: json['weather'] != null 
-          ? TempoWeather.fromJson(json['weather']) 
+      weather: json['weather'] != null
+          ? TempoWeather.fromJson(json['weather'])
           : null,
       isActive: json['isActive'] ?? true,
       createdAt: json['createdAt'] ?? Timestamp.now(),
       updatedAt: json['updatedAt'] ?? Timestamp.now(),
-      expiresAt: json['expiresAt'] ?? Timestamp.fromDate(
-        DateTime.now().add(const Duration(hours: 24)),
-      ),
+      expiresAt: json['expiresAt'] ??
+          Timestamp.fromDate(
+            DateTime.now().add(const Duration(hours: 24)),
+          ),
       version: json['version'] ?? '1.0',
     );
   }
@@ -118,16 +119,16 @@ class TempoStatus {
 
   // ステータスが有効かどうか
   bool get isExpired => DateTime.now().isAfter(expiresAt.toDate());
-  
+
   // ステータスが表示可能かどうか
   bool get isVisible => isActive && !isExpired;
 
   // 作成からの経過時間（分）
-  int get minutesSinceCreated => 
+  int get minutesSinceCreated =>
       DateTime.now().difference(createdAt.toDate()).inMinutes;
 
   // 更新からの経過時間（分）
-  int get minutesSinceUpdated => 
+  int get minutesSinceUpdated =>
       DateTime.now().difference(updatedAt.toDate()).inMinutes;
 
   // 残り時間（時間）
@@ -287,8 +288,7 @@ class TempoInteraction {
   }
 
   // インタラクションからの経過時間（分）
-  int get minutesAgo => 
-      DateTime.now().difference(timestamp.toDate()).inMinutes;
+  int get minutesAgo => DateTime.now().difference(timestamp.toDate()).inMinutes;
 
   // 表示用の時間テキスト
   String get timeAgo {

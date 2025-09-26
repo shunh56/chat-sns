@@ -46,17 +46,15 @@ class MutesScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(
                   children: [
-                  UserIcon(
-                            user: user,
-                            r: 48,
-                         
-                          ),
+                    UserIcon(
+                      user: user,
+                      r: 48,
+                    ),
                     const Gap(12),
                     Text(user.username),
                     const Expanded(child: SizedBox()),
                     GestureDetector(
                       onTap: () {
-                        
                         ref
                             .read(mutesListNotifierProvider.notifier)
                             .unMuteUser(user);

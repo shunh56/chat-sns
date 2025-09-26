@@ -13,12 +13,12 @@ final markFootprintsSeenProvider = Provider(
 class MarkSeenProvider {
   final MarkFootprintsSeenUsecase _markFootprintsSeenUsecase;
   final Ref _ref;
-  
+
   MarkSeenProvider(this._markFootprintsSeenUsecase, this._ref);
-  
+
   Future<void> markAllSeen() async {
     await _markFootprintsSeenUsecase.markAllFootprintsSeen();
-    
+
     // 未読カウントをリセット
     _ref.read(unreadFootprintCountProvider.notifier).resetCount();
   }

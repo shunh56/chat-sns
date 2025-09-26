@@ -14,7 +14,7 @@ class DiscoverPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scrollController = useScrollController();
-    
+
     return Scaffold(
       backgroundColor: TempoColors.background,
       body: SafeArea(
@@ -31,8 +31,8 @@ class DiscoverPage extends HookConsumerWidget {
                     Row(
                       children: [
                         ShaderMask(
-                          shaderCallback: (bounds) => TempoColors.primaryGradient
-                              .createShader(bounds),
+                          shaderCallback: (bounds) =>
+                              TempoColors.primaryGradient.createShader(bounds),
                           child: const Text(
                             'Tempo',
                             style: TempoTextStyles.display2,
@@ -82,11 +82,12 @@ class DiscoverPage extends HookConsumerWidget {
                 ),
               ),
             ),
-            
+
             // Current Status Section
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: TempoSpacing.lg),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: TempoSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -124,13 +125,14 @@ class DiscoverPage extends HookConsumerWidget {
                 ),
               ),
             ),
-            
+
             const SliverToBoxAdapter(child: SizedBox(height: TempoSpacing.xl)),
-            
+
             // Nearby Users Section
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: TempoSpacing.lg),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: TempoSpacing.lg),
                 child: Text(
                   '同じテンポの人たち',
                   style: TempoTextStyles.headline3.copyWith(
@@ -139,9 +141,9 @@ class DiscoverPage extends HookConsumerWidget {
                 ),
               ),
             ),
-            
+
             const SliverToBoxAdapter(child: SizedBox(height: TempoSpacing.lg)),
-            
+
             // User Cards
             SliverList(
               delegate: SliverChildBuilderDelegate(
@@ -158,7 +160,7 @@ class DiscoverPage extends HookConsumerWidget {
                 childCount: 10,
               ),
             ),
-            
+
             // Bottom Padding
             const SliverToBoxAdapter(
               child: SizedBox(height: TempoSpacing.xxxl),
@@ -190,9 +192,9 @@ class DiscoverPage extends HookConsumerWidget {
       {'name': 'たけし', 'activity': '散歩', 'mood': '🥺', 'time': '12分前'},
       {'name': 'さくら', 'activity': 'カフェでまったり', 'mood': '😪', 'time': '15分前'},
     ];
-    
+
     final user = users[index % users.length];
-    
+
     return Container(
       padding: const EdgeInsets.all(TempoSpacing.cardPadding),
       decoration: BoxDecoration(

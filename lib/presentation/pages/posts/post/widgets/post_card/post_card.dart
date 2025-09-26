@@ -17,12 +17,10 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
     super.key,
     required this.postRef,
     required this.user,
-   
   });
 
   final Post postRef;
   final UserAccount user;
-  
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -75,7 +73,6 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
           handleTapDown(animations.scaleController, details),
       onTapUp: (details) => handleTapUp(animations.scaleController, details),
       onTapCancel: () => handleTapCancel(animations.scaleController),
-     
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -90,7 +87,6 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
             user: user,
             onUserTap: () => _handleUserTap(context, ref),
             onMoreTap: () => _handleMoreTap(context, ref, post),
-           
           ),
         ),
       ),
@@ -101,9 +97,7 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
 
   /// カードタップ処理
   void _handleCardTap(BuildContext context, WidgetRef ref, Post post) {
-  
-      ref.read(navigationRouterProvider(context)).goToPost(post, user);
-    
+    ref.read(navigationRouterProvider(context)).goToPost(post, user);
   }
 
   /// ユーザータップ処理

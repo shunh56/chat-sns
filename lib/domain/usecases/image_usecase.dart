@@ -13,13 +13,14 @@ class ImageUsecase {
 
   ImageUsecase(this._repository);
 
-  List<UserImage> addImages(List<String> imageUrls){
+  List<UserImage> addImages(List<String> imageUrls) {
     List<UserImage> images = [];
-    for(String imageUrl in  imageUrls){
-       images.add(_repository.addImage(imageUrl));
+    for (String imageUrl in imageUrls) {
+      images.add(_repository.addImage(imageUrl));
     }
     return images;
   }
+
   getImages({String? userId}) async {
     return _repository.getImages(userId: userId);
   }

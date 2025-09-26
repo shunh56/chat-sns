@@ -42,7 +42,7 @@ class BaseCard extends ConsumerWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(borderRadius),
-          splashColor: enableHoverEffect 
+          splashColor: enableHoverEffect
               ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
               : Colors.transparent,
           highlightColor: enableHoverEffect
@@ -56,13 +56,15 @@ class BaseCard extends ConsumerWidget {
                 color: borderColor ?? ThemeColor.cardBorderColor,
                 width: 1.0,
               ),
-              boxShadow: enableShadow ? [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ] : null,
+              boxShadow: enableShadow
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
             child: child,
           ),

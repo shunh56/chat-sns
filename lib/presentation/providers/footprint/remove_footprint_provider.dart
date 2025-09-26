@@ -14,15 +14,14 @@ final removeFootprintProvider = Provider(
 class RemoveFootprintProvider {
   final RemoveFootprintUsecase _removeFootprintUsecase;
   final Ref _ref;
-  
+
   RemoveFootprintProvider(this._removeFootprintUsecase, this._ref);
-  
+
   Future<void> removeFootprint(String userId) async {
     await _removeFootprintUsecase.deleteFootprint(userId);
-    
+
     // 関連するプロバイダを更新
     _ref.invalidate(visitorsProvider);
     _ref.invalidate(visitedProvider);
-    
   }
 }

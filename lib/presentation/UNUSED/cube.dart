@@ -136,7 +136,7 @@ extension ColorDarker on Color {
   }
 
   Color brighter(double amount) {
-    assert(amount >= 0 , 'Amount should be bigger thant 0');
+    assert(amount >= 0, 'Amount should be bigger thant 0');
     double f = amount;
     return Color.fromARGB(
       alpha,

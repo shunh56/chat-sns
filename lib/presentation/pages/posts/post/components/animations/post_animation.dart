@@ -88,7 +88,7 @@ PostAnimations usePostAnimations({
   useEffect(() {
     final animatedPosts = ref.read(animatedPostsProvider.notifier);
     final hasBeenAnimated = animatedPosts.hasBeenAnimated(postId);
-    
+
     if (hasBeenAnimated) {
       slideController.value = 1.0;
       fadeController.value = 1.0;

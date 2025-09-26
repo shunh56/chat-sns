@@ -13,7 +13,7 @@ class ConnectionsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabController = useTabController(initialLength: 2);
-    
+
     return Scaffold(
       backgroundColor: TempoColors.background,
       body: SafeArea(
@@ -62,7 +62,7 @@ class ConnectionsPage extends HookConsumerWidget {
                 ],
               ),
             ),
-            
+
             // Tab Bar
             Container(
               margin: const EdgeInsets.symmetric(horizontal: TempoSpacing.lg),
@@ -90,9 +90,9 @@ class ConnectionsPage extends HookConsumerWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: TempoSpacing.lg),
-            
+
             // Tab Content
             Expanded(
               child: TabBarView(
@@ -143,9 +143,9 @@ class ConnectionsPage extends HookConsumerWidget {
       itemBuilder: (context, index) {
         final connection = connections[index];
         final startTime = connection['startTime'] as DateTime;
-        final remaining = const Duration(hours: 24) - 
-            DateTime.now().difference(startTime);
-        
+        final remaining =
+            const Duration(hours: 24) - DateTime.now().difference(startTime);
+
         return Container(
           margin: const EdgeInsets.only(bottom: TempoSpacing.md),
           padding: const EdgeInsets.all(TempoSpacing.cardPadding),
@@ -285,7 +285,7 @@ class ConnectionsPage extends HookConsumerWidget {
       itemCount: history.length,
       itemBuilder: (context, index) {
         final item = history[index];
-        
+
         return Container(
           margin: const EdgeInsets.only(bottom: TempoSpacing.md),
           padding: const EdgeInsets.all(TempoSpacing.cardPadding),

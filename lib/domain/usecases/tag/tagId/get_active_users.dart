@@ -6,18 +6,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final getActiveUsersProvider = Provider<GetActiveUsers>((ref) {
   final repository = ref.watch(tagRepositoryProvider);
-  return GetActiveUsers(
-    repository
-  );
+  return GetActiveUsers(repository);
 });
 
 class GetActiveUsers {
   final TagRepository repository;
-  
 
   GetActiveUsers(this.repository);
 
-  Future<List<TagUser>> execute(String tagId,{String? lastUserId,}) async {
-    return await repository.getActiveUsers(tagId,);
+  Future<List<TagUser>> execute(
+    String tagId, {
+    String? lastUserId,
+  }) async {
+    return await repository.getActiveUsers(
+      tagId,
+    );
   }
 }

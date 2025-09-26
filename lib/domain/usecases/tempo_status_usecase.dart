@@ -28,7 +28,7 @@ class TempoStatusUsecase {
   }) async {
     // 位置情報を取得
     final location = await _getCurrentLocation();
-    
+
     // 天気情報を取得（オプション）
     final weather = await _getWeatherInfo(location);
 
@@ -58,7 +58,7 @@ class TempoStatusUsecase {
     // 位置情報を再取得（ステータス内容が変更された場合）
     TempoLocation? newLocation;
     TempoWeather? newWeather;
-    
+
     if (status != null || mood != null) {
       newLocation = await _getCurrentLocation();
       newWeather = await _getWeatherInfo(newLocation);
@@ -200,12 +200,13 @@ class TempoStatusUsecase {
       );
 
       // ジオハッシュを生成（精度6で約1.2km四方）
-      final geohash = _generateGeohash(position.latitude, position.longitude, 6);
+      final geohash =
+          _generateGeohash(position.latitude, position.longitude, 6);
 
       // 住所を取得
       String prefecture = '';
       String city = '';
-      
+
       try {
         final placemarks = await placemarkFromCoordinates(
           position.latitude,
@@ -242,7 +243,7 @@ class TempoStatusUsecase {
     const lat = 35.6812;
     const lon = 139.7671;
     final geohash = _generateGeohash(lat, lon, 6);
-    
+
     return TempoLocation(
       latitude: lat,
       longitude: lon,
@@ -288,7 +289,7 @@ class TempoStatusUsecase {
     '😌', // まったり
     '🔥', // やる気
     '💤', // 疲れた
-    '❤️'  // 幸せ
+    '❤️' // 幸せ
   ];
 
   /// 推奨ステータステンプレート
@@ -316,12 +317,12 @@ class TempoStatusUsecase {
     const String base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
     double latMin = -90.0, latMax = 90.0;
     double lonMin = -180.0, lonMax = 180.0;
-    
+
     String geohash = '';
     int bits = 0;
     int bit = 0;
     bool isLon = true;
-    
+
     while (geohash.length < precision) {
       double mid;
       if (isLon) {
@@ -343,17 +344,17 @@ class TempoStatusUsecase {
           latMax = mid;
         }
       }
-      
+
       isLon = !isLon;
       bit++;
-      
+
       if (bit == 5) {
         geohash += base32[bits];
         bits = 0;
         bit = 0;
       }
     }
-    
+
     return geohash;
   }
 }

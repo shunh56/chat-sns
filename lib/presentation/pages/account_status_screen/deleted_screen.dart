@@ -136,7 +136,6 @@ class DeletedAccountScreen extends HookConsumerWidget {
                   // キャンセルボタン
                   TextButton(
                     onPressed: () {
-                      
                       ref.read(authNotifierProvider).signout();
                     },
                     style: TextButton.styleFrom(

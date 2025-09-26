@@ -18,7 +18,7 @@ class TempoHomePage extends HookConsumerWidget {
 
     final pages = [
       const DiscoverPage(),
-      const ConnectionsPage(), 
+      const ConnectionsPage(),
       const ProfilePage(),
     ];
 
@@ -165,10 +165,12 @@ class _TabButton extends HookWidget {
           decoration: BoxDecoration(
             gradient: isActive ? item.gradient : null,
             borderRadius: BorderRadius.circular(16),
-            border: isActive ? null : Border.all(
-              color: TempoColors.textTertiary.withOpacity(0.3),
-              width: 1,
-            ),
+            border: isActive
+                ? null
+                : Border.all(
+                    color: TempoColors.textTertiary.withOpacity(0.3),
+                    width: 1,
+                  ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

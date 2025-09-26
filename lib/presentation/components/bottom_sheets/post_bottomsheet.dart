@@ -641,9 +641,10 @@ class PostBottomModelSheet {
                                       .read(deletingPostsProvider.notifier)
                                       .startDeleting(post.id);
                                   Navigator.pop(context);
-                                  
+
                                   // アニメーション後に実際の削除処理
-                                  Future.delayed(const Duration(milliseconds: 400), () {
+                                  Future.delayed(
+                                      const Duration(milliseconds: 400), () {
                                     ref
                                         .read(allPostsNotifierProvider.notifier)
                                         .deletePostByUser(post);
@@ -766,7 +767,7 @@ class PostBottomModelSheet {
     );
   }
 
- /* openCurrentStatusPostAction(CurrentStatusPost post, UserAccount user) {
+  /* openCurrentStatusPostAction(CurrentStatusPost post, UserAccount user) {
     showModalBottomSheet(
       isScrollControlled: true,
       backgroundColor: ThemeColor.background,

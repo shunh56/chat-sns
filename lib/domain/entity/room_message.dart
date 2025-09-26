@@ -34,7 +34,8 @@ class Message {
     return Message(
       id: json['id'] as String,
       //TODO
-      userId: (json['userId']?? FirebaseAuth.instance.currentUser!.uid) as String,
+      userId:
+          (json['userId'] ?? FirebaseAuth.instance.currentUser!.uid) as String,
       type: MessageType.values.firstWhere(
         (e) => e.toString().split('.').last == json['type'],
         orElse: () => MessageType.text,

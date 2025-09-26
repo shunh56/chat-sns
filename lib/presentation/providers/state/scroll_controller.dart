@@ -12,7 +12,8 @@ class ScrollToTopNotifier extends StateNotifier<int> {
   }
 }
 
-final scrollToTopProvider = StateNotifierProvider<ScrollToTopNotifier, int>((ref) {
+final scrollToTopProvider =
+    StateNotifierProvider<ScrollToTopNotifier, int>((ref) {
   return ScrollToTopNotifier();
 });
 
@@ -28,7 +29,8 @@ class AnimatedPostsNotifier extends StateNotifier<Set<String>> {
   }
 }
 
-final animatedPostsProvider = StateNotifierProvider<AnimatedPostsNotifier, Set<String>>((ref) {
+final animatedPostsProvider =
+    StateNotifierProvider<AnimatedPostsNotifier, Set<String>>((ref) {
   return AnimatedPostsNotifier();
 });
 
@@ -48,6 +50,7 @@ class DeletingPostsNotifier extends StateNotifier<Set<String>> {
   }
 }
 
-final deletingPostsProvider = StateNotifierProvider<DeletingPostsNotifier, Set<String>>((ref) {
+final deletingPostsProvider =
+    StateNotifierProvider<DeletingPostsNotifier, Set<String>>((ref) {
   return DeletingPostsNotifier();
 });

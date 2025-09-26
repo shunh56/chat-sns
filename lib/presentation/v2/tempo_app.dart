@@ -28,7 +28,7 @@ class TempoApp extends ConsumerWidget {
       scaffoldBackgroundColor: TempoColors.backgroundLight,
       cardColor: TempoColors.surfaceLight,
       dividerColor: TempoColors.textTertiary.withOpacity(0.1),
-      
+
       // AppBar
       appBarTheme: const AppBarTheme(
         backgroundColor: TempoColors.surfaceLight,
@@ -36,7 +36,7 @@ class TempoApp extends ConsumerWidget {
         elevation: 0,
         centerTitle: true,
       ),
-      
+
       // BottomNavigationBar
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: TempoColors.surfaceLight,
@@ -45,7 +45,7 @@ class TempoApp extends ConsumerWidget {
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
-      
+
       // TextTheme
       textTheme: TextTheme(
         displayLarge: TempoTextStyles.display1.copyWith(
@@ -82,7 +82,7 @@ class TempoApp extends ConsumerWidget {
           color: TempoColors.textSecondary,
         ),
       ),
-      
+
       // Input Decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -107,7 +107,7 @@ class TempoApp extends ConsumerWidget {
           ),
         ),
       ),
-      
+
       // Elevated Button
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -120,7 +120,7 @@ class TempoApp extends ConsumerWidget {
           textStyle: TempoTextStyles.buttonMedium,
         ),
       ),
-      
+
       // Color Scheme
       colorScheme: const ColorScheme.light(
         primary: TempoColors.primary,
@@ -135,10 +135,10 @@ class TempoApp extends ConsumerWidget {
         onBackground: TempoColors.textPrimaryLight,
         onError: Colors.white,
       ),
-      
+
       // Font Family
       fontFamily: TempoTextStyles.fontFamily,
-      
+
       useMaterial3: true,
     );
   }
@@ -150,7 +150,7 @@ class TempoApp extends ConsumerWidget {
       scaffoldBackgroundColor: TempoColors.background,
       cardColor: TempoColors.surface,
       dividerColor: TempoColors.textTertiary.withOpacity(0.1),
-      
+
       // AppBar
       appBarTheme: const AppBarTheme(
         backgroundColor: TempoColors.surface,
@@ -158,7 +158,7 @@ class TempoApp extends ConsumerWidget {
         elevation: 0,
         centerTitle: true,
       ),
-      
+
       // BottomNavigationBar
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: TempoColors.surface,
@@ -167,7 +167,7 @@ class TempoApp extends ConsumerWidget {
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
-      
+
       // TextTheme
       textTheme: TextTheme(
         displayLarge: TempoTextStyles.display1.copyWith(
@@ -204,7 +204,7 @@ class TempoApp extends ConsumerWidget {
           color: TempoColors.textSecondary,
         ),
       ),
-      
+
       // Input Decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -229,7 +229,7 @@ class TempoApp extends ConsumerWidget {
           ),
         ),
       ),
-      
+
       // Elevated Button
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -242,7 +242,7 @@ class TempoApp extends ConsumerWidget {
           textStyle: TempoTextStyles.buttonMedium,
         ),
       ),
-      
+
       // Color Scheme
       colorScheme: const ColorScheme.dark(
         primary: TempoColors.primary,
@@ -257,10 +257,10 @@ class TempoApp extends ConsumerWidget {
         onBackground: TempoColors.textPrimary,
         onError: Colors.white,
       ),
-      
+
       // Font Family
       fontFamily: TempoTextStyles.fontFamily,
-      
+
       useMaterial3: true,
     );
   }

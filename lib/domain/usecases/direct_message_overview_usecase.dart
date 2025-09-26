@@ -24,7 +24,7 @@ class DirectMessageOverviewUsecase {
     return _repository.leaveChat(userId);
   }
 
-  joinChat(String userId){
+  joinChat(String userId) {
     return _repository.joinChat(userId);
   }
 }

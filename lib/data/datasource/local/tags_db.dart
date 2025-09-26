@@ -10,7 +10,7 @@ class TagsDB {
     "matcha_sweets": "抹茶スイーツ",
     "pudding_parfait": "プリンパフェ",
     "cheese_tea": "チーズティー",
-    
+
     // 娯楽・活動
     "karaoke": "カラオケ",
     "purikura": "プリクラ",
@@ -20,34 +20,34 @@ class TagsDB {
     "live_concert": "ライブ参戦",
     "movie_watching": "映画鑑賞",
     "anime_pilgrimage": "アニメ聖地巡礼",
-    
+
     // ショッピング
     "vintage_shopping": "古着巡り",
     "cosmetics_shopping": "コスメ購入",
     "stationery_collecting": "文房具集め",
     "variety_store": "雑貨屋さん",
-    
+
     // アウトドア・場所
     "picnic": "ピクニック",
     "cherry_blossom": "花見",
     "illumination": "イルミネーション",
     "rooftop_terrace": "屋上テラス",
     "park_walk": "公園散歩",
-    
+
     // イベント・シーズン
     "school_festival": "学園祭",
     "halloween_costume": "ハロウィン仮装",
     "christmas_party": "クリスマスパーティー",
     "birthday_party": "誕生日会",
     "club_camp": "サークル合宿",
-    
+
     // アクティビティ
     "night_pool": "ナイトプール",
     "night_drive": "夜景ドライブ",
     "cycling": "自転車サイクリング",
     "drawing": "お絵描き",
     "homemade_sweets": "手作りお菓子",
-    
+
     // 勉強・大学生活
     "stylish_study_group": "オシャレ勉強会",
     "library_date": "図書館デート",
@@ -59,27 +59,58 @@ class TagsDB {
   // カテゴリー別にタグを整理
   final Map<String, List<String>> categorizedTags = {
     "food": [
-      "cafe_hopping", "starbucks", "bubble_tea", "instagrammable_lunch",
-      "sandwich", "matcha_sweets", "pudding_parfait", "cheese_tea"
+      "cafe_hopping",
+      "starbucks",
+      "bubble_tea",
+      "instagrammable_lunch",
+      "sandwich",
+      "matcha_sweets",
+      "pudding_parfait",
+      "cheese_tea"
     ],
     "entertainment": [
-      "karaoke", "purikura", "arcade", "board_games",
-      "idol_support", "live_concert", "movie_watching", "anime_pilgrimage"
+      "karaoke",
+      "purikura",
+      "arcade",
+      "board_games",
+      "idol_support",
+      "live_concert",
+      "movie_watching",
+      "anime_pilgrimage"
     ],
     "shopping": [
-      "vintage_shopping", "cosmetics_shopping", "stationery_collecting", "variety_store"
+      "vintage_shopping",
+      "cosmetics_shopping",
+      "stationery_collecting",
+      "variety_store"
     ],
     "outdoor": [
-      "picnic", "cherry_blossom", "illumination", "rooftop_terrace", "park_walk"
+      "picnic",
+      "cherry_blossom",
+      "illumination",
+      "rooftop_terrace",
+      "park_walk"
     ],
     "events": [
-      "school_festival", "halloween_costume", "christmas_party", "birthday_party", "club_camp"
+      "school_festival",
+      "halloween_costume",
+      "christmas_party",
+      "birthday_party",
+      "club_camp"
     ],
     "activity": [
-      "night_pool", "night_drive", "cycling", "drawing", "homemade_sweets"
+      "night_pool",
+      "night_drive",
+      "cycling",
+      "drawing",
+      "homemade_sweets"
     ],
     "study": [
-      "stylish_study_group", "library_date", "morning_activity", "night_cafe_work", "note_taking"
+      "stylish_study_group",
+      "library_date",
+      "morning_activity",
+      "night_cafe_work",
+      "note_taking"
     ]
   };
 
@@ -106,7 +137,10 @@ class TagsDB {
   // カテゴリーからタグ名リストを取得
   List<String> getTagNamesByCategory(String category) {
     final tagIds = getTagIdsByCategory(category);
-    return tagIds.map((id) => db[id] ?? "").where((name) => name.isNotEmpty).toList();
+    return tagIds
+        .map((id) => db[id] ?? "")
+        .where((name) => name.isNotEmpty)
+        .toList();
   }
 
   // すべてのカテゴリーを取得
@@ -123,11 +157,11 @@ class TagsDB {
     }
     return null;
   }
-  
+
   // タグを検索（部分一致）
   List<Map<String, String>> searchTags(String query) {
     final results = <Map<String, String>>[];
-    
+
     for (var entry in db.entries) {
       if (entry.key.contains(query) || entry.value.contains(query)) {
         results.add({
@@ -137,10 +171,10 @@ class TagsDB {
         });
       }
     }
-    
+
     return results;
   }
-  
+
   // すべてのタグを取得（id, name, category形式）
   List<Map<String, String>> getAllTags() {
     return db.entries.map((entry) {
@@ -151,7 +185,7 @@ class TagsDB {
       };
     }).toList();
   }
-  
+
   // 複数のタグIDからタグ名リストを取得
   List<String> getTagNamesByIds(List<String> tagIds) {
     return tagIds

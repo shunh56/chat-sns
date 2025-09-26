@@ -98,9 +98,8 @@ class AuthNotifier {
       return "unknown_error";
     }
   }
- 
- 
- /*Future<String> signInWithGoogle() async {
+
+  /*Future<String> signInWithGoogle() async {
     _ref.read(loginProcessProvider.notifier).state = true;
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn(

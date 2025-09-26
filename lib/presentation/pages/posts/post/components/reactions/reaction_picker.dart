@@ -87,7 +87,7 @@ class ReactionPicker extends HookConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: reactions.asMap().entries.map((entry) {
-                      final index = entry.key;
+                      //final index = entry.key;
                       final reaction = entry.value;
                       return GestureDetector(
                         onTap: () {

@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Footprint {
-  final String userId;       // 足あとを残したユーザーID
-  final int count;           // 訪問回数
+  final String userId; // 足あとを残したユーザーID
+  final int count; // 訪問回数
   final Timestamp updatedAt; // 最終訪問日時
-  final bool isSeen;         // 既読状態（所有者が確認したかどうか）
+  final bool isSeen; // 既読状態（所有者が確認したかどうか）
 
   Footprint({
     required this.userId,
@@ -21,7 +21,7 @@ class Footprint {
       isSeen: json["isSeen"] ?? false,
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       "userId": userId,
@@ -30,7 +30,7 @@ class Footprint {
       "isSeen": isSeen,
     };
   }
-  
+
   Footprint copyWith({
     String? userId,
     int? count,
@@ -48,9 +48,9 @@ class Footprint {
 
 // 足あとのプライバシー設定
 enum FootprintPrivacy {
-  everyone,    // 全員に表示
+  everyone, // 全員に表示
   friendsOnly, // 友達のみに表示
-  disabled,    // 無効（表示せず、残さない）
+  disabled, // 無効（表示せず、残さない）
 }
 
 extension FootprintPrivacyExtension on FootprintPrivacy {
@@ -64,7 +64,7 @@ extension FootprintPrivacyExtension on FootprintPrivacy {
         return 'disabled';
     }
   }
-  
+
   static FootprintPrivacy fromString(String value) {
     switch (value) {
       case 'everyone':

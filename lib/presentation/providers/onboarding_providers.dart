@@ -12,7 +12,8 @@ final imageProvider = StateProvider<File?>((ref) => null);
 // Page control
 const ONBOARDING_LENGTH = 4;
 final pageIndexProvider = StateProvider((ref) => 0);
-final pageControllerProvider = Provider((ref) => PageController(initialPage: 0));
+final pageControllerProvider =
+    Provider((ref) => PageController(initialPage: 0));
 
 // Process state
 final creatingProcessProvider = StateProvider.autoDispose((ref) => false);

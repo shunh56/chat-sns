@@ -15,6 +15,6 @@ class VoiceRoom with _$VoiceRoom {
     required String description,
   }) = _VoiceRoom;
 
-  factory VoiceRoom.fromJson(Map<String, dynamic> json) => 
+  factory VoiceRoom.fromJson(Map<String, dynamic> json) =>
       _$VoiceRoomFromJson(json);
 }

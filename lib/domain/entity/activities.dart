@@ -67,16 +67,12 @@ class ActionTypeConverter {
   }
 }
 
-
-
-
-
 /// "docId" => "postId_like", "postId_comment"
-/// 
+///
 /// "id": postId_like,
 /// "ref" : postId,
-/// "type" : "post_like", "post_comment", "currentStatusPost_like", 
+/// "type" : "post_like", "post_comment", "currentStatusPost_like",
 /// "likedUsers": [],
 /// "commentUsers": []
 ///  "updatedAt": dateTime,
-/// 
+///

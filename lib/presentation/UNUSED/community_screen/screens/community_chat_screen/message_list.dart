@@ -20,11 +20,11 @@ class ChatMessageList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final messagesState = ref.watch(communityMessagesProvider(communityId));
-    
+
     return messagesState.when(
       data: (messages) {
         if (messages.isEmpty) return const EmptyMessageState();
-        
+
         return Container(
           decoration: const BoxDecoration(
             color: Color(0xFF1E293B),

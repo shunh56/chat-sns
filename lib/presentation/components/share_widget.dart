@@ -181,7 +181,7 @@ class ShareWidget extends ConsumerWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                         // Share.share(message + webUrl);
+                          // Share.share(message + webUrl);
                         },
                         child: Icon(
                           shareIcon,

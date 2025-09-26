@@ -21,15 +21,15 @@ class DeleteStoryUsecase {
   }) async {
     // 権限チェック
     final story = await _storyRepository.getStory(storyId);
-    
+
     if (story == null) {
       throw Exception('Story not found');
     }
-    
+
     if (story.userId != userId) {
       throw Exception('User does not have permission to delete this story');
     }
-    
+
     // ストーリー削除
     await _storyRepository.deleteStory(storyId);
   }

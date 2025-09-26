@@ -18,7 +18,7 @@ class TempoStatusCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statusState = ref.watch(tempoStatusProvider);
-    
+
     // ローディング中の場合
     if (statusState.isLoading) {
       return Container(
@@ -124,10 +124,13 @@ class TempoStatusCard extends ConsumerWidget {
                 activity.isNotEmpty ? activity : (isMyStatus ? 'ステータスを設定' : ''),
                 style: TempoTextStyles.headline3.copyWith(
                   color: isMyStatus ? Colors.white : TempoColors.textPrimary,
-                  fontStyle: activity.isEmpty && isMyStatus ? FontStyle.italic : FontStyle.normal,
+                  fontStyle: activity.isEmpty && isMyStatus
+                      ? FontStyle.italic
+                      : FontStyle.normal,
                 ),
               ),
-              if (activity.length > 10) ...[  // 長いステータスの場合は詳細表示
+              if (activity.length > 10) ...[
+                // 長いステータスの場合は詳細表示
                 const SizedBox(height: TempoSpacing.md),
                 Container(
                   padding: const EdgeInsets.symmetric(

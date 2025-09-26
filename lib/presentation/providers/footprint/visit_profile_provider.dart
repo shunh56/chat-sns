@@ -11,23 +11,23 @@ final visitProfileProvider = Provider(
 
 class VisitProfileProvider {
   final VisitProfileUsecase _visitProfileUsecase;
-  
+
   // 処理中のプロフィールIDを記憶（短時間に連続アクセスを防止）
   final Set<String> _processingIds = {};
-  
+
   VisitProfileProvider(this._visitProfileUsecase);
-  
+
   Future<void> visitProfile(UserAccount user) async {
     // すでに処理中なら何もしない（連続アクセス防止）
     if (_processingIds.contains(user.userId)) {
       return;
     }
-    
+
     _processingIds.add(user.userId);
-    
+
     try {
       await _visitProfileUsecase.leaveFootprint(user);
-      
+
       // 処理完了後にIDを削除
       _processingIds.remove(user.userId);
     } catch (e) {

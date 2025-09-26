@@ -1,4 +1,3 @@
-
 // タグデータをジャンル別に定義
 const List<Map<String, String>> hashTags = [
   // エンターテイメント

@@ -35,7 +35,7 @@ class CosmicBackground extends HookWidget {
             ),
           ),
         ),
-        
+
         // 星々のパーティクル
         AnimatedBuilder(
           animation: animationController,
@@ -48,7 +48,7 @@ class CosmicBackground extends HookWidget {
             );
           },
         ),
-        
+
         // 星雲エフェクト
         ...List.generate(3, (index) {
           return Positioned(
@@ -58,7 +58,11 @@ class CosmicBackground extends HookWidget {
               animation: animationController,
               builder: (context, child) {
                 return Transform.rotate(
-                  angle: animationController.value * 2 * math.pi * (index + 1) * 0.1,
+                  angle: animationController.value *
+                      2 *
+                      math.pi *
+                      (index + 1) *
+                      0.1,
                   child: Container(
                     width: 300,
                     height: 300,
@@ -83,7 +87,7 @@ class CosmicBackground extends HookWidget {
             ),
           );
         }),
-        
+
         // オーロラエフェクト
         Positioned.fill(
           child: AnimatedBuilder(
@@ -113,9 +117,10 @@ class StarFieldPainter extends CustomPainter {
     final paint = Paint()..style = PaintingStyle.fill;
 
     for (final star in stars) {
-      final opacity = (math.sin(animation * 2 * math.pi * star.twinkleSpeed) + 1) / 2;
+      final opacity =
+          (math.sin(animation * 2 * math.pi * star.twinkleSpeed) + 1) / 2;
       paint.color = Colors.white.withOpacity(opacity * star.brightness);
-      
+
       canvas.drawCircle(
         Offset(
           star.x * size.width,
@@ -162,10 +167,11 @@ class AuroraPainter extends CustomPainter {
     for (int i = 0; i < 5; i++) {
       final offset = i * 100.0;
       final waveHeight = math.sin(animation * 2 * math.pi + i) * 20;
-      
+
       path.moveTo(0, offset);
       for (double x = 0; x <= size.width; x += 10) {
-        final y = offset + math.sin(x / 50 + animation * 2 * math.pi) * waveHeight;
+        final y =
+            offset + math.sin(x / 50 + animation * 2 * math.pi) * waveHeight;
         path.lineTo(x, y);
       }
       path.lineTo(size.width, offset);
