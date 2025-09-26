@@ -45,7 +45,7 @@ platform :ios do
     )
 
     # Flutterビルドとアーカイブ（automatic signingで）
-    sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-method=development")
+    sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist -- -allowProvisioningUpdates")
 
     # Firebase App Distributionへアップロード
     firebase_app_distribution(
