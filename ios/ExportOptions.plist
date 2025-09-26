@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>method</key>
-	<string>development</string>
+	<string>ad-hoc</string>
 	<key>signingStyle</key>
 	<string>automatic</string>
 	<key>teamID</key>
@@ -15,7 +15,7 @@
 	<key>uploadSymbols</key>
 	<true/>
 	<key>signingCertificate</key>
-	<string>Apple Development</string>
+	<string>Apple Distribution</string>
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>com.blank.sns</key>
