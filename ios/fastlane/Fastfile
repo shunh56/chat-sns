@@ -31,12 +31,12 @@ platform :ios do
   end
 
   desc "Build for Firebase App Distribution"
-  lane :firebase do
+  lane :firebase do |options|
+    # 環境変数から環境を取得（dev/prod）
+    environment = options[:env] || "dev"
+
     # アプリIDの設定
     app_identifier = "com.blank.sns"
-
-    # AdHocビルド用の証明書
-    # match(type: "adhoc", readonly: true)
 
     # ビルド番号の自動インクリメント
     increment_build_number(
@@ -44,26 +44,15 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # アプリのビルド（Development署名で自動配布）
-    build_app(
-      workspace: "Runner.xcworkspace",
-      scheme: "Runner",
-      export_method: "development",
-      output_directory: "./build",
-      output_name: "app.ipa",
-      export_options: {
-        signingStyle: "automatic",
-        compileBitcode: false,
-        uploadBitcode: false,
-        uploadSymbols: true
-      }
-    )
+    # Flutterビルドとアーカイブ（automatic signingで）
+    sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-method=development")
 
     # Firebase App Distributionへアップロード
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID_IOS"],
+      ipa_path: "../../build/ios/ipa/通話SNS.ipa",
       groups: "testers",
-      release_notes: "自動ビルド from develop branch"
+      release_notes: "自動ビルド from #{environment} environment"
     )
   end
 
