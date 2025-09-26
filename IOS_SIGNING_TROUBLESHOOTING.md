@@ -197,9 +197,9 @@ The following build commands failed:
 
 ---
 
-### 🔄 方法7: `flutter build ios --no-codesign` + gym（verbose有効）（現在テスト中）
+### ❌ 方法7: `flutter build ios --no-codesign` + gym（verbose有効）（第1版）
 
-**コミット**: (次のコミット)
+**コミット**: 78ab6d6
 
 **実装内容**:
 ```ruby
@@ -208,21 +208,55 @@ sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines
 
 # gymでアーカイブ+署名+エクスポートのみ
 gym(
-  scheme: "Runner",
-  workspace: "Runner.xcworkspace",
-  configuration: "Release",
-  export_method: "ad-hoc",
   xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9",
   export_xcargs: "-allowProvisioningUpdates",
   verbose: true
 )
 ```
 
+**結果**: ❌ 失敗（gRPCエラー再発）
+```
+Parse Issue (Xcode): A template argument list is expected after a name prefixed by the template keyword
+/ios/Pods/gRPC-Core/src/core/lib/promise/detail/basic_seq.h:102:37
+```
+
+**考察**:
+- GitHub Actions側でpod installを実行してもgRPCエラーは解決しない
+- Xcode 16.4とgRPC-Coreの互換性問題
+- C++コンパイラの`template`キーワード処理でエラー
+- C++言語標準をC++17にダウングレードする必要がある
+
+---
+
+### 🔄 方法8: Podfile修正でgRPC-Core C++エラーを解決（現在テスト中）
+
+**コミット**: (次のコミット)
+
+**実装内容**:
+```ruby
+# Podfile post_install
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    if target.name == 'gRPC-Core' || target.name == 'gRPC-C++'
+      target.build_configurations.each do |config|
+        # Fix for Xcode 16 C++20 template keyword issue
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+        config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+      end
+    end
+  end
+end
+```
+
 **期待される動作**:
-- `flutter build ios --no-codesign`でFlutterビルド（署名スキップ）
-- 前回のgRPCエラーが解決されている
-- gymの`xcargs`で`-allowProvisioningUpdates`を適用
-- verbose出力で詳細なエラーを確認
+- gRPC-CoreをC++17でコンパイルすることでXcode 16の互換性問題を回避
+- `flutter build ios --no-codesign`が成功
+- gymで`-allowProvisioningUpdates`による自動署名が機能
+
+**理論的根拠**:
+- Xcode 16はデフォルトでC++20を使用し、`template`キーワードの扱いが厳格化
+- gRPC-Coreの古いコードがC++20の厳格なルールに対応していない
+- C++17にダウングレードすることで互換性を確保
 
 **結果**: 🔄 テスト中
 

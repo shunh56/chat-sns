@@ -65,6 +65,19 @@ post_install do |installer|
     end
   end
 
+  # Fix gRPC-Core C++ compilation issue with Xcode 16+
+  installer.pods_project.targets.each do |target|
+    if target.name == 'gRPC-Core' || target.name == 'gRPC-C++'
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'GPR_FORBID_UNREACHABLE_CODE=1'
+        config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+        # Fix for Xcode 16 C++20 template keyword issue
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+      end
+    end
+  end
+
   installer.aggregate_targets.each do |target|
     target.xcconfigs.each do |variant, xcconfig|
       xcconfig_path = target.client_root + target.xcconfig_relative_path(variant)
