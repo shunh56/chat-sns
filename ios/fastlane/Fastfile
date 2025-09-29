@@ -41,19 +41,28 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # 環境変数でAPI Key認証情報を設定（OpenSSL curve name エラーを回避）
-    ENV["APP_STORE_CONNECT_API_KEY_ID"] = ENV["APP_STORE_CONNECT_API_KEY_ID"]
-    ENV["APP_STORE_CONNECT_API_ISSUER_ID"] = ENV["APP_STORE_CONNECT_API_ISSUER_ID"]
-    ENV["APP_STORE_CONNECT_API_KEY_CONTENT"] = ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
+    # MATCH_GIT_URLが設定されているか確認
+    if !ENV["MATCH_GIT_URL"] || ENV["MATCH_GIT_URL"].empty?
+      UI.user_error!("MATCH_GIT_URL is not set. Please add it to GitHub Secrets with value: https://github.com/shunh56/ios-certificates.git")
+    end
 
-    # API Key ファイルのパスを環境変数に設定
-    api_key_path = File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
-    ENV["APP_STORE_CONNECT_API_KEY_PATH"] = api_key_path
+    # Matchで証明書とプロビジョニングプロファイルを同期（API Key認証で）
+    # API Keyの環境変数が設定されていれば、自動的に使用される
+    match(
+      type: "adhoc",
+      app_identifier: "com.blank.sns",
+      readonly: true,
+      git_url: ENV["MATCH_GIT_URL"],
+      api_key_path: File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8"),
+      api_key: {
+        key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+        issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+        key: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+        in_house: false
+      }
+    )
 
-    # xcodeコマンドライン用の環境変数を設定
-    ENV["XCODE_XCCONFIG_FILE"] = "../ios/Flutter/Release.xcconfig"
-
-    # Flutter IPAビルドを直接実行（環境変数でAPI Key認証を渡す）
+    # Flutter IPAビルド（Matchで取得した証明書を使用）
     sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist")
 
     # Firebase App Distributionへアップロード

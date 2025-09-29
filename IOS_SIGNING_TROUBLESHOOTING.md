@@ -379,9 +379,9 @@ invalid curve name (OpenSSL::PKey::ECError)
 
 ---
 
-### 🔄 方法11: 環境変数でAPI Key認証（現在テスト中）
+### ❌ 方法11: 環境変数でAPI Key認証
 
-**コミット**: (次のコミット)
+**コミット**: (実装せず)
 
 **実装内容**:
 ```ruby
@@ -393,10 +393,61 @@ ENV["APP_STORE_CONNECT_API_KEY_PATH"] = api_key_path
 sh("flutter build ipa --release ...")
 ```
 
+**結果**: ❌ 実装途中で中止
+- `flutter build ipa`は依然として署名問題を解決できない
+- 根本的にprovisioning profilesの問題が残る
+
+**考察**:
+- 環境変数だけでは署名の根本問題は解決しない
+- Matchでの証明書管理が必要
+
+---
+
+### 🔄 方法12: Fastlane Match完全実装（現在テスト中）
+
+**コミット**: (次のコミット)
+
+**実装内容**:
+```ruby
+# MATCH_GIT_URLの確認
+if !ENV["MATCH_GIT_URL"] || ENV["MATCH_GIT_URL"].empty?
+  UI.user_error!("MATCH_GIT_URL is not set. Please add it to GitHub Secrets with value: https://github.com/shunh56/ios-certificates.git")
+end
+
+# Matchで証明書とプロビジョニングプロファイルを同期（API Key認証で）
+match(
+  type: "adhoc",
+  app_identifier: "com.blank.sns",
+  readonly: true,
+  git_url: ENV["MATCH_GIT_URL"],
+  api_key_path: File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8"),
+  api_key: {
+    key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+    issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+    key: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+    in_house: false
+  }
+)
+
+# Flutter IPAビルド（Matchで取得した証明書を使用）
+sh("flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist")
+```
+
 **期待される動作**:
-- Fastlaneのapp_store_connect_api_keyアクションをスキップ
-- 環境変数経由でxcodebuildにAPI Key情報を渡す
-- OpenSSLエラーを回避
+- MatchがGitリポジトリから証明書とプロビジョニングプロファイルを取得
+- API Key認証でApple Developer Portalにアクセス
+- automatic signingで`flutter build ipa`が成功
+- Firebase App Distributionへアップロード成功
+
+**理論的根拠**:
+- Matchは業界標準の証明書管理ツール
+- API Key認証により二要素認証を回避
+- readonly: trueで既存の証明書を使用（生成不要）
+- ExportOptions.plistでautomatic signingを指定
+
+**必要な設定**:
+- GitHub Secrets: MATCH_GIT_URL = https://github.com/shunh56/ios-certificates.git
+- 初回のみローカルで`fastlane match development`と`fastlane match adhoc`を実行
 
 **結果**: 🔄 テスト中
 
