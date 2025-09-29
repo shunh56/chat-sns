@@ -1,5 +1,31 @@
 default_platform(:ios)
 
+# gRPC修正を適用するヘルパー関数
+def apply_grpc_fixes
+  require 'xcodeproj'
+
+  begin
+    project_path = "Runner.xcworkspace"
+    UI.message("🔍 Searching for gRPC targets in project...")
+
+    # 直接ビルド設定を修正
+    sh('find Pods -name "*.xcconfig" -exec grep -l "gRPC\\|GRPC" {} \\; | head -10 | while IFS= read -r file; do
+      echo "📝 Patching $file"
+      if ! grep -q "CLANG_CXX_LANGUAGE_STANDARD.*c++17" "$file"; then
+        echo "CLANG_CXX_LANGUAGE_STANDARD = c++17" >> "$file"
+      fi
+      if ! grep -q "GCC_WARN_INHIBIT_ALL_WARNINGS.*YES" "$file"; then
+        echo "GCC_WARN_INHIBIT_ALL_WARNINGS = YES" >> "$file"
+      fi
+    done')
+
+    UI.success("✅ Applied direct gRPC fixes to build configuration files")
+
+  rescue => e
+    UI.error("❌ Failed to apply gRPC fixes: #{e.message}")
+  end
+end
+
 platform :ios do
   desc "Build and upload to TestFlight"
   lane :beta do |options|
@@ -75,6 +101,10 @@ platform :ios do
       # API Key情報を環境変数に設定（automatic signingで使用）
       ENV["APP_STORE_CONNECT_API_KEY_PATH"] = File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
     end
+
+    # gRPC修正を再適用（Flutter buildでpod installが実行されるため）
+    UI.message("🔧 Re-applying gRPC C++17 fixes before Flutter build...")
+    apply_grpc_fixes
 
     # Flutter iOS ビルド（署名なし）
     sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
