@@ -24,8 +24,8 @@ end
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
 flutter_ios_podfile_setup
-# Override Firebase SDK Version
-$FirebaseSDKVersion = '10.24.0'
+# Override Firebase SDK Version - Use compatible version for Xcode 16
+$FirebaseSDKVersion = '10.18.0'
 
 pre_install do |installer|
   # Remove duplicate aosl.xcframework before installation
@@ -66,8 +66,14 @@ post_install do |installer|
   end
 
   # Fix gRPC-Core C++ compilation issue with Xcode 16+
+  puts "🔍 Searching for gRPC targets..."
+  grpc_targets = []
+
   installer.pods_project.targets.each do |target|
-    if target.name == 'gRPC-Core' || target.name == 'gRPC-C++' || target.name.include?('gRPC')
+    if target.name.include?('gRPC') || target.name.include?('grpc') || target.name == 'gRPC-Core' || target.name == 'gRPC-C++'
+      grpc_targets << target.name
+      puts "📦 Found gRPC target: #{target.name}"
+
       target.build_configurations.each do |config|
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'GPR_FORBID_UNREACHABLE_CODE=1'
@@ -81,9 +87,16 @@ post_install do |installer|
         config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
         config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17'
         config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions'
+        config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+        config.build_settings['OTHER_CFLAGS'] << '-Wno-error=c++20-extensions'
+
+        puts "✅ Applied C++17 fix to #{target.name} (#{config.name})"
       end
     end
   end
+
+  puts "📊 Total gRPC targets modified: #{grpc_targets.length}"
+  puts "🔧 gRPC targets: #{grpc_targets.join(', ')}" unless grpc_targets.empty?
 
   installer.aggregate_targets.each do |target|
     target.xcconfigs.each do |variant, xcconfig|
