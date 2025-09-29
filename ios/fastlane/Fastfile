@@ -41,26 +41,40 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # MATCH_GIT_URLが設定されているか確認
-    if !ENV["MATCH_GIT_URL"] || ENV["MATCH_GIT_URL"].empty?
-      UI.user_error!("MATCH_GIT_URL is not set. Please add it to GitHub Secrets with value: https://github.com/shunh56/ios-certificates.git")
-    end
+    # Matchを試行するが、失敗した場合はautomatic signingにフォールバック
+    begin
+      # MATCH_GIT_URLが設定されているか確認
+      if !ENV["MATCH_GIT_URL"] || ENV["MATCH_GIT_URL"].empty?
+        UI.important("MATCH_GIT_URL is not set. Skipping Match and using automatic signing.")
+        raise "No MATCH_GIT_URL"
+      end
 
-    # Matchで証明書とプロビジョニングプロファイルを同期（API Key認証で）
-    # API Keyの環境変数が設定されていれば、自動的に使用される
-    match(
-      type: "adhoc",
-      app_identifier: "com.blank.sns",
-      readonly: true,
-      git_url: ENV["MATCH_GIT_URL"],
-      api_key_path: File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8"),
-      api_key: {
-        key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
-        issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
-        key: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
-        in_house: false
-      }
-    )
+      UI.message("Attempting to use Fastlane Match for certificate management...")
+
+      # Matchで証明書とプロビジョニングプロファイルを同期（API Key認証で）
+      match(
+        type: "adhoc",
+        app_identifier: "com.blank.sns",
+        readonly: true,
+        git_url: ENV["MATCH_GIT_URL"],
+        api_key_path: File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8"),
+        api_key: {
+          key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+          issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+          key: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+          in_house: false
+        }
+      )
+
+      UI.success("✅ Fastlane Match completed successfully!")
+
+    rescue => e
+      UI.important("⚠️  Fastlane Match failed: #{e.message}")
+      UI.important("Falling back to automatic signing with App Store Connect API Key...")
+
+      # API Key情報を環境変数に設定（automatic signingで使用）
+      ENV["APP_STORE_CONNECT_API_KEY_PATH"] = File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
+    end
 
     # Flutter IPAビルド（Matchで取得した証明書を使用）
     sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist")
