@@ -41,11 +41,21 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # まず最初にgRPC-Coreエラーを修正するためにXcodeプロジェクトをクリーン
+    # DerivedDataをクリーン
     sh("rm -rf ~/Library/Developer/Xcode/DerivedData")
-    sh("xcodebuild clean -workspace Runner.xcworkspace -scheme Runner -configuration Release")
 
-    # Flutterビルド（シンプルにビルドのみ、エクスポートはgymに任せる）
+    # Flutter依存関係を取得してxcconfigファイルを生成
+    sh("cd ../.. && flutter pub get")
+
+    # pod installが既に実行されているか確認、なければ実行
+    if !File.exist?("Runner.xcworkspace")
+      sh("pod install --repo-update")
+    end
+
+    # Xcodeプロジェクトをクリーン
+    sh("xcodebuild clean -workspace Runner.xcworkspace -scheme Runner -configuration Release || true")
+
+    # Flutterビルド（設定のみ生成、実際のビルドはbuild_appに任せる）
     sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --config-only")
 
     # build_app（gymのエイリアス）でビルド+署名+エクスポート
