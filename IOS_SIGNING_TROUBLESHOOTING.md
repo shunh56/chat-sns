@@ -320,7 +320,89 @@ MATCH_GIT_URL (= https://github.com/shunh56/ios-certificates.git)
 
 ---
 
-## 次に試すべきこと（方法4が失敗した場合）
+### ❌ 方法8: Podfile修正でgRPC-Core C++エラーを解決
+
+**コミット**: 2070745
+
+**実装内容**:
+```ruby
+# Podfile post_install
+if target.name == 'gRPC-Core' || target.name == 'gRPC-C++'
+  config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+end
+```
+
+**結果**: ❌ 失敗
+- Podfileの修正が反映される前にpod installが実行されてしまう
+- GitHub Actions側で既にpod installが実行されているため効果なし
+
+---
+
+### ❌ 方法9: flutter build ios --config-only + build_app
+
+**コミット**: ca004f7, adba4dc
+
+**実装内容**:
+- DerivedDataをクリーン
+- `flutter build ios --config-only`で設定のみ生成
+- `build_app`で実際のビルドを実行
+
+**結果**: ❌ 失敗
+- `ARCHIVE FAILED`エラー
+- 具体的なエラー詳細が不明
+
+---
+
+### ❌ 方法10: app_store_connect_api_key + flutter build ipa
+
+**コミット**: 522a75a
+
+**実装内容**:
+```ruby
+app_store_connect_api_key(
+  key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+  issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+  key_filepath: api_key_path
+)
+sh("flutter build ipa --release ...")
+```
+
+**結果**: ❌ 失敗
+```
+invalid curve name (OpenSSL::PKey::ECError)
+```
+
+**考察**:
+- OpenSSLとRubyの互換性問題
+- P8ファイルの楕円曲線暗号が正しく読み込めない
+- GitHub Actions環境特有の問題
+
+---
+
+### 🔄 方法11: 環境変数でAPI Key認証（現在テスト中）
+
+**コミット**: (次のコミット)
+
+**実装内容**:
+```ruby
+# 環境変数でAPI Key認証情報を設定
+ENV["APP_STORE_CONNECT_API_KEY_ID"] = ENV["APP_STORE_CONNECT_API_KEY_ID"]
+ENV["APP_STORE_CONNECT_API_KEY_PATH"] = api_key_path
+
+# Flutter IPAビルドを直接実行
+sh("flutter build ipa --release ...")
+```
+
+**期待される動作**:
+- Fastlaneのapp_store_connect_api_keyアクションをスキップ
+- 環境変数経由でxcodebuildにAPI Key情報を渡す
+- OpenSSLエラーを回避
+
+**結果**: 🔄 テスト中
+
+---
+
+## 次に試すべきこと（方法11が失敗した場合）
 
 ### オプションA: Matchを完全にセットアップ
 1. ローカルで`fastlane match development`を実行し、パスワード入力
