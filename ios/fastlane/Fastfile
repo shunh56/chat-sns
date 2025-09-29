@@ -41,43 +41,26 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # DerivedDataをクリーン
-    sh("rm -rf ~/Library/Developer/Xcode/DerivedData")
-
-    # Flutter依存関係を取得してxcconfigファイルを生成
-    sh("cd ../.. && flutter pub get")
-
-    # pod installが既に実行されているか確認、なければ実行
-    if !File.exist?("Runner.xcworkspace")
-      sh("pod install --repo-update")
+    # API Keyファイルが存在することを確認
+    api_key_path = File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
+    if !File.exist?(api_key_path)
+      UI.error("API Key file not found at: #{api_key_path}")
+      UI.error("Please ensure APP_STORE_CONNECT_API_KEY_ID and API Key file are properly configured")
+    else
+      UI.success("API Key file found at: #{api_key_path}")
     end
 
-    # Xcodeプロジェクトをクリーン
-    sh("xcodebuild clean -workspace Runner.xcworkspace -scheme Runner -configuration Release || true")
-
-    # Flutterビルド（設定のみ生成、実際のビルドはbuild_appに任せる）
-    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --config-only")
-
-    # build_app（gymのエイリアス）でビルド+署名+エクスポート
-    # build_appはより新しいAPIで、自動署名のハンドリングが改善されている
-    build_app(
-      workspace: "Runner.xcworkspace",
-      scheme: "Runner",
-      configuration: "Release",
-      export_method: "ad-hoc",
-      export_team_id: "CDQBCQRWL9",
-      xcargs: "-allowProvisioningUpdates",
-      export_options: {
-        method: "ad-hoc",
-        teamID: "CDQBCQRWL9",
-        signingStyle: "automatic",
-        allowProvisioningUpdates: true,
-        signingCertificate: "Apple Distribution",
-        provisioningProfiles: {
-          "com.blank.sns" => "Automatic"
-        }
-      }
+    # App Store Connect API キーを使用して認証
+    app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+      key_filepath: api_key_path,
+      duration: 1200,
+      in_house: false
     )
+
+    # Flutter IPAビルドコマンドを直接実行（automatic signing enabled）
+    sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist")
 
     # Firebase App Distributionへアップロード
     firebase_app_distribution(

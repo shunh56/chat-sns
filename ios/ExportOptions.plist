@@ -23,5 +23,11 @@
 	</dict>
 	<key>allowProvisioningUpdates</key>
 	<true/>
+	<key>destination</key>
+	<string>export</string>
+	<key>generateAppStoreInformation</key>
+	<false/>
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
 </dict>
 </plist>
