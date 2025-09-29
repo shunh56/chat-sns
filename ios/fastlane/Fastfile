@@ -41,30 +41,32 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # Flutterビルド（dart-definesを適用）
-    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
+    # まず最初にgRPC-Coreエラーを修正するためにXcodeプロジェクトをクリーン
+    sh("rm -rf ~/Library/Developer/Xcode/DerivedData")
+    sh("xcodebuild clean -workspace Runner.xcworkspace -scheme Runner -configuration Release")
 
-    # gymでアーカイブ+署名+エクスポートのみ（allowProvisioningUpdatesフラグ付き）
-    gym(
-      scheme: "Runner",
+    # Flutterビルド（シンプルにビルドのみ、エクスポートはgymに任せる）
+    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --config-only")
+
+    # build_app（gymのエイリアス）でビルド+署名+エクスポート
+    # build_appはより新しいAPIで、自動署名のハンドリングが改善されている
+    build_app(
       workspace: "Runner.xcworkspace",
+      scheme: "Runner",
       configuration: "Release",
       export_method: "ad-hoc",
-      skip_build_archive: false,
-      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9",
+      export_team_id: "CDQBCQRWL9",
+      xcargs: "-allowProvisioningUpdates",
       export_options: {
-        signingStyle: "automatic",
+        method: "ad-hoc",
         teamID: "CDQBCQRWL9",
-        compileBitcode: false,
-        uploadBitcode: false,
-        uploadSymbols: true,
+        signingStyle: "automatic",
+        allowProvisioningUpdates: true,
         signingCertificate: "Apple Distribution",
         provisioningProfiles: {
           "com.blank.sns" => "Automatic"
         }
-      },
-      export_xcargs: "-allowProvisioningUpdates",
-      verbose: true
+      }
     )
 
     # Firebase App Distributionへアップロード
