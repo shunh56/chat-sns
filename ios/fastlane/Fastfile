@@ -76,8 +76,24 @@ platform :ios do
       ENV["APP_STORE_CONNECT_API_KEY_PATH"] = File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
     end
 
-    # Flutter IPAビルド（Matchで取得した証明書を使用）
-    sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-options-plist=ios/ExportOptions.plist")
+    # Flutter iOS ビルド（署名なし）
+    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
+
+    # gymでアーカイブ+署名+エクスポート（allowProvisioningUpdatesを使用）
+    gym(
+      scheme: "Runner",
+      workspace: "Runner.xcworkspace",
+      configuration: "Release",
+      export_method: "ad-hoc",
+      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9",
+      export_options: {
+        signingStyle: "automatic",
+        teamID: "CDQBCQRWL9",
+        allowProvisioningUpdates: true
+      },
+      output_directory: "../../build/ios/ipa",
+      output_name: "Runner.ipa"
+    )
 
     # Firebase App Distributionへアップロード
     firebase_app_distribution(
