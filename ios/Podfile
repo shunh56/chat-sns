@@ -24,8 +24,8 @@ end
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
 flutter_ios_podfile_setup
-# Override Firebase SDK Version - Use stable version with Xcode 16 compatibility
-$FirebaseSDKVersion = '10.29.0'
+# Override Firebase SDK Version - Use 10.28.0 to test gRPC fixes
+$FirebaseSDKVersion = '10.28.0'
 
 pre_install do |installer|
   # Remove duplicate aosl.xcframework before installation
