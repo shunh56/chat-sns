@@ -84,11 +84,27 @@ def apply_grpc_fixes
 
     # Also fix Agora RTC Engine source code issues
     UI.message("🔧 Applying Agora RTC Engine source code fixes...")
-    agora_surface_view_factory_path = "Pods/agora_rtc_engine/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"
 
-    if File.exist?(agora_surface_view_factory_path)
-      UI.message("📁 Found AgoraSurfaceViewFactory.mm")
+    # Try multiple possible paths for agora_rtc_engine
+    possible_paths = [
+      # Pub cache path (for CI/CD)
+      File.expand_path("~/.pub-cache/hosted/pub.dev/agora_rtc_engine-6.5.3/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"),
+      # Local Pods path (for local development)
+      "Pods/agora_rtc_engine/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm",
+      # Symlink path
+      ".symlinks/plugins/agora_rtc_engine/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"
+    ]
 
+    agora_surface_view_factory_path = nil
+    possible_paths.each do |path|
+      if File.exist?(path)
+        agora_surface_view_factory_path = path
+        UI.message("📁 Found AgoraSurfaceViewFactory.mm at: #{path}")
+        break
+      end
+    end
+
+    if agora_surface_view_factory_path
       # Read the file content
       content = File.read(agora_surface_view_factory_path)
 
@@ -115,7 +131,8 @@ def apply_grpc_fixes
         UI.message("ℹ️ AgoraSurfaceViewFactory.mm already has proper weakSelf declaration")
       end
     else
-      UI.important("⚠️ AgoraSurfaceViewFactory.mm not found at expected path")
+      UI.important("⚠️ AgoraSurfaceViewFactory.mm not found at any expected path:")
+      possible_paths.each { |path| UI.important("   - #{path}") }
     end
 
     UI.success("✅ Applied comprehensive post-build gRPC + Agora fixes")
