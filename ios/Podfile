@@ -152,6 +152,43 @@ post_install do |installer|
   puts "📹 Total Agora targets modified: #{agora_targets.length}"
   puts "🎥 Agora targets: #{agora_targets.join(', ')}" unless agora_targets.empty?
 
+  # Fix Agora RTC Engine source code weakSelf issue
+  puts "🔧 Fixing Agora RTC Engine source code weakSelf issue..."
+  agora_surface_view_factory_path = "#{Dir.pwd}/Pods/agora_rtc_engine/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"
+
+  if File.exist?(agora_surface_view_factory_path)
+    puts "📁 Found AgoraSurfaceViewFactory.mm at: #{agora_surface_view_factory_path}"
+
+    # Read the file content
+    content = File.read(agora_surface_view_factory_path)
+
+    # Check if the file needs to be fixed (contains weakSelf usage without proper declaration)
+    if content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf = self;')
+      puts "🔧 Applying weakSelf fix to AgoraSurfaceViewFactory.mm..."
+
+      # Find the problematic block and add proper weakSelf declaration
+      # Look for dispatch_async blocks that use weakSelf
+      fixed_content = content.gsub(
+        /dispatch_async\(dispatch_get_main_queue\(\), \^\{\s*\n\s*weakSelf/,
+        "dispatch_async(dispatch_get_main_queue(), ^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
+      )
+
+      # Alternative pattern - look for other block patterns
+      fixed_content = fixed_content.gsub(
+        /\^\s*\{\s*\n\s*weakSelf/,
+        "^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
+      )
+
+      # Write the fixed content back
+      File.write(agora_surface_view_factory_path, fixed_content)
+      puts "✅ Applied weakSelf fix to AgoraSurfaceViewFactory.mm"
+    else
+      puts "ℹ️ AgoraSurfaceViewFactory.mm already has proper weakSelf declaration or no weakSelf usage"
+    end
+  else
+    puts "⚠️ AgoraSurfaceViewFactory.mm not found at expected path"
+  end
+
   installer.aggregate_targets.each do |target|
     target.xcconfigs.each do |variant, xcconfig|
       xcconfig_path = target.client_root + target.xcconfig_relative_path(variant)

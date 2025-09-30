@@ -82,10 +82,46 @@ def apply_grpc_fixes
       UI.success("✅ Applied project-level C++17 settings")
     end
 
-    UI.success("✅ Applied comprehensive post-build gRPC fixes")
+    # Also fix Agora RTC Engine source code issues
+    UI.message("🔧 Applying Agora RTC Engine source code fixes...")
+    agora_surface_view_factory_path = "Pods/agora_rtc_engine/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"
+
+    if File.exist?(agora_surface_view_factory_path)
+      UI.message("📁 Found AgoraSurfaceViewFactory.mm")
+
+      # Read the file content
+      content = File.read(agora_surface_view_factory_path)
+
+      # Check if the file needs to be fixed (contains weakSelf usage without proper declaration)
+      if content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf = self;')
+        UI.message("🔧 Applying weakSelf fix to AgoraSurfaceViewFactory.mm...")
+
+        # Find the problematic block and add proper weakSelf declaration
+        fixed_content = content.gsub(
+          /dispatch_async\(dispatch_get_main_queue\(\), \^\{\s*\n\s*weakSelf/,
+          "dispatch_async(dispatch_get_main_queue(), ^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
+        )
+
+        # Alternative pattern - look for other block patterns
+        fixed_content = fixed_content.gsub(
+          /\^\s*\{\s*\n\s*weakSelf/,
+          "^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
+        )
+
+        # Write the fixed content back
+        File.write(agora_surface_view_factory_path, fixed_content)
+        UI.success("✅ Applied weakSelf fix to AgoraSurfaceViewFactory.mm")
+      else
+        UI.message("ℹ️ AgoraSurfaceViewFactory.mm already has proper weakSelf declaration")
+      end
+    else
+      UI.important("⚠️ AgoraSurfaceViewFactory.mm not found at expected path")
+    end
+
+    UI.success("✅ Applied comprehensive post-build gRPC + Agora fixes")
 
   rescue => e
-    UI.error("❌ Failed to apply gRPC fixes: #{e.message}")
+    UI.error("❌ Failed to apply gRPC/Agora fixes: #{e.message}")
     UI.error("Error details: #{e.backtrace.first(5).join('\n')}")
   end
 end

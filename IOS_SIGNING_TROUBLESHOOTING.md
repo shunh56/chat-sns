@@ -806,5 +806,70 @@ end
 3. **ビルド方式**: `flutter build ios --no-codesign` + `gym`
 4. **フォールバック**: Match準備済み（将来利用可能）
 
+### 🎥 **方法20: Agora RTC Engine ARC コンパイル修正（2025年9月30日）**
+
+**コミット**: dacc770
+
+**新しい問題発見**:
+gRPC-Core問題完全解決後、新たなAgora RTC Engine関連のコンパイルエラーが発生：
+
+```
+Parse Issue (Xcode): Expected unqualified-id
+Semantic Issue (Xcode): Use of undeclared identifier 'weakSelf'
+/Users/runner/.pub-cache/hosted/pub.dev/agora_rtc_engine-6.5.3/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm:41:11
+```
+
+**根本原因**:
+- Agora RTC EngineのObjective-C++ファイルでARCが適切に設定されていない
+- `weakSelf`識別子が宣言されていない
+- Objective-C++の自動参照カウント（ARC）設定が不足
+
+**解決策**:
+```ruby
+# Podfile post_install に追加
+# Fix Agora RTC Engine compilation issues
+puts "🎥 Applying Agora RTC Engine fixes..."
+agora_targets = []
+
+installer.pods_project.targets.each do |target|
+  if target.name.include?('agora_rtc_engine')
+    agora_targets << target.name
+    puts "📹 Found Agora target: #{target.name}"
+
+    target.build_configurations.each do |config|
+      # Ensure ARC is enabled for Agora
+      config.build_settings['CLANG_ENABLE_OBJC_ARC'] = 'YES'
+      # Add specific Objective-C++ flags
+      config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
+      config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-fobjc-arc'
+      config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-fno-objc-arc-exceptions'
+      # Ensure proper language standard
+      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+
+      puts "✅ Applied Agora fixes to #{target.name} (#{config.name})"
+    end
+  end
+end
+
+puts "📹 Total Agora targets modified: #{agora_targets.length}"
+puts "🎥 Agora targets: #{agora_targets.join(', ')}" unless agora_targets.empty?
+```
+
+**修正内容**:
+1. **ARC有効化**: `CLANG_ENABLE_OBJC_ARC = 'YES'`
+2. **Objective-C++フラグ**: `-fobjc-arc`
+3. **例外処理無効化**: `-fno-objc-arc-exceptions`
+4. **C++17標準**: gRPC修正との一貫性確保
+
+**期待される動作**:
+1. Agora RTC Engineターゲットに特化したARC設定適用
+2. `weakSelf`識別子エラーの解決
+3. Objective-C++コンパイル成功
+4. CI/CDパイプライン完全成功
+
+**結果**: 🔄 テスト中（CI/CDビルド実行中）
+
+---
+
 **最終更新**: 2025年9月30日
-**ステータス**: ✅ 全問題解決済み - 本番運用可能
+**ステータス**: 🔄 Agora RTC Engine修正テスト中
