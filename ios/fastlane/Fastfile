@@ -317,28 +317,10 @@ platform :ios do
     # これによりAgoraの問題を回避できる可能性
     UI.message("📱 Building Flutter IPA with integrated approach...")
 
-    begin
-      # まずflutter build ipaを試す（統合ビルド）
-      sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-method ad-hoc")
-      UI.success("✅ Flutter build ipa succeeded!")
-
-      # IPAファイルが生成されているか確認
-      ipa_path = "../../build/ios/ipa/Runner.ipa"
-      if File.exist?(ipa_path)
-        UI.success("✅ IPA file generated successfully at: #{ipa_path}")
-        # 既にIPAがあるのでgymステップをスキップ
-        skip_gym = true
-      else
-        skip_gym = false
-      end
-
-    rescue => e
-      UI.important("⚠️ Flutter build ipa failed, falling back to flutter build ios + gym approach: #{e.message}")
-
-      # フォールバック：従来のflutter build ios + gymアプローチ
-      sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
-      skip_gym = false
-    end
+    # シンプルで確実なビルドアプローチ（記事の成功例に基づく）
+    UI.message("📱 Building with flutter build ios (no-codesign) approach...")
+    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
+    skip_gym = false
 
     # Flutter buildの後にさらにgRPC修正を適用
     UI.message("🔧 Post-Flutter build gRPC fixes...")

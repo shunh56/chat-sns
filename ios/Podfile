@@ -186,34 +186,54 @@ post_install do |installer|
     # Check if the file needs to be fixed
     needs_fix = content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf')
 
-    # Simple and reliable weakSelf fix approach
+    # Robust weakSelf fix approach based on CI/CD error analysis
     if content.include?('weakSelf')
-      puts "🔧 Applying simple weakSelf fix to AgoraSurfaceViewFactory.mm..."
+      puts "🔧 Applying robust weakSelf fix to AgoraSurfaceViewFactory.mm..."
 
       # Store original content for backup
       original_content = content.dup
 
-      # Simple approach: Add __weak typeof(self) weakSelf = self; at the start of any block that uses weakSelf
-      # Target the specific problematic pattern from CI/CD error logs
-      content = content.gsub(
-        /(\^.*\{\s*\n\s*)([^_]*weakSelf)/,
-        '\1__weak typeof(self) weakSelf = self;\n        \2'
-      )
+      # Strategy 1: Remove any broken/incomplete weakSelf declarations first
+      content = content.gsub(/^\s*__weak typeof\(self\) weakSelf.*$/, '')
 
-      # Also fix any standalone weakSelf usage by adding declaration at method start
-      if content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf')
-        # Add declaration at the beginning of the first method that uses weakSelf
+      # Strategy 2: Replace blocks containing weakSelf with proper syntax
+      # Target specific pattern from CI/CD logs: dispatch_async blocks at lines 41-45
+      content = content.gsub(
+        /dispatch_async\([^)]+\)\s*\^\s*\{\s*\n(\s*)([^}]*weakSelf[^}]*)\}/m
+      ) do |match|
+        indent = $1
+        block_content = $2
+        "dispatch_async(dispatch_get_main_queue(), ^{
+#{indent}    __weak typeof(self) weakSelf = self;
+#{indent}    #{block_content.strip}
+#{indent}})"
+      end
+
+      # Strategy 3: Fix any remaining block patterns
+      content = content.gsub(
+        /(\^\s*\{\s*\n\s*)([^_}]*weakSelf[^}]*)\}/m
+      ) do |match|
+        block_start = $1
+        block_content = $2
+        indent = block_start[/\n(\s*)/, 1] || "        "
+        "#{block_start}#{indent}__weak typeof(self) weakSelf = self;\n#{indent}#{block_content.strip}\n#{indent}}"
+      end
+
+      # Strategy 4: Final safety net - ensure any method with weakSelf has declaration
+      if content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf = self;')
+        puts "⚠️ Adding fallback weakSelf declaration at method beginning"
         content = content.sub(
           /^(\s*-\s*\([^)]+\)[^{]*\{\s*\n)/,
-          '\1    __weak typeof(self) weakSelf = self;\n'
+          "\\1    __weak typeof(self) weakSelf = self;\n"
         )
       end
 
       # Write the fixed content back
       File.write(agora_surface_view_factory_path, content)
-      puts "✅ Applied simple weakSelf fix to AgoraSurfaceViewFactory.mm"
+      puts "✅ Applied robust weakSelf fix to AgoraSurfaceViewFactory.mm"
       puts "   - Original size: #{original_content.length} bytes"
       puts "   - Fixed size: #{content.length} bytes"
+      puts "   - Lines with weakSelf: #{content.lines.count { |line| line.include?('weakSelf') }}"
 
     else
       puts "ℹ️ No weakSelf usage found in AgoraSurfaceViewFactory.mm"
