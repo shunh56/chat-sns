@@ -10,12 +10,12 @@ platform :android do
     build_number = Time.now.to_i
     UI.message("🔢 Using build number: #{build_number}")
 
-    # Flutter AABビルド
+    # Flutter AABビルド（flavorとdart-define-from-fileの両方を使用）
     UI.message("📱 Building Android App Bundle for #{environment} environment...")
-    sh("cd ../.. && flutter build appbundle --release --dart-define-from-file=dart_defines/#{environment}.env --build-number=#{build_number}")
+    sh("cd ../.. && flutter build appbundle --release --flavor #{environment} --dart-define-from-file=dart_defines/#{environment}.env --build-number=#{build_number}")
 
-    # AABファイルの存在確認
-    aab_path = "../build/app/outputs/bundle/release/app-release.aab"
+    # AABファイルの存在確認（flavorごとに異なるパス）
+    aab_path = "../build/app/outputs/bundle/#{environment}Release/app-#{environment}-release.aab"
     unless File.exist?(aab_path)
       UI.user_error!("❌ AAB file not found at: #{aab_path}")
     end
@@ -43,12 +43,12 @@ platform :android do
     build_number = Time.now.to_i
     UI.message("🔢 Using build number: #{build_number}")
 
-    # APKビルド（dart-define-from-fileのみを使用、flavorは使わない）
+    # APKビルド（flavorとdart-define-from-fileの両方を使用）
     UI.message("📱 Building Android APK for #{environment} environment...")
-    sh("cd ../.. && flutter build apk --release --dart-define-from-file=dart_defines/#{environment}.env --build-number=#{build_number}")
+    sh("cd ../.. && flutter build apk --release --flavor #{environment} --dart-define-from-file=dart_defines/#{environment}.env --build-number=#{build_number}")
 
-    # APKファイルの存在確認
-    apk_path = "../build/app/outputs/flutter-apk/app-release.apk"
+    # APKファイルの存在確認（flavorごとに異なるパス）
+    apk_path = "../build/app/outputs/flutter-apk/app-#{environment}-release.apk"
     unless File.exist?(apk_path)
       UI.user_error!("❌ APK file not found at: #{apk_path}")
     end
