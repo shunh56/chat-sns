@@ -2,18 +2,36 @@ default_platform(:android)
 
 platform :android do
   desc "Build and upload to Google Play Internal Testing"
-  lane :beta do
-    # Flutterビルド
-    sh("flutter build appbundle --release")
+  lane :beta do |options|
+    # 環境変数から環境を取得（dev/prod）
+    environment = options[:env] || "prod"
+
+    # ビルド番号を生成
+    build_number = Time.now.to_i
+    UI.message("🔢 Using build number: #{build_number}")
+
+    # Flutter AABビルド
+    UI.message("📱 Building Android App Bundle for #{environment} environment...")
+    sh("cd ../.. && flutter build appbundle --release --dart-define-from-file=dart_defines/#{environment}.env --build-number=#{build_number}")
+
+    # AABファイルの存在確認
+    aab_path = "../build/app/outputs/bundle/release/app-release.aab"
+    unless File.exist?(aab_path)
+      UI.user_error!("❌ AAB file not found at: #{aab_path}")
+    end
+
+    UI.success("✅ AAB built successfully at: #{aab_path}")
 
     # Google Play Internal Testingへアップロード
     upload_to_play_store(
       track: "internal",
-      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      aab: aab_path,
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true
     )
+
+    UI.success("🚀 Successfully uploaded to Google Play Internal Testing!")
   end
 
   desc "Build for Firebase App Distribution"
@@ -21,17 +39,32 @@ platform :android do
     # 環境変数から環境を取得（dev/prod）
     environment = options[:env] || "dev"
 
-    # APKビルド（flavorとdart-define-from-fileを使用）
-    sh("cd ../.. && flutter build apk --release --flavor #{environment} --dart-define-from-file=dart_defines/#{environment}.env")
+    # ビルド番号を生成
+    build_number = Time.now.to_i
+    UI.message("🔢 Using build number: #{build_number}")
+
+    # APKビルド（dart-define-from-fileのみを使用、flavorは使わない）
+    UI.message("📱 Building Android APK for #{environment} environment...")
+    sh("cd ../.. && flutter build apk --release --dart-define-from-file=dart_defines/#{environment}.env --build-number=#{build_number}")
+
+    # APKファイルの存在確認
+    apk_path = "../build/app/outputs/flutter-apk/app-release.apk"
+    unless File.exist?(apk_path)
+      UI.user_error!("❌ APK file not found at: #{apk_path}")
+    end
+
+    UI.success("✅ APK built successfully at: #{apk_path}")
 
     # Firebase App Distributionへアップロード
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID_ANDROID"],
       groups: "testers",
-      release_notes: "自動ビルド from #{environment} environment",
+      release_notes: "自動ビルド from #{environment} environment (Build: #{build_number})",
       android_artifact_type: "APK",
-      android_artifact_path: "../build/app/outputs/flutter-apk/app-#{environment}-release.apk"
+      android_artifact_path: apk_path
     )
+
+    UI.success("🚀 Successfully uploaded to Firebase App Distribution!")
   end
 
   desc "Build and sign APK"
