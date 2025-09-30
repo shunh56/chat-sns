@@ -125,6 +125,33 @@ post_install do |installer|
   puts "🔧 gRPC targets: #{grpc_targets.join(', ')}" unless grpc_targets.empty?
   puts "🌐 Applied global C++17 enforcement to all #{installer.pods_project.targets.length} targets"
 
+  # Fix Agora RTC Engine compilation issues
+  puts "🎥 Applying Agora RTC Engine fixes..."
+  agora_targets = []
+
+  installer.pods_project.targets.each do |target|
+    if target.name.include?('agora_rtc_engine')
+      agora_targets << target.name
+      puts "📹 Found Agora target: #{target.name}"
+
+      target.build_configurations.each do |config|
+        # Ensure ARC is enabled for Agora
+        config.build_settings['CLANG_ENABLE_OBJC_ARC'] = 'YES'
+        # Add specific Objective-C++ flags
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-fobjc-arc'
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-fno-objc-arc-exceptions'
+        # Ensure proper language standard
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+
+        puts "✅ Applied Agora fixes to #{target.name} (#{config.name})"
+      end
+    end
+  end
+
+  puts "📹 Total Agora targets modified: #{agora_targets.length}"
+  puts "🎥 Agora targets: #{agora_targets.join(', ')}" unless agora_targets.empty?
+
   installer.aggregate_targets.each do |target|
     target.xcconfigs.each do |variant, xcconfig|
       xcconfig_path = target.client_root + target.xcconfig_relative_path(variant)
