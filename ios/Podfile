@@ -27,6 +27,10 @@ flutter_ios_podfile_setup
 # Override Firebase SDK Version - Use 10.28.0 to test gRPC fixes
 $FirebaseSDKVersion = '10.28.0'
 
+# Force C++17 to avoid gRPC-Core compilation issues with Xcode 16
+ENV['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+ENV['CLANG_CXX_LIBRARY'] = 'libc++'
+
 pre_install do |installer|
   # Remove duplicate aosl.xcframework before installation
   Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_duplicate_framework_and_library_names) {}
@@ -65,10 +69,29 @@ post_install do |installer|
     end
   end
 
-  # Fix gRPC-Core C++ compilation issue with Xcode 16+
+  # Fix gRPC-Core C++ compilation issue with Xcode 16+ (Enhanced)
   puts "🔍 Searching for gRPC targets..."
   grpc_targets = []
 
+  # Global C++17 enforcement for all targets first
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      # Force C++17 globally to prevent any C++20 template issues
+      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+      config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+
+      # Global C++ warning suppression for template compatibility
+      config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
+      config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17'
+      config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions'
+      config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-c++20-extensions'
+      config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+      config.build_settings['OTHER_CFLAGS'] << '-Wno-error=c++20-extensions'
+      config.build_settings['OTHER_CFLAGS'] << '-Wno-c++20-extensions'
+    end
+  end
+
+  # Specific gRPC target handling
   installer.pods_project.targets.each do |target|
     if target.name.include?('gRPC') || target.name.include?('grpc') || target.name == 'gRPC-Core' || target.name == 'gRPC-C++'
       grpc_targets << target.name
@@ -79,7 +102,7 @@ post_install do |installer|
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'GPR_FORBID_UNREACHABLE_CODE=1'
         config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
 
-        # Force C++17 to avoid Xcode 16 C++20 template keyword issues
+        # Enhanced C++17 enforcement for gRPC targets
         config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
         config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
 
@@ -87,16 +110,20 @@ post_install do |installer|
         config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
         config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17'
         config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions'
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-c++20-extensions'
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-template-id-cdtor'
         config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
         config.build_settings['OTHER_CFLAGS'] << '-Wno-error=c++20-extensions'
+        config.build_settings['OTHER_CFLAGS'] << '-Wno-c++20-extensions'
 
-        puts "✅ Applied C++17 fix to #{target.name} (#{config.name})"
+        puts "✅ Applied enhanced C++17 fix to #{target.name} (#{config.name})"
       end
     end
   end
 
   puts "📊 Total gRPC targets modified: #{grpc_targets.length}"
   puts "🔧 gRPC targets: #{grpc_targets.join(', ')}" unless grpc_targets.empty?
+  puts "🌐 Applied global C++17 enforcement to all #{installer.pods_project.targets.length} targets"
 
   installer.aggregate_targets.each do |target|
     target.xcconfigs.each do |variant, xcconfig|

@@ -1,11 +1,11 @@
 default_platform(:ios)
 
-# gRPC修正を適用するヘルパー関数
+# gRPC修正を適用するヘルパー関数（強化版）
 def apply_grpc_fixes
   require 'xcodeproj'
 
   begin
-    UI.message("🔍 Searching for gRPC targets in project...")
+    UI.message("🔍 Post-build gRPC fixes - Searching for targets in project...")
 
     # Podsディレクトリの存在確認
     unless Dir.exist?("Pods")
@@ -13,39 +13,68 @@ def apply_grpc_fixes
       return
     end
 
-    # 直接ビルド設定を修正
-    result = sh('find Pods -name "*.xcconfig" -exec grep -l "gRPC\\|GRPC" {} \\; 2>/dev/null | head -10', log: false)
+    # 全てのxcconfigファイルにC++17設定を強制適用
+    UI.message("📝 Applying C++17 fixes to ALL xcconfig files...")
 
-    if result.strip.empty?
-      UI.important("⚠️ No gRPC xcconfig files found")
-    else
-      UI.message("📝 Found gRPC xcconfig files, applying C++17 fixes...")
+    sh('find Pods -name "*.xcconfig" 2>/dev/null | while IFS= read -r file; do
+      echo "📝 Patching $file"
+      if ! grep -q "CLANG_CXX_LANGUAGE_STANDARD.*c++17" "$file" 2>/dev/null; then
+        echo "CLANG_CXX_LANGUAGE_STANDARD = c++17" >> "$file"
+      fi
+      if ! grep -q "CLANG_CXX_LIBRARY.*libc++" "$file" 2>/dev/null; then
+        echo "CLANG_CXX_LIBRARY = libc++" >> "$file"
+      fi
+      if ! grep -q "GCC_WARN_INHIBIT_ALL_WARNINGS.*YES" "$file" 2>/dev/null; then
+        echo "GCC_WARN_INHIBIT_ALL_WARNINGS = YES" >> "$file"
+      fi
+      if ! grep -q "OTHER_CPLUSPLUSFLAGS.*-std=c++17" "$file" 2>/dev/null; then
+        echo "OTHER_CPLUSPLUSFLAGS = \$(inherited) -std=c++17 -Wno-error=c++20-extensions -Wno-c++20-extensions" >> "$file"
+      fi
+      echo "✅ Patched $file"
+    done')
 
-      sh('find Pods -name "*.xcconfig" -exec grep -l "gRPC\\|GRPC" {} \\; 2>/dev/null | head -10 | while IFS= read -r file; do
-        echo "📝 Patching $file"
-        if ! grep -q "CLANG_CXX_LANGUAGE_STANDARD.*c++17" "$file" 2>/dev/null; then
-          echo "CLANG_CXX_LANGUAGE_STANDARD = c++17" >> "$file"
-        fi
-        if ! grep -q "GCC_WARN_INHIBIT_ALL_WARNINGS.*YES" "$file" 2>/dev/null; then
-          echo "GCC_WARN_INHIBIT_ALL_WARNINGS = YES" >> "$file"
-        fi
-        echo "✅ Patched $file"
-      done')
+    # Pods.xcodeprojを直接修正
+    pods_project_path = "Pods/Pods.xcodeproj"
+    if File.exist?(pods_project_path)
+      UI.message("🔧 Directly modifying Pods project...")
+      pods_project = Xcodeproj::Project.open(pods_project_path)
+
+      pods_project.targets.each do |target|
+        target.build_configurations.each do |config|
+          # 全てのターゲットにC++17を強制適用
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+          config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17'
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions'
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-c++20-extensions'
+          config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          config.build_settings['OTHER_CFLAGS'] << '-Wno-error=c++20-extensions'
+          config.build_settings['OTHER_CFLAGS'] << '-Wno-c++20-extensions'
+
+          if target.name.include?('gRPC') || target.name.include?('grpc')
+            config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+          end
+        end
+      end
+
+      pods_project.save
+      UI.success("✅ Modified Pods project directly")
     end
 
     # 直接プロジェクトファイルも修正
     if File.exist?("Runner.xcworkspace")
-      UI.message("🔧 Also applying direct project modifications...")
+      UI.message("🔧 Also applying direct Runner project modifications...")
       project = Xcodeproj::Project.open("Runner.xcodeproj")
 
       project.targets.each do |target|
-        if target.name.include?('Runner')
-          target.build_configurations.each do |config|
-            config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
-            config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
-            config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17' unless config.build_settings['OTHER_CPLUSPLUSFLAGS'].include?('-std=c++17')
-            config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions' unless config.build_settings['OTHER_CPLUSPLUSFLAGS'].include?('-Wno-error=c++20-extensions')
-          end
+        target.build_configurations.each do |config|
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+          config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17' unless config.build_settings['OTHER_CPLUSPLUSFLAGS'].include?('-std=c++17')
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions' unless config.build_settings['OTHER_CPLUSPLUSFLAGS'].include?('-Wno-error=c++20-extensions')
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-c++20-extensions' unless config.build_settings['OTHER_CPLUSPLUSFLAGS'].include?('-Wno-c++20-extensions')
         end
       end
 
@@ -53,10 +82,11 @@ def apply_grpc_fixes
       UI.success("✅ Applied project-level C++17 settings")
     end
 
-    UI.success("✅ Applied direct gRPC fixes to build configuration files")
+    UI.success("✅ Applied comprehensive post-build gRPC fixes")
 
   rescue => e
     UI.error("❌ Failed to apply gRPC fixes: #{e.message}")
+    UI.error("Error details: #{e.backtrace.first(5).join('\n')}")
   end
 end
 
@@ -101,7 +131,7 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # Matchを試行するが、失敗した場合はautomatic signingにフォールバック
+    # Matchの設定競合を解決
     begin
       # MATCH_GIT_URLが設定されているか確認
       if !ENV["MATCH_GIT_URL"] || ENV["MATCH_GIT_URL"].empty?
@@ -111,19 +141,13 @@ platform :ios do
 
       UI.message("Attempting to use Fastlane Match for certificate management...")
 
-      # Matchで証明書とプロビジョニングプロファイルを同期（API Key認証で）
+      # API Key設定の競合を解決 - api_key_pathのみ使用
       match(
         type: "adhoc",
         app_identifier: "com.blank.sns",
         readonly: true,
         git_url: ENV["MATCH_GIT_URL"],
-        api_key_path: File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8"),
-        api_key: {
-          key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
-          issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
-          key: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
-          in_house: false
-        }
+        api_key_path: File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
       )
 
       UI.success("✅ Fastlane Match completed successfully!")
@@ -136,11 +160,20 @@ platform :ios do
       ENV["APP_STORE_CONNECT_API_KEY_PATH"] = File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
     end
 
+    # 最初にPodfileを修正してからFlutter buildを実行
+    UI.message("🔧 Pre-configuring Podfile for gRPC compatibility...")
+
+    # Flutter buildの前にPodfile.lockを削除してクリーンな状態にする
+    sh("rm -f Podfile.lock")
+
+    # Flutter build前にpod install実行でPodfileの設定を適用
+    sh("pod install")
+
     # Flutter iOS ビルド（署名なし）
     sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
 
-    # gRPC修正を再適用（Flutter buildでpod installが実行された後）
-    UI.message("🔧 Re-applying gRPC C++17 fixes after Flutter build...")
+    # Flutter buildの後にさらにgRPC修正を適用
+    UI.message("🔧 Post-Flutter build gRPC fixes...")
     apply_grpc_fixes
 
     # gymでアーカイブ+署名+エクスポート（allowProvisioningUpdatesを使用）
