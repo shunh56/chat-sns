@@ -2,11 +2,10 @@ git_url("https://github.com/shunh56/ios-certificates.git")
 
 storage_mode("git")
 
-type("development")
+type("development") # デフォルトタイプ（必要に応じて変更可能）
 
 app_identifier(["com.blank.sns"])
 
-team_id("CDQBCQRWL9")
+username("shunhihara0707@gmail.com")
 
-# API Key設定（ローカルとCI/CD両方で使用）
-api_key_path("/Users/shunh/private_keys/AuthKey_XFJ0JP4T17E.p8")
+team_id("CDQBCQRWL9")

@@ -131,34 +131,42 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj"
     )
 
-    # Matchの設定競合を解決
+    # 証明書管理：Matchを試行、失敗時は自動署名にフォールバック
+    certificate_management_method = "automatic" # デフォルトは自動署名
+
     begin
-      # MATCH_GIT_URLが設定されているか確認
-      if !ENV["MATCH_GIT_URL"] || ENV["MATCH_GIT_URL"].empty?
-        UI.important("MATCH_GIT_URL is not set. Skipping Match and using automatic signing.")
-        raise "No MATCH_GIT_URL"
+      # Match使用条件をチェック
+      if ENV["MATCH_GIT_URL"] && !ENV["MATCH_GIT_URL"].empty? && ENV["FASTLANE_USER"] && !ENV["FASTLANE_USER"].empty?
+        UI.message("🔐 Attempting to use Fastlane Match for certificate management...")
+
+        # Matchで証明書取得を試行（readonly mode for CI/CD safety）
+        match(
+          type: "adhoc",
+          app_identifier: "com.blank.sns",
+          readonly: true,
+          git_url: ENV["MATCH_GIT_URL"]
+        )
+
+        certificate_management_method = "match"
+        UI.success("✅ Fastlane Match completed successfully!")
+
+      else
+        UI.important("🔧 Match requirements not met. Using automatic signing.")
+        UI.important("   - MATCH_GIT_URL: #{ENV['MATCH_GIT_URL'] ? '✅' : '❌'}")
+        UI.important("   - FASTLANE_USER: #{ENV['FASTLANE_USER'] ? '✅' : '❌'}")
+        raise "Using automatic signing"
       end
 
-      UI.message("Attempting to use Fastlane Match for certificate management...")
-
-      # API Key設定の競合を解決 - api_key_pathのみ使用
-      match(
-        type: "adhoc",
-        app_identifier: "com.blank.sns",
-        readonly: true,
-        git_url: ENV["MATCH_GIT_URL"],
-        api_key_path: File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
-      )
-
-      UI.success("✅ Fastlane Match completed successfully!")
-
     rescue => e
-      UI.important("⚠️  Fastlane Match failed: #{e.message}")
-      UI.important("Falling back to automatic signing with App Store Connect API Key...")
+      UI.important("⚠️  Fastlane Match not available: #{e.message}")
+      UI.important("🔧 Falling back to automatic signing with App Store Connect API Key...")
 
       # API Key情報を環境変数に設定（automatic signingで使用）
       ENV["APP_STORE_CONNECT_API_KEY_PATH"] = File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
+      certificate_management_method = "automatic"
     end
+
+    UI.message("📱 Using certificate management method: #{certificate_management_method}")
 
     # 最初にPodfileを修正してからFlutter buildを実行
     UI.message("🔧 Pre-configuring Podfile for gRPC compatibility...")
