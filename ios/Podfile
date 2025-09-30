@@ -178,28 +178,95 @@ post_install do |installer|
     # Read the file content
     content = File.read(agora_surface_view_factory_path)
 
-    # Check if the file needs to be fixed (contains weakSelf usage without proper declaration)
-    if content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf = self;')
-      puts "🔧 Applying weakSelf fix to AgoraSurfaceViewFactory.mm..."
+    puts "🔍 Analyzing AgoraSurfaceViewFactory.mm content..."
+    puts "   - File size: #{content.length} bytes"
+    puts "   - Contains 'weakSelf': #{content.include?('weakSelf')}"
+    puts "   - Contains '__weak typeof(self) weakSelf': #{content.include?('__weak typeof(self) weakSelf')}"
 
-      # Find the problematic block and add proper weakSelf declaration
-      # Look for dispatch_async blocks that use weakSelf
-      fixed_content = content.gsub(
-        /dispatch_async\(dispatch_get_main_queue\(\), \^\{\s*\n\s*weakSelf/,
+    # Check if the file needs to be fixed
+    needs_fix = content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf')
+
+    # Force fix even if our detection is imperfect - apply comprehensive patterns
+    if content.include?('weakSelf') || content.match(/\]\s*\{\s*[^}]*weakSelf/)
+      puts "🔧 Applying comprehensive weakSelf fix to AgoraSurfaceViewFactory.mm..."
+
+      # Store original content for backup
+      original_content = content.dup
+
+      # Pattern 1: Fix blocks that use weakSelf without declaration
+      # Look for any block { followed by weakSelf usage
+      content = content.gsub(
+        /(\{\s*\n\s*)weakSelf/,
+        '\1__weak typeof(self) weakSelf = self;\n        weakSelf'
+      )
+
+      # Pattern 2: Fix dispatch_async blocks specifically
+      content = content.gsub(
+        /dispatch_async\s*\([^)]+\)\s*\^\s*\{\s*\n\s*weakSelf/,
         "dispatch_async(dispatch_get_main_queue(), ^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
       )
 
-      # Alternative pattern - look for other block patterns
-      fixed_content = fixed_content.gsub(
-        /\^\s*\{\s*\n\s*weakSelf/,
-        "^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
+      # Pattern 3: Fix any remaining standalone weakSelf without declaration
+      # Split by lines and fix each problematic usage
+      lines = content.split("\n")
+      fixed_lines = []
+      i = 0
+
+      while i < lines.length
+        line = lines[i]
+
+        # If this line contains weakSelf but we haven't seen a declaration
+        if line.match(/\bweakSelf\b/) && !line.include?('__weak typeof(self) weakSelf')
+          # Look backwards to see if there's a recent declaration
+          has_recent_declaration = false
+          (i-5..i-1).each do |j|
+            if j >= 0 && lines[j] && lines[j].include?('__weak typeof(self) weakSelf')
+              has_recent_declaration = true
+              break
+            end
+          end
+
+          # If no recent declaration, add one before this line
+          unless has_recent_declaration
+            indent = line[/^\s*/]
+            fixed_lines << "#{indent}__weak typeof(self) weakSelf = self;"
+          end
+        end
+
+        fixed_lines << line
+        i += 1
+      end
+
+      # Join back and finalize
+      content = fixed_lines.join("\n")
+
+      # Pattern 4: Final safety check - forced fix for known problematic lines
+      # Based on CI/CD error at lines 41, 44, 45 - ensure we have proper declarations
+      content = content.gsub(
+        /^(\s*)(.*weakSelf.*$)/,
+        proc do |match|
+          indentation = $1
+          line_content = $2
+
+          # Check if this line already has a declaration or is itself a declaration
+          if line_content.include?('__weak typeof(self) weakSelf') ||
+             line_content.match(/typeof.*weakSelf.*=/)
+            match # Keep as-is if it's a declaration
+          else
+            # Add declaration before the line
+            "#{indentation}__weak typeof(self) weakSelf = self;\n#{match}"
+          end
+        end
       )
 
       # Write the fixed content back
-      File.write(agora_surface_view_factory_path, fixed_content)
-      puts "✅ Applied weakSelf fix to AgoraSurfaceViewFactory.mm"
+      File.write(agora_surface_view_factory_path, content)
+      puts "✅ Applied comprehensive weakSelf fix to AgoraSurfaceViewFactory.mm"
+      puts "   - Original size: #{original_content.length} bytes"
+      puts "   - Fixed size: #{content.length} bytes"
+
     else
-      puts "ℹ️ AgoraSurfaceViewFactory.mm already has proper weakSelf declaration or no weakSelf usage"
+      puts "ℹ️ No weakSelf usage found in AgoraSurfaceViewFactory.mm"
     end
   else
     puts "⚠️ AgoraSurfaceViewFactory.mm not found at any expected path:"

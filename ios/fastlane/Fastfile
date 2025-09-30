@@ -108,31 +108,114 @@ def apply_grpc_fixes
       # Read the file content
       content = File.read(agora_surface_view_factory_path)
 
-      # Check if the file needs to be fixed (contains weakSelf usage without proper declaration)
-      if content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf = self;')
-        UI.message("🔧 Applying weakSelf fix to AgoraSurfaceViewFactory.mm...")
+      UI.message("🔍 Analyzing AgoraSurfaceViewFactory.mm content...")
+      UI.message("   - File size: #{content.length} bytes")
+      UI.message("   - Contains 'weakSelf': #{content.include?('weakSelf')}")
+      UI.message("   - Contains '__weak typeof(self) weakSelf': #{content.include?('__weak typeof(self) weakSelf')}")
 
-        # Find the problematic block and add proper weakSelf declaration
-        fixed_content = content.gsub(
-          /dispatch_async\(dispatch_get_main_queue\(\), \^\{\s*\n\s*weakSelf/,
+      # Force fix even if our detection is imperfect - apply comprehensive patterns
+      if content.include?('weakSelf') || content.match(/\]\s*\{\s*[^}]*weakSelf/)
+        UI.message("🔧 Applying comprehensive weakSelf fix to AgoraSurfaceViewFactory.mm...")
+
+        # Store original content for backup
+        original_content = content.dup
+
+        # Pattern 1: Fix blocks that use weakSelf without declaration
+        # Look for any block { followed by weakSelf usage
+        content = content.gsub(
+          /(\{\s*\n\s*)weakSelf/,
+          '\1__weak typeof(self) weakSelf = self;\n        weakSelf'
+        )
+
+        # Pattern 2: Fix dispatch_async blocks specifically
+        content = content.gsub(
+          /dispatch_async\s*\([^)]+\)\s*\^\s*\{\s*\n\s*weakSelf/,
           "dispatch_async(dispatch_get_main_queue(), ^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
         )
 
-        # Alternative pattern - look for other block patterns
-        fixed_content = fixed_content.gsub(
-          /\^\s*\{\s*\n\s*weakSelf/,
-          "^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
+        # Pattern 3: Fix any remaining standalone weakSelf without declaration
+        # Split by lines and fix each problematic usage
+        lines = content.split("\n")
+        fixed_lines = []
+        i = 0
+
+        while i < lines.length
+          line = lines[i]
+
+          # If this line contains weakSelf but we haven't seen a declaration
+          if line.match(/\bweakSelf\b/) && !line.include?('__weak typeof(self) weakSelf')
+            # Look backwards to see if there's a recent declaration
+            has_recent_declaration = false
+            (i-5..i-1).each do |j|
+              if j >= 0 && lines[j] && lines[j].include?('__weak typeof(self) weakSelf')
+                has_recent_declaration = true
+                break
+              end
+            end
+
+            # If no recent declaration, add one before this line
+            unless has_recent_declaration
+              indent = line[/^\s*/]
+              fixed_lines << "#{indent}__weak typeof(self) weakSelf = self;"
+            end
+          end
+
+          fixed_lines << line
+          i += 1
+        end
+
+        # Join back and finalize
+        content = fixed_lines.join("\n")
+
+        # Pattern 4: Final safety check - forced fix for known problematic lines
+        # Based on CI/CD error at lines 41, 44, 45 - ensure we have proper declarations
+        content = content.gsub(
+          /^(\s*)(.*weakSelf.*$)/,
+          proc do |match|
+            indentation = $1
+            line_content = $2
+
+            # Check if this line already has a declaration or is itself a declaration
+            if line_content.include?('__weak typeof(self) weakSelf') ||
+               line_content.match(/typeof.*weakSelf.*=/)
+              match # Keep as-is if it's a declaration
+            else
+              # Add declaration before the line
+              "#{indentation}__weak typeof(self) weakSelf = self;\n#{match}"
+            end
+          end
         )
 
         # Write the fixed content back
-        File.write(agora_surface_view_factory_path, fixed_content)
-        UI.success("✅ Applied weakSelf fix to AgoraSurfaceViewFactory.mm")
+        File.write(agora_surface_view_factory_path, content)
+        UI.success("✅ Applied comprehensive weakSelf fix to AgoraSurfaceViewFactory.mm")
+        UI.message("   - Original size: #{original_content.length} bytes")
+        UI.message("   - Fixed size: #{content.length} bytes")
+
       else
-        UI.message("ℹ️ AgoraSurfaceViewFactory.mm already has proper weakSelf declaration")
+        UI.message("ℹ️ No weakSelf usage found in AgoraSurfaceViewFactory.mm")
       end
     else
       UI.important("⚠️ AgoraSurfaceViewFactory.mm not found at any expected path:")
       possible_paths.each { |path| UI.important("   - #{path}") }
+    end
+
+    # Additional safety measure: Force create a simple weakSelf fix if file exists
+    if File.exist?(File.expand_path("~/.pub-cache/hosted/pub.dev/agora_rtc_engine-6.5.3/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"))
+      UI.message("🛡️ Applying emergency weakSelf fix as final safety measure...")
+      emergency_fix_path = File.expand_path("~/.pub-cache/hosted/pub.dev/agora_rtc_engine-6.5.3/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm")
+      emergency_content = File.read(emergency_fix_path)
+
+      # Simple but effective fix: add weakSelf declaration at the top of any problematic method
+      if emergency_content.include?('weakSelf') && !emergency_content.include?('__weak typeof(self) weakSelf = self;')
+        # Find the first method that uses weakSelf and add declaration
+        emergency_content = emergency_content.gsub(
+          /(\{[^}]*?\n[^}]*?)(\s+)(.*weakSelf)/m,
+          '\1\2__weak typeof(self) weakSelf = self;\2\3'
+        )
+        File.write(emergency_fix_path, emergency_content)
+        UI.success("🛡️ Applied emergency weakSelf fix")
+      end
     end
 
     UI.success("✅ Applied comprehensive post-build gRPC + Agora fixes")
