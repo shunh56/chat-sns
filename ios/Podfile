@@ -186,82 +186,32 @@ post_install do |installer|
     # Check if the file needs to be fixed
     needs_fix = content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf')
 
-    # Force fix even if our detection is imperfect - apply comprehensive patterns
-    if content.include?('weakSelf') || content.match(/\]\s*\{\s*[^}]*weakSelf/)
-      puts "🔧 Applying comprehensive weakSelf fix to AgoraSurfaceViewFactory.mm..."
+    # Simple and reliable weakSelf fix approach
+    if content.include?('weakSelf')
+      puts "🔧 Applying simple weakSelf fix to AgoraSurfaceViewFactory.mm..."
 
       # Store original content for backup
       original_content = content.dup
 
-      # Pattern 1: Fix blocks that use weakSelf without declaration
-      # Look for any block { followed by weakSelf usage
+      # Simple approach: Add __weak typeof(self) weakSelf = self; at the start of any block that uses weakSelf
+      # Target the specific problematic pattern from CI/CD error logs
       content = content.gsub(
-        /(\{\s*\n\s*)weakSelf/,
-        '\1__weak typeof(self) weakSelf = self;\n        weakSelf'
+        /(\^.*\{\s*\n\s*)([^_]*weakSelf)/,
+        '\1__weak typeof(self) weakSelf = self;\n        \2'
       )
 
-      # Pattern 2: Fix dispatch_async blocks specifically
-      content = content.gsub(
-        /dispatch_async\s*\([^)]+\)\s*\^\s*\{\s*\n\s*weakSelf/,
-        "dispatch_async(dispatch_get_main_queue(), ^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
-      )
-
-      # Pattern 3: Fix any remaining standalone weakSelf without declaration
-      # Split by lines and fix each problematic usage
-      lines = content.split("\n")
-      fixed_lines = []
-      i = 0
-
-      while i < lines.length
-        line = lines[i]
-
-        # If this line contains weakSelf but we haven't seen a declaration
-        if line.match(/\bweakSelf\b/) && !line.include?('__weak typeof(self) weakSelf')
-          # Look backwards to see if there's a recent declaration
-          has_recent_declaration = false
-          (i-5..i-1).each do |j|
-            if j >= 0 && lines[j] && lines[j].include?('__weak typeof(self) weakSelf')
-              has_recent_declaration = true
-              break
-            end
-          end
-
-          # If no recent declaration, add one before this line
-          unless has_recent_declaration
-            indent = line[/^\s*/]
-            fixed_lines << "#{indent}__weak typeof(self) weakSelf = self;"
-          end
-        end
-
-        fixed_lines << line
-        i += 1
+      # Also fix any standalone weakSelf usage by adding declaration at method start
+      if content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf')
+        # Add declaration at the beginning of the first method that uses weakSelf
+        content = content.sub(
+          /^(\s*-\s*\([^)]+\)[^{]*\{\s*\n)/,
+          '\1    __weak typeof(self) weakSelf = self;\n'
+        )
       end
-
-      # Join back and finalize
-      content = fixed_lines.join("\n")
-
-      # Pattern 4: Final safety check - forced fix for known problematic lines
-      # Based on CI/CD error at lines 41, 44, 45 - ensure we have proper declarations
-      content = content.gsub(
-        /^(\s*)(.*weakSelf.*$)/,
-        proc do |match|
-          indentation = $1
-          line_content = $2
-
-          # Check if this line already has a declaration or is itself a declaration
-          if line_content.include?('__weak typeof(self) weakSelf') ||
-             line_content.match(/typeof.*weakSelf.*=/)
-            match # Keep as-is if it's a declaration
-          else
-            # Add declaration before the line
-            "#{indentation}__weak typeof(self) weakSelf = self;\n#{match}"
-          end
-        end
-      )
 
       # Write the fixed content back
       File.write(agora_surface_view_factory_path, content)
-      puts "✅ Applied comprehensive weakSelf fix to AgoraSurfaceViewFactory.mm"
+      puts "✅ Applied simple weakSelf fix to AgoraSurfaceViewFactory.mm"
       puts "   - Original size: #{original_content.length} bytes"
       puts "   - Fixed size: #{content.length} bytes"
 
