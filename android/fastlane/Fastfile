@@ -58,7 +58,8 @@ platform :android do
     # Firebase App Distributionへアップロード
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID_ANDROID"],
-      groups: "testers",
+      # groups: "testers",  # testersグループが存在しない場合はコメントアウト
+      testers_file: nil,  # テスターファイルも使用しない
       release_notes: "自動ビルド from #{environment} environment (Build: #{build_number})",
       android_artifact_type: "APK",
       android_artifact_path: apk_path
