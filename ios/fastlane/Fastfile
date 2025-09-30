@@ -313,28 +313,72 @@ platform :ios do
     # Flutter build前にpod install実行でPodfileの設定を適用
     sh("pod install")
 
-    # Flutter iOS ビルド（署名なし）
-    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
+    # 記事の成功例に基づく改善：flutter build ipaを使用（より統合されたアプローチ）
+    # これによりAgoraの問題を回避できる可能性
+    UI.message("📱 Building Flutter IPA with integrated approach...")
+
+    begin
+      # まずflutter build ipaを試す（統合ビルド）
+      sh("cd ../.. && flutter build ipa --release --dart-define-from-file=dart_defines/#{environment}.env --export-method ad-hoc")
+      UI.success("✅ Flutter build ipa succeeded!")
+
+      # IPAファイルが生成されているか確認
+      ipa_path = "../../build/ios/ipa/Runner.ipa"
+      if File.exist?(ipa_path)
+        UI.success("✅ IPA file generated successfully at: #{ipa_path}")
+        # 既にIPAがあるのでgymステップをスキップ
+        skip_gym = true
+      else
+        skip_gym = false
+      end
+
+    rescue => e
+      UI.important("⚠️ Flutter build ipa failed, falling back to flutter build ios + gym approach: #{e.message}")
+
+      # フォールバック：従来のflutter build ios + gymアプローチ
+      sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
+      skip_gym = false
+    end
 
     # Flutter buildの後にさらにgRPC修正を適用
     UI.message("🔧 Post-Flutter build gRPC fixes...")
     apply_grpc_fixes
 
-    # gymでアーカイブ+署名+エクスポート（allowProvisioningUpdatesを使用）
-    gym(
-      scheme: "Runner",
-      workspace: "Runner.xcworkspace",
-      configuration: "Release",
-      export_method: "ad-hoc",
-      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=CDQBCQRWL9",
-      export_options: {
-        signingStyle: "automatic",
+    # skip_gymフラグを返す
+    skip_gym ||= false
+
+    # gymが必要な場合のみ実行
+    unless skip_gym
+      # 記事の成功例に基づく修正：手動署名を使用
+      # ExportOptions.plistを作成
+      export_options_content = {
+        method: "ad-hoc",
+        signingStyle: "manual",
+        provisioningProfiles: {
+          "com.blank.sns" => "com.blank.sns AdHoc"  # プロファイル名を調整する必要があるかもしれません
+        },
         teamID: "CDQBCQRWL9",
-        allowProvisioningUpdates: true
-      },
-      output_directory: "../../build/ios/ipa",
-      output_name: "Runner.ipa"
-    )
+        compileBitcode: false,
+        uploadBitcode: false,
+        uploadSymbols: false
+      }
+
+      # ExportOptions.plistファイルとして保存
+      File.write("ExportOptions.plist", export_options_content.to_plist)
+
+      # gymでアーカイブ+署名+エクスポート（成功例に基づく設定）
+      gym(
+        scheme: "Runner",
+        workspace: "Runner.xcworkspace",
+        configuration: "Release",
+        export_method: "ad-hoc",
+        export_options: "ExportOptions.plist",
+        clean: true,
+        output_directory: "../../build/ios/ipa",
+        output_name: "Runner.ipa",
+        xcargs: "DEVELOPMENT_TEAM=CDQBCQRWL9"
+      )
+    end
 
     # Firebase App Distributionへアップロード
     firebase_app_distribution(
