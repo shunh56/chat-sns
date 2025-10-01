@@ -249,11 +249,16 @@ platform :ios do
     sh("cd ../.. && make build-#{environment}")
 
     # TestFlightへアップロード
-    upload_to_testflight(
+    result = upload_to_testflight(
       ipa: "../../build/ios/ipa/*.ipa",
       skip_waiting_for_build_processing: true,
       changelog: "自動ビルド from #{environment} environment"
     )
+
+    # TestFlightのURLを保存（App Store Connectから取得）
+    testflight_url = "https://appstoreconnect.apple.com/apps/#{ENV['APP_STORE_CONNECT_APP_ID']}/testflight"
+    File.write("../testflight_url.txt", testflight_url)
+    UI.message("🔗 TestFlight URL saved: #{testflight_url}")
   end
 
   desc "Build for Firebase App Distribution"
@@ -363,12 +368,19 @@ platform :ios do
     end
 
     # Firebase App Distributionへアップロード
-    firebase_app_distribution(
+    result = firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID_IOS"],
       ipa_path: lane_context[SharedValues::IPA_OUTPUT_PATH],
       groups: "testers",
       release_notes: "自動ビルド from #{environment} environment"
     )
+
+    # Firebase URLをファイルに出力してGitHub Actionsで利用
+    firebase_url = result ? result[:testing_uri] || result[:console_uri] : nil
+    if firebase_url
+      File.write("../firebase_ios_url.txt", firebase_url)
+      UI.message("🔗 Firebase URL saved: #{firebase_url}")
+    end
   end
 
   desc "Setup certificates and provisioning profiles"

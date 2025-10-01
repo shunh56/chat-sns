@@ -15,6 +15,9 @@ jobs:
   deploy-ios:
     if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: macos-latest
+    outputs:
+      firebase_ios_url: ${{ steps.save-firebase-ios-url.outputs.url }}
+      testflight_url: ${{ steps.save-testflight-url.outputs.url }}
 
     steps:
     - uses: actions/checkout@v4
@@ -168,6 +171,18 @@ jobs:
         cd ios
         bundle exec fastlane firebase env:${{ steps.env.outputs.environment }}
 
+    # Firebase URLを環境変数に保存
+    - name: Save Firebase iOS URL
+      id: save-firebase-ios-url
+      if: github.ref == 'refs/heads/develop' && always()
+      run: |
+        if [ -f "firebase_ios_url.txt" ]; then
+          url=$(cat firebase_ios_url.txt)
+          echo "url=$url" >> $GITHUB_OUTPUT
+        else
+          echo "url=No URL available" >> $GITHUB_OUTPUT
+        fi
+
     # TestFlightは本番のみ（時間短縮）
     - name: Deploy to TestFlight
       if: github.ref == 'refs/heads/main'
@@ -175,13 +190,29 @@ jobs:
         APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
         APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
         APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        APP_STORE_CONNECT_APP_ID: ${{ secrets.APP_STORE_CONNECT_APP_ID }}
       run: |
         cd ios
         bundle exec fastlane beta env:${{ steps.env.outputs.environment }}
 
+    # TestFlight URLを環境変数に保存
+    - name: Save TestFlight URL
+      id: save-testflight-url
+      if: github.ref == 'refs/heads/main' && always()
+      run: |
+        if [ -f "testflight_url.txt" ]; then
+          url=$(cat testflight_url.txt)
+          echo "url=$url" >> $GITHUB_OUTPUT
+        else
+          echo "url=No URL available" >> $GITHUB_OUTPUT
+        fi
+
   deploy-android:
     if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    outputs:
+      firebase_android_url: ${{ steps.save-firebase-android-url.outputs.url }}
+      google_play_url: ${{ steps.save-google-play-url.outputs.url }}
 
     steps:
     - uses: actions/checkout@v4
@@ -277,6 +308,18 @@ jobs:
         cd android
         bundle exec fastlane firebase env:${{ steps.env.outputs.environment }}
 
+    # Firebase URLを環境変数に保存
+    - name: Save Firebase Android URL
+      id: save-firebase-android-url
+      if: github.ref == 'refs/heads/develop' && always()
+      run: |
+        if [ -f "firebase_android_url.txt" ]; then
+          url=$(cat firebase_android_url.txt)
+          echo "url=$url" >> $GITHUB_OUTPUT
+        else
+          echo "url=No URL available" >> $GITHUB_OUTPUT
+        fi
+
     # Google Playは本番のみ
     - name: Deploy to Google Play Internal Testing
       if: github.ref == 'refs/heads/main'
@@ -286,6 +329,13 @@ jobs:
         echo $GOOGLE_PLAY_JSON_KEY_BASE64 | base64 --decode > android/play-store-key.json
         cd android
         bundle exec fastlane beta env:${{ steps.env.outputs.environment }}
+
+    # Google Play URLを保存
+    - name: Save Google Play URL
+      id: save-google-play-url
+      if: github.ref == 'refs/heads/main' && always()
+      run: |
+        echo "url=https://play.google.com/console/u/0/developers/${{ secrets.GOOGLE_PLAY_DEVELOPER_ID }}/app/${{ secrets.GOOGLE_PLAY_APP_ID }}/tracks/internal-testing" >> $GITHUB_OUTPUT
 
     # Keychainクリーンアップ（記事の成功例に基づく）
     - name: Cleanup keychain
@@ -321,6 +371,11 @@ jobs:
                 value: '${{ needs.deploy-android.result }}',
                 short: true
               }]
+            }, {
+              color: 'good',
+              title: '📱 Download Links',
+              text: '${{ github.ref == 'refs/heads/develop' && format('📲 Firebase App Distribution\n• iOS: {0}\n• Android: {1}', needs.deploy-ios.outputs.firebase_ios_url || 'Not available', needs.deploy-android.outputs.firebase_android_url || 'Not available') || format('🏪 Store Links\n• TestFlight: {0}\n• Google Play Internal: {1}', needs.deploy-ios.outputs.testflight_url || 'Not available', needs.deploy-android.outputs.google_play_url || 'Not available') }}',
+              mrkdwn_in: ['text']
             }]
           }
       env:

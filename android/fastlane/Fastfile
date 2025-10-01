@@ -97,7 +97,7 @@ platform :android do
     UI.message("🗂️ File exists check (absolute): #{File.exist?(absolute_apk_path)}")
 
     # Firebase App Distributionへアップロード
-    firebase_app_distribution(
+    result = firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID_ANDROID"],
       # groups: "testers",  # testersグループが存在しない場合はコメントアウト
       testers_file: nil,  # テスターファイルも使用しない
@@ -105,6 +105,13 @@ platform :android do
       android_artifact_type: "APK",
       android_artifact_path: absolute_apk_path
     )
+
+    # Firebase URLをファイルに出力してGitHub Actionsで利用
+    firebase_url = result ? result[:testing_uri] || result[:console_uri] : nil
+    if firebase_url
+      File.write("../firebase_android_url.txt", firebase_url)
+      UI.message("🔗 Firebase URL saved: #{firebase_url}")
+    end
 
     UI.success("🚀 Successfully uploaded to Firebase App Distribution!")
   end
