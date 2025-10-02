@@ -377,20 +377,35 @@ jobs:
     if: always()
 
     steps:
-    - name: Prepare Firebase URLs for Slack
-      id: prepare-urls
+    - name: Fetch Firebase URLs from files
+      id: fetch-urls
       run: |
-        # Use direct URLs since they're working now
-        echo "firebase_ios_url=${{ needs.deploy-ios.outputs.firebase_ios_url || 'Not available' }}" >> $GITHUB_OUTPUT
-        echo "firebase_android_url=${{ needs.deploy-android.outputs.firebase_android_url || 'Not available' }}" >> $GITHUB_OUTPUT
+        # Download build artifacts to access URL files directly
+        echo "Downloading iOS artifacts..."
+        # This is a workaround since we can't access the files directly across jobs
 
-        # Firebase Console management URLs for adding testers
+        # For now, construct URLs from encoded outputs if available
+        if [ -n "${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}" ] && [ "${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}" != "" ]; then
+          ios_url=$(echo "${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}" | base64 -d 2>/dev/null || echo "Decode failed")
+          echo "firebase_ios_url=$ios_url" >> $GITHUB_OUTPUT
+        else
+          echo "firebase_ios_url=iOS deployment failed or URL not generated" >> $GITHUB_OUTPUT
+        fi
+
+        if [ -n "${{ needs.deploy-android.outputs.firebase_android_url_encoded }}" ] && [ "${{ needs.deploy-android.outputs.firebase_android_url_encoded }}" != "" ]; then
+          android_url=$(echo "${{ needs.deploy-android.outputs.firebase_android_url_encoded }}" | base64 -d 2>/dev/null || echo "Decode failed")
+          echo "firebase_android_url=$android_url" >> $GITHUB_OUTPUT
+        else
+          echo "firebase_android_url=Android URL extraction failed" >> $GITHUB_OUTPUT
+        fi
+
+        # Firebase Console management URLs
         echo "firebase_ios_console=https://console.firebase.google.com/u/0/project/chat-sns-project/appdistribution/app/ios:com.blank.sns.dev/releases?hl=ja" >> $GITHUB_OUTPUT
         echo "firebase_android_console=https://console.firebase.google.com/u/0/project/chat-sns-project/appdistribution/app/android:com.blank.sns.dev/releases?hl=ja" >> $GITHUB_OUTPUT
 
-        # Debug output
-        echo "iOS URL: ${{ needs.deploy-ios.outputs.firebase_ios_url || 'Not available' }}"
-        echo "Android URL: ${{ needs.deploy-android.outputs.firebase_android_url || 'Not available' }}"
+        # Debug info
+        echo "Encoded iOS: ${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}"
+        echo "Encoded Android: ${{ needs.deploy-android.outputs.firebase_android_url_encoded }}"
 
     - name: Slack Notification
       uses: 8398a7/action-slack@v3
@@ -414,12 +429,12 @@ jobs:
             }, {
               color: 'good',
               title: '📱 Download Links',
-              text: '${{ github.ref == 'refs/heads/develop' && format('📲 Firebase App Distribution\n• iOS: {0}\n• Android: {1}', steps.prepare-urls.outputs.firebase_ios_url || 'Not available', steps.prepare-urls.outputs.firebase_android_url || 'Not available') || format('🏪 Store Links\n• TestFlight: {0}\n• Google Play Internal: {1}', needs.deploy-ios.outputs.testflight_url || 'Not available', needs.deploy-android.outputs.google_play_url || 'Not available') }}',
+              text: '${{ github.ref == 'refs/heads/develop' && format('📲 Firebase App Distribution\n• iOS: {0}\n• Android: {1}', steps.fetch-urls.outputs.firebase_ios_url || 'Not available', steps.fetch-urls.outputs.firebase_android_url || 'Not available') || format('🏪 Store Links\n• TestFlight: {0}\n• Google Play Internal: {1}', needs.deploy-ios.outputs.testflight_url || 'Not available', needs.deploy-android.outputs.google_play_url || 'Not available') }}',
               mrkdwn_in: ['text']
             }, {
               color: 'warning',
               title: '🛠️ Firebase Console (Manage Testers)',
-              text: '${{ github.ref == 'refs/heads/develop' && format('📊 App Distribution Management\n• iOS Console: {0}\n• Android Console: {1}', steps.prepare-urls.outputs.firebase_ios_console, steps.prepare-urls.outputs.firebase_android_console) || '🏪 Production Console Links Available in Main Branch' }}',
+              text: '${{ github.ref == 'refs/heads/develop' && format('📊 App Distribution Management\n• iOS Console: {0}\n• Android Console: {1}', steps.fetch-urls.outputs.firebase_ios_console, steps.fetch-urls.outputs.firebase_android_console) || '🏪 Production Console Links Available in Main Branch' }}',
               mrkdwn_in: ['text']
             }]
           }
