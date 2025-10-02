@@ -254,12 +254,12 @@ class PostBottomModelSheet {
                                 final vc = await ref
                                     .read(voiceChatUsecaseProvider)
                                     .createVoiceChat(text);
-                                Navigator.pushReplacement(
+                                /*Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => VoiceChatScreen(id: vc.id),
                                   ),
-                                );
+                                ); */
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(

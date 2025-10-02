@@ -7,7 +7,7 @@
             "type": "dart",
             "args": [
                 "--dart-define=FLAVOR=dev",
-                "--dart-define-from-file=dart_defines/dev.env"
+                "--dart-define-from-file=dart_defines/dev.json"
             ]
         },
         {
@@ -16,7 +16,7 @@
             "type": "dart",
             "args": [
                 "--dart-define=FLAVOR=prod",
-                "--dart-define-from-file=dart_defines/prod.env"
+                "--dart-define-from-file=dart_defines/prod.json"
             ]
         },
         {
@@ -26,7 +26,7 @@
             "flutterMode": "profile",
             "args": [
                 "--dart-define=FLAVOR=dev",
-                "--dart-define-from-file=dart_defines/dev.env"
+                "--dart-define-from-file=dart_defines/dev.json"
             ]
         },
         {
@@ -36,7 +36,7 @@
             "flutterMode": "profile",
             "args": [
                 "--dart-define=FLAVOR=prod",
-                "--dart-define-from-file=dart_defines/prod.env"
+                "--dart-define-from-file=dart_defines/prod.json"
             ]
         },
         {
@@ -46,7 +46,7 @@
             "flutterMode": "release",
             "args": [
                 "--dart-define=FLAVOR=dev",
-                "--dart-define-from-file=dart_defines/dev.env"
+                "--dart-define-from-file=dart_defines/dev.json"
             ]
         },
         {
@@ -56,7 +56,7 @@
             "flutterMode": "release",
             "args": [
                 "--dart-define=FLAVOR=prod",
-                "--dart-define-from-file=dart_defines/prod.env"
+                "--dart-define-from-file=dart_defines/prod.json"
             ]
         }
     ]

@@ -15,11 +15,6 @@ for index in "${!define_items[@]}"
 do
     # Flutter 2.2 以降で必要なデコードを実行する
     item=$(decode_url "${define_items[$index]}")
-    # FLAVORが含まれるDart Defineの場合
-    if [ $(echo $item | grep 'FLAVOR') ] ; then
-        # FLAVORの値(=の右側)
-        value=${item#*=}
-        # FLAVORに対応したXCConfigファイルをincludeさせる
-        echo "#include \"$value.xcconfig\"" >> $OUTPUT_FILE
-    fi
+    # すべてのDart Defineを書き込む
+    echo "$item" >> $OUTPUT_FILE
 done

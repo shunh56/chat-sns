@@ -108,7 +108,7 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
               Map<String, dynamic>.from(call.arguments);
           final id = args['extra']['id'] ?? "";
           final uuid = args['uuid'];
-          Navigator.push(
+         /* Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => VoiceChatScreen(
@@ -116,7 +116,7 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
                 uuid: uuid,
               ),
             ),
-          );
+          ); */
           /* Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => Scaffold(

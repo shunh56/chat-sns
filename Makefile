@@ -13,9 +13,9 @@
 
 # Variables
 FLUTTER = flutter
-DART_DEFINE_DEV = --dart-define-from-file=dart_defines/dev.env
-DART_DEFINE_PROD = --dart-define-from-file=dart_defines/prod.env
-DART_DEFINE_APPSTORE = --dart-define-from-file=dart_defines/appstore.env
+DART_DEFINE_DEV = --dart-define-from-file=dart_defines/dev.json
+DART_DEFINE_PROD = --dart-define-from-file=dart_defines/prod.json
+DART_DEFINE_APPSTORE = --dart-define-from-file=dart_defines/appstore.json
 
 # Default target
 help:
@@ -72,6 +72,19 @@ setup-ios:
 	@mkdir -p ios/Flutter
 	@touch ios/Flutter/DartDefines.xcconfig
 	@: > ios/Flutter/DartDefines.xcconfig
+
+# Generate DartDefines.xcconfig from dart_defines files
+generate-dart-defines-dev:
+	@echo "Generating DartDefines.xcconfig for dev environment..."
+	@grep -v '^#' dart_defines/dev.env | sed 's/"//g' | sed 's/appName=/APPNAME=/g' | sed 's/appId=/appId=/g' > ios/Flutter/DartDefines.xcconfig
+
+generate-dart-defines-prod:
+	@echo "Generating DartDefines.xcconfig for prod environment..."
+	@grep -v '^#' dart_defines/prod.env | sed 's/"//g' | sed 's/appName=/APPNAME=/g' | sed 's/appId=/appId=/g' > ios/Flutter/DartDefines.xcconfig
+
+generate-dart-defines-appstore:
+	@echo "Generating DartDefines.xcconfig for appstore environment..."
+	@grep -v '^#' dart_defines/appstore.env | sed 's/"//g' | sed 's/appName=/APPNAME=/g' | sed 's/appId=/appId=/g' > ios/Flutter/DartDefines.xcconfig
 
 clean:
 	@echo "Cleaning project..."

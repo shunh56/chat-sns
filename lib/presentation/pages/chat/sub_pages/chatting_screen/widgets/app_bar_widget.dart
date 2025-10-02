@@ -120,12 +120,12 @@ class ChatAppBar extends ConsumerWidget {
     //TODO
     if (isMutualFollow || true) {
       final vc = await ref.read(voipUsecaseProvider).callUser(user);
-      Navigator.pushReplacement(
+      /*Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => VoiceChatScreen(id: vc.id),
         ),
-      );
+      ); */
     }
   }
 }

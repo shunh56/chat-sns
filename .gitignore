@@ -32,6 +32,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+ios/build/
 
 # Symbolication related
 app.*.symbols
@@ -50,5 +51,26 @@ app/google-services-dev.json
 app/google-services-prod.json
 app/google-services.json
 
-#
+# iOS Configuration files
 **/ios/Flutter/DartDefines.xcconfig
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+
+# CocoaPods
+**/ios/Pods/
+**/ios/Podfile.lock
+**/ios/.symlinks/
+
+# Xcode
+**/ios/Runner.xcworkspace/xcuserdata/
+**/ios/Runner.xcodeproj/xcuserdata/
+**/ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Environment files (機密情報を含む可能性)
+dart_defines/*.env
+
+# Apple Certificates and Provisioning Profiles
+**/ios/*.mobileprovision
+**/ios/*.p12
+**/ios/*.cer
+**/ios/Runner/GoogleService-Info.plist

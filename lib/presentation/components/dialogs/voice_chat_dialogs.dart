@@ -103,12 +103,12 @@ class VoiceChatDialogs {
                   const Gap(12),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacement(
+                      /*Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (_) => VoiceChatScreen(id: vc.id),
                         ),
-                      );
+                      ); */
                     },
                     child: Center(
                       child: Container(
