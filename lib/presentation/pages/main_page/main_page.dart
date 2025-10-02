@@ -103,8 +103,8 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
     platform.setMethodCallHandler(
       (MethodCall call) async {
         if (call.method == "onVoIPReceived") {
-          final Map<String, dynamic> args =
-              Map<String, dynamic>.from(call.arguments);
+          // final Map<String, dynamic> args =
+          //     Map<String, dynamic>.from(call.arguments);
           // final id = args['extra']['id'] ?? "";
           // final uuid = args['uuid'];
           /* Navigator.push(

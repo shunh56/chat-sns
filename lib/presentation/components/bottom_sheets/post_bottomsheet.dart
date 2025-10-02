@@ -13,7 +13,6 @@ import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/posts/replies.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
-import 'package:app/domain/usecases/voice_chat_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -247,7 +246,7 @@ class PostBottomModelSheet {
                           ? GestureDetector(
                               behavior: HitTestBehavior.opaque,
                               onTap: () async {
-                                String text = ref.read(inputTextProvider);
+                                // String text = ref.read(inputTextProvider);
                                 controller.clear();
                                 ref.read(inputTextProvider.notifier).state = "";
                                 // final vc = await ref
