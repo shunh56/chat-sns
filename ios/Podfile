@@ -73,9 +73,33 @@ post_install do |installer|
   puts "🔍 Searching for gRPC targets..."
   grpc_targets = []
 
-  # Global C++17 enforcement for all targets first
+  # Global optimization for all targets (M2 Pro optimized)
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
+      # Basic deployment settings
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
+
+      # M2 Pro / Apple Silicon optimizations
+      config.build_settings['ARCHS'] = 'arm64'
+      config.build_settings['VALID_ARCHS'] = 'arm64'
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+
+      # Enhanced build performance for M2 Pro
+      config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
+      config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
+      config.build_settings['SWIFT_OPTIMIZATION_LEVEL'] = '-O'
+
+      # Parallel build optimization
+      config.build_settings['SWIFT_DISABLE_SAFETY_CHECKS'] = 'YES' if config.name == 'Release'
+      config.build_settings['GCC_OPTIMIZATION_LEVEL'] = '3' if config.name == 'Release'
+
+      # Memory and CPU optimizations for M2 Pro
+      config.build_settings['LLVM_LTO'] = config.name == 'Release' ? 'YES' : 'NO'
+      config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
+      config.build_settings['STRIP_INSTALLED_PRODUCT'] = 'YES' if config.name == 'Release'
+
       # Force C++17 globally to prevent any C++20 template issues
       config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
       config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'

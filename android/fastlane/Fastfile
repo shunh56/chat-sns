@@ -97,14 +97,25 @@ platform :android do
     UI.message("🗂️ File exists check (absolute): #{File.exist?(absolute_apk_path)}")
 
     # Firebase App Distributionへアップロード
-    result = firebase_app_distribution(
+    firebase_params = {
       app: ENV["FIREBASE_APP_ID_ANDROID"],
-      # groups: "testers",  # testersグループが存在しない場合はコメントアウト
-      testers_file: nil,  # テスターファイルも使用しない
       release_notes: "自動ビルド from #{environment} environment (Build: #{build_number})",
       android_artifact_type: "APK",
       android_artifact_path: absolute_apk_path
-    )
+    }
+
+    # テスター設定: 環境変数またはデフォルトのテスターを使用
+    if ENV["FIREBASE_TESTERS"] && !ENV["FIREBASE_TESTERS"].empty?
+      UI.message("📧 Adding testers from environment variable: #{ENV["FIREBASE_TESTERS"]}")
+      firebase_params[:testers] = ENV["FIREBASE_TESTERS"]
+    elsif ENV["FIREBASE_TESTER_GROUPS"] && !ENV["FIREBASE_TESTER_GROUPS"].empty?
+      UI.message("👥 Adding tester groups: #{ENV["FIREBASE_TESTER_GROUPS"]}")
+      firebase_params[:groups] = ENV["FIREBASE_TESTER_GROUPS"]
+    else
+      UI.message("ℹ️ No specific testers configured, using default distribution settings")
+    end
+
+    result = firebase_app_distribution(firebase_params)
 
     # Firebase結果をデバッグ
     UI.message("🔍 Firebase App Distribution result: #{result.inspect}")

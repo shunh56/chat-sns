@@ -368,12 +368,24 @@ platform :ios do
     end
 
     # Firebase App Distributionへアップロード
-    result = firebase_app_distribution(
+    firebase_params = {
       app: ENV["FIREBASE_APP_ID_IOS"],
       ipa_path: lane_context[SharedValues::IPA_OUTPUT_PATH],
-      groups: "testers",
       release_notes: "自動ビルド from #{environment} environment"
-    )
+    }
+
+    # テスター設定: 環境変数またはデフォルトのテスターを使用
+    if ENV["FIREBASE_TESTERS"] && !ENV["FIREBASE_TESTERS"].empty?
+      UI.message("📧 Adding testers from environment variable: #{ENV["FIREBASE_TESTERS"]}")
+      firebase_params[:testers] = ENV["FIREBASE_TESTERS"]
+    elsif ENV["FIREBASE_TESTER_GROUPS"] && !ENV["FIREBASE_TESTER_GROUPS"].empty?
+      UI.message("👥 Adding tester groups: #{ENV["FIREBASE_TESTER_GROUPS"]}")
+      firebase_params[:groups] = ENV["FIREBASE_TESTER_GROUPS"]
+    else
+      UI.message("ℹ️ No specific testers configured, using default distribution settings")
+    end
+
+    result = firebase_app_distribution(firebase_params)
 
     # Firebase URLをファイルに出力してGitHub Actionsで利用
     firebase_url = result ? result[:testing_uri] || result[:console_uri] : nil
