@@ -21,7 +21,6 @@ import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/search/search_users_screen.dart';
 import 'package:app/presentation/pages/posts/create/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline/timeline_page.dart';
-import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/presentation/v2/tempo_app.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
@@ -106,9 +105,9 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
         if (call.method == "onVoIPReceived") {
           final Map<String, dynamic> args =
               Map<String, dynamic>.from(call.arguments);
-          final id = args['extra']['id'] ?? "";
-          final uuid = args['uuid'];
-         /* Navigator.push(
+          // final id = args['extra']['id'] ?? "";
+          // final uuid = args['uuid'];
+          /* Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => VoiceChatScreen(

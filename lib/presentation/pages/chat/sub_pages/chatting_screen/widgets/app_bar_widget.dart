@@ -9,7 +9,6 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:app/domain/usecases/voip_usecase.dart';
 
@@ -119,7 +118,7 @@ class ChatAppBar extends ConsumerWidget {
 
     //TODO
     if (isMutualFollow || true) {
-      final vc = await ref.read(voipUsecaseProvider).callUser(user);
+      // final vc = await ref.read(voipUsecaseProvider).callUser(user);
       /*Navigator.pushReplacement(
         context,
         MaterialPageRoute(
