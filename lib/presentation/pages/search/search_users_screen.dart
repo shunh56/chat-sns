@@ -1,7 +1,7 @@
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
-import 'package:app/presentation/UNUSED/user_listview_testing_screen.dart';
+// import 'package:app/presentation/UNUSED/user_listview_testing_screen.dart'; // Archived
 import 'package:app/presentation/pages/activities/activities_screen.dart';
 import 'package:app/presentation/pages/footprint/footprint_screen.dart';
 import 'package:app/presentation/pages/footprint/widget/footprint_badge.dart';
@@ -67,7 +67,7 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const NewScreen(),
+                builder: (_) => const SizedBox(), // NewScreen() archived
               ),
             );
           },
