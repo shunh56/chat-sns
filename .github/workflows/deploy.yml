@@ -181,7 +181,7 @@ jobs:
           url=$(cat firebase_ios_url.txt)
           echo "✅ Found iOS URL: $url"
           # Base64 encode to avoid secret masking by GitHub Actions
-          encoded_url=$(echo -n "$url" | base64)
+          encoded_url=$(echo -n "$url" | base64 -w 0)
           echo "url_encoded=$encoded_url" >> $GITHUB_OUTPUT
           echo "url=$url" >> $GITHUB_OUTPUT
         else
@@ -330,7 +330,7 @@ jobs:
           url=$(cat firebase_android_url.txt)
           echo "✅ Found URL: $url"
           # Base64 encode to avoid secret masking by GitHub Actions
-          encoded_url=$(echo -n "$url" | base64)
+          encoded_url=$(echo -n "$url" | base64 -w 0)
           echo "url_encoded=$encoded_url" >> $GITHUB_OUTPUT
           echo "url=$url" >> $GITHUB_OUTPUT
         else
@@ -373,24 +373,16 @@ jobs:
     if: always()
 
     steps:
-    - name: Decode Firebase URLs
-      id: decode-urls
+    - name: Prepare Firebase URLs for Slack
+      id: prepare-urls
       run: |
-        # Decode iOS Firebase URL
-        if [ -n "${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}" ]; then
-          ios_url=$(echo "${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}" | base64 -d)
-          echo "firebase_ios_url=$ios_url" >> $GITHUB_OUTPUT
-        else
-          echo "firebase_ios_url=${{ needs.deploy-ios.outputs.firebase_ios_url || 'Not available' }}" >> $GITHUB_OUTPUT
-        fi
+        # Use direct URLs since they're working now
+        echo "firebase_ios_url=${{ needs.deploy-ios.outputs.firebase_ios_url || 'Not available' }}" >> $GITHUB_OUTPUT
+        echo "firebase_android_url=${{ needs.deploy-android.outputs.firebase_android_url || 'Not available' }}" >> $GITHUB_OUTPUT
 
-        # Decode Android Firebase URL
-        if [ -n "${{ needs.deploy-android.outputs.firebase_android_url_encoded }}" ]; then
-          android_url=$(echo "${{ needs.deploy-android.outputs.firebase_android_url_encoded }}" | base64 -d)
-          echo "firebase_android_url=$android_url" >> $GITHUB_OUTPUT
-        else
-          echo "firebase_android_url=${{ needs.deploy-android.outputs.firebase_android_url || 'Not available' }}" >> $GITHUB_OUTPUT
-        fi
+        # Debug output
+        echo "iOS URL: ${{ needs.deploy-ios.outputs.firebase_ios_url || 'Not available' }}"
+        echo "Android URL: ${{ needs.deploy-android.outputs.firebase_android_url || 'Not available' }}"
 
     - name: Slack Notification
       uses: 8398a7/action-slack@v3
@@ -414,7 +406,7 @@ jobs:
             }, {
               color: 'good',
               title: '📱 Download Links',
-              text: '${{ github.ref == 'refs/heads/develop' && format('📲 Firebase App Distribution\n• iOS: {0}\n• Android: {1}', steps.decode-urls.outputs.firebase_ios_url || 'Not available', steps.decode-urls.outputs.firebase_android_url || 'Not available') || format('🏪 Store Links\n• TestFlight: {0}\n• Google Play Internal: {1}', needs.deploy-ios.outputs.testflight_url || 'Not available', needs.deploy-android.outputs.google_play_url || 'Not available') }}',
+              text: '${{ github.ref == 'refs/heads/develop' && format('📲 Firebase App Distribution\n• iOS: {0}\n• Android: {1}', steps.prepare-urls.outputs.firebase_ios_url || 'Not available', steps.prepare-urls.outputs.firebase_android_url || 'Not available') || format('🏪 Store Links\n• TestFlight: {0}\n• Google Play Internal: {1}', needs.deploy-ios.outputs.testflight_url || 'Not available', needs.deploy-android.outputs.google_play_url || 'Not available') }}',
               mrkdwn_in: ['text']
             }]
           }
