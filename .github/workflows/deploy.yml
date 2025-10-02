@@ -313,11 +313,20 @@ jobs:
       id: save-firebase-android-url
       if: github.ref == 'refs/heads/develop' && always()
       run: |
+        echo "🔍 Looking for Firebase Android URL file..."
+        echo "📂 Current directory: $(pwd)"
+        echo "📁 Directory contents:"
+        ls -la
+
         if [ -f "firebase_android_url.txt" ]; then
           url=$(cat firebase_android_url.txt)
+          echo "✅ Found URL: $url"
           echo "url=$url" >> $GITHUB_OUTPUT
         else
-          echo "url=No URL available" >> $GITHUB_OUTPUT
+          echo "❌ firebase_android_url.txt not found"
+          echo "🔍 Searching for URL file in subdirectories..."
+          find . -name "*firebase*url*" -type f 2>/dev/null || echo "No Firebase URL files found"
+          echo "url=Firebase URL file not found" >> $GITHUB_OUTPUT
         fi
 
     # Google Playは本番のみ

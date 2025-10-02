@@ -106,11 +106,38 @@ platform :android do
       android_artifact_path: absolute_apk_path
     )
 
+    # Firebase結果をデバッグ
+    UI.message("🔍 Firebase App Distribution result: #{result.inspect}")
+    UI.message("🔍 Available keys: #{result.keys.inspect}") if result.respond_to?(:keys)
+
     # Firebase URLをファイルに出力してGitHub Actionsで利用
-    firebase_url = result ? result[:testing_uri] || result[:console_uri] : nil
+    firebase_url = nil
+
+    # 複数の可能性を試す
+    if result.respond_to?(:[])
+      firebase_url = result[:testing_uri] || result[:console_uri] || result['testing_uri'] || result['console_uri']
+    end
+
+    # Fastlane内部のコンテキストからも試す
+    if !firebase_url && lane_context[SharedValues::FIREBASE_APP_DISTRO_RELEASE]
+      release_info = lane_context[SharedValues::FIREBASE_APP_DISTRO_RELEASE]
+      UI.message("🔍 Release info from lane_context: #{release_info.inspect}")
+      firebase_url = release_info[:testing_uri] || release_info[:console_uri] if release_info.respond_to?(:[])
+    end
+
+    # 最終的にはログからURLを構築
+    if !firebase_url && ENV["FIREBASE_APP_ID_ANDROID"]
+      # 成功したCI/CDログから実際のURLパターンを使用
+      firebase_url = "https://appdistribution.firebase.google.com/testerapps/#{ENV["FIREBASE_APP_ID_ANDROID"]}/releases"
+    end
+
     if firebase_url
-      File.write("../firebase_android_url.txt", firebase_url)
+      File.write("../../firebase_android_url.txt", firebase_url)
       UI.message("🔗 Firebase URL saved: #{firebase_url}")
+      UI.message("📁 File saved at: #{File.expand_path('../../firebase_android_url.txt')}")
+    else
+      UI.error("❌ Could not determine Firebase URL")
+      File.write("../../firebase_android_url.txt", "Firebase URL not available")
     end
 
     UI.success("🚀 Successfully uploaded to Firebase App Distribution!")
