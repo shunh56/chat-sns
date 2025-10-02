@@ -115,17 +115,17 @@ platform :android do
 
     # 複数の可能性を試す
     if result.respond_to?(:[])
-      firebase_url = result[:testing_uri] || result[:console_uri] || result['testing_uri'] || result['console_uri']
+      firebase_url = result[:testingUri] || result[:testing_uri] || result[:firebaseConsoleUri] || result[:console_uri]
     end
 
     # Fastlane内部のコンテキストからも試す
     if !firebase_url && lane_context[SharedValues::FIREBASE_APP_DISTRO_RELEASE]
       release_info = lane_context[SharedValues::FIREBASE_APP_DISTRO_RELEASE]
       UI.message("🔍 Release info from lane_context: #{release_info.inspect}")
-      firebase_url = release_info[:testing_uri] || release_info[:console_uri] if release_info.respond_to?(:[])
+      firebase_url = release_info[:testingUri] || release_info[:testing_uri] || release_info[:firebaseConsoleUri] || release_info[:console_uri] if release_info.respond_to?(:[])
     end
 
-    # 最終的にはログからURLを構築
+    # 最終的にはログからURLを構築（フォールバックとして基本URLを使用）
     if !firebase_url && ENV["FIREBASE_APP_ID_ANDROID"]
       # 成功したCI/CDログから実際のURLパターンを使用
       firebase_url = "https://appdistribution.firebase.google.com/testerapps/#{ENV["FIREBASE_APP_ID_ANDROID"]}/releases"
