@@ -24,17 +24,8 @@ end
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
 flutter_ios_podfile_setup
-# Override Firebase SDK Version - Use 10.28.0 to test gRPC fixes
-$FirebaseSDKVersion = '10.28.0'
-
-# Force C++17 to avoid gRPC-Core compilation issues with Xcode 16
-ENV['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
-ENV['CLANG_CXX_LIBRARY'] = 'libc++'
-
-pre_install do |installer|
-  # Remove duplicate aosl.xcframework before installation
-  Pod::Installer::Xcode::TargetValidator.send(:define_method, :verify_no_duplicate_framework_and_library_names) {}
-end
+# Override Firebase SDK Version
+$FirebaseSDKVersion = '10.24.0'
 
 target 'Runner' do
   use_frameworks!
@@ -49,225 +40,32 @@ target 'Runner' do
   pod 'Firebase/Messaging', $FirebaseSDKVersion, :modular_headers => true
   pod 'FirebaseCore', $FirebaseSDKVersion, :modular_headers => true
   pod 'FirebaseDatabase', $FirebaseSDKVersion, :modular_headers => true
-
+  
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-
+  
   target 'RunnerTests' do
     inherit! :search_paths
   end
 end
 
 post_install do |installer|
-  # Remove duplicate aosl.xcframework from AgoraRtm (keep AgoraInfra_iOS version)
-  # This prevents the "frameworks with conflicting names" error
-  agora_rtm_pod = installer.pod_targets.find { |t| t.name == 'AgoraRtm' }
-  if agora_rtm_pod
-    aosl_path = "#{agora_rtm_pod.sandbox.pod_dir('AgoraRtm')}/aosl.xcframework"
-    if File.exist?(aosl_path)
-      puts "Removing duplicate aosl.xcframework from AgoraRtm pod"
-      FileUtils.rm_rf(aosl_path)
-    end
+
+  bitcode_strip_path = `xcrun --find bitcode_strip`.chop!
+  def strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
+    framework_path = File.join(Dir.pwd, framework_relative_path)
+    command = "#{bitcode_strip_path} #{framework_path} -r -o #{framework_path}"
+    puts "Stripping bitcode: #{command}"
+    system(command)
   end
-
-  # Fix gRPC-Core C++ compilation issue with Xcode 16+ (Enhanced)
-  puts "🔍 Searching for gRPC targets..."
-  grpc_targets = []
-
-  # Global optimization for all targets (M2 Pro optimized)
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      # Basic deployment settings
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
-      config.build_settings['ENABLE_BITCODE'] = 'NO'
-      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
-
-      # M2 Pro / Apple Silicon optimizations
-      config.build_settings['ARCHS'] = 'arm64'
-      config.build_settings['VALID_ARCHS'] = 'arm64'
-      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
-
-      # Enhanced build performance for M2 Pro
-      config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
-      config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
-      config.build_settings['SWIFT_OPTIMIZATION_LEVEL'] = '-O'
-
-      # Parallel build optimization
-      config.build_settings['SWIFT_DISABLE_SAFETY_CHECKS'] = 'YES' if config.name == 'Release'
-      config.build_settings['GCC_OPTIMIZATION_LEVEL'] = '3' if config.name == 'Release'
-
-      # Memory and CPU optimizations for M2 Pro
-      config.build_settings['LLVM_LTO'] = config.name == 'Release' ? 'YES' : 'NO'
-      config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
-      config.build_settings['STRIP_INSTALLED_PRODUCT'] = 'YES' if config.name == 'Release'
-
-      # Force C++17 globally to prevent any C++20 template issues
-      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
-      config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
-
-      # Global C++ warning suppression for template compatibility
-      config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
-      config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17'
-      config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions'
-      config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-c++20-extensions'
-      config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
-      config.build_settings['OTHER_CFLAGS'] << '-Wno-error=c++20-extensions'
-      config.build_settings['OTHER_CFLAGS'] << '-Wno-c++20-extensions'
-    end
-  end
-
-  # Specific gRPC target handling
-  installer.pods_project.targets.each do |target|
-    if target.name.include?('gRPC') || target.name.include?('grpc') || target.name == 'gRPC-Core' || target.name == 'gRPC-C++'
-      grpc_targets << target.name
-      puts "📦 Found gRPC target: #{target.name}"
-
-      target.build_configurations.each do |config|
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'GPR_FORBID_UNREACHABLE_CODE=1'
-        config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
-
-        # Enhanced C++17 enforcement for gRPC targets
-        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
-        config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
-
-        # Additional C++ compatibility flags
-        config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17'
-        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions'
-        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-c++20-extensions'
-        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-template-id-cdtor'
-        config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_CFLAGS'] << '-Wno-error=c++20-extensions'
-        config.build_settings['OTHER_CFLAGS'] << '-Wno-c++20-extensions'
-
-        puts "✅ Applied enhanced C++17 fix to #{target.name} (#{config.name})"
-      end
-    end
-  end
-
-  puts "📊 Total gRPC targets modified: #{grpc_targets.length}"
-  puts "🔧 gRPC targets: #{grpc_targets.join(', ')}" unless grpc_targets.empty?
-  puts "🌐 Applied global C++17 enforcement to all #{installer.pods_project.targets.length} targets"
-
-  # Fix Agora RTC Engine compilation issues
-  puts "🎥 Applying Agora RTC Engine fixes..."
-  agora_targets = []
-
-  installer.pods_project.targets.each do |target|
-    if target.name.include?('agora_rtc_engine')
-      agora_targets << target.name
-      puts "📹 Found Agora target: #{target.name}"
-
-      target.build_configurations.each do |config|
-        # Ensure ARC is enabled for Agora
-        config.build_settings['CLANG_ENABLE_OBJC_ARC'] = 'YES'
-        # Add specific Objective-C++ flags
-        config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-fobjc-arc'
-        config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-fno-objc-arc-exceptions'
-        # Ensure proper language standard
-        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
-
-        puts "✅ Applied Agora fixes to #{target.name} (#{config.name})"
-      end
-    end
-  end
-
-  puts "📹 Total Agora targets modified: #{agora_targets.length}"
-  puts "🎥 Agora targets: #{agora_targets.join(', ')}" unless agora_targets.empty?
-
-  # Fix Agora RTC Engine source code weakSelf issue
-  puts "🔧 Fixing Agora RTC Engine source code weakSelf issue..."
-
-  # Try multiple possible paths for agora_rtc_engine
-  possible_paths = [
-    # Pub cache path (for CI/CD)
-    File.expand_path("~/.pub-cache/hosted/pub.dev/agora_rtc_engine-6.5.3/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"),
-    # Local Pods path (for local development)
-    "#{Dir.pwd}/Pods/agora_rtc_engine/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm",
-    # Symlink path
-    "#{Dir.pwd}/.symlinks/plugins/agora_rtc_engine/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"
+  framework_paths = [
+    # Agora SDKのフレームワークパスを指定（Podsディレクトリ確認してパスをコピーすればOK）
+    "Pods/AgoraRtcEngine_iOS/AgoraRtcKit.xcframework/ios-arm64_armv7/AgoraRtcKit.framework/AgoraRtcKit",
+    "Pods/AgoraRtm_iOS/AgoraRtmKit.xcframework/ios-arm64_armv7/AgoraRtmKit.framework/AgoraRtmKit"
   ]
-
-  agora_surface_view_factory_path = nil
-  possible_paths.each do |path|
-    if File.exist?(path)
-      agora_surface_view_factory_path = path
-      puts "📁 Found AgoraSurfaceViewFactory.mm at: #{path}"
-      break
-    end
+  framework_paths.each do |framework_relative_path|
+    strip_bitcode_from_framework(bitcode_strip_path, framework_relative_path)
   end
-
-  if agora_surface_view_factory_path
-    # Read the file content
-    content = File.read(agora_surface_view_factory_path)
-
-    puts "🔍 Analyzing AgoraSurfaceViewFactory.mm content..."
-    puts "   - File size: #{content.length} bytes"
-    puts "   - Contains 'weakSelf': #{content.include?('weakSelf')}"
-
-    # Apply simplified and robust weakSelf fix
-    if content.include?('weakSelf')
-      puts "🔧 Applying simplified weakSelf fix to AgoraSurfaceViewFactory.mm..."
-
-      # Store original content for backup
-      original_content = content.dup
-
-      # Strategy 1: Fix dispatch_async blocks with weakSelf
-      content = content.gsub(
-        /dispatch_async\(dispatch_get_main_queue\(\),\s*\^\s*\{\s*\n(\s*)([^}]*weakSelf[^}]*)\n(\s*)\}\);?/m
-      ) do |match|
-        indent = $1
-        block_content = $2.strip
-        closing_indent = $3
-        "dispatch_async(dispatch_get_main_queue(), ^{
-#{indent}    __weak typeof(self) weakSelf = self;
-#{indent}    #{block_content}
-#{closing_indent}});"
-      end
-
-      # Strategy 2: Fix any block that uses weakSelf without declaration
-      content = content.gsub(
-        /(\^\s*\{\s*\n)(\s*)([^}]*weakSelf[^}]*\n)(\s*\})/m
-      ) do |match|
-        block_start = $1
-        indent = $2
-        block_content = $3.strip
-        closing = $4
-        "#{block_start}#{indent}    __weak typeof(self) weakSelf = self;\n#{indent}    #{block_content}\n#{closing}"
-      end
-
-      # Strategy 3: If weakSelf still exists without declaration, add it at method start
-      if content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf = self;')
-        puts "⚠️ Adding weakSelf declaration at method beginning"
-        # Find the method that contains weakSelf and add declaration
-        content = content.gsub(
-          /(-\s*\([^)]+\)\s*\w+[^{]*\{\s*\n)((?:[^{}]*\{[^{}]*\})*[^{}]*weakSelf[^{}]*)/m
-        ) do |match|
-          method_start = $1
-          method_body = $2
-          if !method_body.include?('__weak typeof(self) weakSelf = self;')
-            "#{method_start}    __weak typeof(self) weakSelf = self;\n#{method_body}"
-          else
-            match
-          end
-        end
-      end
-
-      # Write the fixed content back
-      File.write(agora_surface_view_factory_path, content)
-      puts "✅ Applied simplified weakSelf fix to AgoraSurfaceViewFactory.mm"
-      puts "   - Original size: #{original_content.length} bytes"
-      puts "   - Fixed size: #{content.length} bytes"
-      puts "   - Lines with weakSelf: #{content.lines.count { |line| line.include?('weakSelf') }}"
-
-    else
-      puts "ℹ️ No weakSelf usage found in AgoraSurfaceViewFactory.mm"
-    end
-  else
-    puts "⚠️ AgoraSurfaceViewFactory.mm not found at any expected path:"
-    possible_paths.each { |path| puts "   - #{path}" }
-  end
+  
 
   installer.aggregate_targets.each do |target|
     target.xcconfigs.each do |variant, xcconfig|
@@ -291,7 +89,6 @@ post_install do |installer|
       # 基本設定
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
       config.build_settings['ENABLE_BITCODE'] = 'NO'
-      # Allow non-modular includes - Critical for Xcode 16 + Firebase compatibility
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
       

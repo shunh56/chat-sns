@@ -66,9 +66,6 @@ app/google-services.json
 **/ios/Runner.xcodeproj/xcuserdata/
 **/ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
 
-# Environment files (機密情報を含む可能性)
-dart_defines/*.env
-
 # Apple Certificates and Provisioning Profiles
 **/ios/*.mobileprovision
 **/ios/*.p12
