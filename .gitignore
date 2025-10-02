@@ -46,10 +46,8 @@ app.*.map.json
 /android/app/release
 
 
-#
-app/google-services-dev.json
-app/google-services-prod.json
-app/google-services.json
+# Google Services JSON files - keep env specific files for CI/CD
+android/app/google-services.json
 
 # iOS Configuration files
 **/ios/Flutter/DartDefines.xcconfig

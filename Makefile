@@ -202,6 +202,47 @@ prod: run-prod-debug
 
 
 # ==============================================================================
+# CI/CD Deployment Commands
+# ==============================================================================
+
+.PHONY: run-ios-dev-firebase run-ios-prod-firebase run-ios-dev-testflight run-ios-prod-testflight \
+        run-android-dev-firebase run-android-prod-firebase run-android-dev-googleplay run-android-prod-googleplay
+
+# iOS Deployment Commands
+run-ios-dev-firebase:
+	@echo "Deploying iOS dev to Firebase App Distribution..."
+	cd ios && bundle exec fastlane firebase env:dev
+
+run-ios-prod-firebase:
+	@echo "Deploying iOS prod to Firebase App Distribution..."
+	cd ios && bundle exec fastlane firebase env:prod
+
+run-ios-dev-testflight:
+	@echo "Deploying iOS dev to TestFlight..."
+	cd ios && bundle exec fastlane beta env:dev
+
+run-ios-prod-testflight:
+	@echo "Deploying iOS prod to TestFlight..."
+	cd ios && bundle exec fastlane beta env:prod
+
+# Android Deployment Commands
+run-android-dev-firebase:
+	@echo "Deploying Android dev to Firebase App Distribution..."
+	cd android && bundle exec fastlane firebase env:dev
+
+run-android-prod-firebase:
+	@echo "Deploying Android prod to Firebase App Distribution..."
+	cd android && bundle exec fastlane firebase env:prod
+
+run-android-dev-googleplay:
+	@echo "Deploying Android dev to Google Play Internal Testing..."
+	cd android && bundle exec fastlane beta env:dev
+
+run-android-prod-googleplay:
+	@echo "Deploying Android prod to Google Play Internal Testing..."
+	cd android && bundle exec fastlane beta env:prod
+
+# ==============================================================================
 # Firebase Functions Deploy Commands
 # ==============================================================================
 

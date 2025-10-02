@@ -1,6 +1,6 @@
 {
   "FLAVOR": "prod",
-  "APPNAME": "BLANK",
-  "APP_ID": "com.blank.sns",
+  "APPNAME": "BLANK PROD",
+  "APP_ID": "com.blank.sns.prod",
   "googleReversedClientId": "com.googleusercontent.apps.822316855484-3gcaup6u2k9b8jfljdn56rilbsgekm9i"
 }
