@@ -380,6 +380,10 @@ jobs:
         echo "firebase_ios_url=${{ needs.deploy-ios.outputs.firebase_ios_url || 'Not available' }}" >> $GITHUB_OUTPUT
         echo "firebase_android_url=${{ needs.deploy-android.outputs.firebase_android_url || 'Not available' }}" >> $GITHUB_OUTPUT
 
+        # Firebase Console management URLs for adding testers
+        echo "firebase_ios_console=https://console.firebase.google.com/u/0/project/chat-sns-project/appdistribution/app/ios:com.blank.sns.dev/releases?hl=ja" >> $GITHUB_OUTPUT
+        echo "firebase_android_console=https://console.firebase.google.com/u/0/project/chat-sns-project/appdistribution/app/android:com.blank.sns.dev/releases?hl=ja" >> $GITHUB_OUTPUT
+
         # Debug output
         echo "iOS URL: ${{ needs.deploy-ios.outputs.firebase_ios_url || 'Not available' }}"
         echo "Android URL: ${{ needs.deploy-android.outputs.firebase_android_url || 'Not available' }}"
@@ -407,6 +411,11 @@ jobs:
               color: 'good',
               title: '📱 Download Links',
               text: '${{ github.ref == 'refs/heads/develop' && format('📲 Firebase App Distribution\n• iOS: {0}\n• Android: {1}', steps.prepare-urls.outputs.firebase_ios_url || 'Not available', steps.prepare-urls.outputs.firebase_android_url || 'Not available') || format('🏪 Store Links\n• TestFlight: {0}\n• Google Play Internal: {1}', needs.deploy-ios.outputs.testflight_url || 'Not available', needs.deploy-android.outputs.google_play_url || 'Not available') }}',
+              mrkdwn_in: ['text']
+            }, {
+              color: 'warning',
+              title: '🛠️ Firebase Console (Manage Testers)',
+              text: '${{ github.ref == 'refs/heads/develop' && format('📊 App Distribution Management\n• iOS Console: {0}\n• Android Console: {1}', steps.prepare-urls.outputs.firebase_ios_console, steps.prepare-urls.outputs.firebase_android_console) || '🏪 Production Console Links Available in Main Branch' }}',
               mrkdwn_in: ['text']
             }]
           }
