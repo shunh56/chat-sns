@@ -12,7 +12,7 @@ platform :android do
 
     # Flutter AABビルド（flavorとdart-define-from-fileの両方を使用）
     UI.message("📱 Building Android App Bundle for #{environment} environment...")
-    sh("cd ../.. && flutter build appbundle --release --flavor #{environment} --dart-define-from-file=dart_defines/#{environment}.env --build-number=#{build_number}")
+    sh("cd ../.. && flutter build appbundle --release --flavor #{environment} --dart-define-from-file=dart_defines/#{environment}.json --build-number=#{build_number}")
 
     # AABファイルの存在確認（flavorごとに異なるパス）
     aab_path = "../../build/app/outputs/bundle/#{environment}Release/app-#{environment}-release.aab"
@@ -48,7 +48,7 @@ platform :android do
 
     # APKビルド（flavorとdart-define-from-fileの両方を使用）
     UI.message("📱 Building Android APK for #{environment} environment...")
-    sh("cd ../.. && flutter build apk --release --flavor #{environment} --dart-define-from-file=dart_defines/#{environment}.env --build-number=#{build_number}")
+    sh("cd ../.. && flutter build apk --release --flavor #{environment} --dart-define-from-file=dart_defines/#{environment}.json --build-number=#{build_number}")
 
     # APKファイルの存在確認（CI/CDログから正しいパスを確認）
     apk_path = "../../build/app/outputs/flutter-apk/app-#{environment}-release.apk"

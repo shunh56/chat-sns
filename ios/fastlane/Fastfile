@@ -324,7 +324,7 @@ platform :ios do
 
     # シンプルで確実なビルドアプローチ（記事の成功例に基づく）
     UI.message("📱 Building with flutter build ios (no-codesign) approach...")
-    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.env --no-codesign")
+    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.json --no-codesign")
     skip_gym = false
 
     # Flutter buildの後にさらにgRPC修正を適用
