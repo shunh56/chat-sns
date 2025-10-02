@@ -1,4 +1,5 @@
 {
+  "FLAVOR": "dev",
   "APPNAME": "BLANK DEV",
   "APP_ID": "com.blank.sns.dev",
   "googleReversedClientId": "com.googleusercontent.apps.889410445548-e12j86agor31tgb0n6o0hbpqb8g8ltg3"

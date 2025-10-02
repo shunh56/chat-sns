@@ -13,9 +13,9 @@
 
 # Variables
 FLUTTER = flutter
-DART_DEFINE_DEV = --dart-define=FLAVOR=dev --dart-define-from-file=dart_defines/dev.json
-DART_DEFINE_PROD = --dart-define=FLAVOR=prod --dart-define-from-file=dart_defines/prod.json
-DART_DEFINE_APPSTORE = --dart-define=FLAVOR=appstore --dart-define-from-file=dart_defines/appstore.json
+DART_DEFINE_DEV = --dart-define-from-file=dart_defines/dev.json
+DART_DEFINE_PROD = --dart-define-from-file=dart_defines/prod.json
+DART_DEFINE_APPSTORE = --dart-define-from-file=dart_defines/appstore.json
 
 # Default target
 help:
@@ -93,7 +93,7 @@ run-dev-profile:
 
 run-dev-release:
 	@echo "Running dev environment in release mode..."
-	$(FLUTTER) run --release $(DART_DEFINE_DEV) --verbose
+	$(FLUTTER) run --release $(DART_DEFINE_DEV)
 
 # ==============================================================================
 # iOS Run Commands - Production Environment
