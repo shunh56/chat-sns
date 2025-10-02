@@ -181,56 +181,58 @@ post_install do |installer|
     puts "🔍 Analyzing AgoraSurfaceViewFactory.mm content..."
     puts "   - File size: #{content.length} bytes"
     puts "   - Contains 'weakSelf': #{content.include?('weakSelf')}"
-    puts "   - Contains '__weak typeof(self) weakSelf': #{content.include?('__weak typeof(self) weakSelf')}"
 
-    # Check if the file needs to be fixed
-    needs_fix = content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf')
-
-    # Robust weakSelf fix approach based on CI/CD error analysis
+    # Apply simplified and robust weakSelf fix
     if content.include?('weakSelf')
-      puts "🔧 Applying robust weakSelf fix to AgoraSurfaceViewFactory.mm..."
+      puts "🔧 Applying simplified weakSelf fix to AgoraSurfaceViewFactory.mm..."
 
       # Store original content for backup
       original_content = content.dup
 
-      # Strategy 1: Remove any broken/incomplete weakSelf declarations first
-      content = content.gsub(/^\s*__weak typeof\(self\) weakSelf.*$/, '')
-
-      # Strategy 2: Replace blocks containing weakSelf with proper syntax
-      # Target specific pattern from CI/CD logs: dispatch_async blocks at lines 41-45
+      # Strategy 1: Fix dispatch_async blocks with weakSelf
       content = content.gsub(
-        /dispatch_async\([^)]+\)\s*\^\s*\{\s*\n(\s*)([^}]*weakSelf[^}]*)\}/m
+        /dispatch_async\(dispatch_get_main_queue\(\),\s*\^\s*\{\s*\n(\s*)([^}]*weakSelf[^}]*)\n(\s*)\}\);?/m
       ) do |match|
         indent = $1
-        block_content = $2
+        block_content = $2.strip
+        closing_indent = $3
         "dispatch_async(dispatch_get_main_queue(), ^{
 #{indent}    __weak typeof(self) weakSelf = self;
-#{indent}    #{block_content.strip}
-#{indent}})"
+#{indent}    #{block_content}
+#{closing_indent}});"
       end
 
-      # Strategy 3: Fix any remaining block patterns
+      # Strategy 2: Fix any block that uses weakSelf without declaration
       content = content.gsub(
-        /(\^\s*\{\s*\n\s*)([^_}]*weakSelf[^}]*)\}/m
+        /(\^\s*\{\s*\n)(\s*)([^}]*weakSelf[^}]*\n)(\s*\})/m
       ) do |match|
         block_start = $1
-        block_content = $2
-        indent = block_start[/\n(\s*)/, 1] || "        "
-        "#{block_start}#{indent}__weak typeof(self) weakSelf = self;\n#{indent}#{block_content.strip}\n#{indent}}"
+        indent = $2
+        block_content = $3.strip
+        closing = $4
+        "#{block_start}#{indent}    __weak typeof(self) weakSelf = self;\n#{indent}    #{block_content}\n#{closing}"
       end
 
-      # Strategy 4: Final safety net - ensure any method with weakSelf has declaration
+      # Strategy 3: If weakSelf still exists without declaration, add it at method start
       if content.include?('weakSelf') && !content.include?('__weak typeof(self) weakSelf = self;')
-        puts "⚠️ Adding fallback weakSelf declaration at method beginning"
-        content = content.sub(
-          /^(\s*-\s*\([^)]+\)[^{]*\{\s*\n)/,
-          "\\1    __weak typeof(self) weakSelf = self;\n"
-        )
+        puts "⚠️ Adding weakSelf declaration at method beginning"
+        # Find the method that contains weakSelf and add declaration
+        content = content.gsub(
+          /(-\s*\([^)]+\)\s*\w+[^{]*\{\s*\n)((?:[^{}]*\{[^{}]*\})*[^{}]*weakSelf[^{}]*)/m
+        ) do |match|
+          method_start = $1
+          method_body = $2
+          if !method_body.include?('__weak typeof(self) weakSelf = self;')
+            "#{method_start}    __weak typeof(self) weakSelf = self;\n#{method_body}"
+          else
+            match
+          end
+        end
       end
 
       # Write the fixed content back
       File.write(agora_surface_view_factory_path, content)
-      puts "✅ Applied robust weakSelf fix to AgoraSurfaceViewFactory.mm"
+      puts "✅ Applied simplified weakSelf fix to AgoraSurfaceViewFactory.mm"
       puts "   - Original size: #{original_content.length} bytes"
       puts "   - Fixed size: #{content.length} bytes"
       puts "   - Lines with weakSelf: #{content.lines.count { |line| line.include?('weakSelf') }}"
