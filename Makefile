@@ -1,164 +1,286 @@
-.PHONY: dev prod clean dev-debug dev-profile dev-release prod-debug prod-profile prod-release build-dev build-prod
+# ==============================================================================
+# Flutter App Build Makefile
+# ==============================================================================
 
+.PHONY: help setup clean \
+        run-dev-debug run-dev-profile run-dev-release \
+        run-prod-debug run-prod-profile run-prod-release \
+        run-appstore-debug run-appstore-profile run-appstore-release \
+        run-android-dev-debug run-android-dev-profile run-android-dev-release \
+        run-android-prod-debug run-android-prod-profile run-android-prod-release \
+        build-ios-dev build-ios-prod build-ios-appstore \
+        build-android-dev build-android-prod
+
+# Variables
 FLUTTER = flutter
 DART_DEFINE_DEV = --dart-define-from-file=dart_defines/dev.env
 DART_DEFINE_PROD = --dart-define-from-file=dart_defines/prod.env
 DART_DEFINE_APPSTORE = --dart-define-from-file=dart_defines/appstore.env
 
+# Default target
+help:
+	@echo "=== Flutter App Build Commands ==="
+	@echo ""
+	@echo "Setup Commands:"
+	@echo "  make setup           - Setup project dependencies and prepare iOS"
+	@echo "  make clean           - Clean project and reinstall dependencies"
+	@echo ""
+	@echo "Development Run Commands (iOS):"
+	@echo "  make run-dev-debug   - Run dev environment in debug mode"
+	@echo "  make run-dev-profile - Run dev environment in profile mode"
+	@echo "  make run-dev-release - Run dev environment in release mode"
+	@echo ""
+	@echo "Production Run Commands (iOS):"
+	@echo "  make run-prod-debug   - Run prod environment in debug mode"
+	@echo "  make run-prod-profile - Run prod environment in profile mode"
+	@echo "  make run-prod-release - Run prod environment in release mode"
+	@echo ""
+	@echo "App Store Run Commands (iOS):"
+	@echo "  make run-appstore-debug   - Run appstore environment in debug mode"
+	@echo "  make run-appstore-profile - Run appstore environment in profile mode"
+	@echo "  make run-appstore-release - Run appstore environment in release mode"
+	@echo ""
+	@echo "Android Run Commands:"
+	@echo "  make run-android-dev-debug   - Run Android dev in debug mode"
+	@echo "  make run-android-dev-profile - Run Android dev in profile mode"
+	@echo "  make run-android-dev-release - Run Android dev in release mode"
+	@echo "  make run-android-prod-debug  - Run Android prod in debug mode"
+	@echo "  make run-android-prod-profile- Run Android prod in profile mode"
+	@echo "  make run-android-prod-release- Run Android prod in release mode"
+	@echo ""
+	@echo "Build Commands:"
+	@echo "  make build-ios-dev      - Build iOS dev IPA"
+	@echo "  make build-ios-prod     - Build iOS prod IPA"
+	@echo "  make build-ios-appstore - Build iOS appstore IPA"
+	@echo "  make build-android-dev  - Build Android dev App Bundle"
+	@echo "  make build-android-prod - Build Android prod App Bundle"
 
-#build runner
-build-runner:
-	@echo "Activating build runner..."
-	flutter pub run build_runner build --delete-conflicting-outputs
+# ==============================================================================
+# Setup Commands
+# ==============================================================================
 
-.PHONY: prepare-ios
-prepare-ios:
-	@echo "Copying xcconfig file to Flutter directory..."
+setup: setup-build-runner setup-ios
+	@echo "Setup completed successfully"
+
+setup-build-runner:
+	@echo "Setting up build runner..."
+	$(FLUTTER) pub get
+	$(FLUTTER) pub run build_runner build --delete-conflicting-outputs
+
+setup-ios:
+	@echo "Preparing iOS configuration..."
 	@mkdir -p ios/Flutter
 	@touch ios/Flutter/DartDefines.xcconfig
-	@echo "Cleaning DartDefines.xcconfig..."
 	@: > ios/Flutter/DartDefines.xcconfig
 
-#dev-ios
-dev-profile: 
-	@echo "Starting dev profile build..."
-	$(FLUTTER) run --profile $(DART_DEFINE_DEV)
-
-dev-release:
-	@echo "Starting dev release build..."
-	$(FLUTTER) run --release $(DART_DEFINE_DEV)
-
-#dev-android
-dev-android-release:
-	@echo "Starting Android dev release build..."
-	$(FLUTTER) run --flavor dev --release $(DART_DEFINE_DEV)
-
-dev-android-release-verbose:
-	@echo "Starting Android dev release build..."
-	$(FLUTTER) run --verbose --flavor dev --release $(DART_DEFINE_DEV)
-
-#prod-ios
-prod-profile:
-	@echo "Starting prod profile build..."
-	$(FLUTTER) run --profile $(DART_DEFINE_PROD)
-
-prod-release:
-	@echo "Starting prod release build..."
-	$(FLUTTER) run --release $(DART_DEFINE_PROD)
-
-prod-android-release:
-	@echo "Starting Android prod release build..."
-	$(FLUTTER) run --flavor prod --release $(DART_DEFINE_PROD)
-
-appstore-release:
-	@echo "Starting appstore release build..."
-	$(FLUTTER) run --release $(DART_DEFINE_APPSTORE)
-
-#build-ios
-build-dev:
-	@echo "Building dev IPA..."
-	$(FLUTTER) build ipa --release $(DART_DEFINE_DEV)
-
-build-prod:
-	@echo "Building prod IPA..."
-	$(FLUTTER) build ipa --release $(DART_DEFINE_PROD)
-
-build-appstore:
-	@echo "Building appstore IPA..."
-	$(FLUTTER) build ipa --release $(DART_DEFINE_APPSTORE)
-
-#build-android
-build-android-dev:
-	@echo "Building Android dev App Bundle..."
-	$(FLUTTER) build appbundle --flavor dev --release $(DART_DEFINE_DEV)
-
-
-build-android-prod:
-	@echo "Building Android prod App Bundle..."
-	$(FLUTTER) build appbundle --flavor prod --release $(DART_DEFINE_PROD)
-
-dev: dev-debug
-prod: prod-debug
-
-.PHONY: clean-ios
-clean-ios:
+clean:
 	@echo "Cleaning project..."
 	$(FLUTTER) clean
 	cd ios && rm -rf Pods Podfile.lock
 	cd ios && pod install
 
+# ==============================================================================
+# iOS Run Commands - Development Environment
+# ==============================================================================
+
+run-dev-debug:
+	@echo "Running dev environment in debug mode..."
+	$(FLUTTER) run --debug $(DART_DEFINE_DEV)
+
+run-dev-profile:
+	@echo "Running dev environment in profile mode..."
+	$(FLUTTER) run --profile $(DART_DEFINE_DEV)
+
+run-dev-release:
+	@echo "Running dev environment in release mode..."
+	$(FLUTTER) run --release $(DART_DEFINE_DEV)
+
+# ==============================================================================
+# iOS Run Commands - Production Environment
+# ==============================================================================
+
+run-prod-debug:
+	@echo "Running prod environment in debug mode..."
+	$(FLUTTER) run --debug $(DART_DEFINE_PROD)
+
+run-prod-profile:
+	@echo "Running prod environment in profile mode..."
+	$(FLUTTER) run --profile $(DART_DEFINE_PROD)
+
+run-prod-release:
+	@echo "Running prod environment in release mode..."
+	$(FLUTTER) run --release $(DART_DEFINE_PROD)
+
+# ==============================================================================
+# iOS Run Commands - App Store Environment
+# ==============================================================================
+
+run-appstore-debug:
+	@echo "Running appstore environment in debug mode..."
+	$(FLUTTER) run --debug $(DART_DEFINE_APPSTORE)
+
+run-appstore-profile:
+	@echo "Running appstore environment in profile mode..."
+	$(FLUTTER) run --profile $(DART_DEFINE_APPSTORE)
+
+run-appstore-release:
+	@echo "Running appstore environment in release mode..."
+	$(FLUTTER) run --release $(DART_DEFINE_APPSTORE)
+
+# ==============================================================================
+# Android Run Commands - Development Environment
+# ==============================================================================
+
+run-android-dev-debug:
+	@echo "Running Android dev environment in debug mode..."
+	$(FLUTTER) run --debug --flavor dev $(DART_DEFINE_DEV)
+
+run-android-dev-profile:
+	@echo "Running Android dev environment in profile mode..."
+	$(FLUTTER) run --profile --flavor dev $(DART_DEFINE_DEV)
+
+run-android-dev-release:
+	@echo "Running Android dev environment in release mode..."
+	$(FLUTTER) run --release --flavor dev $(DART_DEFINE_DEV)
+
+run-android-dev-release-verbose:
+	@echo "Running Android dev environment in release mode (verbose)..."
+	$(FLUTTER) run --verbose --release --flavor dev $(DART_DEFINE_DEV)
+
+# ==============================================================================
+# Android Run Commands - Production Environment
+# ==============================================================================
+
+run-android-prod-debug:
+	@echo "Running Android prod environment in debug mode..."
+	$(FLUTTER) run --debug --flavor prod $(DART_DEFINE_PROD)
+
+run-android-prod-profile:
+	@echo "Running Android prod environment in profile mode..."
+	$(FLUTTER) run --profile --flavor prod $(DART_DEFINE_PROD)
+
+run-android-prod-release:
+	@echo "Running Android prod environment in release mode..."
+	$(FLUTTER) run --release --flavor prod $(DART_DEFINE_PROD)
+
+# ==============================================================================
+# iOS Build Commands
+# ==============================================================================
+
+build-ios-dev:
+	@echo "Building iOS dev IPA..."
+	$(FLUTTER) build ipa --release $(DART_DEFINE_DEV)
+
+build-ios-prod:
+	@echo "Building iOS prod IPA..."
+	$(FLUTTER) build ipa --release $(DART_DEFINE_PROD)
+
+build-ios-appstore:
+	@echo "Building iOS appstore IPA..."
+	$(FLUTTER) build ipa --release $(DART_DEFINE_APPSTORE)
+
+# ==============================================================================
+# Android Build Commands
+# ==============================================================================
+
+build-android-dev:
+	@echo "Building Android dev App Bundle..."
+	$(FLUTTER) build appbundle --flavor dev --release $(DART_DEFINE_DEV)
+
+build-android-prod:
+	@echo "Building Android prod App Bundle..."
+	$(FLUTTER) build appbundle --flavor prod --release $(DART_DEFINE_PROD)
+
+# ==============================================================================
+# Legacy Aliases (for backward compatibility)
+# ==============================================================================
+
+dev: run-dev-debug
+prod: run-prod-debug
 
 
-# Firebase Functionsデプロイ用Makefile
 
-# プロジェクトID定義
-DEV_PROJECT := chat-sns-project
-PROD_PROJECT := blank-project-prod
+# ==============================================================================
+# Firebase Functions Deploy Commands
+# ==============================================================================
 
-# デフォルトターゲット
-.PHONY: help
-functions-help:
-	@echo "使用可能なコマンド:"
-	@echo "  make deploy-dev        - 開発環境(chat-sns-project)にFunctionsをデプロイ"
-	@echo "  make deploy-prod       - 本番環境(blank-project-prod)にFunctionsをデプロイ"
-	@echo "  make deploy-dev-only X - 開発環境の特定のFunction(X)のみデプロイ"
-	@echo "  make deploy-prod-only X - 本番環境の特定のFunction(X)のみデプロイ"
-	@echo "  make serve             - Functionsをローカルでエミュレート"
-	@echo "  make use-dev           - 開発環境を使用するよう.firebasercを更新"
-	@echo "  make use-prod          - 本番環境を使用するよう.firebasercを更新"
+.PHONY: firebase-help firebase-serve firebase-use-dev firebase-use-prod \
+        firebase-deploy-dev firebase-deploy-prod \
+        firebase-deploy-dev-function firebase-deploy-prod-function
 
-# 開発環境へのデプロイ
-.PHONY: deploy-dev
-deploy-dev:
-	@echo "開発環境($(DEV_PROJECT))にFunctionsをデプロイします..."
+# Firebase project IDs
+FIREBASE_DEV_PROJECT := chat-sns-project
+FIREBASE_PROD_PROJECT := blank-project-prod
+
+firebase-help:
+	@echo "=== Firebase Functions Commands ==="
+	@echo ""
+	@echo "Environment Commands:"
+	@echo "  make firebase-use-dev           - Switch to development environment"
+	@echo "  make firebase-use-prod          - Switch to production environment"
+	@echo ""
+	@echo "Deploy Commands:"
+	@echo "  make firebase-deploy-dev        - Deploy all functions to development"
+	@echo "  make firebase-deploy-prod       - Deploy all functions to production"
+	@echo ""
+	@echo "Selective Deploy Commands:"
+	@echo "  make firebase-deploy-dev-function FUNCTION=funcName   - Deploy specific function to dev"
+	@echo "  make firebase-deploy-prod-function FUNCTION=funcName  - Deploy specific function to prod"
+	@echo ""
+	@echo "Local Development:"
+	@echo "  make firebase-serve             - Start local Firebase emulator"
+
+firebase-use-dev:
+	@echo "Switching to development environment ($(FIREBASE_DEV_PROJECT))..."
 	firebase use development
-	firebase deploy --only functions --project=$(DEV_PROJECT)
+	@echo "Current project: $(FIREBASE_DEV_PROJECT)"
 
-# 本番環境へのデプロイ
-.PHONY: deploy-prod
-deploy-prod:
-	@echo "本番環境($(PROD_PROJECT))にFunctionsをデプロイします..."
+firebase-use-prod:
+	@echo "Switching to production environment ($(FIREBASE_PROD_PROJECT))..."
 	firebase use production
-	firebase deploy --only functions --project=$(PROD_PROJECT)
+	@echo "Current project: $(FIREBASE_PROD_PROJECT)"
 
-# 開発環境の特定のFunctionのみデプロイ
-.PHONY: deploy-dev-only
-deploy-dev-only:
+firebase-deploy-dev:
+	@echo "Deploying all functions to development environment ($(FIREBASE_DEV_PROJECT))..."
+	firebase use development
+	firebase deploy --only functions --project=$(FIREBASE_DEV_PROJECT)
+
+firebase-deploy-prod:
+	@echo "Deploying all functions to production environment ($(FIREBASE_PROD_PROJECT))..."
+	firebase use production
+	firebase deploy --only functions --project=$(FIREBASE_PROD_PROJECT)
+
+firebase-deploy-dev-function:
 	@if [ -z "$(FUNCTION)" ]; then \
-		echo "関数名を指定してください: make deploy-dev-only FUNCTION=funcName"; \
+		echo "Error: Function name required. Usage: make firebase-deploy-dev-function FUNCTION=funcName"; \
 		exit 1; \
 	fi
-	@echo "開発環境($(DEV_PROJECT))にFunction $(FUNCTION)をデプロイします..."
+	@echo "Deploying function $(FUNCTION) to development environment ($(FIREBASE_DEV_PROJECT))..."
 	firebase use development
-	firebase deploy --only functions:$(FUNCTION) --project=$(DEV_PROJECT)
+	firebase deploy --only functions:$(FUNCTION) --project=$(FIREBASE_DEV_PROJECT)
 
-# 本番環境の特定のFunctionのみデプロイ
-.PHONY: deploy-prod-only
-deploy-prod-only:
+firebase-deploy-prod-function:
 	@if [ -z "$(FUNCTION)" ]; then \
-		echo "関数名を指定してください: make deploy-prod-only FUNCTION=funcName"; \
+		echo "Error: Function name required. Usage: make firebase-deploy-prod-function FUNCTION=funcName"; \
 		exit 1; \
 	fi
-	@echo "本番環境($(PROD_PROJECT))にFunction $(FUNCTION)をデプロイします..."
+	@echo "Deploying function $(FUNCTION) to production environment ($(FIREBASE_PROD_PROJECT))..."
 	firebase use production
-	firebase deploy --only functions:$(FUNCTION) --project=$(PROD_PROJECT)
+	firebase deploy --only functions:$(FUNCTION) --project=$(FIREBASE_PROD_PROJECT)
 
-# Functionsのローカルエミュレーション
-.PHONY: serve
-serve:
-	@echo "Functionsをローカルでエミュレートします..."
+firebase-serve:
+	@echo "Starting Firebase Functions local emulator..."
 	firebase emulators:start --only functions
 
-# 開発環境を使用するよう設定
-.PHONY: use-dev
-use-dev:
-	@echo "開発環境($(DEV_PROJECT))を使用するよう設定します..."
-	firebase use development
-	@echo "現在のプロジェクト: $(DEV_PROJECT)"
+# ==============================================================================
+# Legacy Aliases (for backward compatibility)
+# ==============================================================================
 
-# 本番環境を使用するよう設定
-.PHONY: use-prod
-use-prod:
-	@echo "本番環境($(PROD_PROJECT))を使用するよう設定します..."
-	firebase use production
-	@echo "現在のプロジェクト: $(PROD_PROJECT)"
+functions-help: firebase-help
+deploy-dev: firebase-deploy-dev
+deploy-prod: firebase-deploy-prod
+deploy-dev-only: firebase-deploy-dev-function
+deploy-prod-only: firebase-deploy-prod-function
+serve: firebase-serve
+use-dev: firebase-use-dev
+use-prod: firebase-use-prod
