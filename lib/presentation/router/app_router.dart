@@ -98,8 +98,14 @@ class AppRouter {
     try {
       // メンテナンスチェック
       final remoteConfigAsync = _ref.read(remoteConfigProvider);
-      final remoteConfig = await remoteConfigAsync.future;
-      if (remoteConfig.getBool('isUnderMaintenance')) {
+
+      // AsyncValueがロード中の場合は待機
+      if (remoteConfigAsync.isLoading || !remoteConfigAsync.hasValue) {
+        return null; // ローディング中はリダイレクトしない
+      }
+
+      final remoteConfig = remoteConfigAsync.valueOrNull;
+      if (remoteConfig != null && remoteConfig.getBool('isUnderMaintenance')) {
         return '/maintenance';
       }
 

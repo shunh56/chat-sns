@@ -6,6 +6,7 @@ import '../../core/utils/theme.dart';
 import '../../core/utils/variables.dart';
 import '../../core/values.dart';
 import '../router/app_router.dart';
+import '../services/notification_handler.dart';
 
 /// アプリケーションのルートウィジェット
 ///
@@ -15,6 +16,9 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // グローバルプロバイダーリファレンスの初期化
+    GlobalProviderRef.initialize(ref);
+
     // テーマサイズの取得
     final themeSize = ref.watch(themeSizeProvider(context));
 
