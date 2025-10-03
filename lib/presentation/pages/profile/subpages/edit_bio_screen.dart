@@ -11,7 +11,7 @@ import 'package:app/presentation/components/widget/hasgtag_widgets.dart';
 import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/providers/image/image_processor.dart';
 import 'package:app/domain/usecases/image_uploader_usecase.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';

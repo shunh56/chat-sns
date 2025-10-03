@@ -10,7 +10,7 @@ import 'package:app/presentation/pages/search/widgets/hashtag_user_card_view.dar
 import 'package:app/presentation/pages/search/widgets/top_feed.dart';
 import 'package:app/presentation/pages/search/sub_pages/search_params_screen.dart';
 import 'package:app/presentation/providers/activities_list_notifier.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 
 import 'package:app/presentation/providers/users/online_users.dart';
 import 'package:flutter/material.dart';

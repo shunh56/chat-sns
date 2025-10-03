@@ -19,7 +19,7 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 

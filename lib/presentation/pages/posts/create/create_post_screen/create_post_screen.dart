@@ -15,7 +15,7 @@ import 'package:app/presentation/providers/image/image_processor.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/state/create_post/core.dart';
 import 'package:app/presentation/providers/state/create_post/post.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';

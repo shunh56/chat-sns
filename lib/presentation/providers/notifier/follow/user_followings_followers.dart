@@ -1,6 +1,6 @@
 import 'package:app/domain/usecases/follow/get_followers_usecase.dart';
 import 'package:app/domain/usecases/follow/get_following_usecase.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final userFollowersProvider = FutureProvider.family((ref, String userId) async {

@@ -8,7 +8,7 @@ import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/search/sub_pages/user_card_stack_screen.dart';
 import 'package:app/presentation/providers/users/hashtag_users.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/tag_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -2,7 +2,7 @@ import 'package:app/core/extenstions/string_extenstion.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/providers/onboarding_providers.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:app/domain/usecases/user_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

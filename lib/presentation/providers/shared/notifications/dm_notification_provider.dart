@@ -1,4 +1,4 @@
-// lib/presentation/providers/dm_notification_provider.dart
+// lib/presentation/providers/shared/notifications/dm_notification_provider.dart
 
 import 'package:app/domain/entity/push_notification_model.dart';
 import 'package:flutter/material.dart';

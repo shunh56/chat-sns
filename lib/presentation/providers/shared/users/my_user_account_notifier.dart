@@ -6,7 +6,7 @@ import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/providers/onboarding_providers.dart';
 import 'package:app/domain/usecases/image_uploader_usecase.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/invite_code_usecase.dart';
 import 'package:app/domain/usecases/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,7 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final myAccountNotifierProvider = StateNotifierProvider.autoDispose<
+final myAccountNotifierProvider = StateNotifierProvider<
     MyAccountNotifier, AsyncValue<UserAccount>>(
   (ref) => MyAccountNotifier(
     ref,

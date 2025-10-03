@@ -5,7 +5,7 @@ import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/profile/subpages/edit_bio_screen.dart';
 import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/settings/settings_screen.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';

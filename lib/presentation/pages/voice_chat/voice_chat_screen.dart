@@ -13,7 +13,7 @@ import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/providers/chats/voice_chats_list.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/data/datasource/firebase/firebase_funcrtions.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:app/presentation/providers/state/count_down.dart';
 import 'package:app/domain/usecases/voice_chat_usecase.dart';
 import 'package:cloud_functions/cloud_functions.dart';
