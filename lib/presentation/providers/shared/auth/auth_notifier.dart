@@ -3,7 +3,7 @@ import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/presentation/pages/auth/signin_page.dart';
 import 'package:app/presentation/pages/auth/signup_page.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';

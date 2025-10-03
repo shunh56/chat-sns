@@ -2,7 +2,7 @@
 import 'package:app/core/utils/variables.dart';
 import 'package:app/domain/entity/push_notification_model.dart';
 import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_screen.dart';
-import 'package:app/presentation/providers/dm_notification_provider.dart';
+import 'package:app/presentation/providers/shared/notifications/dm_notification_provider.dart';
 import 'package:app/presentation/services/notification_service.dart';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:app/core/utils/theme.dart';
@@ -632,7 +632,7 @@ class NotificationHandler {
 import 'package:app/core/utils/variables.dart';
 import 'package:app/domain/entity/push_notification_model.dart';
 import 'package:app/presentation/services/notification_service.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/core/utils/debug_print.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';

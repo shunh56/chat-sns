@@ -6,7 +6,7 @@ import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_profile_page.dart';
 import 'package:app/presentation/pages/posts/post/post_detail_page.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

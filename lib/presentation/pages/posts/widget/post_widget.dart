@@ -12,7 +12,7 @@ import 'package:app/presentation/components/user_widget.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/user/post_images_screen.dart';
-import 'package:app/presentation/providers/heart_animation_notifier.dart';
+import 'package:app/presentation/providers/shared/app/heart_animation_notifier.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

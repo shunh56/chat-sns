@@ -2,7 +2,7 @@ import 'package:app/core/utils/debug_print.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
 import 'package:app/data/datasource/firebase/firebase_funcrtions.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:app/domain/usecases/push_notification_usecase.dart';
 import 'package:app/domain/usecases/voice_chat_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

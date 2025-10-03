@@ -8,16 +8,16 @@ import '../../domain/entity/user.dart';
 import '../pages/account_status_screen/banned_screen.dart';
 import '../pages/account_status_screen/deleted_screen.dart';
 import '../pages/account_status_screen/freezed_screen.dart';
-import '../pages/main_page/error_page.dart';
-import '../pages/main_page/loading_page.dart';
-import '../pages/main_page/main_page.dart';
-import '../pages/main_page/maintenance_screen.dart';
-import '../pages/main_page/welcome_page.dart';
+import '../pages/common/error_page.dart';
+import '../pages/common/loading_page.dart';
+import '../pages/common/maintenance_screen.dart';
+import '../pages/common/welcome_page.dart';
+import '../pages/main_page/main_page_wrapper.dart';
 import '../pages/onboarding/onboarding_screen.dart';
 import '../pages/onboarding/shared_preferences_provider.dart';
 import '../pages/onboaring_account/onboarding_screen.dart';
 import '../pages/version/update_notifier.dart';
-import '../providers/users/my_user_account_notifier.dart';
+import '../providers/shared/users/my_user_account_notifier.dart';
 
 /// アプリケーションのルーティングを管理するプロバイダー
 final appRouterProvider = Provider<GoRouter>((ref) {
