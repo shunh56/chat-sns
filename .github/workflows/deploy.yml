@@ -162,6 +162,8 @@ jobs:
       if: github.ref == 'refs/heads/develop'
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        FIREBASE_APP_ID_IOS_DEV: ${{ secrets.FIREBASE_APP_ID_IOS_DEV }}
+        FIREBASE_APP_ID_IOS_PROD: ${{ secrets.FIREBASE_APP_ID_IOS_PROD }}
         FIREBASE_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
         FIREBASE_TESTER_GROUPS: ${{ secrets.FIREBASE_TESTER_GROUPS }}
         MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
@@ -310,6 +312,8 @@ jobs:
       if: github.ref == 'refs/heads/develop'
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        FIREBASE_APP_ID_ANDROID_DEV: ${{ secrets.FIREBASE_APP_ID_ANDROID_DEV }}
+        FIREBASE_APP_ID_ANDROID_PROD: ${{ secrets.FIREBASE_APP_ID_ANDROID_PROD }}
         FIREBASE_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
         FIREBASE_TESTER_GROUPS: ${{ secrets.FIREBASE_TESTER_GROUPS }}
       run: |

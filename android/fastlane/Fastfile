@@ -96,9 +96,18 @@ platform :android do
     UI.message("📍 Absolute path for Firebase: #{absolute_apk_path}")
     UI.message("🗂️ File exists check (absolute): #{File.exist?(absolute_apk_path)}")
 
+    # Firebase App IDを環境に応じて取得
+    firebase_app_id = if environment == "prod"
+      ENV["FIREBASE_APP_ID_ANDROID_PROD"]
+    else
+      ENV["FIREBASE_APP_ID_ANDROID_DEV"]
+    end
+
+    UI.message("📱 Using Firebase App ID for #{environment}: #{firebase_app_id}")
+
     # Firebase App Distributionへアップロード
     firebase_params = {
-      app: ENV["FIREBASE_APP_ID_ANDROID"],
+      app: firebase_app_id,
       release_notes: "自動ビルド from #{environment} environment (Build: #{build_number})",
       android_artifact_type: "APK",
       android_artifact_path: absolute_apk_path
