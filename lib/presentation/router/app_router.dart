@@ -95,37 +95,45 @@ class AppRouter {
 
   /// リダイレクト処理
   Future<String?> _redirect(BuildContext context, GoRouterState state) async {
-    // メンテナンスチェック
-    final remoteConfig = await _ref.read(remoteConfigProvider.future);
-    if (remoteConfig.getBool('isUnderMaintenance')) {
-      return '/maintenance';
-    }
-
-    // 認証状態チェック
-    final authStream = _ref.read(authChangeProvider);
-    final user = await authStream.future;
-
-    if (user == null) {
-      // 未認証の場合
-      if (state.matchedLocation != '/welcome') {
-        return '/welcome';
+    try {
+      // メンテナンスチェック
+      final remoteConfigAsync = _ref.read(remoteConfigProvider);
+      final remoteConfig = await remoteConfigAsync.future;
+      if (remoteConfig.getBool('isUnderMaintenance')) {
+        return '/maintenance';
       }
-      return null;
-    }
 
-    // 認証済みの場合、アカウント情報を確認
-    final accountAsync = await _ref.read(myAccountNotifierProvider.future);
+      // 認証状態チェック
+      final authAsync = _ref.read(authChangeProvider);
+      final user = authAsync.valueOrNull;
 
-    // ユーザー名未設定の場合
-    if (accountAsync.username == "null") {
-      if (state.matchedLocation != '/onboarding') {
-        return '/onboarding';
+      if (user == null) {
+        // 未認証の場合
+        if (state.matchedLocation != '/welcome') {
+          return '/welcome';
+        }
+        return null;
       }
-      return null;
-    }
 
-    // アカウントステータスの確認
-    switch (accountAsync.accountStatus) {
+      // 認証済みの場合、アカウント情報を確認
+      final accountAsync = _ref.read(myAccountNotifierProvider);
+      final account = accountAsync.valueOrNull;
+
+      if (account == null) {
+        // アカウント情報がまだ読み込まれていない
+        return null;
+      }
+
+      // ユーザー名未設定の場合
+      if (account.username == "null") {
+        if (state.matchedLocation != '/onboarding') {
+          return '/onboarding';
+        }
+        return null;
+      }
+
+      // アカウントステータスの確認
+      switch (account.accountStatus) {
       case AccountStatus.banned:
         if (state.matchedLocation != '/banned') {
           return '/banned';
@@ -143,8 +151,10 @@ class AppRouter {
         break;
       default:
         // オンボーディング完了チェック
-        final onboardingState = await _ref.read(initialOnboardingStateProvider.future);
-        if (!onboardingState.isCompleted) {
+        final onboardingAsync = _ref.read(initialOnboardingStateProvider);
+        final onboardingState = onboardingAsync.valueOrNull;
+
+        if (onboardingState != null && !onboardingState.isCompleted) {
           if (state.matchedLocation != '/onboarding-flow') {
             return '/onboarding-flow';
           }
@@ -158,19 +168,23 @@ class AppRouter {
             state.matchedLocation == '/onboarding-flow') {
           return '/home';
         }
-    }
+      }
 
-    return null;
+      return null;
+    } catch (e) {
+      // エラー時はスプラッシュ画面に留まる
+      return null;
+    }
   }
 
   /// リフレッシュ用のListenableを作成
   Listenable _createRefreshListenable() {
     // 複数の状態変化を監視するためのカスタムListenable
     return _MultiProviderRefreshListenable(_ref, [
-      remoteConfigProvider,
-      authChangeProvider,
-      myAccountNotifierProvider,
-      initialOnboardingStateProvider,
+      remoteConfigProvider as AlwaysAliveProviderListenable,
+      authChangeProvider as AlwaysAliveProviderListenable,
+      myAccountNotifierProvider as AlwaysAliveProviderListenable,
+      initialOnboardingStateProvider as AlwaysAliveProviderListenable,
     ]);
   }
 }
@@ -194,7 +208,7 @@ class _InitialLoadingScreen extends ConsumerWidget {
 /// 複数のプロバイダーを監視するListenable
 class _MultiProviderRefreshListenable extends ChangeNotifier {
   final Ref _ref;
-  final List<ProviderBase> _providers;
+  final List<AlwaysAliveProviderListenable> _providers;
   final List<ProviderSubscription> _subscriptions = [];
 
   _MultiProviderRefreshListenable(this._ref, this._providers) {
