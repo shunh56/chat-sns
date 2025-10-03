@@ -20,7 +20,7 @@ class TempoTimeIndicator extends HookWidget {
   Widget build(BuildContext context) {
     final progress = remaining.inSeconds / total.inSeconds;
     final isWarning = remaining.inHours < 1;
-    
+
     final animationController = useAnimationController(
       duration: const Duration(milliseconds: 1500),
     );
@@ -67,17 +67,19 @@ class TempoTimeIndicator extends HookWidget {
                     ),
                   ),
                 ),
-                
+
                 // Progress Circle
                 CustomPaint(
                   size: Size(size, size),
                   painter: _CircularProgressPainter(
                     progress: progress,
-                    color: isWarning ? TempoColors.warning : TempoColors.primary.withOpacity(0.6),
+                    color: isWarning
+                        ? TempoColors.warning
+                        : TempoColors.primary.withOpacity(0.6),
                     strokeWidth: 2.0, // より細く
                   ),
                 ),
-                
+
                 // Center Text
                 Center(
                   child: Column(
@@ -87,8 +89,8 @@ class TempoTimeIndicator extends HookWidget {
                         '${remaining.inHours}',
                         style: TempoTextStyles.caption.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: isWarning 
-                              ? TempoColors.warning 
+                          color: isWarning
+                              ? TempoColors.warning
                               : TempoColors.textPrimary, // より読みやすい色に
                           fontSize: size * 0.22, // 少し大きく
                         ),
@@ -128,7 +130,7 @@ class _CircularProgressPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
-    
+
     final paint = Paint()
       ..color = color
       ..strokeWidth = strokeWidth
@@ -138,7 +140,7 @@ class _CircularProgressPainter extends CustomPainter {
     // Draw progress arc
     const startAngle = -math.pi / 2; // Start from top
     final sweepAngle = 2 * math.pi * progress;
-    
+
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       startAngle,
@@ -152,7 +154,7 @@ class _CircularProgressPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return oldDelegate is _CircularProgressPainter &&
         (oldDelegate.progress != progress ||
-         oldDelegate.color != color ||
-         oldDelegate.strokeWidth != strokeWidth);
+            oldDelegate.color != color ||
+            oldDelegate.strokeWidth != strokeWidth);
   }
 }

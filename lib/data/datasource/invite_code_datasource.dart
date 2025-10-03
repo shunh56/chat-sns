@@ -12,6 +12,7 @@ final inviteCodeDatasourceProvider = Provider(
     ref.watch(firestoreProvider),
   ),
 );
+
 class InviteCodeDatasource {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
@@ -41,7 +42,7 @@ class InviteCodeDatasource {
         .collection(collectionName)
         .where("userId", isEqualTo: _auth.currentUser!.uid)
         .get();
-    
+
     if (query.docs.isEmpty) return null;
     return query.docs.first;
   }
@@ -50,15 +51,15 @@ class InviteCodeDatasource {
     final query = await _firestore
         .collection(collectionName)
         .where("logs", arrayContains: {
-          "userId": _auth.currentUser!.uid,
-        })
-        .get();
-    
+      "userId": _auth.currentUser!.uid,
+    }).get();
+
     if (query.docs.isEmpty) return null;
     return query.docs.first;
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> fetchInviteCode(String code) async {
+  Future<DocumentSnapshot<Map<String, dynamic>>> fetchInviteCode(
+      String code) async {
     return await _firestore.collection(collectionName).doc(code).get();
   }
 
@@ -79,9 +80,10 @@ class InviteCodeDatasource {
     }
 
     // ユーザードキュメントに使用した招待コードを記録
-    await _firestore.collection("users").doc(currentUser.uid).update({
-      "usedInviteCode": code
-    });
+    await _firestore
+        .collection("users")
+        .doc(currentUser.uid)
+        .update({"usedInviteCode": code});
 
     return _firestore.collection(collectionName).doc(code).update({
       "logs": FieldValue.arrayUnion([
@@ -101,7 +103,8 @@ class InviteCodeDatasource {
     String randomDigits = '';
 
     for (int i = 0; i < 6; i++) {
-      randomUpperCase += upperCaseLetters[random.nextInt(upperCaseLetters.length)];
+      randomUpperCase +=
+          upperCaseLetters[random.nextInt(upperCaseLetters.length)];
     }
     for (int i = 0; i < 2; i++) {
       randomDigits += digits[random.nextInt(digits.length)];

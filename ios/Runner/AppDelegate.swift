@@ -16,9 +16,9 @@ import google_mobile_ads
         GeneratedPluginRegistrant.register(with: self)
         
         //admob native ad
-        let listTileFactory = ListTileNativeAdFactory()
-        FLTGoogleMobileAdsPlugin.registerNativeAdFactory(
-            self, factoryId: "listTile", nativeAdFactory: listTileFactory)
+        // let listTileFactory = ListTileNativeAdFactory()
+        // FLTGoogleMobileAdsPlugin.registerNativeAdFactory(
+        //     self, factoryId: "listTile", nativeAdFactory: listTileFactory)
         
         // Setup VOIP
         let mainQueue = DispatchQueue.main

@@ -6,7 +6,7 @@ class AnimatedMessageWidget extends HookWidget {
   final Widget child;
   final Duration duration;
   final bool slideFromBottom;
-  
+
   /// メッセージに適用するアニメーションの種類
   final AnimationType animationType;
 
@@ -27,8 +27,7 @@ class AnimatedMessageWidget extends HookWidget {
 
     // オパシティのアニメーション
     final opacityAnimation = useAnimation(
-      Tween<double>(begin: 0.0, end: 1.0)
-          .animate(CurvedAnimation(
+      Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
         parent: animationController,
         curve: Curves.easeInOut,
       )),
@@ -36,8 +35,7 @@ class AnimatedMessageWidget extends HookWidget {
 
     // スケールのアニメーション
     final scaleAnimation = useAnimation(
-      Tween<double>(begin: 0.8, end: 1.0)
-          .animate(CurvedAnimation(
+      Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(
         parent: animationController,
         curve: Curves.easeOutBack,
       )),
@@ -45,9 +43,7 @@ class AnimatedMessageWidget extends HookWidget {
 
     // スライドのアニメーション
     final slideAnimation = Tween<Offset>(
-      begin: slideFromBottom 
-          ? const Offset(0, 0.2) 
-          : const Offset(0.1, 0),
+      begin: slideFromBottom ? const Offset(0, 0.2) : const Offset(0.1, 0),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: animationController,
@@ -68,7 +64,7 @@ class AnimatedMessageWidget extends HookWidget {
           duration: duration,
           child: child,
         );
-        
+
       case AnimationType.scale:
         return Transform.scale(
           scale: scaleAnimation,
@@ -78,7 +74,7 @@ class AnimatedMessageWidget extends HookWidget {
             child: child,
           ),
         );
-        
+
       case AnimationType.slide:
         return SlideTransition(
           position: slideAnimation,
@@ -88,7 +84,7 @@ class AnimatedMessageWidget extends HookWidget {
             child: child,
           ),
         );
-        
+
       case AnimationType.combined:
         return SlideTransition(
           position: slideAnimation,
@@ -107,8 +103,8 @@ class AnimatedMessageWidget extends HookWidget {
 
 /// アニメーションの種類を定義
 enum AnimationType {
-  fadeIn,   // フェードインのみ
-  scale,    // スケール + フェードイン
-  slide,    // スライド + フェードイン
+  fadeIn, // フェードインのみ
+  scale, // スケール + フェードイン
+  slide, // スライド + フェードイン
   combined, // スライド + スケール + フェードイン
 }

@@ -9,12 +9,10 @@ import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/report/report_user_screen.dart';
 import 'package:app/presentation/pages/posts/create/create_post_screen/create_post_screen.dart';
-import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/posts/replies.dart';
 import 'package:app/presentation/providers/state/scroll_controller.dart';
-import 'package:app/domain/usecases/voice_chat_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -248,18 +246,18 @@ class PostBottomModelSheet {
                           ? GestureDetector(
                               behavior: HitTestBehavior.opaque,
                               onTap: () async {
-                                String text = ref.read(inputTextProvider);
+                                // String text = ref.read(inputTextProvider);
                                 controller.clear();
                                 ref.read(inputTextProvider.notifier).state = "";
-                                final vc = await ref
-                                    .read(voiceChatUsecaseProvider)
-                                    .createVoiceChat(text);
-                                Navigator.pushReplacement(
+                                // final vc = await ref
+                                //     .read(voiceChatUsecaseProvider)
+                                //     .createVoiceChat(text);
+                                /*Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => VoiceChatScreen(id: vc.id),
                                   ),
-                                );
+                                ); */
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -641,9 +639,10 @@ class PostBottomModelSheet {
                                       .read(deletingPostsProvider.notifier)
                                       .startDeleting(post.id);
                                   Navigator.pop(context);
-                                  
+
                                   // アニメーション後に実際の削除処理
-                                  Future.delayed(const Duration(milliseconds: 400), () {
+                                  Future.delayed(
+                                      const Duration(milliseconds: 400), () {
                                     ref
                                         .read(allPostsNotifierProvider.notifier)
                                         .deletePostByUser(post);
@@ -766,7 +765,7 @@ class PostBottomModelSheet {
     );
   }
 
- /* openCurrentStatusPostAction(CurrentStatusPost post, UserAccount user) {
+  /* openCurrentStatusPostAction(CurrentStatusPost post, UserAccount user) {
     showModalBottomSheet(
       isScrollControlled: true,
       backgroundColor: ThemeColor.background,

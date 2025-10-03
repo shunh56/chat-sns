@@ -5,7 +5,6 @@ import 'package:app/domain/entity/story/story.dart';
 import 'package:app/domain/repository_interface/story_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
 final getStoriesUsecaseProvider = Provider(
   (ref) => GetStoriesUsecase(
     ref.watch(storyRepositoryProvider),
@@ -31,5 +30,4 @@ class GetStoriesUsecase {
   Future<List<Story>> getStoriesByTag(String tagId) async {
     return await _storyRepository.getStoriesByTag(tagId);
   }
-
 }

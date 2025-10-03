@@ -1,0 +1,440 @@
+name: Deploy to TestFlight & Firebase (Optimized)
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    types: [ closed ]
+    branches: [ main ]
+
+env:
+  FLUTTER_VERSION: '3.24.3'
+
+jobs:
+  # 並列実行でビルド時間を半分に
+  deploy-ios:
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    runs-on: macos-latest
+    outputs:
+      firebase_ios_url: ${{ steps.save-firebase-ios-url.outputs.url }}
+      firebase_ios_url_encoded: ${{ steps.save-firebase-ios-url.outputs.url_encoded }}
+      testflight_url: ${{ steps.save-testflight-url.outputs.url }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # 🚀 改善1: Flutter + 依存関係キャッシュ強化
+    - name: Cache Flutter SDK
+      uses: actions/cache@v3
+      with:
+        path: |
+          /Users/runner/hostedtoolcache/flutter
+        key: ${{ runner.os }}-flutter-${{ env.FLUTTER_VERSION }}
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+
+    # 🚀 改善2: pub依存関係の積極的キャッシュ
+    - name: Cache pub dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ env.PUB_CACHE }}
+          ~/.pub-cache
+          .dart_tool
+        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pub-
+
+    - name: Install Flutter dependencies
+      run: flutter pub get
+
+    # CocoaPodsキャッシュは削除（常にクリーンインストール）
+    # 重複フレームワークの問題を避けるため
+
+    - name: Setup Ruby & Fastlane (cached)
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+        working-directory: ios
+
+    - name: Install pods (with conflict resolution)
+      run: |
+        cd ios
+        echo "🧹 Cleaning previous pod installation..."
+        rm -rf Pods Podfile.lock .symlinks
+
+        echo "🔄 Installing fresh pods..."
+        pod deintegrate || true
+        pod repo update
+        pod install --repo-update
+
+        echo "✅ Pods installed successfully"
+
+    - name: Determine environment
+      id: env
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "environment=prod" >> $GITHUB_OUTPUT
+        else
+          echo "environment=dev" >> $GITHUB_OUTPUT
+        fi
+
+    # 🚀 改善4: 証明書キャッシュ
+    - name: Cache signing certificates
+      id: cert-cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          certificate.p12
+          build.keychain
+        key: ios-cert-${{ hashFiles('ios/Runner.xcodeproj/project.pbxproj') }}-v1
+
+    # 記事の成功例に基づく改善：Keychainの適切な設定（条件付き実行）
+    - name: Setup Keychain and Certificates
+      if: env.IOS_DISTRIBUTION_CERTIFICATE_BASE64 != ''
+      env:
+        CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+        CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+        PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+      run: |
+        # Only run if certificate is provided
+        if [ -z "$CERTIFICATE_BASE64" ]; then
+          echo "⚠️ No certificate provided, skipping keychain setup"
+          exit 0
+        fi
+
+        # Create temporary keychain
+        KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+        KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+        # Store keychain path for cleanup
+        echo "TEMP_KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
+
+        # Decode certificates and profiles
+        echo "$CERTIFICATE_BASE64" | base64 --decode > $RUNNER_TEMP/distribution.p12
+        echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > $RUNNER_TEMP/profile.mobileprovision
+
+        # Create and configure keychain
+        security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+        # Import certificate
+        security import $RUNNER_TEMP/distribution.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+        security list-keychain -d user -s $KEYCHAIN_PATH
+
+        # Install provisioning profile
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        cp $RUNNER_TEMP/profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+
+        echo "✅ Certificates and provisioning profiles configured"
+
+    - name: Setup App Store Connect API Key
+      env:
+        API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+        API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+      run: |
+        # Create API Key directory
+        mkdir -p ~/private_keys
+
+        # Create API Key file
+        echo "$API_KEY_CONTENT" > ~/private_keys/AuthKey_${API_KEY_ID}.p8
+
+        # Set file permissions
+        chmod 600 ~/private_keys/AuthKey_${API_KEY_ID}.p8
+
+        # Export environment variables for xcodebuild
+        echo "APP_STORE_CONNECT_API_KEY_ID=$API_KEY_ID" >> $GITHUB_ENV
+        echo "APP_STORE_CONNECT_API_ISSUER_ID=$API_ISSUER_ID" >> $GITHUB_ENV
+        echo "APP_STORE_CONNECT_API_KEY_PATH=$HOME/private_keys/AuthKey_${API_KEY_ID}.p8" >> $GITHUB_ENV
+
+        echo "✅ App Store Connect API Key configured"
+
+    # 🚀 改善5: Firebase配布のみ（develop用）
+    - name: Deploy to Firebase App Distribution
+      if: github.ref == 'refs/heads/develop'
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        FIREBASE_APP_ID_IOS_DEV: ${{ secrets.FIREBASE_APP_ID_IOS_DEV }}
+        FIREBASE_APP_ID_IOS_PROD: ${{ secrets.FIREBASE_APP_ID_IOS_PROD }}
+        FIREBASE_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
+        FIREBASE_TESTER_GROUPS: ${{ secrets.FIREBASE_TESTER_GROUPS }}
+        MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+        APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+      run: |
+        make run-ios-${{ steps.env.outputs.environment }}-firebase
+
+    # Firebase URLを環境変数に保存
+    - name: Save Firebase iOS URL
+      id: save-firebase-ios-url
+      if: github.ref == 'refs/heads/develop' && always()
+      run: |
+        if [ -f "firebase_ios_url.txt" ]; then
+          url=$(cat firebase_ios_url.txt)
+          echo "✅ Found iOS URL: $url"
+          # Base64 encode to avoid secret masking by GitHub Actions
+          encoded_url=$(echo -n "$url" | base64 -w 0)
+          echo "url_encoded=$encoded_url" >> $GITHUB_OUTPUT
+          echo "url=$url" >> $GITHUB_OUTPUT
+        else
+          echo "❌ firebase_ios_url.txt not found"
+          echo "url_encoded=" >> $GITHUB_OUTPUT
+          echo "url=No URL available" >> $GITHUB_OUTPUT
+        fi
+
+    # TestFlightは本番のみ（時間短縮）
+    - name: Deploy to TestFlight
+      if: github.ref == 'refs/heads/main'
+      env:
+        APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+        APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        APP_STORE_CONNECT_APP_ID: ${{ secrets.APP_STORE_CONNECT_APP_ID }}
+      run: |
+        make run-ios-${{ steps.env.outputs.environment }}-testflight
+
+    # TestFlight URLを環境変数に保存
+    - name: Save TestFlight URL
+      id: save-testflight-url
+      if: github.ref == 'refs/heads/main' && always()
+      run: |
+        if [ -f "testflight_url.txt" ]; then
+          url=$(cat testflight_url.txt)
+          echo "url=$url" >> $GITHUB_OUTPUT
+        else
+          echo "url=No URL available" >> $GITHUB_OUTPUT
+        fi
+
+  deploy-android:
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    outputs:
+      firebase_android_url: ${{ steps.save-firebase-android-url.outputs.url }}
+      firebase_android_url_encoded: ${{ steps.save-firebase-android-url.outputs.url_encoded }}
+      google_play_url: ${{ steps.save-google-play-url.outputs.url }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # 🚀 改善6: Flutter + Gradle キャッシュ
+    - name: Cache Flutter SDK
+      uses: actions/cache@v3
+      with:
+        path: |
+          /opt/hostedtoolcache/flutter
+        key: ${{ runner.os }}-flutter-${{ env.FLUTTER_VERSION }}
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+
+    - name: Cache pub dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ env.PUB_CACHE }}
+          ~/.pub-cache
+          .dart_tool
+        key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pub-
+
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    # 🚀 改善7: Gradle + Android SDK キャッシュ
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          ~/.android/avd/*
+          ~/.android/adb*
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Install Flutter dependencies
+      run: flutter pub get
+
+    - name: Setup Ruby & Fastlane (cached)
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+        working-directory: android
+
+    - name: Determine environment
+      id: env
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "environment=prod" >> $GITHUB_OUTPUT
+        else
+          echo "environment=dev" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Decode Keystore
+      env:
+        ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      run: |
+        echo $ANDROID_KEYSTORE_BASE64 | base64 --decode > android/app/key.jks
+
+    - name: Create key.properties
+      env:
+        ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+      run: |
+        echo "storePassword=$ANDROID_STORE_PASSWORD" > android/key.properties
+        echo "keyPassword=$ANDROID_KEY_PASSWORD" >> android/key.properties
+        echo "keyAlias=$ANDROID_KEY_ALIAS" >> android/key.properties
+        echo "storeFile=key.jks" >> android/key.properties
+
+    # Firebase配布のみ（develop）
+    - name: Deploy to Firebase App Distribution
+      if: github.ref == 'refs/heads/develop'
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        FIREBASE_APP_ID_ANDROID_DEV: ${{ secrets.FIREBASE_APP_ID_ANDROID_DEV }}
+        FIREBASE_APP_ID_ANDROID_PROD: ${{ secrets.FIREBASE_APP_ID_ANDROID_PROD }}
+        FIREBASE_TESTERS: ${{ secrets.FIREBASE_TESTERS }}
+        FIREBASE_TESTER_GROUPS: ${{ secrets.FIREBASE_TESTER_GROUPS }}
+      run: |
+        make run-android-${{ steps.env.outputs.environment }}-firebase
+
+    # Firebase URLを環境変数に保存
+    - name: Save Firebase Android URL
+      id: save-firebase-android-url
+      if: github.ref == 'refs/heads/develop' && always()
+      run: |
+        echo "🔍 Looking for Firebase Android URL file..."
+        echo "📂 Current directory: $(pwd)"
+        echo "📁 Directory contents:"
+        ls -la
+
+        if [ -f "firebase_android_url.txt" ]; then
+          url=$(cat firebase_android_url.txt)
+          echo "✅ Found URL: $url"
+          # Base64 encode to avoid secret masking by GitHub Actions
+          encoded_url=$(echo -n "$url" | base64 -w 0)
+          echo "url_encoded=$encoded_url" >> $GITHUB_OUTPUT
+          echo "url=$url" >> $GITHUB_OUTPUT
+        else
+          echo "❌ firebase_android_url.txt not found"
+          echo "🔍 Searching for URL file in subdirectories..."
+          find . -name "*firebase*url*" -type f 2>/dev/null || echo "No Firebase URL files found"
+          echo "url_encoded=" >> $GITHUB_OUTPUT
+          echo "url=Firebase URL file not found" >> $GITHUB_OUTPUT
+        fi
+
+    # Google Playは本番のみ
+    - name: Deploy to Google Play Internal Testing
+      if: github.ref == 'refs/heads/main'
+      env:
+        GOOGLE_PLAY_JSON_KEY_BASE64: ${{ secrets.GOOGLE_PLAY_JSON_KEY_BASE64 }}
+      run: |
+        echo $GOOGLE_PLAY_JSON_KEY_BASE64 | base64 --decode > android/play-store-key.json
+        make run-android-${{ steps.env.outputs.environment }}-googleplay
+
+    # Google Play URLを保存
+    - name: Save Google Play URL
+      id: save-google-play-url
+      if: github.ref == 'refs/heads/main' && always()
+      run: |
+        echo "url=https://play.google.com/console/u/0/developers/${{ secrets.GOOGLE_PLAY_DEVELOPER_ID }}/app/${{ secrets.GOOGLE_PLAY_APP_ID }}/tracks/internal-testing" >> $GITHUB_OUTPUT
+
+    # Keychainクリーンアップ（記事の成功例に基づく）
+    - name: Cleanup keychain
+      if: always() && env.TEMP_KEYCHAIN_PATH != ''
+      run: |
+        if [ -n "$TEMP_KEYCHAIN_PATH" ]; then
+          security delete-keychain $TEMP_KEYCHAIN_PATH || true
+        fi
+
+  # 🚀 改善8: 軽量な通知ジョブ
+  notify-completion:
+    needs: [deploy-ios, deploy-android]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Fetch Firebase URLs from files
+      id: fetch-urls
+      run: |
+        # Download build artifacts to access URL files directly
+        echo "Downloading iOS artifacts..."
+        # This is a workaround since we can't access the files directly across jobs
+
+        # For now, construct URLs from encoded outputs if available
+        if [ -n "${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}" ] && [ "${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}" != "" ]; then
+          ios_url=$(echo "${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}" | base64 -d 2>/dev/null || echo "Decode failed")
+          echo "firebase_ios_url=$ios_url" >> $GITHUB_OUTPUT
+        else
+          echo "firebase_ios_url=iOS deployment failed or URL not generated" >> $GITHUB_OUTPUT
+        fi
+
+        if [ -n "${{ needs.deploy-android.outputs.firebase_android_url_encoded }}" ] && [ "${{ needs.deploy-android.outputs.firebase_android_url_encoded }}" != "" ]; then
+          android_url=$(echo "${{ needs.deploy-android.outputs.firebase_android_url_encoded }}" | base64 -d 2>/dev/null || echo "Decode failed")
+          echo "firebase_android_url=$android_url" >> $GITHUB_OUTPUT
+        else
+          echo "firebase_android_url=Android URL extraction failed" >> $GITHUB_OUTPUT
+        fi
+
+        # Firebase Console management URLs
+        echo "firebase_ios_console=https://console.firebase.google.com/u/0/project/chat-sns-project/appdistribution/app/ios:com.blank.sns.dev/releases?hl=ja" >> $GITHUB_OUTPUT
+        echo "firebase_android_console=https://console.firebase.google.com/u/0/project/chat-sns-project/appdistribution/app/android:com.blank.sns.dev/releases?hl=ja" >> $GITHUB_OUTPUT
+
+        # Debug info
+        echo "Encoded iOS: ${{ needs.deploy-ios.outputs.firebase_ios_url_encoded }}"
+        echo "Encoded Android: ${{ needs.deploy-android.outputs.firebase_android_url_encoded }}"
+
+    - name: Slack Notification
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: custom
+        custom_payload: |
+          {
+            text: "🚀 Deployment completed!",
+            attachments: [{
+              color: '${{ needs.deploy-ios.result == 'success' && needs.deploy-android.result == 'success' && 'good' || 'danger' }}',
+              fields: [{
+                title: 'iOS Deploy',
+                value: '${{ needs.deploy-ios.result }}',
+                short: true
+              }, {
+                title: 'Android Deploy',
+                value: '${{ needs.deploy-android.result }}',
+                short: true
+              }]
+            }, {
+              color: 'good',
+              title: '📱 Download Links',
+              text: '${{ github.ref == 'refs/heads/develop' && format('📲 Firebase App Distribution\n• iOS: {0}\n• Android: {1}', steps.fetch-urls.outputs.firebase_ios_url || 'Not available', steps.fetch-urls.outputs.firebase_android_url || 'Not available') || format('🏪 Store Links\n• TestFlight: {0}\n• Google Play Internal: {1}', needs.deploy-ios.outputs.testflight_url || 'Not available', needs.deploy-android.outputs.google_play_url || 'Not available') }}',
+              mrkdwn_in: ['text']
+            }, {
+              color: 'warning',
+              title: '🛠️ Firebase Console (Manage Testers)',
+              text: '${{ github.ref == 'refs/heads/develop' && format('📊 App Distribution Management\n• iOS Console: {0}\n• Android Console: {1}', steps.fetch-urls.outputs.firebase_ios_console, steps.fetch-urls.outputs.firebase_android_console) || '🏪 Production Console Links Available in Main Branch' }}',
+              mrkdwn_in: ['text']
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

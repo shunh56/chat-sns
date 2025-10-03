@@ -8,7 +8,6 @@ import 'package:app/presentation/pages/settings/debug_report_screen.dart';
 import 'package:app/presentation/pages/settings/notification_settings/direct_messages_screen.dart';
 import 'package:app/presentation/pages/settings/notification_settings/friend_requests_screen.dart';
 import 'package:app/presentation/pages/version/version_manager.dart';
-import 'package:app/presentation/providers/theme_provider.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +25,7 @@ class SettingsScreen extends ConsumerWidget {
 
     if (me == null) return const Scaffold();
 
-    final isDarkMode = ref.watch(isDarkModeProvider);
+    //final isDarkMode = ref.watch(isDarkModeProvider);
 
     return Scaffold(
       appBar: AppBar(

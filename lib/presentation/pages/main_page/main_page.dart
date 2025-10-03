@@ -21,7 +21,6 @@ import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/search/search_users_screen.dart';
 import 'package:app/presentation/pages/posts/create/create_post_screen/create_post_screen.dart';
 import 'package:app/presentation/pages/posts/timeline/timeline_page.dart';
-import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/presentation/v2/tempo_app.dart';
 import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
 import 'package:app/presentation/providers/state/bottom_nav.dart';
@@ -104,11 +103,11 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
     platform.setMethodCallHandler(
       (MethodCall call) async {
         if (call.method == "onVoIPReceived") {
-          final Map<String, dynamic> args =
-              Map<String, dynamic>.from(call.arguments);
-          final id = args['extra']['id'] ?? "";
-          final uuid = args['uuid'];
-          Navigator.push(
+          // final Map<String, dynamic> args =
+          //     Map<String, dynamic>.from(call.arguments);
+          // final id = args['extra']['id'] ?? "";
+          // final uuid = args['uuid'];
+          /* Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => VoiceChatScreen(
@@ -116,7 +115,7 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
                 uuid: uuid,
               ),
             ),
-          );
+          ); */
           /* Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => Scaffold(
@@ -192,7 +191,7 @@ class _MainPageWrapperState extends ConsumerState<MainPageWrapper>
           if (navigatorKey.currentState != null) {
             // extra データから通話に必要な情報を取得
             final callId = event.body['extra']?['id'] as String?;
-            final uuid = event.body['id'] as String?;
+            //final uuid = event.body['id'] as String?;
             if (callId != null) {
               /*navigatorKey.currentState!.push(
               MaterialPageRoute(
@@ -260,9 +259,6 @@ final mainPageProvidersKeeper = Provider<void>((ref) {
   // 重要なプロバイダーをキープ
   ref.watch(followingListNotifierProvider);
   ref.watch(followersListNotifierProvider);
-
-  // プロバイダーが破棄されないよう明示的にキープする
-  ref.keepAlive();
 
   return;
 });

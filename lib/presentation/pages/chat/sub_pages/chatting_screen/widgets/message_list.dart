@@ -38,7 +38,7 @@ class MessageListWidget extends HookConsumerWidget {
 
     // 最新メッセージIDを一時的に保持するための変数
     final latestMessageId = useRef<String?>(null);
-    
+
     // 初回ロード済みかどうかを記録するフラグ
     final isInitialLoadCompleted = useRef<bool>(false);
 
@@ -52,9 +52,10 @@ class MessageListWidget extends HookConsumerWidget {
           previousMessageCount.value = messages.length;
           return;
         }
-        
+
         // メッセージが増えた場合（新しいメッセージが追加された）
-        if (messages.isNotEmpty && messages.length > previousMessageCount.value) {
+        if (messages.isNotEmpty &&
+            messages.length > previousMessageCount.value) {
           // リストが逆順なので、インデックス0が最新のメッセージ
           final newLatestMessageId = messages[0].id;
 
@@ -62,7 +63,9 @@ class MessageListWidget extends HookConsumerWidget {
           latestMessageId.value = newLatestMessageId;
 
           // プロバイダーを更新（Future.microtaskは不要）
-          ref.read(latestMessageIdProvider.notifier).setLatestMessageId(newLatestMessageId);
+          ref
+              .read(latestMessageIdProvider.notifier)
+              .setLatestMessageId(newLatestMessageId);
 
           // 1秒後に最新メッセージIDをクリア（アニメーション終了後）
           Future.delayed(const Duration(seconds: 1), () {
@@ -86,7 +89,8 @@ class MessageListWidget extends HookConsumerWidget {
     // スクロール監視のためのフック
     useEffect(() {
       void onScroll() {
-        if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
+        if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent) {
           notifier.loadMore();
         }
       }
@@ -97,7 +101,8 @@ class MessageListWidget extends HookConsumerWidget {
 
     return messageList.when(
       data: (data) {
-        bool showLoadMore = ref.watch(messageListNotifierProvider(userId).notifier).hasMore;
+        bool showLoadMore =
+            ref.watch(messageListNotifierProvider(userId).notifier).hasMore;
 
         return ListView.builder(
           reverse: true,
@@ -123,22 +128,28 @@ class MessageListWidget extends HookConsumerWidget {
 
             // メッセージが最新かどうかを判定（ローカル変数を使用）
             // 初回ロード時は常にfalseを返す
-            final isLatest = isInitialLoadCompleted.value && message.id == latestMessageId.value;
-            
+            final isLatest = isInitialLoadCompleted.value &&
+                message.id == latestMessageId.value;
+
             if (isLatest) {
-              DebugPrint("アニメーション表示するメッセージ: ${message.id} (最新ID: ${latestMessageId.value}) ${message.text}");
+              DebugPrint(
+                  "アニメーション表示するメッセージ: ${message.id} (最新ID: ${latestMessageId.value}) ${message.text}");
             }
 
             if (message.senderId != currentUserId) {
               return LeftMessage(
-                key: isLatest ? Key('left_${message.id}_anim') : Key('left_${message.id}'),
+                key: isLatest
+                    ? Key('left_${message.id}_anim')
+                    : Key('left_${message.id}'),
                 message: message,
                 user: user,
                 isLatest: isLatest,
               );
             } else if (message.senderId == currentUserId) {
               return RightMessage(
-                key: isLatest ? Key('right_${message.id}_anim') : Key('right_${message.id}'),
+                key: isLatest
+                    ? Key('right_${message.id}_anim')
+                    : Key('right_${message.id}'),
                 message: message,
                 user: user,
                 isLatest: isLatest,

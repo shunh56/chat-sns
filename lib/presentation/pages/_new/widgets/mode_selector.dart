@@ -23,17 +23,17 @@ class _ModeSelectorState extends ConsumerState<ModeSelector>
   @override
   void initState() {
     super.initState();
-    
+
     _slideController = AnimationController(
       duration: AppConstants.mediumAnimation,
       vsync: this,
     );
-    
+
     _glowController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat();
-    
+
     _transitionController = AnimationController(
       duration: AppConstants.fastAnimation,
       vsync: this,
@@ -51,7 +51,7 @@ class _ModeSelectorState extends ConsumerState<ModeSelector>
   @override
   Widget build(BuildContext context) {
     final discoveryState = ref.watch(discoveryProvider);
-    
+
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -82,14 +82,14 @@ class _ModeSelectorState extends ConsumerState<ModeSelector>
             children: [
               // Background glow
               _buildBackgroundGlow(),
-              
+
               // Mode buttons
               Row(
                 children: DiscoveryMode.values.asMap().entries.map((entry) {
                   final index = entry.key;
                   final mode = entry.value;
                   final isActive = discoveryState.selectedMode == mode;
-                  
+
                   return Expanded(
                     child: _buildModeButton(mode, isActive, index),
                   );
@@ -104,7 +104,7 @@ class _ModeSelectorState extends ConsumerState<ModeSelector>
 
   Widget _buildBackgroundGlow() {
     final glowOpacity = sin(_glowController.value * 2 * pi) * 0.3 + 0.7;
-    
+
     return Positioned.fill(
       child: Container(
         decoration: BoxDecoration(
@@ -167,17 +167,20 @@ class _ModeSelectorState extends ConsumerState<ModeSelector>
             children: [
               // Shimmer effect for active button
               if (isActive) _buildShimmerEffect(),
-              
+
               // Button content
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         _getModeIcon(mode),
-                        color: isActive ? Colors.white : Colors.white.withOpacity(0.6),
+                        color: isActive
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.6),
                         size: 16,
                       ),
                       const SizedBox(height: 2),
@@ -185,9 +188,12 @@ class _ModeSelectorState extends ConsumerState<ModeSelector>
                         mode.displayName,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: isActive ? Colors.white : Colors.white.withOpacity(0.7),
+                          color: isActive
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.7),
                           fontSize: 9,
-                          fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                          fontWeight:
+                              isActive ? FontWeight.w700 : FontWeight.w500,
                           height: 1.1,
                         ),
                       ),
@@ -197,12 +203,11 @@ class _ModeSelectorState extends ConsumerState<ModeSelector>
               ),
             ],
           ),
-        ).animate(target: isActive ? 1 : 0)
-          .scale(
-            end: const Offset(1.05, 1.05),
-            duration: 200.ms,
-            curve: Curves.easeOutBack,
-          ),
+        ).animate(target: isActive ? 1 : 0).scale(
+              end: const Offset(1.05, 1.05),
+              duration: 200.ms,
+              curve: Curves.easeOutBack,
+            ),
       ),
     );
   }
@@ -247,14 +252,14 @@ class _ModeSelectorState extends ConsumerState<ModeSelector>
 
   void _handleModeChange(DiscoveryMode mode) {
     HapticFeedback.mediumImpact();
-    
+
     // Trigger transition animation
     _transitionController.forward().then((_) {
       _transitionController.reverse();
     });
-    
+
     ref.read(discoveryProvider.notifier).changeMode(mode);
-    
+
     // Visual feedback
     _showModeChangeEffect(mode);
   }

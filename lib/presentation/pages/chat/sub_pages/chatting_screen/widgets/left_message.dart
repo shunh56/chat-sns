@@ -23,12 +23,12 @@ class LeftMessage extends HookConsumerWidget {
   final CoreMessage message;
   final UserAccount user;
   final bool isLatest;
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    
+
     // 通常のメッセージウィジェット
     final messageWidget = Container(
       margin: const EdgeInsets.only(
@@ -96,7 +96,7 @@ class LeftMessage extends HookConsumerWidget {
         ],
       ),
     );
-    
+
     // 最新のメッセージの場合のみアニメーション適用
     if (isLatest) {
       return AnimatedMessageWidget(

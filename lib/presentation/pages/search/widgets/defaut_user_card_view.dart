@@ -292,7 +292,7 @@ class DefaultUserCardView extends ConsumerWidget {
             ),
           ),
         );
-        return Material(
+        /*    return Material(
           color: isFollowing ? Colors.blue : ThemeColor.white,
           borderRadius: BorderRadius.circular(100),
           child: InkWell(
@@ -318,6 +318,7 @@ class DefaultUserCardView extends ConsumerWidget {
             ),
           ),
         );
+      */
       },
     );
   }

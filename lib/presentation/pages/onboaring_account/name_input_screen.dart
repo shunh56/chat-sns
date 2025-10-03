@@ -61,12 +61,14 @@ class InputNameScreen extends ConsumerWidget {
           ),
           const Spacer(flex: 2),
           ElevatedButton(
-            onPressed: name.isEmpty ? null : () {
-              ref.read(pageControllerProvider).nextPage(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            },
+            onPressed: name.isEmpty
+                ? null
+                : () {
+                    ref.read(pageControllerProvider).nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColor.primary,
               foregroundColor: ThemeColor.text,

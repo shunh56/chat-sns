@@ -1,4 +1,3 @@
-
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/presentation/components/core/shader.dart';

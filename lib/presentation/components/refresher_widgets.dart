@@ -19,7 +19,6 @@ final customRefreshHeader = CustomHeader(
           ),
         );
       case RefreshStatus.refreshing:
-        
         return const Padding(
           padding: EdgeInsets.only(bottom: 8),
           child: Center(
@@ -67,7 +66,6 @@ final customRefreshFooter = CustomFooter(
       case LoadStatus.idle:
         return const SizedBox();
       case LoadStatus.loading:
-        
         return const Padding(
           padding: EdgeInsets.only(top: 8),
           child: Center(

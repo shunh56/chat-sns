@@ -1,0 +1,428 @@
+default_platform(:ios)
+
+# gRPC修正を適用するヘルパー関数（強化版）
+def apply_grpc_fixes
+  require 'xcodeproj'
+
+  begin
+    UI.message("🔍 Post-build gRPC fixes - Searching for targets in project...")
+
+    # Podsディレクトリの存在確認
+    unless Dir.exist?("Pods")
+      UI.error("❌ Pods directory not found. Skipping gRPC fixes.")
+      return
+    end
+
+    # 全てのxcconfigファイルにC++17設定を強制適用
+    UI.message("📝 Applying C++17 fixes to ALL xcconfig files...")
+
+    sh('find Pods -name "*.xcconfig" 2>/dev/null | while IFS= read -r file; do
+      echo "📝 Patching $file"
+      if ! grep -q "CLANG_CXX_LANGUAGE_STANDARD.*c++17" "$file" 2>/dev/null; then
+        echo "CLANG_CXX_LANGUAGE_STANDARD = c++17" >> "$file"
+      fi
+      if ! grep -q "CLANG_CXX_LIBRARY.*libc++" "$file" 2>/dev/null; then
+        echo "CLANG_CXX_LIBRARY = libc++" >> "$file"
+      fi
+      if ! grep -q "GCC_WARN_INHIBIT_ALL_WARNINGS.*YES" "$file" 2>/dev/null; then
+        echo "GCC_WARN_INHIBIT_ALL_WARNINGS = YES" >> "$file"
+      fi
+      if ! grep -q "OTHER_CPLUSPLUSFLAGS.*-std=c++17" "$file" 2>/dev/null; then
+        echo "OTHER_CPLUSPLUSFLAGS = \$(inherited) -std=c++17 -Wno-error=c++20-extensions -Wno-c++20-extensions" >> "$file"
+      fi
+      echo "✅ Patched $file"
+    done')
+
+    # Pods.xcodeprojを直接修正
+    pods_project_path = "Pods/Pods.xcodeproj"
+    if File.exist?(pods_project_path)
+      UI.message("🔧 Directly modifying Pods project...")
+      pods_project = Xcodeproj::Project.open(pods_project_path)
+
+      pods_project.targets.each do |target|
+        target.build_configurations.each do |config|
+          # 全てのターゲットにC++17を強制適用
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+          config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17'
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions'
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-c++20-extensions'
+          config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          config.build_settings['OTHER_CFLAGS'] << '-Wno-error=c++20-extensions'
+          config.build_settings['OTHER_CFLAGS'] << '-Wno-c++20-extensions'
+
+          if target.name.include?('gRPC') || target.name.include?('grpc')
+            config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'
+          end
+        end
+      end
+
+      pods_project.save
+      UI.success("✅ Modified Pods project directly")
+    end
+
+    # 直接プロジェクトファイルも修正
+    if File.exist?("Runner.xcworkspace")
+      UI.message("🔧 Also applying direct Runner project modifications...")
+      project = Xcodeproj::Project.open("Runner.xcodeproj")
+
+      project.targets.each do |target|
+        target.build_configurations.each do |config|
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+          config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-std=c++17' unless config.build_settings['OTHER_CPLUSPLUSFLAGS'].include?('-std=c++17')
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-error=c++20-extensions' unless config.build_settings['OTHER_CPLUSPLUSFLAGS'].include?('-Wno-error=c++20-extensions')
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-Wno-c++20-extensions' unless config.build_settings['OTHER_CPLUSPLUSFLAGS'].include?('-Wno-c++20-extensions')
+        end
+      end
+
+      project.save
+      UI.success("✅ Applied project-level C++17 settings")
+    end
+
+    # Also fix Agora RTC Engine source code issues
+    UI.message("🔧 Applying Agora RTC Engine source code fixes...")
+
+    # Try multiple possible paths for agora_rtc_engine
+    possible_paths = [
+      # Pub cache path (for CI/CD)
+      File.expand_path("~/.pub-cache/hosted/pub.dev/agora_rtc_engine-6.5.3/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"),
+      # Local Pods path (for local development)
+      "Pods/agora_rtc_engine/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm",
+      # Symlink path
+      ".symlinks/plugins/agora_rtc_engine/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"
+    ]
+
+    agora_surface_view_factory_path = nil
+    possible_paths.each do |path|
+      if File.exist?(path)
+        agora_surface_view_factory_path = path
+        UI.message("📁 Found AgoraSurfaceViewFactory.mm at: #{path}")
+        break
+      end
+    end
+
+    if agora_surface_view_factory_path
+      # Read the file content
+      content = File.read(agora_surface_view_factory_path)
+
+      UI.message("🔍 Analyzing AgoraSurfaceViewFactory.mm content...")
+      UI.message("   - File size: #{content.length} bytes")
+      UI.message("   - Contains 'weakSelf': #{content.include?('weakSelf')}")
+      UI.message("   - Contains '__weak typeof(self) weakSelf': #{content.include?('__weak typeof(self) weakSelf')}")
+
+      # Force fix even if our detection is imperfect - apply comprehensive patterns
+      if content.include?('weakSelf') || content.match(/\]\s*\{\s*[^}]*weakSelf/)
+        UI.message("🔧 Applying comprehensive weakSelf fix to AgoraSurfaceViewFactory.mm...")
+
+        # Store original content for backup
+        original_content = content.dup
+
+        # Pattern 1: Fix blocks that use weakSelf without declaration
+        # Look for any block { followed by weakSelf usage
+        content = content.gsub(
+          /(\{\s*\n\s*)weakSelf/,
+          '\1__weak typeof(self) weakSelf = self;\n        weakSelf'
+        )
+
+        # Pattern 2: Fix dispatch_async blocks specifically
+        content = content.gsub(
+          /dispatch_async\s*\([^)]+\)\s*\^\s*\{\s*\n\s*weakSelf/,
+          "dispatch_async(dispatch_get_main_queue(), ^{\n        __weak typeof(self) weakSelf = self;\n        weakSelf"
+        )
+
+        # Pattern 3: Fix any remaining standalone weakSelf without declaration
+        # Split by lines and fix each problematic usage
+        lines = content.split("\n")
+        fixed_lines = []
+        i = 0
+
+        while i < lines.length
+          line = lines[i]
+
+          # If this line contains weakSelf but we haven't seen a declaration
+          if line.match(/\bweakSelf\b/) && !line.include?('__weak typeof(self) weakSelf')
+            # Look backwards to see if there's a recent declaration
+            has_recent_declaration = false
+            (i-5..i-1).each do |j|
+              if j >= 0 && lines[j] && lines[j].include?('__weak typeof(self) weakSelf')
+                has_recent_declaration = true
+                break
+              end
+            end
+
+            # If no recent declaration, add one before this line
+            unless has_recent_declaration
+              indent = line[/^\s*/]
+              fixed_lines << "#{indent}__weak typeof(self) weakSelf = self;"
+            end
+          end
+
+          fixed_lines << line
+          i += 1
+        end
+
+        # Join back and finalize
+        content = fixed_lines.join("\n")
+
+        # Pattern 4: Final safety check - forced fix for known problematic lines
+        # Based on CI/CD error at lines 41, 44, 45 - ensure we have proper declarations
+        content = content.gsub(
+          /^(\s*)(.*weakSelf.*$)/,
+          proc do |match|
+            indentation = $1
+            line_content = $2
+
+            # Check if this line already has a declaration or is itself a declaration
+            if line_content.include?('__weak typeof(self) weakSelf') ||
+               line_content.match(/typeof.*weakSelf.*=/)
+              match # Keep as-is if it's a declaration
+            else
+              # Add declaration before the line
+              "#{indentation}__weak typeof(self) weakSelf = self;\n#{match}"
+            end
+          end
+        )
+
+        # Write the fixed content back
+        File.write(agora_surface_view_factory_path, content)
+        UI.success("✅ Applied comprehensive weakSelf fix to AgoraSurfaceViewFactory.mm")
+        UI.message("   - Original size: #{original_content.length} bytes")
+        UI.message("   - Fixed size: #{content.length} bytes")
+
+      else
+        UI.message("ℹ️ No weakSelf usage found in AgoraSurfaceViewFactory.mm")
+      end
+    else
+      UI.important("⚠️ AgoraSurfaceViewFactory.mm not found at any expected path:")
+      possible_paths.each { |path| UI.important("   - #{path}") }
+    end
+
+    # Additional safety measure: Force create a simple weakSelf fix if file exists
+    if File.exist?(File.expand_path("~/.pub-cache/hosted/pub.dev/agora_rtc_engine-6.5.3/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm"))
+      UI.message("🛡️ Applying emergency weakSelf fix as final safety measure...")
+      emergency_fix_path = File.expand_path("~/.pub-cache/hosted/pub.dev/agora_rtc_engine-6.5.3/ios/agora_rtc_engine/Sources/agora_rtc_engine/AgoraSurfaceViewFactory.mm")
+      emergency_content = File.read(emergency_fix_path)
+
+      # Simple but effective fix: add weakSelf declaration at the top of any problematic method
+      if emergency_content.include?('weakSelf') && !emergency_content.include?('__weak typeof(self) weakSelf = self;')
+        # Find the first method that uses weakSelf and add declaration
+        emergency_content = emergency_content.gsub(
+          /(\{[^}]*?\n[^}]*?)(\s+)(.*weakSelf)/m,
+          '\1\2__weak typeof(self) weakSelf = self;\2\3'
+        )
+        File.write(emergency_fix_path, emergency_content)
+        UI.success("🛡️ Applied emergency weakSelf fix")
+      end
+    end
+
+    UI.success("✅ Applied comprehensive post-build gRPC + Agora fixes")
+
+  rescue => e
+    UI.error("❌ Failed to apply gRPC/Agora fixes: #{e.message}")
+    UI.error("Error details: #{e.backtrace.first(5).join('\n')}")
+  end
+end
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do |options|
+    # 環境変数から環境を取得（dev/prod/appstore）
+    environment = options[:env] || "dev"
+
+    # アプリIDの設定
+    app_identifier = "com.blank.sns"
+
+    # 証明書とプロファイルの取得（Match使用）
+    # 初回設定時はコメントアウトして手動で設定
+    # match(type: "appstore", readonly: true)
+
+    # ビルド番号の自動インクリメント
+    increment_build_number(
+      build_number: latest_testflight_build_number + 1,
+      xcodeproj: "Runner.xcodeproj"
+    )
+
+    # Flutterビルド（Makefileのコマンドを使用）
+    sh("cd ../.. && make build-#{environment}")
+
+    # TestFlightへアップロード
+    result = upload_to_testflight(
+      ipa: "../../build/ios/ipa/*.ipa",
+      skip_waiting_for_build_processing: true,
+      changelog: "自動ビルド from #{environment} environment"
+    )
+
+    # TestFlightのURLを保存（App Store Connectから取得）
+    testflight_url = "https://appstoreconnect.apple.com/apps/#{ENV['APP_STORE_CONNECT_APP_ID']}/testflight"
+    File.write("../testflight_url.txt", testflight_url)
+    UI.message("🔗 TestFlight URL saved: #{testflight_url}")
+  end
+
+  desc "Build for Firebase App Distribution"
+  lane :firebase do |options|
+    # 環境変数から環境を取得（dev/prod）
+    environment = options[:env] || "dev"
+
+    # ビルド番号の自動インクリメント
+    increment_build_number(
+      build_number: Time.now.to_i,
+      xcodeproj: "Runner.xcodeproj"
+    )
+
+    # 証明書管理：Matchを試行、失敗時は自動署名にフォールバック
+    certificate_management_method = "automatic" # デフォルトは自動署名
+
+    begin
+      # Match使用条件をチェック
+      if ENV["MATCH_GIT_URL"] && !ENV["MATCH_GIT_URL"].empty? && ENV["FASTLANE_USER"] && !ENV["FASTLANE_USER"].empty?
+        UI.message("🔐 Attempting to use Fastlane Match for certificate management...")
+
+        # Matchで証明書取得を試行（readonly mode for CI/CD safety）
+        match(
+          type: "adhoc",
+          app_identifier: "com.blank.sns",
+          readonly: true,
+          git_url: ENV["MATCH_GIT_URL"]
+        )
+
+        certificate_management_method = "match"
+        UI.success("✅ Fastlane Match completed successfully!")
+
+      else
+        UI.important("🔧 Match requirements not met. Using automatic signing.")
+        UI.important("   - MATCH_GIT_URL: #{ENV['MATCH_GIT_URL'] ? '✅' : '❌'}")
+        UI.important("   - FASTLANE_USER: #{ENV['FASTLANE_USER'] ? '✅' : '❌'}")
+        raise "Using automatic signing"
+      end
+
+    rescue => e
+      UI.important("⚠️  Fastlane Match not available: #{e.message}")
+      UI.important("🔧 Falling back to automatic signing with App Store Connect API Key...")
+
+      # API Key情報を環境変数に設定（automatic signingで使用）
+      ENV["APP_STORE_CONNECT_API_KEY_PATH"] = File.expand_path("~/private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY_ID']}.p8")
+      certificate_management_method = "automatic"
+    end
+
+    UI.message("📱 Using certificate management method: #{certificate_management_method}")
+
+    # 最初にPodfileを修正してからFlutter buildを実行
+    UI.message("🔧 Pre-configuring Podfile for gRPC compatibility...")
+
+    # Flutter buildの前にPodfile.lockを削除してクリーンな状態にする
+    sh("rm -f Podfile.lock")
+
+    # Flutter build前にpod install実行でPodfileの設定を適用
+    sh("pod install")
+
+    # 記事の成功例に基づく改善：flutter build ipaを使用（より統合されたアプローチ）
+    # これによりAgoraの問題を回避できる可能性
+    UI.message("📱 Building Flutter IPA with integrated approach...")
+
+    # シンプルで確実なビルドアプローチ（記事の成功例に基づく）
+    UI.message("📱 Building with flutter build ios (no-codesign) approach...")
+    sh("cd ../.. && flutter build ios --release --dart-define-from-file=dart_defines/#{environment}.json --no-codesign")
+    skip_gym = false
+
+    # Flutter buildの後にさらにgRPC修正を適用
+    UI.message("🔧 Post-Flutter build gRPC fixes...")
+    apply_grpc_fixes
+
+    # skip_gymフラグを返す
+    skip_gym ||= false
+
+    # gymが必要な場合のみ実行
+    unless skip_gym
+      # 記事の成功例に基づく修正：手動署名を使用
+      # ExportOptions.plistを作成
+      export_options_content = {
+        method: "ad-hoc",
+        signingStyle: "manual",
+        provisioningProfiles: {
+          "com.blank.sns" => "com.blank.sns AdHoc"  # プロファイル名を調整する必要があるかもしれません
+        },
+        teamID: "CDQBCQRWL9",
+        compileBitcode: false,
+        uploadBitcode: false,
+        uploadSymbols: false
+      }
+
+      # ExportOptions.plistファイルとして保存
+      File.write("ExportOptions.plist", export_options_content.to_plist)
+
+      # gymでアーカイブ+署名+エクスポート（成功例に基づく設定）
+      gym(
+        scheme: "Runner",
+        workspace: "Runner.xcworkspace",
+        configuration: "Release",
+        export_method: "ad-hoc",
+        export_options: "ExportOptions.plist",
+        clean: true,
+        output_directory: "../../build/ios/ipa",
+        output_name: "Runner.ipa",
+        xcargs: "DEVELOPMENT_TEAM=CDQBCQRWL9"
+      )
+    end
+
+    # Firebase App IDを環境に応じて取得
+    firebase_app_id = if environment == "prod"
+      ENV["FIREBASE_APP_ID_IOS_PROD"]
+    else
+      ENV["FIREBASE_APP_ID_IOS_DEV"]
+    end
+
+    UI.message("📱 Using Firebase App ID for #{environment}: #{firebase_app_id}")
+
+    # Firebase App Distributionへアップロード
+    firebase_params = {
+      app: firebase_app_id,
+      ipa_path: lane_context[SharedValues::IPA_OUTPUT_PATH],
+      release_notes: "自動ビルド from #{environment} environment"
+    }
+
+    # テスター設定: 環境変数またはデフォルトのテスターを使用
+    if ENV["FIREBASE_TESTERS"] && !ENV["FIREBASE_TESTERS"].empty?
+      UI.message("📧 Adding testers from environment variable: #{ENV["FIREBASE_TESTERS"]}")
+      firebase_params[:testers] = ENV["FIREBASE_TESTERS"]
+    elsif ENV["FIREBASE_TESTER_GROUPS"] && !ENV["FIREBASE_TESTER_GROUPS"].empty?
+      UI.message("👥 Adding tester groups: #{ENV["FIREBASE_TESTER_GROUPS"]}")
+      firebase_params[:groups] = ENV["FIREBASE_TESTER_GROUPS"]
+    else
+      UI.message("ℹ️ No specific testers configured, using default distribution settings")
+    end
+
+    result = firebase_app_distribution(firebase_params)
+
+    # Firebase URLをファイルに出力してGitHub Actionsで利用
+    firebase_url = result ? result[:testing_uri] || result[:console_uri] : nil
+    if firebase_url
+      File.write("../firebase_ios_url.txt", firebase_url)
+      UI.message("🔗 Firebase URL saved: #{firebase_url}")
+    end
+  end
+
+  desc "Setup certificates and provisioning profiles"
+  lane :setup_certs do
+    # Matchの初期設定（初回のみ実行）
+    match(
+      type: "development",
+      app_identifier: "com.blank.sns",
+      readonly: false
+    )
+
+    match(
+      type: "adhoc",
+      app_identifier: "com.blank.sns",
+      readonly: false
+    )
+
+    match(
+      type: "appstore",
+      app_identifier: "com.blank.sns",
+      readonly: false
+    )
+  end
+end

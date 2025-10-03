@@ -4,7 +4,6 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/entity/voice_chat.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
-import 'package:app/presentation/pages/voice_chat/voice_chat_screen.dart';
 import 'package:app/presentation/providers/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,12 +102,12 @@ class VoiceChatDialogs {
                   const Gap(12),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacement(
+                      /*Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (_) => VoiceChatScreen(id: vc.id),
                         ),
-                      );
+                      ); */
                     },
                     child: Center(
                       child: Container(

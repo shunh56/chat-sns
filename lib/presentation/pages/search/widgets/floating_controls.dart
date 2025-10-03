@@ -28,7 +28,7 @@ class FloatingControls extends HookWidget {
       duration: const Duration(milliseconds: 500),
     );
 
-    final fadeAnimation = useAnimation(
+/*    final fadeAnimation = useAnimation(
       Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
           parent: fadeController,
@@ -44,7 +44,7 @@ class FloatingControls extends HookWidget {
           curve: Curves.elasticOut,
         ),
       ),
-    );
+    ); */
 
     useEffect(() {
       if (isVisible) {
@@ -61,11 +61,12 @@ class FloatingControls extends HookWidget {
       right: 20,
       top: 100,
       child: FadeTransition(
-        opacity: Tween<double>(begin: 0.0, end: 1.0)
-            .animate(CurvedAnimation(parent: fadeController, curve: Curves.easeInOut)),
+        opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+            CurvedAnimation(parent: fadeController, curve: Curves.easeInOut)),
         child: SlideTransition(
           position: Tween<Offset>(begin: const Offset(1.2, 0), end: Offset.zero)
-              .animate(CurvedAnimation(parent: slideController, curve: Curves.elasticOut)),
+              .animate(CurvedAnimation(
+                  parent: slideController, curve: Curves.elasticOut)),
           child: Column(
             children: [
               // Zoom In Button
@@ -74,36 +75,36 @@ class FloatingControls extends HookWidget {
                 onTap: onZoomIn,
                 tooltip: 'Zoom In',
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Zoom Out Button
               _FloatingControlButton(
                 icon: Icons.zoom_out,
                 onTap: onZoomOut,
                 tooltip: 'Zoom Out',
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Reset View Button
               _FloatingControlButton(
                 icon: Icons.center_focus_strong,
                 onTap: onReset,
                 tooltip: 'Reset View',
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Filter Button
               _FloatingControlButton(
                 icon: Icons.tune,
                 onTap: onFilter,
                 tooltip: 'Filter Users',
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Mini Compass
               _CosmicCompass(),
             ],
@@ -245,7 +246,7 @@ class _CompassPainter extends CustomPainter {
       ..color = Colors.blue.withOpacity(0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    
+
     canvas.drawCircle(center, radius, ringPaint);
 
     // Draw cardinal points
@@ -273,7 +274,7 @@ class _CompassPainter extends CustomPainter {
       final y1 = center.dy + math.sin(angle) * (radius - 8);
       final x2 = center.dx + math.cos(angle) * (radius - 15);
       final y2 = center.dy + math.sin(angle) * (radius - 15);
-      
+
       canvas.drawLine(Offset(x1, y1), Offset(x2, y2), linePaint);
     }
 
@@ -281,7 +282,7 @@ class _CompassPainter extends CustomPainter {
     final starPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(center, 3, starPaint);
   }
 
@@ -323,9 +324,7 @@ class SpeedControl extends HookWidget {
               fontSize: 12,
             ),
           ),
-          
           const SizedBox(height: 8),
-          
           SliderTheme(
             data: SliderThemeData(
               thumbColor: Colors.blue,
@@ -342,7 +341,6 @@ class SpeedControl extends HookWidget {
               onChanged: onSpeedChanged,
             ),
           ),
-          
           Text(
             '${speed.toStringAsFixed(1)}x',
             style: const TextStyle(

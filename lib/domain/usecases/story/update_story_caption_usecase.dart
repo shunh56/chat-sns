@@ -22,15 +22,15 @@ class UpdateStoryCaptionUsecase {
   }) async {
     // 権限チェック
     final story = await _storyRepository.getStory(storyId);
-    
+
     if (story == null) {
       throw Exception('Story not found');
     }
-    
+
     if (story.userId != userId) {
       throw Exception('User does not have permission to edit this story');
     }
-    
+
     // キャプション更新
     await _storyRepository.updateStoryCaption(storyId, newCaption);
   }

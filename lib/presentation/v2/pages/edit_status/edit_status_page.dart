@@ -29,8 +29,22 @@ class EditStatusPage extends HookConsumerWidget {
     }, [statusState.status]);
 
     final moods = [
-      '😊', '😴', '🍔', '☕', '📚', '🎵', '🏃', '🎮',
-      '😎', '🤔', '💻', '🎨', '🌟', '❤️', '🌈', '🔥'
+      '😊',
+      '😴',
+      '🍔',
+      '☕',
+      '📚',
+      '🎵',
+      '🏃',
+      '🎮',
+      '😎',
+      '🤔',
+      '💻',
+      '🎨',
+      '🌟',
+      '❤️',
+      '🌈',
+      '🔥'
     ];
 
     return Scaffold(
@@ -56,8 +70,9 @@ class EditStatusPage extends HookConsumerWidget {
                 : () async {
                     try {
                       final status = statusController.text.trim();
-                      debugPrint('保存処理開始: status="$status", mood="${selectedMood.value}"');
-                      
+                      debugPrint(
+                          '保存処理開始: status="$status", mood="${selectedMood.value}"');
+
                       if (status.isNotEmpty) {
                         if (statusState.status == null) {
                           debugPrint('新規ステータス作成');
@@ -72,22 +87,24 @@ class EditStatusPage extends HookConsumerWidget {
                             mood: selectedMood.value,
                           );
                         }
-                        
+
                         // 少し待ってから状態をチェック
                         await Future.delayed(const Duration(milliseconds: 100));
                         final newStatusState = ref.read(tempoStatusProvider);
-                        
+
                         // エラーチェック
                         if (newStatusState.error != null) {
                           debugPrint('ステータス保存エラー: ${newStatusState.error}');
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('保存に失敗しました: ${newStatusState.error}')),
+                              SnackBar(
+                                  content: Text(
+                                      '保存に失敗しました: ${newStatusState.error}')),
                             );
                           }
                           return;
                         }
-                        
+
                         debugPrint('ステータス保存成功');
                         if (context.mounted) {
                           Navigator.pop(context);
@@ -161,7 +178,8 @@ class EditStatusPage extends HookConsumerWidget {
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 8,
                         crossAxisSpacing: 8,
                         mainAxisSpacing: 8,
@@ -171,7 +189,7 @@ class EditStatusPage extends HookConsumerWidget {
                       itemBuilder: (context, index) {
                         final mood = moods[index];
                         final isSelected = selectedMood.value == mood;
-                        
+
                         return GestureDetector(
                           onTap: () => selectedMood.value = mood,
                           child: Container(

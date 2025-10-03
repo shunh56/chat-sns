@@ -1,0 +1,204 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build and upload to Google Play Internal Testing"
+  lane :beta do |options|
+    # 環境変数から環境を取得（dev/prod）
+    environment = options[:env] || "prod"
+
+    # ビルド番号を生成
+    build_number = Time.now.to_i
+    UI.message("🔢 Using build number: #{build_number}")
+
+    # Flutter AABビルド（flavorとdart-define-from-fileの両方を使用）
+    UI.message("📱 Building Android App Bundle for #{environment} environment...")
+    sh("cd ../.. && flutter build appbundle --release --flavor #{environment} --dart-define-from-file=dart_defines/#{environment}.json --build-number=#{build_number}")
+
+    # AABファイルの存在確認（flavorごとに異なるパス）
+    aab_path = "../../build/app/outputs/bundle/#{environment}Release/app-#{environment}-release.aab"
+    unless File.exist?(aab_path)
+      UI.user_error!("❌ AAB file not found at: #{aab_path}")
+    end
+
+    # Google Play用に絶対パスに変換
+    absolute_aab_path = File.expand_path(aab_path)
+    UI.success("✅ AAB built successfully at: #{aab_path}")
+    UI.message("📍 Absolute path for Google Play: #{absolute_aab_path}")
+
+    # Google Play Internal Testingへアップロード
+    upload_to_play_store(
+      track: "internal",
+      aab: absolute_aab_path,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+
+    UI.success("🚀 Successfully uploaded to Google Play Internal Testing!")
+  end
+
+  desc "Build for Firebase App Distribution"
+  lane :firebase do |options|
+    # 環境変数から環境を取得（dev/prod）
+    environment = options[:env] || "dev"
+
+    # ビルド番号を生成
+    build_number = Time.now.to_i
+    UI.message("🔢 Using build number: #{build_number}")
+
+    # APKビルド（flavorとdart-define-from-fileの両方を使用）
+    UI.message("📱 Building Android APK for #{environment} environment...")
+    sh("cd ../.. && flutter build apk --release --flavor #{environment} --dart-define-from-file=dart_defines/#{environment}.json --build-number=#{build_number}")
+
+    # APKファイルの存在確認（CI/CDログから正しいパスを確認）
+    apk_path = "../../build/app/outputs/flutter-apk/app-#{environment}-release.apk"
+
+    UI.message("🔍 Checking APK file at: #{apk_path}")
+    UI.message("📂 Current working directory: #{Dir.pwd}")
+
+    unless File.exist?(apk_path)
+      # APKファイルが見つからない場合、ビルドディレクトリを検索
+      UI.message("🔎 APK not found at expected path, searching build directory...")
+
+      possible_paths = [
+        "../../build/app/outputs/flutter-apk/app-#{environment}-release.apk",
+        "../build/app/outputs/flutter-apk/app-#{environment}-release.apk",
+        "build/app/outputs/flutter-apk/app-#{environment}-release.apk",
+        "../../build/app/outputs/apk/#{environment}/release/app-#{environment}-release.apk"
+      ]
+
+      found_path = nil
+      possible_paths.each do |path|
+        if File.exist?(path)
+          found_path = path
+          UI.message("✅ Found APK at: #{path}")
+          break
+        else
+          UI.message("❌ Not found at: #{path}")
+        end
+      end
+
+      if found_path
+        apk_path = found_path
+      else
+        # 最後の手段として、ビルドディレクトリをリスト表示
+        UI.message("📁 Listing build directory contents:")
+        Dir.glob("../../build/app/outputs/**/*.apk").each do |file|
+          UI.message("   📄 #{file}")
+        end
+        UI.user_error!("❌ APK file not found at any expected location")
+      end
+    end
+
+    # Firebase App Distribution用に絶対パスに変換
+    absolute_apk_path = File.expand_path(apk_path)
+    UI.success("✅ APK built successfully at: #{apk_path}")
+    UI.message("📍 Absolute path for Firebase: #{absolute_apk_path}")
+    UI.message("🗂️ File exists check (absolute): #{File.exist?(absolute_apk_path)}")
+
+    # Firebase App IDを環境に応じて取得
+    firebase_app_id = if environment == "prod"
+      ENV["FIREBASE_APP_ID_ANDROID_PROD"]
+    else
+      ENV["FIREBASE_APP_ID_ANDROID_DEV"]
+    end
+
+    UI.message("📱 Using Firebase App ID for #{environment}: #{firebase_app_id}")
+
+    # Firebase App Distributionへアップロード
+    firebase_params = {
+      app: firebase_app_id,
+      release_notes: "自動ビルド from #{environment} environment (Build: #{build_number})",
+      android_artifact_type: "APK",
+      android_artifact_path: absolute_apk_path
+    }
+
+    # テスター設定: 環境変数またはデフォルトのテスターを使用
+    if ENV["FIREBASE_TESTERS"] && !ENV["FIREBASE_TESTERS"].empty?
+      UI.message("📧 Adding testers from environment variable: #{ENV["FIREBASE_TESTERS"]}")
+      firebase_params[:testers] = ENV["FIREBASE_TESTERS"]
+    elsif ENV["FIREBASE_TESTER_GROUPS"] && !ENV["FIREBASE_TESTER_GROUPS"].empty?
+      UI.message("👥 Adding tester groups: #{ENV["FIREBASE_TESTER_GROUPS"]}")
+      firebase_params[:groups] = ENV["FIREBASE_TESTER_GROUPS"]
+    else
+      UI.message("ℹ️ No specific testers configured, using default distribution settings")
+    end
+
+    result = firebase_app_distribution(firebase_params)
+
+    # Firebase結果をデバッグ
+    UI.message("🔍 Firebase App Distribution result: #{result.inspect}")
+    UI.message("🔍 Available keys: #{result.keys.inspect}") if result.respond_to?(:keys)
+
+    # Firebase URLをファイルに出力してGitHub Actionsで利用
+    firebase_url = nil
+
+    # 複数の可能性を試す
+    if result.respond_to?(:[])
+      firebase_url = result[:testingUri] || result[:testing_uri] || result[:firebaseConsoleUri] || result[:console_uri]
+    end
+
+    # Fastlane内部のコンテキストからも試す
+    if !firebase_url && lane_context[SharedValues::FIREBASE_APP_DISTRO_RELEASE]
+      release_info = lane_context[SharedValues::FIREBASE_APP_DISTRO_RELEASE]
+      UI.message("🔍 Release info from lane_context: #{release_info.inspect}")
+      firebase_url = release_info[:testingUri] || release_info[:testing_uri] || release_info[:firebaseConsoleUri] || release_info[:console_uri] if release_info.respond_to?(:[])
+    end
+
+    # 最終的にはログからURLを構築（フォールバックとして基本URLを使用）
+    if !firebase_url && ENV["FIREBASE_APP_ID_ANDROID"]
+      # 成功したCI/CDログから実際のURLパターンを使用
+      firebase_url = "https://appdistribution.firebase.google.com/testerapps/#{ENV["FIREBASE_APP_ID_ANDROID"]}/releases"
+    end
+
+    if firebase_url
+      File.write("../../firebase_android_url.txt", firebase_url)
+      UI.message("🔗 Firebase URL saved: #{firebase_url}")
+      UI.message("📁 File saved at: #{File.expand_path('../../firebase_android_url.txt')}")
+    else
+      UI.error("❌ Could not determine Firebase URL")
+      File.write("../../firebase_android_url.txt", "Firebase URL not available")
+    end
+
+    UI.success("🚀 Successfully uploaded to Firebase App Distribution!")
+  end
+
+  desc "Build and sign APK"
+  lane :build do
+    # バージョン番号を取得
+    version_name = flutter_version()["version_name"]
+    version_code = Time.now.to_i
+
+    # Flutterビルド
+    sh("flutter build apk --release --build-name=#{version_name} --build-number=#{version_code}")
+
+    puts "✅ APK built successfully"
+    puts "📍 Location: build/app/outputs/flutter-apk/app-release.apk"
+  end
+
+  desc "Promote from internal to production"
+  lane :promote do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end
+
+# Flutterのバージョン情報を取得するヘルパーメソッド
+def flutter_version()
+  pubspec = File.read("../pubspec.yaml")
+  version_line = pubspec.lines.find { |line| line.start_with?("version:") }
+  version = version_line.split(":").last.strip
+  version_parts = version.split("+")
+
+  {
+    "version_name" => version_parts[0],
+    "version_code" => version_parts[1] || "1"
+  }
+end

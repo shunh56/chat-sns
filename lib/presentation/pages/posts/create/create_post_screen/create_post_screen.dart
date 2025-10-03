@@ -6,7 +6,7 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/core/values.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/presentation/UNUSED/community_screen/model/community.dart';
+// import 'package:app/presentation/UNUSED/community_screen/model/community.dart'; // Archived
 import 'package:app/presentation/components/dialogs/dialogs.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
 import 'package:app/presentation/pages/posts/create/create_post_screen/images_widget.dart';
@@ -26,7 +26,7 @@ class CreatePostScreen extends ConsumerWidget {
     super.key,
     this.community,
   });
-  final Community? community;
+  final dynamic community; // Community? community; // Archived
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

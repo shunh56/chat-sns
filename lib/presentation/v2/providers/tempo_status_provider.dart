@@ -5,7 +5,8 @@ import '../../../domain/entity/tempo_status.dart';
 import '../../../domain/usecases/tempo_status_usecase.dart';
 
 /// Tempoアプリのステータス管理プロバイダー
-final tempoStatusProvider = StateNotifierProvider<TempoStatusNotifier, TempoStatusState>(
+final tempoStatusProvider =
+    StateNotifierProvider<TempoStatusNotifier, TempoStatusState>(
   (ref) => TempoStatusNotifier(ref),
 );
 
@@ -52,7 +53,8 @@ class TempoStatusNotifier extends StateNotifier<TempoStatusState> {
     try {
       state = state.copyWith(isLoading: true);
       final status = await _usecase.getMyStatus(userId);
-      debugPrint('_loadCurrentStatus 取得完了: status=${status?.status}, mood=${status?.mood}');
+      debugPrint(
+          '_loadCurrentStatus 取得完了: status=${status?.status}, mood=${status?.mood}');
       state = state.copyWith(status: status, isLoading: false);
     } catch (e) {
       debugPrint('_loadCurrentStatus エラー: $e');
@@ -68,7 +70,7 @@ class TempoStatusNotifier extends StateNotifier<TempoStatusState> {
     debugPrint('TempoStatusProvider.createStatus 開始');
     final userId = FirebaseAuth.instance.currentUser?.uid;
     debugPrint('userId: $userId');
-    
+
     if (userId == null) {
       debugPrint('ユーザー認証エラー');
       state = state.copyWith(error: 'ユーザーが認証されていません');
@@ -78,13 +80,13 @@ class TempoStatusNotifier extends StateNotifier<TempoStatusState> {
     // バリデーション
     final statusError = _usecase.validateStatusInput(status);
     final moodError = _usecase.validateMoodInput(mood);
-    
+
     if (statusError != null) {
       debugPrint('ステータス入力エラー: $statusError');
       state = state.copyWith(error: statusError);
       return;
     }
-    
+
     if (moodError != null) {
       debugPrint('気分入力エラー: $moodError');
       state = state.copyWith(error: moodError);
@@ -94,13 +96,13 @@ class TempoStatusNotifier extends StateNotifier<TempoStatusState> {
     try {
       debugPrint('ステータス作成処理開始');
       state = state.copyWith(isLoading: true, error: null);
-      
+
       await _usecase.createStatus(
         userId: userId,
         status: status,
         mood: mood,
       );
-      
+
       debugPrint('ステータス作成完了、最新データを取得');
       // 作成後、最新のステータスを取得
       await _loadCurrentStatus();
@@ -119,7 +121,7 @@ class TempoStatusNotifier extends StateNotifier<TempoStatusState> {
     debugPrint('TempoStatusProvider.updateStatus 開始');
     final userId = FirebaseAuth.instance.currentUser?.uid;
     debugPrint('userId: $userId');
-    
+
     if (userId == null) {
       debugPrint('ユーザー認証エラー');
       state = state.copyWith(error: 'ユーザーが認証されていません');
@@ -135,7 +137,7 @@ class TempoStatusNotifier extends StateNotifier<TempoStatusState> {
         return;
       }
     }
-    
+
     if (mood != null) {
       final moodError = _usecase.validateMoodInput(mood);
       if (moodError != null) {
@@ -148,13 +150,13 @@ class TempoStatusNotifier extends StateNotifier<TempoStatusState> {
     try {
       debugPrint('ステータス更新処理開始');
       state = state.copyWith(isLoading: true, error: null);
-      
+
       await _usecase.updateStatus(
         userId: userId,
         status: status,
         mood: mood,
       );
-      
+
       debugPrint('ステータス更新完了、最新データを取得');
       // 更新後、最新のステータスを取得
       await _loadCurrentStatus();
@@ -202,7 +204,8 @@ final nearbyStatusesProvider = FutureProvider<List<TempoStatus>>((ref) async {
 });
 
 /// 自分のステータスへのインタラクション一覧プロバイダー
-final myStatusInteractionsProvider = FutureProvider<List<TempoInteraction>>((ref) async {
+final myStatusInteractionsProvider =
+    FutureProvider<List<TempoInteraction>>((ref) async {
   final userId = FirebaseAuth.instance.currentUser?.uid;
   if (userId == null) return [];
 
@@ -215,7 +218,8 @@ final myStatusInteractionsProvider = FutureProvider<List<TempoInteraction>>((ref
 });
 
 /// ステータス編集用の一時的な状態管理
-final tempoStatusEditProvider = StateProvider.autoDispose<TempoStatusEditState>((ref) {
+final tempoStatusEditProvider =
+    StateProvider.autoDispose<TempoStatusEditState>((ref) {
   final currentStatus = ref.watch(tempoStatusProvider).status;
   return TempoStatusEditState(
     status: currentStatus?.status ?? '',

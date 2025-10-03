@@ -46,7 +46,8 @@ class _CosmicBackgroundState extends State<CosmicBackground> {
         x: _random.nextDouble(),
         y: _random.nextDouble(),
         size: 100 + _random.nextDouble() * 200,
-        color: AppColors.cosmicGradient[_random.nextInt(AppColors.cosmicGradient.length)],
+        color: AppColors
+            .cosmicGradient[_random.nextInt(AppColors.cosmicGradient.length)],
         drift: _random.nextDouble() * 0.5,
       ));
     }
@@ -66,10 +67,10 @@ class _CosmicBackgroundState extends State<CosmicBackground> {
   double _getRandomStarSize() {
     final weights = [0.7, 0.2, 0.08, 0.02];
     final sizes = [2.0, 3.5, 5.0, 7.0];
-    
+
     final random = _random.nextDouble();
     double cumulative = 0;
-    
+
     for (int i = 0; i < weights.length; i++) {
       cumulative += weights[i];
       if (random <= cumulative) {
@@ -87,7 +88,7 @@ class _CosmicBackgroundState extends State<CosmicBackground> {
           if (_random.nextDouble() < 0.3) {
             final shootingStarIndex = _random.nextInt(_stars.length);
             _stars[shootingStarIndex].shootingStar = true;
-            
+
             Timer(const Duration(seconds: 2), () {
               if (mounted) {
                 setState(() {
@@ -96,7 +97,7 @@ class _CosmicBackgroundState extends State<CosmicBackground> {
               }
             });
           }
-          
+
           // Slowly drift nebulae
           for (var nebula in _nebulae) {
             nebula.x = (nebula.x + nebula.drift * 0.01) % 1.0;
@@ -113,7 +114,8 @@ class _CosmicBackgroundState extends State<CosmicBackground> {
       animation: widget.controller,
       builder: (context, child) {
         return CustomPaint(
-          painter: EnhancedStarFieldPainter(_stars, _nebulae, widget.controller.value),
+          painter: EnhancedStarFieldPainter(
+              _stars, _nebulae, widget.controller.value),
           size: Size.infinite,
         );
       },
@@ -172,7 +174,7 @@ class EnhancedStarFieldPainter extends CustomPainter {
     for (var nebula in nebulae) {
       _drawNebula(canvas, size, nebula);
     }
-    
+
     // Draw stars
     for (var star in stars) {
       if (star.shootingStar) {
@@ -186,17 +188,23 @@ class EnhancedStarFieldPainter extends CustomPainter {
   void _drawNebula(Canvas canvas, Size size, Nebula nebula) {
     final center = Offset(nebula.x * size.width, nebula.y * size.height);
     final opacity = (sin(animationValue * pi + nebula.drift) * 0.3 + 0.7) * 0.1;
-    
+
     final paint = Paint()
       ..color = nebula.color.withOpacity(opacity)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, nebula.size * 0.3);
-    
+
     canvas.drawCircle(center, nebula.size, paint);
   }
 
   void _drawStar(Canvas canvas, Size size, EnhancedStar star) {
-    final twinkle = sin(animationValue * 2 * pi * star.twinkleSpeed + star.pulsePhase) * 0.5 + 0.5;
-    final pulse = sin(animationValue * pi * star.twinkleSpeed * 0.5 + star.pulsePhase) * 0.2 + 0.8;
+    final twinkle =
+        sin(animationValue * 2 * pi * star.twinkleSpeed + star.pulsePhase) *
+                0.5 +
+            0.5;
+    final pulse =
+        sin(animationValue * pi * star.twinkleSpeed * 0.5 + star.pulsePhase) *
+                0.2 +
+            0.8;
     final opacity = (star.brightness * 0.4 + twinkle * 0.6).clamp(0.2, 1.0);
     final currentSize = star.size * (0.7 + twinkle * 0.6) * pulse;
 
@@ -215,7 +223,7 @@ class EnhancedStarFieldPainter extends CustomPainter {
         ..color = star.color.withOpacity(opacity * 0.8)
         ..strokeWidth = 1
         ..style = PaintingStyle.stroke;
-      
+
       final crossSize = currentSize * 2;
       canvas.drawLine(
         Offset(center.dx - crossSize, center.dy),
@@ -246,29 +254,29 @@ class EnhancedStarFieldPainter extends CustomPainter {
     final startY = star.y * size.height;
     final endX = startX + 100;
     final endY = startY + 50;
-    
+
     final currentX = startX + (endX - startX) * progress;
     final currentY = startY + (endY - startY) * progress;
-    
+
     final opacity = (1.0 - progress) * 0.8;
-    
+
     // Trail
     final trailPaint = Paint()
       ..color = star.color.withOpacity(opacity * 0.5)
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-    
+
     canvas.drawLine(
       Offset(currentX, currentY),
       Offset(currentX - 30 * progress, currentY - 15 * progress),
       trailPaint,
     );
-    
+
     // Main shooting star
     final paint = Paint()
       ..color = star.color.withOpacity(opacity)
       ..style = PaintingStyle.fill;
-    
+
     canvas.drawCircle(Offset(currentX, currentY), star.size * 1.5, paint);
   }
 

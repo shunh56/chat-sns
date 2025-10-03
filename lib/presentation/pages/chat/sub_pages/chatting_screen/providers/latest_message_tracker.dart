@@ -2,7 +2,8 @@ import 'package:app/core/utils/debug_print.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// 最新のメッセージIDを追跡するProvider
-final latestMessageIdProvider = StateNotifierProvider<LatestMessageNotifier, String>((ref) {
+final latestMessageIdProvider =
+    StateNotifierProvider<LatestMessageNotifier, String>((ref) {
   return LatestMessageNotifier();
 });
 

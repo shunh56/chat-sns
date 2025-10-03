@@ -35,6 +35,43 @@ if (flutterVersionName == null) {
     flutterVersionName = "1.0"
 }
 
+// Dart Definesから値を取得する関数
+
+// dart_definesから環境変数を取得（dart_definesが存在する場合のみ）
+def getAppId(String defaultValue) {
+    def localDartDefines = [:]
+    if (project.hasProperty('dart-defines')) {
+        project.property('dart-defines').split(',').each {
+            def decoded = new String(Base64.decoder.decode(it))
+            def pair = decoded.split('=')
+            if (pair.length == 2) {
+                localDartDefines[pair[0]] = pair[1]
+            }
+        }
+        if (localDartDefines.APP_ID) {
+            return localDartDefines.APP_ID
+        }
+    }
+    return defaultValue
+}
+
+def getAppName(String defaultValue) {
+    def localDartDefines = [:]
+    if (project.hasProperty('dart-defines')) {
+        project.property('dart-defines').split(',').each {
+            def decoded = new String(Base64.decoder.decode(it))
+            def pair = decoded.split('=')
+            if (pair.length == 2) {
+                localDartDefines[pair[0]] = pair[1]
+            }
+        }
+        if (localDartDefines.APPNAME) {
+            return localDartDefines.APPNAME
+        }
+    }
+    return defaultValue
+}
+
 android {
     namespace  'com.blank.sns'
     compileSdk = 34
@@ -74,17 +111,17 @@ android {
     productFlavors {
         dev {
             dimension "environment"
-            applicationId "com.blank.sns.dev"
+            // dart_definesから取得した値を使用
+            applicationId getAppId("com.blank.sns.dev")
             buildConfigField "String", "FLAVOR_NAME", "\"dev\""
-            resValue "string", "app_name", "BLANK DEV"  // 開発版のアプリ名
-
+            resValue "string", "app_name", getAppName("BLANK DEV")
         }
         prod {
             dimension "environment"
-            applicationId "com.blank.sns"
+            // dart_definesから取得した値を使用（デフォルトは元の値を維持）
+            applicationId getAppId("com.blank.sns")
             buildConfigField "String", "FLAVOR_NAME", "\"prod\""
-            resValue "string", "app_name", "BLANK"  // 本番版のアプリ名
-           
+            resValue "string", "app_name", getAppName("BLANK")
         }
     }
 

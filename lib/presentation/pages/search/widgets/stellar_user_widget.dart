@@ -93,7 +93,7 @@ class StellarUserWidget extends HookWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isActive 
+                      color: isActive
                           ? Colors.blue.withOpacity(glowAnimation)
                           : Colors.white.withOpacity(0.3),
                       width: 3,
@@ -116,7 +116,7 @@ class StellarUserWidget extends HookWidget {
                     ),
                   ),
                 ),
-                
+
                 // Online indicator
                 if (user.isOnline)
                   Positioned(
@@ -135,7 +135,7 @@ class StellarUserWidget extends HookWidget {
                       ),
                     ),
                   ),
-                
+
                 // Name label below avatar
                 Positioned(
                   bottom: -25,

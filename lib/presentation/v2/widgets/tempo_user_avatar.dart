@@ -62,31 +62,35 @@ class TempoUserAvatar extends HookWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     // より控えめなオンライン状態の表現
-                    gradient: isOnline ? LinearGradient(
-                      colors: [
-                        TempoColors.primary.withOpacity(0.1),
-                        TempoColors.secondary.withOpacity(0.05),
-                      ],
-                    ) : null,
+                    gradient: isOnline
+                        ? LinearGradient(
+                            colors: [
+                              TempoColors.primary.withOpacity(0.1),
+                              TempoColors.secondary.withOpacity(0.05),
+                            ],
+                          )
+                        : null,
                     color: isOnline ? null : TempoColors.surface,
                     border: Border.all(
-                      color: isOnline 
+                      color: isOnline
                           ? TempoColors.primary.withOpacity(0.3)
                           : TempoColors.textTertiary.withOpacity(0.2),
                       width: isOnline ? 2 : 1,
                     ),
-                    boxShadow: isOnline ? [
-                      BoxShadow(
-                        color: TempoColors.primary.withOpacity(0.1),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ] : null,
+                    boxShadow: isOnline
+                        ? [
+                            BoxShadow(
+                              color: TempoColors.primary.withOpacity(0.1),
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(3),
                     child: ClipOval(
-                      child: imageUrl != null 
+                      child: imageUrl != null
                           ? Image.network(
                               imageUrl!,
                               width: size - 6,

@@ -5,25 +5,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FollowModel {
   final String userId;
   final DateTime createdAt;
-  
+
   FollowModel({
     required this.userId,
     required this.createdAt,
   });
-  
+
   factory FollowModel.fromFirestore(Map<String, dynamic> data) {
     // createdAtがFirestoreのTimestampの場合、DateTimeに変換
     final timestamp = data['createdAt'];
-    final createdAt = timestamp is Timestamp 
-        ? timestamp.toDate() 
-        : DateTime.now();
-    
+    final createdAt =
+        timestamp is Timestamp ? timestamp.toDate() : DateTime.now();
+
     return FollowModel(
       userId: data['userId'] as String,
       createdAt: createdAt,
     );
   }
-  
+
   Map<String, dynamic> toFirestore() {
     return {
       'userId': userId,
@@ -40,7 +39,7 @@ class FollowStatsModel {
   final int followingCountLastWeek;
   final int followerCountLastDay;
   final int followerCountLastWeek;
-  
+
   FollowStatsModel({
     this.followingCount = 0,
     this.followerCount = 0,
@@ -49,7 +48,7 @@ class FollowStatsModel {
     this.followerCountLastDay = 0,
     this.followerCountLastWeek = 0,
   });
-  
+
   factory FollowStatsModel.fromFirestore(Map<String, dynamic> data) {
     return FollowStatsModel(
       followingCount: data['followingCount'] ?? 0,
@@ -60,7 +59,7 @@ class FollowStatsModel {
       followerCountLastWeek: data['followerCountLastWeek'] ?? 0,
     );
   }
-  
+
   Map<String, dynamic> toFirestore() {
     return {
       'followingCount': followingCount,
@@ -71,7 +70,7 @@ class FollowStatsModel {
       'followerCountLastWeek': followerCountLastWeek,
     };
   }
-  
+
   FollowStats toDomain() {
     return FollowStats(
       followingCount: followingCount,
@@ -82,7 +81,7 @@ class FollowStatsModel {
       followerCountLastWeek: followerCountLastWeek,
     );
   }
-  
+
   factory FollowStatsModel.fromDomain(FollowStats stats) {
     return FollowStatsModel(
       followingCount: stats.followingCount,
@@ -102,7 +101,7 @@ class FollowActivityModel {
   final String to;
   final String action;
   final DateTime createdAt;
-  
+
   FollowActivityModel({
     required this.id,
     required this.from,
@@ -110,14 +109,13 @@ class FollowActivityModel {
     required this.action,
     required this.createdAt,
   });
-  
+
   factory FollowActivityModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final timestamp = data['createdAt'];
-    final createdAt = timestamp is Timestamp 
-        ? timestamp.toDate() 
-        : DateTime.now();
-    
+    final createdAt =
+        timestamp is Timestamp ? timestamp.toDate() : DateTime.now();
+
     return FollowActivityModel(
       id: doc.id,
       from: data['from'] as String,
@@ -126,7 +124,7 @@ class FollowActivityModel {
       createdAt: createdAt,
     );
   }
-  
+
   Map<String, dynamic> toFirestore() {
     return {
       'from': from,
@@ -135,26 +133,26 @@ class FollowActivityModel {
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
-  
+
   FollowActivity toDomain() {
     return FollowActivity(
       id: id,
       fromUserId: from,
       toUserId: to,
-      activityType: action == 'follow' 
-          ? FollowActivityType.follow 
+      activityType: action == 'follow'
+          ? FollowActivityType.follow
           : FollowActivityType.unfollow,
       createdAt: createdAt,
     );
   }
-  
+
   factory FollowActivityModel.fromDomain(FollowActivity activity) {
     return FollowActivityModel(
       id: activity.id,
       from: activity.fromUserId,
       to: activity.toUserId,
-      action: activity.activityType == FollowActivityType.follow 
-          ? 'follow' 
+      action: activity.activityType == FollowActivityType.follow
+          ? 'follow'
           : 'unfollow',
       createdAt: activity.createdAt,
     );

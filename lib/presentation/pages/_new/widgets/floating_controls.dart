@@ -22,12 +22,12 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
   @override
   void initState() {
     super.initState();
-    
+
     _floatController = AnimationController(
       duration: const Duration(seconds: 4),
       vsync: this,
     )..repeat(reverse: true);
-    
+
     _expandController = AnimationController(
       duration: AppConstants.fastAnimation,
       vsync: this,
@@ -50,7 +50,7 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
         animation: Listenable.merge([_floatController, _expandController]),
         builder: (context, child) {
           final floatOffset = sin(_floatController.value * 2 * pi) * 5;
-          
+
           return Transform.translate(
             offset: Offset(0, floatOffset),
             child: Column(
@@ -59,7 +59,7 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
               children: [
                 // Expanded controls
                 if (_isExpanded) ..._buildExpandedControls(),
-                
+
                 // Main FAB
                 const SizedBox(height: 12),
                 _buildMainFAB(),
@@ -97,7 +97,7 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
       final index = entry.key;
       final control = entry.value;
       final delay = (controls.length - index - 1) * 50;
-      
+
       return Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: _buildEnhancedControlOrb(
@@ -105,10 +105,20 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
           tooltip: control.tooltip,
           color: control.color,
           onTap: control.onTap,
-        ).animate()
-          .fadeIn(delay: delay.ms, duration: 200.ms)
-          .slideX(begin: 1, end: 0, delay: delay.ms, duration: 300.ms, curve: Curves.easeOutBack)
-          .scale(begin: const Offset(0.5, 0.5), end: const Offset(1, 1), delay: delay.ms, duration: 300.ms),
+        )
+            .animate()
+            .fadeIn(delay: delay.ms, duration: 200.ms)
+            .slideX(
+                begin: 1,
+                end: 0,
+                delay: delay.ms,
+                duration: 300.ms,
+                curve: Curves.easeOutBack)
+            .scale(
+                begin: const Offset(0.5, 0.5),
+                end: const Offset(1, 1),
+                delay: delay.ms,
+                duration: 300.ms),
       );
     }).toList();
   }
@@ -147,7 +157,7 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
           children: [
             // Shimmer effect
             _buildFABShimmer(),
-            
+
             // Icon
             Center(
               child: AnimatedRotation(
@@ -187,8 +197,10 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                begin: Alignment(-1.0 + _floatController.value * 2, -1.0 + _floatController.value * 2),
-                end: Alignment(1.0 + _floatController.value * 2, 1.0 + _floatController.value * 2),
+                begin: Alignment(-1.0 + _floatController.value * 2,
+                    -1.0 + _floatController.value * 2),
+                end: Alignment(1.0 + _floatController.value * 2,
+                    1.0 + _floatController.value * 2),
                 colors: [
                   Colors.transparent,
                   Colors.white.withOpacity(0.3),
@@ -266,7 +278,7 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
                   ),
                 ),
               ),
-              
+
               // Icon
               Center(
                 child: Icon(
@@ -298,20 +310,20 @@ class _FloatingControlsState extends ConsumerState<FloatingControls>
     setState(() {
       _isExpanded = !_isExpanded;
     });
-    
+
     if (_isExpanded) {
       _expandController.forward();
     } else {
       _expandController.reverse();
     }
-    
+
     HapticFeedback.mediumImpact();
   }
 
   void _handleControlTap(DetailPanelType panelType) {
     HapticFeedback.lightImpact();
     ref.read(discoveryProvider.notifier).toggleDetailPanel(panelType);
-    
+
     // Auto-collapse after selection
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) {

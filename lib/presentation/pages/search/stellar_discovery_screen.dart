@@ -9,7 +9,6 @@ import 'package:app/presentation/pages/search/widgets/stellar_user_widget.dart';
 import 'package:app/presentation/pages/search/widgets/floating_controls.dart';
 import 'package:app/presentation/providers/users/online_users.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -20,18 +19,18 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
-    
+
     // 3D コントローラー
-    final controller3D = useMemoized(() => Flutter3DController());
-    
+    //final controller3D = useMemoized(() => Flutter3DController());
+
     // ズームレベルとローテーション
     final zoomLevel = useState(1.0);
     final rotationX = useState(0.0);
     final rotationY = useState(0.0);
-    
+
     // タッチ位置追跡
     final lastPanPosition = useState(Offset.zero);
-    
+
     // ユーザーデータ
     final newUsers = ref.watch(newUsersNotifierProvider);
     final activeUsers = ref.watch(recentUsersNotifierProvider);
@@ -42,11 +41,12 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
         children: [
           // 宇宙空間の背景
           const CosmicBackground(),
-          
+
           // 3D空間のユーザー表示
           GestureDetector(
             onScaleUpdate: (details) {
-              zoomLevel.value = (zoomLevel.value * details.scale).clamp(0.5, 3.0);
+              zoomLevel.value =
+                  (zoomLevel.value * details.scale).clamp(0.5, 3.0);
             },
             onPanStart: (details) {
               lastPanPosition.value = details.localPosition;
@@ -78,7 +78,7 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
                       loading: () => [],
                       error: (_, __) => [],
                     ),
-                    
+
                     // アクティブユーザーの表示
                     ...activeUsers.when(
                       data: (users) => _buildUserPlanets(
@@ -93,14 +93,15 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
               ),
             ),
           ),
-          
+
           // UI オーバーレイ
           SafeArea(
             child: Column(
               children: [
                 // ヘッダー
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Row(
                     children: [
                       ShaderWidget(
@@ -114,7 +115,8 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.filter_list, color: Colors.white),
+                        icon:
+                            const Icon(Icons.filter_list, color: Colors.white),
                         onPressed: () {
                           // フィルター機能
                         },
@@ -122,9 +124,9 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                
+
                 const Spacer(),
-                
+
                 // フローティングコントロール
                 FloatingControls(
                   onZoomIn: () {
@@ -139,7 +141,7 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
                     rotationY.value = 0.0;
                   },
                 ),
-                
+
                 const SizedBox(height: 20),
               ],
             ),
@@ -148,18 +150,19 @@ class StellarDiscoveryScreen extends HookConsumerWidget {
       ),
     );
   }
-  
-  List<Widget> _buildUserPlanets(List<UserAccount> users, {required bool isNewUser}) {
-    final random = math.Random();
+
+  List<Widget> _buildUserPlanets(List<UserAccount> users,
+      {required bool isNewUser}) {
+    //final random = math.Random();
     return users.asMap().entries.map((entry) {
       final index = entry.key;
       final user = entry.value;
-      
+
       // 3D空間での位置計算
       final angle = (index / users.length) * 2 * math.pi;
       final radius = isNewUser ? 150.0 : 250.0;
-      final height = random.nextDouble() * 100 - 50;
-      
+      //final height = random.nextDouble() * 100 - 50;
+
       return StellarUserWidget(
         user: user,
         orbitRadius: radius,

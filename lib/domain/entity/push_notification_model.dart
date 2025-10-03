@@ -151,8 +151,6 @@ class PushNotificationModel {
   }
 }
 
-
-
 /*
 {
   "type": "notification_type",      // 通知タイプ（dm, call, like, comment, follow, etc）

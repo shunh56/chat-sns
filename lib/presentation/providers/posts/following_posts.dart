@@ -65,7 +65,7 @@ class FollowingPostsNotifier extends StateNotifier<AsyncValue<List<Post>>> {
     final List<String> userIds = [...followingIds, myId];
     final posts = await postsNotifier.getPostsFromUserIds(userIds);
     posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    
+
     if (mounted) {
       state = AsyncValue.data(posts);
     }

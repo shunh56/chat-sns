@@ -21,7 +21,7 @@ class ToggleStoryLikeUsecase {
   }) async {
     // 現在のいいね状態を確認
     final isLiked = await _storyRepository.hasUserLikedStory(storyId, userId);
-    
+
     // いいねの状態を切り替え
     if (isLiked) {
       await _storyRepository.unlikeStory(storyId, userId);
