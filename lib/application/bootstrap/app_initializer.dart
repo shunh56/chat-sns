@@ -141,7 +141,8 @@ class AppInitializer {
   Future<void> _configureCrashlytics() async {
     if (!kDebugMode) {
       await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
-      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
     }
     DebugPrint('Crashlytics configured');
   }

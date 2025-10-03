@@ -44,54 +44,54 @@ class AppRouter {
 
   /// ルート定義
   List<RouteBase> get _routes => [
-    GoRoute(
-      path: '/splash',
-      name: 'splash',
-      builder: (context, state) => const UpdateNotifier(
-        child: _InitialLoadingScreen(),
-      ),
-    ),
-    GoRoute(
-      path: '/maintenance',
-      name: 'maintenance',
-      builder: (context, state) => const MaintenanceScreen(),
-    ),
-    GoRoute(
-      path: '/welcome',
-      name: 'welcome',
-      builder: (context, state) => const WelcomePage(),
-    ),
-    GoRoute(
-      path: '/onboarding',
-      name: 'onboarding',
-      builder: (context, state) => const OnboardingScreen(),
-    ),
-    GoRoute(
-      path: '/onboarding-flow',
-      name: 'onboarding-flow',
-      builder: (context, state) => const OnboardingFlowScreen(),
-    ),
-    GoRoute(
-      path: '/banned',
-      name: 'banned',
-      builder: (context, state) => const BannedAccountScreen(),
-    ),
-    GoRoute(
-      path: '/freezed',
-      name: 'freezed',
-      builder: (context, state) => const FreezedAccountScreen(),
-    ),
-    GoRoute(
-      path: '/deleted',
-      name: 'deleted',
-      builder: (context, state) => const DeletedAccountScreen(),
-    ),
-    GoRoute(
-      path: '/home',
-      name: 'home',
-      builder: (context, state) => const MainPageWrapper(),
-    ),
-  ];
+        GoRoute(
+          path: '/splash',
+          name: 'splash',
+          builder: (context, state) => const UpdateNotifier(
+            child: _InitialLoadingScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/maintenance',
+          name: 'maintenance',
+          builder: (context, state) => const MaintenanceScreen(),
+        ),
+        GoRoute(
+          path: '/welcome',
+          name: 'welcome',
+          builder: (context, state) => const WelcomePage(),
+        ),
+        GoRoute(
+          path: '/onboarding',
+          name: 'onboarding',
+          builder: (context, state) => const OnboardingScreen(),
+        ),
+        GoRoute(
+          path: '/onboarding-flow',
+          name: 'onboarding-flow',
+          builder: (context, state) => const OnboardingFlowScreen(),
+        ),
+        GoRoute(
+          path: '/banned',
+          name: 'banned',
+          builder: (context, state) => const BannedAccountScreen(),
+        ),
+        GoRoute(
+          path: '/freezed',
+          name: 'freezed',
+          builder: (context, state) => const FreezedAccountScreen(),
+        ),
+        GoRoute(
+          path: '/deleted',
+          name: 'deleted',
+          builder: (context, state) => const DeletedAccountScreen(),
+        ),
+        GoRoute(
+          path: '/home',
+          name: 'home',
+          builder: (context, state) => const MainPageWrapper(),
+        ),
+      ];
 
   /// リダイレクト処理
   Future<String?> _redirect(BuildContext context, GoRouterState state) async {
@@ -140,40 +140,40 @@ class AppRouter {
 
       // アカウントステータスの確認
       switch (account.accountStatus) {
-      case AccountStatus.banned:
-        if (state.matchedLocation != '/banned') {
-          return '/banned';
-        }
-        break;
-      case AccountStatus.freezed:
-        if (state.matchedLocation != '/freezed') {
-          return '/freezed';
-        }
-        break;
-      case AccountStatus.deleted:
-        if (state.matchedLocation != '/deleted') {
-          return '/deleted';
-        }
-        break;
-      default:
-        // オンボーディング完了チェック
-        final onboardingAsync = _ref.read(initialOnboardingStateProvider);
-        final onboardingState = onboardingAsync.valueOrNull;
-
-        if (onboardingState != null && !onboardingState.isCompleted) {
-          if (state.matchedLocation != '/onboarding-flow') {
-            return '/onboarding-flow';
+        case AccountStatus.banned:
+          if (state.matchedLocation != '/banned') {
+            return '/banned';
           }
-          return null;
-        }
+          break;
+        case AccountStatus.freezed:
+          if (state.matchedLocation != '/freezed') {
+            return '/freezed';
+          }
+          break;
+        case AccountStatus.deleted:
+          if (state.matchedLocation != '/deleted') {
+            return '/deleted';
+          }
+          break;
+        default:
+          // オンボーディング完了チェック
+          final onboardingAsync = _ref.read(initialOnboardingStateProvider);
+          final onboardingState = onboardingAsync.valueOrNull;
 
-        // すべての条件をクリアしたらホームへ
-        if (state.matchedLocation == '/splash' ||
-            state.matchedLocation == '/welcome' ||
-            state.matchedLocation == '/onboarding' ||
-            state.matchedLocation == '/onboarding-flow') {
-          return '/home';
-        }
+          if (onboardingState != null && !onboardingState.isCompleted) {
+            if (state.matchedLocation != '/onboarding-flow') {
+              return '/onboarding-flow';
+            }
+            return null;
+          }
+
+          // すべての条件をクリアしたらホームへ
+          if (state.matchedLocation == '/splash' ||
+              state.matchedLocation == '/welcome' ||
+              state.matchedLocation == '/onboarding' ||
+              state.matchedLocation == '/onboarding-flow') {
+            return '/home';
+          }
       }
 
       return null;
