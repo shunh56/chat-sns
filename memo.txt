@@ -83,6 +83,8 @@ flutter pub run import_sorter:main
 Xcode データ関係の削除
 https://qiita.com/shtnkgm/items/c96a58579ec406194fa8
 
+rm -rf ~/Library/Developer/Xcode/DerivedData/
+
 
 
 

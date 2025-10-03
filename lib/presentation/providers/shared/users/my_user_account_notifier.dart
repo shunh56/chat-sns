@@ -15,7 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final myAccountNotifierProvider = StateNotifierProvider.autoDispose<
+final myAccountNotifierProvider = StateNotifierProvider<
     MyAccountNotifier, AsyncValue<UserAccount>>(
   (ref) => MyAccountNotifier(
     ref,
