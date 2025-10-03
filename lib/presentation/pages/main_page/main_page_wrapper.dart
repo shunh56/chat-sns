@@ -37,7 +37,8 @@ class MainPageWrapper extends HookConsumerWidget {
         }
       }
 
-      WidgetsBinding.instance.addObserver(_LifecycleObserver(handleLifecycleChange));
+      WidgetsBinding.instance
+          .addObserver(_LifecycleObserver(handleLifecycleChange));
 
       return () {
         // 実際のオブザーバーの削除は_LifecycleObserverのdisposeで行う

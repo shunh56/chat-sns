@@ -7,7 +7,8 @@ import '../../../providers/state/scroll_controller.dart';
 import '../constants/tab_constants.dart';
 
 /// メインページの統合状態管理
-final mainPageStateProvider = StateNotifierProvider<MainPageStateNotifier, MainPageState>((ref) {
+final mainPageStateProvider =
+    StateNotifierProvider<MainPageStateNotifier, MainPageState>((ref) {
   return MainPageStateNotifier(ref);
 });
 

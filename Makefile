@@ -87,6 +87,10 @@ run-dev-debug:
 	@echo "Running dev environment in debug mode..."
 	$(FLUTTER) run --debug $(DART_DEFINE_DEV)
 
+run-dev-debug-wireless:
+	@echo "Running dev environment in debug mode..."
+	$(FLUTTER) run --debug $(DART_DEFINE_DEV) -d 00008110-001E3D9221F2401E
+
 run-dev-profile:
 	@echo "Running dev environment in profile mode..."
 	$(FLUTTER) run --profile $(DART_DEFINE_DEV)

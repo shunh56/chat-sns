@@ -14,7 +14,8 @@ class MainFloatingActionButtons extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentIndex = ref.watch(mainPageStateProvider.select((state) => state.currentIndex));
+    final currentIndex =
+        ref.watch(mainPageStateProvider.select((state) => state.currentIndex));
 
     return _buildFloatingActionButton(context, currentIndex);
   }

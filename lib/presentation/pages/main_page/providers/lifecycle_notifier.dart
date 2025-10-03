@@ -6,7 +6,8 @@ import '../../../providers/shared/app/session_provider.dart';
 import '../../../providers/shared/users/my_user_account_notifier.dart';
 
 /// アプリライフサイクル管理プロバイダー
-final lifecycleNotifierProvider = StateNotifierProvider<LifecycleNotifier, LifecycleState>((ref) {
+final lifecycleNotifierProvider =
+    StateNotifierProvider<LifecycleNotifier, LifecycleState>((ref) {
   return LifecycleNotifier(ref);
 });
 
@@ -26,7 +27,8 @@ class LifecycleState {
   }) {
     return LifecycleState(
       currentState: currentState ?? this.currentState,
-      isTrackingPermissionRequested: isTrackingPermissionRequested ?? this.isTrackingPermissionRequested,
+      isTrackingPermissionRequested:
+          isTrackingPermissionRequested ?? this.isTrackingPermissionRequested,
     );
   }
 }
@@ -51,7 +53,8 @@ class LifecycleNotifier extends StateNotifier<LifecycleState> {
     try {
       final status = await AppTrackingTransparency.trackingAuthorizationStatus;
 
-      if (status == TrackingStatus.notDetermined && !state.isTrackingPermissionRequested) {
+      if (status == TrackingStatus.notDetermined &&
+          !state.isTrackingPermissionRequested) {
         // 少し待ってからトラッキング許可をリクエスト
         await Future.delayed(const Duration(milliseconds: 200));
         await AppTrackingTransparency.requestTrackingAuthorization();
