@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../chat/chat_screen.dart';
 import '../../profile/profile_page.dart';
 import '../../search/search_users_screen.dart';
-import '../../posts/timeline/timeline_page.dart';
+import 'package:app/presentation/pages/posts/features/timeline/timeline_page.dart';
 import '../providers/main_page_state_notifier.dart';
 
 /// メインページのコンテンツ表示

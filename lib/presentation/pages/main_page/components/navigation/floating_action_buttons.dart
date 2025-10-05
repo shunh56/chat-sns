@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../../core/utils/theme.dart';
 import '../../../../routes/page_transition.dart';
 import '../../../chat/sub_pages/create_chat_screen.dart';
-import '../../../posts/create/create_post_screen/create_post_screen.dart';
+import 'package:app/presentation/pages/posts/features/post_creation/post_creation_page.dart';
 import '../../constants/tab_constants.dart';
 import '../../providers/main_page_state_notifier.dart';
 
@@ -23,7 +23,7 @@ class MainFloatingActionButtons extends ConsumerWidget {
   /// 現在のタブに応じたFloating Action Buttonを構築
   Widget _buildFloatingActionButton(BuildContext context, int currentIndex) {
     switch (currentIndex) {
-      case MainPageTabIndex.home:
+      case MainPageTabIndex.timeline:
         return _buildCreatePostFAB(context);
       case MainPageTabIndex.chat:
         return _buildCreateChatFAB(context);
@@ -65,7 +65,7 @@ class MainFloatingActionButtons extends ConsumerWidget {
     Navigator.push(
       context,
       PageTransitionMethods.slideUp(
-        const CreatePostScreen(),
+        const PostCreationPage(),
       ),
     );
   }

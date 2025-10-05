@@ -2,6 +2,7 @@
 import 'package:app/core/utils/variables.dart';
 import 'package:app/domain/entity/push_notification_model.dart';
 import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_screen.dart';
+import 'package:app/presentation/pages/posts/features/post_detail/post_detail_page.dart';
 import 'package:app/presentation/providers/shared/notifications/dm_notification_provider.dart';
 import 'package:app/presentation/services/notification_service.dart';
 import 'package:app/core/utils/debug_print.dart';
@@ -485,13 +486,13 @@ class NotificationHandler {
     final postId = notification.payload?.postId;
 
     if (postId != null && navigatorKey.currentState != null) {
-      /* navigatorKey.currentState!.push(
+      navigatorKey.currentState!.push(
         MaterialPageRoute(
           builder: (context) => PostDetailPage(
             postId: postId,
           ),
         ),
-      ); */
+      );
       DebugPrint('投稿詳細画面への遷移: postId=$postId');
     }
   }
@@ -865,13 +866,13 @@ class NotificationHandler {
     final postId = notification.payload?.postId;
 
     if (postId != null && navigatorKey.currentState != null) {
-      /* navigatorKey.currentState!.push(
+      navigatorKey.currentState!.push(
         MaterialPageRoute(
           builder: (context) => PostDetailPage(
             postId: postId,
           ),
         ),
-      ); */
+      );
     }
   }
 
