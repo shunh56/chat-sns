@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/domain/entity/user.dart';
+import 'package:app/domain/usecases/device_management_usecase.dart';
 import 'package:app/presentation/providers/onboarding_providers.dart';
 import 'package:app/domain/usecases/image_uploader_usecase.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
@@ -10,9 +11,7 @@ import 'package:app/presentation/providers/shared/users/all_users_notifier.dart'
 import 'package:app/domain/usecases/invite_code_usecase.dart';
 import 'package:app/domain/usecases/user_usecase.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final myAccountNotifierProvider =
@@ -109,45 +108,97 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     }
   }
 
-  onOpen() async {
-    final user = state.asData!.value;
-    await Future.delayed(const Duration(milliseconds: 50));
-    if (!kDebugMode) {
-      final token = await FirebaseMessaging.instance.getToken();
-      final voipToken = Platform.isIOS
-          ? await FlutterCallkitIncoming.getDevicePushTokenVoIP()
-          : null;
-      final updatedUser = user.copyWith(
-        isOnline: true,
-        lastOpenedAt: Timestamp.now(),
-        fcmToken: token,
-        voipToken: voipToken,
-      );
-      state = AsyncValue.data(updatedUser);
-      update(updatedUser);
-    } else {
-      final updatedUser = user.copyWith(
-        isOnline: true,
-        lastOpenedAt: Timestamp.now(),
-      );
-      state = AsyncValue.data(updatedUser);
-      update(updatedUser);
-    }
+  /// オンライン状態を設定 (軽量な更新)
+  /// フォアグラウンド復帰時などに使用
+  Future<void> setOnlineStatus(bool isOnline) async {
+    if (state.asData == null) return;
 
-    //final token = await FirebaseMessaging.instance.getAPNSToken();
-  }
-
-  onClosed() {
-    if (state.asData == null) {
-      return;
-    }
     final user = state.asData!.value;
+
+    // ★ ローカル状態を即座に更新
     final updatedUser = user.copyWith(
-      isOnline: false,
+      isOnline: isOnline,
       lastOpenedAt: Timestamp.now(),
     );
     state = AsyncValue.data(updatedUser);
-    update(updatedUser);
+
+    // ★ Firestore は isOnline と lastOpenedAt のみ更新 (デバイス情報は更新しない)
+    try {
+      await usecase.updateUserFields(
+        userId: user.userId,
+        fields: {
+          'isOnline': isOnline,
+          'lastOpenedAt': FieldValue.serverTimestamp(),
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('[OnlineStatus] Failed to update: $e');
+      }
+    }
+  }
+
+  /// デバイス登録 (初回またはトークン変更時のみ)
+  /// トークンが変更されていない場合は lastActiveAt のみ更新
+  Future<void> registerDeviceIfNeeded() async {
+    if (state.asData == null) return;
+
+    final user = state.asData!.value;
+
+    try {
+      // ★ DeviceManagementUsecase を経由 (クリーンアーキテクチャ準拠)
+      final deviceManagementUsecase = ref.read(deviceManagementUsecaseProvider);
+      final result = await deviceManagementUsecase.registerDeviceIfNeeded(user.userId);
+
+      // トークンが変更された場合、ローカル状態を更新
+      if (result.deviceUpdated) {
+        if (kDebugMode) {
+          print('[DeviceRegistration] Tokens changed, updating local state');
+        }
+
+        // ★ UserAccount を再取得して activeDevices を含めて更新
+        final updatedUserAccount = await usecase.getUserByUid(user.userId);
+        if (updatedUserAccount != null && mounted) {
+          state = AsyncValue.data(updatedUserAccount);
+          ref.read(allUsersNotifierProvider.notifier).addUserAccounts([updatedUserAccount]);
+        }
+
+        // 従来のフィールドも更新 (後方互換性)
+        // これは上記の getUserByUid で取得されるが、明示的に更新する場合:
+        // final updatedUser = user.copyWith(
+        //   fcmToken: result.fcmToken,
+        //   voipToken: result.voipToken,
+        // );
+        // state = AsyncValue.data(updatedUser);
+      } else {
+        if (kDebugMode) {
+          print('[DeviceRegistration] LastActiveAt updated (no token change)');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('[DeviceRegistration] Error: $e');
+      }
+    }
+  }
+
+  /// @deprecated Use registerDeviceIfNeeded() and setOnlineStatus() instead
+  /// 後方互換性のため残す
+  @Deprecated('Use registerDeviceIfNeeded() and setOnlineStatus() instead')
+  onOpen() async {
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    // ★ 新しいメソッドを使用
+    if (!kDebugMode) {
+      await registerDeviceIfNeeded();
+    }
+    await setOnlineStatus(true);
+  }
+
+  /// @deprecated Use setOnlineStatus(false) instead
+  @Deprecated('Use setOnlineStatus(false) instead')
+  onClosed() {
+    setOnlineStatus(false);
   }
 
   onSignOut() async {

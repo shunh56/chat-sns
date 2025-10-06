@@ -1,3 +1,4 @@
+import 'package:app/presentation/services/token_refresh_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
@@ -15,20 +16,24 @@ final lifecycleNotifierProvider =
 class LifecycleState {
   final AppLifecycleState currentState;
   final bool isTrackingPermissionRequested;
+  final bool isInitialized;
 
   const LifecycleState({
     this.currentState = AppLifecycleState.resumed,
     this.isTrackingPermissionRequested = false,
+    this.isInitialized = false,
   });
 
   LifecycleState copyWith({
     AppLifecycleState? currentState,
     bool? isTrackingPermissionRequested,
+    bool? isInitialized,
   }) {
     return LifecycleState(
       currentState: currentState ?? this.currentState,
       isTrackingPermissionRequested:
           isTrackingPermissionRequested ?? this.isTrackingPermissionRequested,
+      isInitialized: isInitialized ?? this.isInitialized,
     );
   }
 }
@@ -39,13 +44,23 @@ class LifecycleNotifier extends StateNotifier<LifecycleState> {
 
   LifecycleNotifier(this._ref) : super(const LifecycleState());
 
-  /// 初期化処理
+  /// 初期化処理 (アプリ起動時のみ1回)
   Future<void> initialize() async {
-    // ユーザーアカウントをオンライン状態に
-    _ref.read(myAccountNotifierProvider.notifier).onOpen();
+    if (state.isInitialized) return;
+
+    // ★ デバイス登録 (初回のみ)
+    await _ref.read(myAccountNotifierProvider.notifier).registerDeviceIfNeeded();
+
+    // ★ トークンリフレッシュリスナーを開始
+    _ref.read(tokenRefreshServiceProvider).initialize();
+
+    // ユーザーをオンライン状態に
+    await _ref.read(myAccountNotifierProvider.notifier).setOnlineStatus(true);
 
     // トラッキング許可の初期化
     await _initializeTracking();
+
+    state = state.copyWith(isInitialized: true);
   }
 
   /// トラッキング許可の初期化
@@ -85,8 +100,8 @@ class LifecycleNotifier extends StateNotifier<LifecycleState> {
 
   /// アプリがフォアグラウンドに戻った時の処理
   void _handleAppResumed() {
-    // ユーザーをオンライン状態に
-    _ref.read(myAccountNotifierProvider.notifier).onOpen();
+    // ★ 変更: デバイス登録はせず、オンライン状態のみ更新
+    _ref.read(myAccountNotifierProvider.notifier).setOnlineStatus(true);
 
     // セッションを開始
     _ref.read(sessionStateProvider.notifier).startSession();
@@ -94,8 +109,8 @@ class LifecycleNotifier extends StateNotifier<LifecycleState> {
 
   /// アプリがバックグラウンドに移った時の処理
   void _handleAppPaused() {
-    // ユーザーをオフライン状態に
-    _ref.read(myAccountNotifierProvider.notifier).onClosed();
+    // ★ オフライン状態に
+    _ref.read(myAccountNotifierProvider.notifier).setOnlineStatus(false);
 
     // セッションを終了
     _ref.read(sessionStateProvider.notifier).endSession();

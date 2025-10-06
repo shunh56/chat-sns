@@ -95,4 +95,13 @@ class UserRepository {
   updateUser(Map<String, dynamic> json) {
     return _datasource.updateUser(json);
   }
+
+  /// 特定のフィールドのみを更新
+  /// 部分更新に使用 (例: isOnline, lastOpenedAt のみ更新)
+  Future<void> updateUserFields({
+    required String userId,
+    required Map<String, dynamic> fields,
+  }) {
+    return _datasource.updateUserFields(userId, fields);
+  }
 }
