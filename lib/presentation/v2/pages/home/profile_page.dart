@@ -1,3 +1,4 @@
+import 'package:app/presentation/pages/user_tag/my_tags_page.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -138,7 +139,7 @@ class ProfilePage extends HookConsumerWidget {
               const Gap(TempoSpacing.xl),
 
               // 設定メニューセクション
-              _buildSettingsSection(),
+              _buildSettingsSection(context),
             ],
           ),
         ),
@@ -460,8 +461,14 @@ class ProfilePage extends HookConsumerWidget {
   }
 
   // 設定セクション
-  Widget _buildSettingsSection() {
+  Widget _buildSettingsSection(BuildContext context) {
     const menuItems = [
+      {
+        'icon': Icons.label,
+        'title': 'マイタグ',
+        'description': 'タグの管理',
+        'route': 'tags',
+      },
       {
         'icon': Icons.notifications,
         'title': '通知設定',
@@ -483,20 +490,22 @@ class ProfilePage extends HookConsumerWidget {
     return Column(
       children: menuItems
           .map((item) => _buildSettingsItem(
+                context,
                 item['icon'] as IconData,
                 item['title'] as String,
                 item['description'] as String,
-                () {},
+                item['route'] as String?,
               ))
           .toList(),
     );
   }
 
   Widget _buildSettingsItem(
+    BuildContext context,
     IconData icon,
     String title,
     String description,
-    VoidCallback onTap,
+    String? route,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: TempoSpacing.md),
@@ -507,7 +516,13 @@ class ProfilePage extends HookConsumerWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
+          onTap: () {
+            if (route == 'tags') {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const MyTagsPage()),
+              );
+            }
+          },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(TempoSpacing.md),

@@ -28,6 +28,32 @@ service cloud.firestore {
                     && resource.data.visitorId == request.auth.uid;
     }
 
+    // ユーザータグ機能 Security Rules
+    // users/{userId}/tags/{tagId} - タグ定義（プライベート）
+    match /users/{userId}/tags/{tagId} {
+      // 読み取り権限: 本人のみ
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // 作成・更新権限: 本人のみ
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+
+      // 削除権限: 本人のみ（システムタグは削除不可）
+      allow delete: if request.auth != null
+                    && request.auth.uid == userId
+                    && resource.data.isSystemTag == false;
+    }
+
+    // user_tags/{userId}/tagged_users/{targetId} - タグ付けされたユーザー（プライベート）
+    match /user_tags/{userId}/tagged_users/{targetId} {
+      // 読み取り権限: 本人のみ
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // 作成・更新・削除権限: 本人のみ
+      allow create, update, delete: if request.auth != null
+                                    && request.auth.uid == userId
+                                    && request.resource.data.userId == request.auth.uid;
+    }
+
     // その他のコレクション: 開発用（要本番用ルール追加）
     match /{document=**} {
       allow read, write: if true;

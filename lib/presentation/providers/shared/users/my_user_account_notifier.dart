@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:app/domain/entity/invite_code.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/domain/usecases/device_management_usecase.dart';
+import 'package:app/domain/usecases/user_tag_usecase.dart';
 import 'package:app/presentation/providers/onboarding_providers.dart';
 import 'package:app/domain/usecases/image_uploader_usecase.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
@@ -37,9 +38,32 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
         ref
             .read(allUsersNotifierProvider.notifier)
             .addUserAccounts([userAccount]);
+
+        // システムタグを初期化 (初回ログイン時のみ)
+        _initializeSystemTagsIfNeeded();
       } else {
         state = AsyncValue.data(UserAccount.nullUser());
         usecase.createUser(UserAccount.nullUser());
+
+        // 新規ユーザーの場合もシステムタグを初期化
+        _initializeSystemTagsIfNeeded();
+      }
+    }
+  }
+
+  Future<void> _initializeSystemTagsIfNeeded() async {
+    try {
+      final tagUsecase = ref.read(userTagUsecaseProvider);
+      final tags = await tagUsecase.watchMyTags().first;
+
+      // タグが存在しない場合のみ初期化
+      if (tags.isEmpty) {
+        await tagUsecase.initializeSystemTags();
+      }
+    } catch (e) {
+      // タグ初期化の失敗は致命的ではないのでログのみ
+      if (kDebugMode) {
+        print('Failed to initialize system tags: $e');
       }
     }
   }

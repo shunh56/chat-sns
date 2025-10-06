@@ -4,6 +4,7 @@ import 'package:app/data/datasource/local/hashtags.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/components/user_tag/tag_button.dart';
 import 'package:app/presentation/providers/footprint/footprint_manager_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/report/report_user_screen.dart';
@@ -427,6 +428,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                                 ),
                               const Expanded(child: SizedBox()),
                               _buildFollowButton(),
+                              const Gap(8),
+                              UserTagButton(targetUserId: user.userId),
 
                               /*
                               const Gap(12),
@@ -500,6 +503,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           color: ThemeColor.subText,
                         ),
                       ),
+                      // タグアイコン表示
+                      const Gap(8),
+                      UserTagIcons(targetUserId: user.userId),
                       // 自己紹介
                       if (user.aboutMe.isNotEmpty)
                         Padding(
