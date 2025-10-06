@@ -110,7 +110,7 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
         ),
         const Gap(12),
         const ActivityIcon(),
-        const Gap(12),
+
         /* Container(
             decoration: BoxDecoration(
               color: const Color(0xFF222222),
@@ -138,34 +138,6 @@ _buildAppBar(BuildContext context, WidgetRef ref) {
             ),
           ),
           const Gap(12), */
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF222222),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const SearchParamsScreen(),
-                  ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Icon(
-                  Icons.search_rounded,
-                  color: ThemeColor.white.withOpacity(0.8),
-                  size: 24,
-                ),
-              ),
-            ),
-          ),
-        ),
       ],
     ),
   );

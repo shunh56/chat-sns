@@ -5,6 +5,7 @@ import 'package:app/presentation/pages/chat/sub_pages/chatting_screen/chatting_s
 import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_profile_page.dart';
 import 'package:app/presentation/pages/posts/features/post_detail/post_detail_page.dart';
+import 'package:app/presentation/pages/footprint/footprint_screen.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:flutter/material.dart';
@@ -76,6 +77,15 @@ class NavigationRouter {
         builder: (_) => PostDetailPage(
           postId: post.id,
         ),
+      ),
+    );
+  }
+
+  goToFootprint() {
+    Navigator.push(
+      context,
+      PageTransitionMethods.slideUp(
+        const FootprintScreen(),
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'package:app/presentation/providers/footprint/mark_seen_provider.dart';
 import 'package:app/presentation/providers/footprint/remove_footprint_provider.dart';
 import 'package:app/presentation/providers/footprint/unread_count_provider.dart';
 import 'package:app/presentation/providers/footprint/visit_profile_provider.dart';
-import 'package:app/presentation/providers/footprint/visited_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // 足あと機能の操作をまとめて提供する複合プロバイダ
@@ -45,7 +44,6 @@ class FootprintManager {
   // 特定の足あとを削除する
   Future<void> removeFootprint(String userId) async {
     await _removeFootprintProvider.removeFootprint(userId);
-    _ref.read(visitedControllerProvider.notifier).removeFootprint(userId);
   }
 
   // 未読足あと数を取得

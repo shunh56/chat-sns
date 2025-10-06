@@ -1,10 +1,20 @@
-rules_version = '2';
+// Footprint機能 Security Rules（v2.0.0 親コレクション設計）
+//
+// コレクション構造:
+// footprints/{footprintId}
+//   - visitorId: string      # 訪問者のユーザーID
+//   - visitedUserId: string  # 訪問されたユーザーID
+//   - visitedAt: timestamp   # 訪問日時
+//   - isSeen: boolean        # 既読フラグ
+//   - version: number        # データバージョン
 
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Footprint機能 Security Rules（v2.0.0 親コレクション設計）
+    // 親コレクション: footprints
     match /footprints/{footprintId} {
+
       // 読み取り権限: 訪問者または訪問された人のみ
       allow read: if request.auth != null
                   && (resource.data.visitorId == request.auth.uid
@@ -26,11 +36,6 @@ service cloud.firestore {
       // 削除権限: 訪問者のみが自分の訪問記録を削除可能
       allow delete: if request.auth != null
                     && resource.data.visitorId == request.auth.uid;
-    }
-
-    // その他のコレクション: 開発用（要本番用ルール追加）
-    match /{document=**} {
-      allow read, write: if true;
     }
   }
 }

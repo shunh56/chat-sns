@@ -2,7 +2,7 @@ import 'package:app/core/analytics/screen_name.dart';
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/domain/entity/footprint.dart';
+import 'package:app/domain/entity/footprint/footprint.dart';
 import 'package:app/presentation/components/image/image.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/providers/footprint/footprint_manager_provider.dart';
@@ -27,7 +27,7 @@ class FootprintScreen extends HookConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final tabController = useTabController(initialLength: 2);
     final visitorsState = ref.watch(visitorsProvider);
-    final visitedState = ref.watch(visitedControllerProvider);
+    final visitedState = ref.watch(visitedProvider);
 
     // 足あとを表示時に既読にする
     useEffect(() {
@@ -115,14 +115,14 @@ class FootprintScreen extends HookConsumerWidget {
                         color: ThemeColor.text,
                         backgroundColor: ThemeColor.stroke,
                         onRefresh: () async {
-                          ref.read(visitorsProvider.notifier).refresh();
+                          ref.invalidate(visitorsProvider);
                         },
                         child: FootprintGridView(
                           footprints: visitors,
                           onDelete: (footprint) {
                             ref
                                 .read(footprintManagerProvider)
-                                .removeFootprint(footprint.userId);
+                                .removeFootprint(footprint.visitorId);
                           },
                         ),
                       );
@@ -146,9 +146,7 @@ class FootprintScreen extends HookConsumerWidget {
                         color: ThemeColor.text,
                         backgroundColor: ThemeColor.stroke,
                         onRefresh: () async {
-                          ref
-                              .read(visitedControllerProvider.notifier)
-                              .refresh();
+                          ref.invalidate(visitedProvider);
                         },
                         child: FootprintGridView(
                           footprints: visited,
@@ -156,7 +154,7 @@ class FootprintScreen extends HookConsumerWidget {
                           onDelete: (footprint) {
                             ref
                                 .read(footprintManagerProvider)
-                                .removeFootprint(footprint.userId);
+                                .removeFootprint(footprint.visitedUserId);
                           },
                         ),
                       );
@@ -171,162 +169,6 @@ class FootprintScreen extends HookConsumerWidget {
         ),
       ),
     );
-    /*   return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 160,
-            pinned: true,
-            // backgroundColor: Theme.of(context).colorScheme.primary,
-            flexibleSpace: FlexibleSpaceBar(
-              title: const Text(
-                '足あと',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                      Theme.of(context).colorScheme.primary,
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: 20,
-                      bottom: 80,
-                      child: Icon(
-                        Icons.follow_the_signs_rounded,
-                        size: 80,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimary
-                            .withOpacity(0.2),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              PopupMenuButton<FootprintPrivacy>(
-                icon: const Icon(Icons.settings),
-                tooltip: 'プライバシー設定',
-                onSelected: (privacy) {
-                  // ref.read(footprintManagerProvider).updatePrivacySetting(privacy);
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: FootprintPrivacy.everyone,
-                    child: Row(
-                      children: [
-                        Icon(Icons.public, size: 20),
-                        SizedBox(width: 12),
-                        Text('全員に表示'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: FootprintPrivacy.friendsOnly,
-                    child: Row(
-                      children: [
-                        Icon(Icons.people, size: 20),
-                        SizedBox(width: 12),
-                        Text('友達のみに表示'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: FootprintPrivacy.disabled,
-                    child: Row(
-                      children: [
-                        Icon(Icons.visibility_off, size: 20),
-                        SizedBox(width: 12),
-                        Text('無効にする'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            bottom: TabBar(
-              controller: tabController,
-              indicatorColor: Theme.of(context).colorScheme.onPrimary,
-              tabs: const [
-                Tab(
-                  icon: Icon(Icons.login),
-                  text: "訪問された",
-                ),
-                Tab(
-                  icon: Icon(Icons.logout),
-                  text: "訪問した",
-                ),
-              ],
-            ),
-          ),
-          SliverFillRemaining(
-            child: TabBarView(
-              controller: tabController,
-              children: [
-                // 訪問された
-                visitorsState.when(
-                  data: (visitors) {
-                    if (visitors.isEmpty) {
-                      return const EmptyFootprintState(
-                        message: 'まだ誰も訪問していません',
-                        icon: Icons.person_off,
-                      );
-                    }
-
-                    return FootprintListView(
-                      footprints: visitors,
-                      onDelete: (footprint) {
-                        ref
-                            .read(footprintManagerProvider)
-                            .removeFootprint(footprint.userId);
-                      },
-                    );
-                  },
-                  loading: () => const FootprintLoadingState(),
-                  error: (error, stack) => FootprintErrorState(error: error),
-                ),
-
-                // 訪問した
-                visitedState.when(
-                  data: (visited) {
-                    if (visited.isEmpty) {
-                      return const EmptyFootprintState(
-                        message: 'まだ誰も訪問していません',
-                        icon: Icons.travel_explore,
-                      );
-                    }
-
-                    return FootprintListView(
-                      footprints: visited,
-                      onDelete: (footprint) {
-                        ref
-                            .read(footprintManagerProvider)
-                            .removeFootprint(footprint.userId);
-                      },
-                    );
-                  },
-                  loading: () => const FootprintLoadingState(),
-                  error: (error, stack) => FootprintErrorState(error: error),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  */
   }
 }
 
@@ -348,7 +190,7 @@ class FootprintGridView extends StatelessWidget {
     final Map<String, List<Footprint>> groupedFootprints = {};
 
     for (final footprint in footprints) {
-      final dateKey = _getDateKey(footprint.updatedAt);
+      final dateKey = _getDateKey(footprint.visitedAt);
       if (!groupedFootprints.containsKey(dateKey)) {
         groupedFootprints[dateKey] = [];
       }
@@ -365,7 +207,7 @@ class FootprintGridView extends StatelessWidget {
           // 日付ヘッダー
           SliverToBoxAdapter(
             child: _buildDateHeader(
-                context, groupedFootprints[dateKey]![0].updatedAt),
+                context, groupedFootprints[dateKey]![0].visitedAt),
           ),
           // グリッドビュー (2列)
           SliverPadding(
@@ -458,7 +300,7 @@ class AnimatedFootprintGridCard extends HookConsumerWidget {
       return null;
     }, []);
 
-    final userAsyncValue = ref.watch(userByUserIdProvider(footprint.userId));
+    final userAsyncValue = ref.watch(userByUserIdProvider(footprint.visitorId));
 
     return Opacity(
       opacity: fadeAnimation,
@@ -645,10 +487,10 @@ class EmptyFootprintState extends ConsumerWidget {
             label: const Text("更新する"),
             onPressed: isVisitedTile
                 ? () {
-                    ref.read(visitedControllerProvider.notifier).loadVisited();
+                    ref.invalidate(visitedProvider);
                   }
                 : () {
-                    ref.read(visitorsProvider.notifier).refresh();
+                    ref.invalidate(visitorsProvider);
                   },
             style: ElevatedButton.styleFrom(
               foregroundColor: ThemeColor.subText,
