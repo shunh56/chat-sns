@@ -149,7 +149,8 @@ class CreateTagPage extends HookConsumerWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: ThemeColor.primary, width: 2),
+                  borderSide:
+                      const BorderSide(color: ThemeColor.primary, width: 2),
                 ),
               ),
               maxLength: 20,

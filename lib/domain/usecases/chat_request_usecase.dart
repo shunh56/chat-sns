@@ -119,7 +119,9 @@ class ChatRequestUsecase {
       }
 
       // キャッシュにない場合は取得を試みる
-      await _ref.read(allUsersNotifierProvider.notifier).updateUserAccount(userId);
+      await _ref
+          .read(allUsersNotifierProvider.notifier)
+          .updateUserAccount(userId);
       final updatedUsers = _ref.read(allUsersNotifierProvider);
       return updatedUsers.asData?.value[userId];
     } catch (e) {

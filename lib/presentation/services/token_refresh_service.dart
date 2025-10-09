@@ -69,7 +69,8 @@ class TokenRefreshService {
       final userId = currentUser.uid;
 
       // ★ DeviceManagementUsecase 経由で更新 (クリーンアーキテクチャ準拠)
-      final deviceManagementUsecase = _ref.read(deviceManagementUsecaseProvider);
+      final deviceManagementUsecase =
+          _ref.read(deviceManagementUsecaseProvider);
       await deviceManagementUsecase.updateDeviceTokens(
         userId: userId,
         fcmToken: fcmToken,

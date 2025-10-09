@@ -277,9 +277,7 @@ class PushNotificationUsecase {
       recipients: receivers,
       content: PushNotificationContent(
         title: sender.name,
-        body: message?.isNotEmpty == true
-            ? message!
-            : "チャットリクエストが届きました。",
+        body: message?.isNotEmpty == true ? message! : "チャットリクエストが届きました。",
       ),
       payload: PushNotificationPayload(
         text: message,

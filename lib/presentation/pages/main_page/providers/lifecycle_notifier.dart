@@ -49,7 +49,9 @@ class LifecycleNotifier extends StateNotifier<LifecycleState> {
     if (state.isInitialized) return;
 
     // ★ デバイス登録 (初回のみ)
-    await _ref.read(myAccountNotifierProvider.notifier).registerDeviceIfNeeded();
+    await _ref
+        .read(myAccountNotifierProvider.notifier)
+        .registerDeviceIfNeeded();
 
     // ★ トークンリフレッシュリスナーを開始
     _ref.read(tokenRefreshServiceProvider).initialize();

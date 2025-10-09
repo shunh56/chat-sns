@@ -15,7 +15,8 @@ final visitorsProvider = StreamProvider.autoDispose<List<Footprint>>((ref) {
 
       // まだ登録されていないか、より新しい記録の場合は更新
       if (!latestByVisitor.containsKey(visitorId) ||
-          footprint.visitedAt.compareTo(latestByVisitor[visitorId]!.visitedAt) > 0) {
+          footprint.visitedAt.compareTo(latestByVisitor[visitorId]!.visitedAt) >
+              0) {
         latestByVisitor[visitorId] = footprint;
       }
     }

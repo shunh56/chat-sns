@@ -44,7 +44,8 @@ class DeviceManagementUsecase {
       final deviceId = await _deviceIdGenerator.generateDeviceId();
 
       // 2. 既存デバイスをチェック
-      final existingDevice = await _deviceRepository.getDevice(userId, deviceId);
+      final existingDevice =
+          await _deviceRepository.getDevice(userId, deviceId);
 
       // 3. トークンを取得
       final fcmToken = await FirebaseMessaging.instance.getToken();

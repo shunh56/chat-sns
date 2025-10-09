@@ -3,8 +3,8 @@ import 'package:app/domain/usecases/chat_request_usecase.dart';
 import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final sentRequestsNotifierProvider = StateNotifierProvider<
-    SentRequestsNotifier, AsyncValue<List<ChatRequest>>>(
+final sentRequestsNotifierProvider =
+    StateNotifierProvider<SentRequestsNotifier, AsyncValue<List<ChatRequest>>>(
   (ref) => SentRequestsNotifier(
     ref,
     ref.watch(chatRequestUsecaseProvider),

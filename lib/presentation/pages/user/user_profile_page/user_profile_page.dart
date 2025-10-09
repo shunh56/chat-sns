@@ -795,7 +795,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         final notifier = ref.read(followingListNotifierProvider.notifier);
         final isFollowing = ref.watch(isFollowingProvider(user.userId));
         return Material(
-          color: isFollowing ? Colors.white.withOpacity(0.15) : ThemeColor.white,
+          color:
+              isFollowing ? Colors.white.withOpacity(0.15) : ThemeColor.white,
           borderRadius: BorderRadius.circular(20),
           child: InkWell(
             onTap: () {
@@ -814,9 +815,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                   !isFollowing ? 'フォロー' : 'フォロー中',
                   style: textStyle.w600(
                     fontSize: 15,
-                    color: isFollowing
-                        ? ThemeColor.white
-                        : ThemeColor.background,
+                    color:
+                        isFollowing ? ThemeColor.white : ThemeColor.background,
                   ),
                 ),
               ),
