@@ -8,6 +8,7 @@ import 'package:app/presentation/pages/posts/features/post_detail/post_detail_pa
 import 'package:app/presentation/pages/footprint/footprint_screen.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,19 +33,27 @@ class NavigationRouter {
     if (user.userId == myId) {
       Navigator.push(
         context,
-        PageTransitionMethods.slideUp(
-          const ProfileScreen(
+        CupertinoPageRoute(
+          builder: (_) => const ProfileScreen(
             canPop: true,
           ),
         ),
       );
     } else {
       if (replace) {
-        Navigator.pushReplacement(context,
-            PageTransitionMethods.slideUp(UserProfileScreen(user: user)));
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+            builder: (_) => UserProfileScreen(user: user),
+          ),
+        );
       } else {
-        Navigator.push(context,
-            PageTransitionMethods.slideUp(UserProfileScreen(user: user)));
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            builder: (_) => UserProfileScreen(user: user),
+          ),
+        );
       }
     }
   }

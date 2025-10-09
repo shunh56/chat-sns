@@ -24,11 +24,18 @@ class UserTagDatasource {
         .doc(userId)
         .collection('tags')
         .orderBy('priority', descending: true)
-        .orderBy('createdAt', descending: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => UserTag.fromJson(doc.data()))
-            .toList());
+        .map((snapshot) {
+      final tags =
+          snapshot.docs.map((doc) => UserTag.fromJson(doc.data())).toList();
+      // priorityが同じ場合はcreatedAtでソート (メモリ内でソート)
+      tags.sort((a, b) {
+        final priorityCompare = b.priority.compareTo(a.priority);
+        if (priorityCompare != 0) return priorityCompare;
+        return a.createdAt.compareTo(b.createdAt);
+      });
+      return tags;
+    });
   }
 
   /// タグを取得
@@ -112,8 +119,7 @@ class UserTagDatasource {
   }
 
   /// 特定のタグが付いたユーザー一覧を取得
-  Stream<List<TaggedUser>> watchTaggedUsersByTag(
-      String userId, String tagId) {
+  Stream<List<TaggedUser>> watchTaggedUsersByTag(String userId, String tagId) {
     return _firestore
         .collection('user_tags')
         .doc(userId)
@@ -191,8 +197,7 @@ class UserTagDatasource {
   }
 
   /// メモを更新
-  Future<void> updateMemo(
-      String userId, String targetId, String? memo) async {
+  Future<void> updateMemo(String userId, String targetId, String? memo) async {
     await _firestore
         .collection('user_tags')
         .doc(userId)

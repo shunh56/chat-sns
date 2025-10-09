@@ -51,6 +51,7 @@ class PostDetailPage extends ConsumerWidget {
                       PostCard(
                         postRef: post,
                         user: user,
+                        disableNavigation: true,
                       ),
                       ReplySection(postId: postId),
                     ],

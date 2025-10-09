@@ -8,8 +8,9 @@ import 'package:uuid/uuid.dart';
 
 final userTagUsecaseProvider = Provider((ref) {
   final currentUser = ref.watch(authProvider).currentUser;
+  // ログイン前はnullを返す（呼び出し側でハンドリング）
   if (currentUser == null) {
-    throw Exception('User not authenticated');
+    throw Exception('User not authenticated - Please login first');
   }
   return UserTagUsecase(
     ref.watch(userTagRepositoryProvider),

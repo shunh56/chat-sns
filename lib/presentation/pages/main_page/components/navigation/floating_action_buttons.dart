@@ -37,10 +37,10 @@ class MainFloatingActionButtons extends ConsumerWidget {
     return FloatingActionButton(
       heroTag: "create_post",
       onPressed: () => _navigateToCreatePost(context),
-      backgroundColor: ThemeColor.highlight,
+      backgroundColor: ThemeColor.background,
       child: const Icon(
-        Icons.edit,
-        color: ThemeColor.white,
+        Icons.add_outlined,
+        color: ThemeColor.icon,
         size: 30,
       ),
     );

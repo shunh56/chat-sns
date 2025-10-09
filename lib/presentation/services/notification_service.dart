@@ -148,6 +148,7 @@ class NotificationService {
       channelDescription: pushChannel.description,
       importance: Importance.high,
       priority: Priority.high,
+      icon: '@drawable/ic_notification',
     );
 
     await _localNotifications.show(
@@ -195,6 +196,7 @@ class NotificationService {
       priority: Priority.max,
       fullScreenIntent: true, // 画面を起こす
       category: AndroidNotificationCategory.call,
+      icon: '@drawable/ic_notification',
     );
 
     await _localNotifications.show(

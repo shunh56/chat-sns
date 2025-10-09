@@ -2,8 +2,10 @@ import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/pages/chat_request/send_chat_request_helper.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
+import 'package:app/presentation/providers/follow/followers_list_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -12,103 +14,243 @@ class UserRequestWidget extends ConsumerWidget {
   const UserRequestWidget({super.key, required this.user, this.padding = 12.0});
   final UserAccount user;
   final double padding;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isFollowing = ref.watch(isFollowingProvider(user.userId));
+    final isFollower = ref.watch(isFollowerProvider(user.userId));
+    final isMutual = isFollowing && isFollower;
+
     return InkWell(
       onTap: () {
         ref.read(navigationRouterProvider(context)).goToProfile(user);
       },
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: padding, vertical: 12),
+        margin: EdgeInsets.symmetric(horizontal: padding, vertical: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: ThemeColor.accent,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            UserIcon(
-              user: user,
-              r: 48,
+            Stack(
+              children: [
+                UserIcon(
+                  user: user,
+                  r: 28,
+                ),
+                if (isMutual)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: ThemeColor.accent,
+                          width: 2,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        size: 12,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const Gap(12),
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Gap(4),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Text(
-                        user.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: ThemeColor.text,
-                          height: 1,
+                      Flexible(
+                        child: Text(
+                          user.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: ThemeColor.text,
+                            height: 1.2,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const Gap(4),
-                      Text(
-                        "@${user.username}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w400,
-                          color: ThemeColor.subText,
+                      if (isMutual) ...[
+                        const Gap(4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            '相互',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
+                  const Gap(2),
+                  Text(
+                    "@${user.username}",
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: ThemeColor.subText,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (user.aboutMe.isNotEmpty) ...[
+                    const Gap(4),
+                    Text(
+                      user.aboutMe,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: ThemeColor.subText,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
               ),
             ),
-            _buildFollowButton(user),
+            const Gap(8),
+            Column(
+              children: [
+                if (!user.isMe) ...[
+                  _buildFollowButton(user, isFollowing, isFollower),
+                  const Gap(6),
+                  _buildMessageButton(context, ref, user),
+                ],
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFollowButton(UserAccount user) {
-    if (user.isMe) return const SizedBox();
+  Widget _buildFollowButton(
+      UserAccount user, bool isFollowing, bool isFollower) {
     return Consumer(
       builder: (context, ref, child) {
         final themeSize = ref.watch(themeSizeProvider(context));
         final textStyle = ThemeTextStyle(themeSize: themeSize);
-
         final notifier = ref.read(followingListNotifierProvider.notifier);
-        final isFollowing = ref.watch(isFollowingProvider(user.userId));
 
-        return Material(
-          color: isFollowing ? Colors.blue : ThemeColor.white,
-          borderRadius: BorderRadius.circular(100),
-          child: InkWell(
-            onTap: () {
-              if (!isFollowing) {
-                notifier.followUser(user);
-              } else {
-                notifier.unfollowUser(user);
-              }
-            },
-            borderRadius: BorderRadius.circular(100),
-            child: Container(
-              height: 36,
-              width: 96,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
+        // フォローしていない && 相手がフォロワー = フォローバック
+        final isFollowBack = !isFollowing && isFollower;
+
+        if (isFollowing) {
+          // フォロー中の場合
+          return OutlinedButton(
+            onPressed: () => notifier.unfollowUser(user),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: ThemeColor.text,
+              side: BorderSide(
+                color: ThemeColor.stroke.withOpacity(0.5),
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Center(
-                child: Text(
-                  !isFollowing ? 'フォロー' : 'フォロー中',
-                  style: textStyle.w600(
-                    fontSize: 12,
-                    color:
-                        isFollowing ? ThemeColor.white : ThemeColor.background,
-                  ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              minimumSize: const Size(80, 32),
+            ),
+            child: Text(
+              'フォロー中',
+              style: textStyle.w600(fontSize: 12),
+            ),
+          );
+        } else {
+          // 未フォローの場合
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: isFollowBack
+                    ? [Colors.green.shade400, Colors.teal.shade400]
+                    : [ThemeColor.highlight, Colors.cyan],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: (isFollowBack ? Colors.green : ThemeColor.highlight)
+                      .withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: () => notifier.followUser(user),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: Colors.white,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                minimumSize: const Size(80, 32),
+              ),
+              child: Text(
+                isFollowBack ? 'フォロバ' : 'フォロー',
+                style: textStyle.w600(fontSize: 12),
               ),
             ),
-          ),
-        );
+          );
+        }
       },
+    );
+  }
+
+  Widget _buildMessageButton(
+      BuildContext context, WidgetRef ref, UserAccount user) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: ThemeColor.background.withOpacity(0.5),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: ThemeColor.stroke.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        icon: const Icon(
+          Icons.chat_bubble_outline,
+          size: 16,
+          color: ThemeColor.text,
+        ),
+        onPressed: () {
+          SendChatRequestHelper.startChatOrRequest(
+            context: context,
+            ref: ref,
+            targetUserId: user.userId,
+          );
+        },
+      ),
     );
   }
 }

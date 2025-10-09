@@ -54,16 +54,40 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
   Future<void> _initializeSystemTagsIfNeeded() async {
     try {
       final tagUsecase = ref.read(userTagUsecaseProvider);
-      final tags = await tagUsecase.watchMyTags().first;
+
+      // タイムアウト付きでタグを取得 (既存ユーザーでコレクションが存在しない場合対策)
+      final tags = await tagUsecase.watchMyTags().first.timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => [], // タイムアウト時は空配列を返す
+          );
 
       // タグが存在しない場合のみ初期化
       if (tags.isEmpty) {
+        if (kDebugMode) {
+          print('[SystemTags] Initializing system tags for user...');
+        }
         await tagUsecase.initializeSystemTags();
+        if (kDebugMode) {
+          print('[SystemTags] System tags initialized successfully');
+        }
       }
     } catch (e) {
-      // タグ初期化の失敗は致命的ではないのでログのみ
+      // タグ初期化の失敗は致命的ではないが、既存ユーザー対応のため初期化を試みる
       if (kDebugMode) {
-        print('Failed to initialize system tags: $e');
+        print(
+            '[SystemTags] Error checking tags: $e, attempting initialization...');
+      }
+
+      try {
+        final tagUsecase = ref.read(userTagUsecaseProvider);
+        await tagUsecase.initializeSystemTags();
+        if (kDebugMode) {
+          print('[SystemTags] System tags initialized after error');
+        }
+      } catch (initError) {
+        if (kDebugMode) {
+          print('[SystemTags] Failed to initialize system tags: $initError');
+        }
       }
     }
   }
@@ -172,7 +196,8 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
     try {
       // ★ DeviceManagementUsecase を経由 (クリーンアーキテクチャ準拠)
       final deviceManagementUsecase = ref.read(deviceManagementUsecaseProvider);
-      final result = await deviceManagementUsecase.registerDeviceIfNeeded(user.userId);
+      final result =
+          await deviceManagementUsecase.registerDeviceIfNeeded(user.userId);
 
       // トークンが変更された場合、ローカル状態を更新
       if (result.deviceUpdated) {
@@ -184,7 +209,9 @@ class MyAccountNotifier extends StateNotifier<AsyncValue<UserAccount>> {
         final updatedUserAccount = await usecase.getUserByUid(user.userId);
         if (updatedUserAccount != null && mounted) {
           state = AsyncValue.data(updatedUserAccount);
-          ref.read(allUsersNotifierProvider.notifier).addUserAccounts([updatedUserAccount]);
+          ref
+              .read(allUsersNotifierProvider.notifier)
+              .addUserAccounts([updatedUserAccount]);
         }
 
         // 従来のフィールドも更新 (後方互換性)

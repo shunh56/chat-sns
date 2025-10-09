@@ -52,7 +52,7 @@ class DmOverviewListNotifier
     _usecase.leaveChat(user.userId);
   }
 
-  joinChat(UserAccount user) {
-    _usecase.joinChat(user.userId);
+  Future<void> joinChat(UserAccount user) {
+    return _usecase.joinChat(user.userId);
   }
 }

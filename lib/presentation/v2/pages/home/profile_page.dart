@@ -1,4 +1,5 @@
 import 'package:app/presentation/pages/user_tag/my_tags_page.dart';
+import 'package:app/presentation/pages/user_tag/tag_management_page.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -470,6 +471,12 @@ class ProfilePage extends HookConsumerWidget {
         'route': 'tags',
       },
       {
+        'icon': Icons.edit_note,
+        'title': 'タグ一覧編集',
+        'description': 'ユーザーごとのタグ編集',
+        'route': 'tag_management',
+      },
+      {
         'icon': Icons.notifications,
         'title': '通知設定',
         'description': 'プッシュ通知の管理'
@@ -520,6 +527,11 @@ class ProfilePage extends HookConsumerWidget {
             if (route == 'tags') {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const MyTagsPage()),
+              );
+            } else if (route == 'tag_management') {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (context) => const TagManagementPage()),
               );
             }
           },

@@ -1,6 +1,8 @@
+import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/tag/user_tag.dart';
 import 'package:app/domain/usecases/user_tag_usecase.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// プロフィール画面のタグボタン
@@ -8,7 +10,7 @@ class UserTagButton extends HookConsumerWidget {
   const UserTagButton({
     super.key,
     required this.targetUserId,
-    this.size = 32,
+    this.size = 40,
   });
 
   final String targetUserId;
@@ -16,29 +18,42 @@ class UserTagButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final usecase = ref.watch(userTagUsecaseProvider);
+    // 認証状態を確認
+    UserTagUsecase? usecase;
+    try {
+      usecase = ref.watch(userTagUsecaseProvider);
+    } catch (e) {
+      // ログインしていない場合は非表示
+      return const SizedBox.shrink();
+    }
 
     return FutureBuilder<List<String>>(
-      future: usecase.getUserTags(targetUserId),
+      future: usecase!.getUserTags(targetUserId),
       builder: (context, snapshot) {
         final tags = snapshot.data ?? [];
         final hasAnyTag = tags.isNotEmpty;
 
-        return GestureDetector(
-          onTap: () => _showTagSelectionSheet(context, ref, targetUserId),
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: hasAnyTag
-                  ? Colors.blue.withOpacity(0.1)
-                  : Colors.grey.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.label_outline,
-              size: size * 0.6,
-              color: hasAnyTag ? Colors.blue : Colors.grey,
+        return Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          child: InkWell(
+            onTap: () => _showTagSelectionSheet(context, ref, targetUserId),
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: size,
+              height: size,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: hasAnyTag
+                    ? Colors.blue.withOpacity(0.2)
+                    : Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                Icons.label_outline,
+                size: 20,
+                color: hasAnyTag ? Colors.blue[300] : Colors.white,
+              ),
             ),
           ),
         );
@@ -65,11 +80,47 @@ class _TagSelectionSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final usecase = ref.watch(userTagUsecaseProvider);
+    final isInitializing = useState(false);
+
+    // 認証状態を確認
+    UserTagUsecase? usecase;
+    try {
+      usecase = ref.watch(userTagUsecaseProvider);
+    } catch (e) {
+      // ログインしていない場合はエラー表示
+      return Container(
+        decoration: const BoxDecoration(
+          color: ThemeColor.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text('ログインが必要です',
+                    style: TextStyle(color: ThemeColor.text)),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ThemeColor.primary,
+                  ),
+                  child: const Text('閉じる'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: ThemeColor.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SafeArea(
@@ -97,20 +148,22 @@ class _TagSelectionSheet extends HookConsumerWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: ThemeColor.text,
                     ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, color: ThemeColor.text),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1),
+            Divider(
+                height: 1, color: ThemeColor.textSecondary.withOpacity(0.2)),
             // タグリスト
             Flexible(
               child: StreamBuilder<List<UserTag>>(
-                stream: usecase.watchMyTags(),
+                stream: usecase!.watchMyTags(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return const Center(child: CircularProgressIndicator());
@@ -118,8 +171,50 @@ class _TagSelectionSheet extends HookConsumerWidget {
 
                   final allTags = snapshot.data!;
 
+                  // 既存ユーザー対応: タグが空の場合は自動初期化
+                  if (allTags.isEmpty && !isInitializing.value) {
+                    isInitializing.value = true;
+                    Future.microtask(() async {
+                      try {
+                        await usecase!.initializeSystemTags();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('システムタグを初期化しました'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('初期化失敗: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } finally {
+                        isInitializing.value = false;
+                      }
+                    });
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('システムタグを初期化しています...'),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
                   return FutureBuilder<List<String>>(
-                    future: usecase.getUserTags(targetUserId),
+                    future: usecase!.getUserTags(targetUserId),
                     builder: (context, selectedSnapshot) {
                       final selectedTags = selectedSnapshot.data ?? [];
 
@@ -127,17 +222,19 @@ class _TagSelectionSheet extends HookConsumerWidget {
                         shrinkWrap: true,
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         itemCount: allTags.length + 1,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        separatorBuilder: (_, __) => Divider(
+                            height: 1,
+                            color: ThemeColor.textSecondary.withOpacity(0.1)),
                         itemBuilder: (context, index) {
                           if (index == allTags.length) {
                             // 新規作成ボタン
                             return ListTile(
                               leading: const Icon(Icons.add_circle_outline,
-                                  color: Colors.blue),
+                                  color: ThemeColor.primary),
                               title: const Text(
                                 '新しいタグを作成',
                                 style: TextStyle(
-                                  color: Colors.blue,
+                                  color: ThemeColor.primary,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -170,28 +267,23 @@ class _TagSelectionSheet extends HookConsumerWidget {
                               tag.name,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
+                                color: ThemeColor.text,
                               ),
                             ),
                             subtitle: tag.isSystemTag
                                 ? null
-                                : Text('${tag.userCount}人'),
+                                : Text('${tag.userCount}人',
+                                    style: const TextStyle(
+                                        color: ThemeColor.textSecondary)),
                             trailing: isSelected
                                 ? const Icon(Icons.check_circle,
-                                    color: Colors.blue)
-                                : const Icon(Icons.circle_outlined,
-                                    color: Colors.grey),
+                                    color: ThemeColor.primary)
+                                : Icon(Icons.circle_outlined,
+                                    color: ThemeColor.textSecondary
+                                        .withOpacity(0.5)),
                             onTap: () async {
-                              await usecase.toggleTag(targetUserId, tag.tagId);
-                              // 再描画のため一度閉じて開き直す
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                                await Future.delayed(
-                                    const Duration(milliseconds: 100));
-                                if (context.mounted) {
-                                  _showTagSelectionSheet(
-                                      context, ref, targetUserId);
-                                }
-                              }
+                              await usecase!.toggleTag(targetUserId, tag.tagId);
+                              // StreamBuilderが自動的に再描画する
                             },
                           );
                         },
@@ -207,20 +299,9 @@ class _TagSelectionSheet extends HookConsumerWidget {
     );
   }
 
-  void _showTagSelectionSheet(
-      BuildContext context, WidgetRef ref, String targetUserId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _TagSelectionSheet(targetUserId: targetUserId),
-    );
-  }
-
   Color _parseColor(String colorString) {
     try {
-      return Color(
-          int.parse(colorString.replaceFirst('#', '0xFF'), radix: 16));
+      return Color(int.parse(colorString.replaceFirst('#', '0xFF'), radix: 16));
     } catch (e) {
       return Colors.grey;
     }
@@ -238,16 +319,23 @@ class UserTagIcons extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final usecase = ref.watch(userTagUsecaseProvider);
+    // 認証状態を確認
+    UserTagUsecase? usecase;
+    try {
+      usecase = ref.watch(userTagUsecaseProvider);
+    } catch (e) {
+      // ログインしていない場合は非表示
+      return const SizedBox.shrink();
+    }
 
     return FutureBuilder<List<String>>(
-      future: usecase.getUserTags(targetUserId),
+      future: usecase!.getUserTags(targetUserId),
       builder: (context, snapshot) {
         final tagIds = snapshot.data ?? [];
         if (tagIds.isEmpty) return const SizedBox.shrink();
 
         return StreamBuilder<List<UserTag>>(
-          stream: usecase.watchMyTags(),
+          stream: usecase!.watchMyTags(),
           builder: (context, tagSnapshot) {
             if (!tagSnapshot.hasData) return const SizedBox.shrink();
 
@@ -282,8 +370,7 @@ class UserTagIcons extends HookConsumerWidget {
 
   Color _parseColor(String colorString) {
     try {
-      return Color(
-          int.parse(colorString.replaceFirst('#', '0xFF'), radix: 16));
+      return Color(int.parse(colorString.replaceFirst('#', '0xFF'), radix: 16));
     } catch (e) {
       return Colors.grey;
     }

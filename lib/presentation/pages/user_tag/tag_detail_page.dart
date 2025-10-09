@@ -18,152 +18,296 @@ class TagDetailPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usecase = ref.watch(userTagUsecaseProvider);
+    final tagColor = _parseColor(tag.color);
 
     return Scaffold(
       backgroundColor: ThemeColor.background,
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(tag.icon),
-            const SizedBox(width: 8),
-            Text(tag.name),
-          ],
-        ),
-        backgroundColor: ThemeColor.background,
-        elevation: 0,
-        actions: [
-          if (!tag.isSystemTag)
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () {
-                // TODO: タグ編集画面へ
-              },
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // 設定セクション
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '設定',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: ThemeColor.subText,
+      body: CustomScrollView(
+        slivers: [
+          // タグヘッダー
+          SliverAppBar(
+            expandedHeight: 200,
+            pinned: true,
+            backgroundColor: ThemeColor.background,
+            iconTheme: const IconThemeData(color: ThemeColor.text),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      tagColor.withOpacity(0.2),
+                      tagColor.withOpacity(0.05),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _SettingToggle(
-                        label: 'タイムラインに表示',
-                        value: tag.showInTimeline,
-                        onChanged: (value) async {
-                          await usecase.toggleTimelineVisibility(
-                              tag.tagId, value);
-                        },
+                child: SafeArea(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 40),
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: tagColor.withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            tag.icon,
+                            style: const TextStyle(fontSize: 40),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _SettingToggle(
-                        label: '新しい投稿を通知',
-                        value: tag.enableNotifications,
-                        onChanged: (value) async {
-                          await usecase.toggleNotifications(tag.tagId, value);
-                        },
+                      const SizedBox(height: 16),
+                      Text(
+                        tag.name,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: ThemeColor.text,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: tagColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.person_outline,
+                              size: 16,
+                              color: tagColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${tag.userCount}人',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: tagColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
+            ),
+            actions: [
+              if (!tag.isSystemTag)
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: 'タグを編集',
+                  onPressed: () {
+                    // TODO: タグ編集画面へ
+                  },
+                ),
+            ],
+          ),
+
+          // 設定セクション
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: ThemeColor.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: ThemeColor.stroke),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: ThemeColor.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.settings_outlined,
+                          size: 18,
+                          color: ThemeColor.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'タグ設定',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: ThemeColor.text,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _SettingToggle(
+                    icon: Icons.visibility_outlined,
+                    label: 'タイムラインに表示',
+                    subtitle: 'このタグのユーザーの投稿をタイムラインで優先表示',
+                    value: tag.showInTimeline,
+                    color: tagColor,
+                    onChanged: (value) async {
+                      await usecase.toggleTimelineVisibility(tag.tagId, value);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  _SettingToggle(
+                    icon: Icons.notifications_outlined,
+                    label: '新しい投稿を通知',
+                    subtitle: 'このタグのユーザーが投稿したときに通知',
+                    value: tag.enableNotifications,
+                    color: tagColor,
+                    onChanged: (value) async {
+                      await usecase.toggleNotifications(tag.tagId, value);
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
 
-          const SizedBox(height: 8),
-
           // タグ付けされたユーザー一覧
-          Expanded(
-            child: Container(
-              color: Colors.white,
-              child: StreamBuilder<List<TaggedUser>>(
-                stream: usecase.watchTaggedUsersByTag(tag.tagId),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: tagColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'タグ付けされたユーザー',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: ThemeColor.text,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
 
-                  final taggedUsers = snapshot.data!;
+          StreamBuilder<List<TaggedUser>>(
+            stream: usecase.watchTaggedUsersByTag(tag.tagId),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-                  if (taggedUsers.isEmpty) {
-                    return Center(
+              final taggedUsers = snapshot.data!;
+
+              if (taggedUsers.isEmpty) {
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            tag.icon,
-                            style: const TextStyle(fontSize: 64),
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: tagColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                tag.icon,
+                                style: const TextStyle(fontSize: 60),
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 24),
                           Text(
-                            '「${tag.name}」タグがついた\nユーザーはまだいません',
+                            '「${tag.name}」タグが付いた\nユーザーはまだいません',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: ThemeColor.text,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'プロフィール画面からユーザーに\nタグを付けることができます',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
                               fontSize: 14,
-                              color: ThemeColor.subText,
+                              color: ThemeColor.textSecondary,
+                              height: 1.5,
                             ),
                           ),
                         ],
                       ),
-                    );
-                  }
+                    ),
+                  ),
+                );
+              }
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          'タグ付けされたユーザー (${taggedUsers.length}人)',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: ThemeColor.subText,
-                          ),
-                        ),
+              return SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _TaggedUserTile(
+                      taggedUser: taggedUsers[index],
+                      tagColor: tagColor,
+                      onTap: () => _navigateToUserProfile(
+                        context,
+                        ref,
+                        taggedUsers[index],
                       ),
-                      Expanded(
-                        child: ListView.separated(
-                          itemCount: taggedUsers.length,
-                          separatorBuilder: (_, __) =>
-                              const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final taggedUser = taggedUsers[index];
-                            return _TaggedUserTile(
-                              taggedUser: taggedUser,
-                              onTap: () =>
-                                  _navigateToUserProfile(context, ref, taggedUser),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+                    ),
+                    childCount: taggedUsers.length,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
     );
+  }
+
+  Color _parseColor(String colorString) {
+    try {
+      return Color(int.parse(colorString.replaceFirst('#', '0xFF'), radix: 16));
+    } catch (e) {
+      return Colors.grey;
+    }
   }
 
   void _navigateToUserProfile(
@@ -186,46 +330,105 @@ class TagDetailPage extends HookConsumerWidget {
 /// 設定トグル
 class _SettingToggle extends StatelessWidget {
   const _SettingToggle({
+    required this.icon,
     required this.label,
+    required this.subtitle,
     required this.value,
+    required this.color,
     required this.onChanged,
   });
 
+  final IconData icon;
   final String label;
+  final String subtitle;
   final bool value;
+  final Color color;
   final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: value ? Colors.blue.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: value ? Colors.blue : Colors.grey.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            value ? Icons.check_circle : Icons.circle_outlined,
-            size: 20,
-            color: value ? Colors.blue : Colors.grey,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: value ? Colors.blue : ThemeColor.subText,
-                fontWeight: value ? FontWeight.w600 : FontWeight.normal,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onChanged(!value),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: value ? color.withOpacity(0.08) : ThemeColor.accent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: value ? color.withOpacity(0.3) : ThemeColor.stroke,
+              width: value ? 2 : 1,
             ),
           ),
-        ],
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: value
+                      ? color.withOpacity(0.2)
+                      : ThemeColor.textSecondary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: value ? color : ThemeColor.textSecondary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            value ? ThemeColor.text : ThemeColor.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: ThemeColor.textSecondary,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: value ? color : ThemeColor.accent,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: value ? color : ThemeColor.stroke,
+                    width: 2,
+                  ),
+                ),
+                child: value
+                    ? const Icon(
+                        Icons.check,
+                        size: 16,
+                        color: Colors.white,
+                      )
+                    : null,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -235,10 +438,12 @@ class _SettingToggle extends StatelessWidget {
 class _TaggedUserTile extends HookConsumerWidget {
   const _TaggedUserTile({
     required this.taggedUser,
+    required this.tagColor,
     required this.onTap,
   });
 
   final TaggedUser taggedUser;
+  final Color tagColor;
   final VoidCallback onTap;
 
   @override
@@ -253,43 +458,140 @@ class _TaggedUserTile extends HookConsumerWidget {
           return const SizedBox.shrink();
         }
 
-        return ListTile(
-          onTap: onTap,
-          leading: UserIcon(user: user),
-          title: Text(
-            user.name,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('@${user.username}'),
-              if (taggedUser.memo != null && taggedUser.memo!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.note, size: 14, color: ThemeColor.subText),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          taggedUser.memo!,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: ThemeColor.subText,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: ThemeColor.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: ThemeColor.stroke),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
             ],
           ),
-          trailing: const Icon(Icons.chevron_right),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    // ユーザーアイコン
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: tagColor.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                      child: UserIcon(user: user, r: 52),
+                    ),
+                    const SizedBox(width: 16),
+                    // ユーザー情報
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: ThemeColor.text,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '@${user.username}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: ThemeColor.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (taggedUser.memo != null &&
+                              taggedUser.memo!.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: tagColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: tagColor.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.note_outlined,
+                                    size: 14,
+                                    color: tagColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      taggedUser.memo!,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: tagColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          if (taggedUser.tags.length > 1) ...[
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 4,
+                              children: [
+                                const Icon(
+                                  Icons.label,
+                                  size: 12,
+                                  color: ThemeColor.textSecondary,
+                                ),
+                                Text(
+                                  '他${taggedUser.tags.length - 1}個のタグ',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: ThemeColor.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: ThemeColor.textSecondary.withOpacity(0.5),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         );
       },
     );

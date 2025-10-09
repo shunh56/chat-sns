@@ -25,11 +25,12 @@ class DirectMessageOverviewDatasource {
         .snapshots();
   }
 
-  joinChat(String otherUserId) {
+  Future<void> joinChat(String otherUserId) async {
     String roomId = DMKeyConverter.getKey(_auth.currentUser!.uid, otherUserId);
-    _firestore.collection("direct_messages").doc(roomId).update({
+    await _firestore.collection("direct_messages").doc(roomId).set({
       "users.${_auth.currentUser!.uid}": true,
-    });
+      "users.$otherUserId": true,
+    }, SetOptions(merge: true));
   }
 
   closeChat(String otherUserId) async {

@@ -7,6 +7,8 @@ enum PushNotificationType {
   comment,
   follow,
   friendRequest,
+  chatRequest,
+  chatRequestAccepted,
   defaultType,
 }
 

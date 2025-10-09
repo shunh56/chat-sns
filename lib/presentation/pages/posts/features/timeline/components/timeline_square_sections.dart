@@ -1,10 +1,14 @@
+import 'package:app/presentation/pages/footprint/footprint_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import 'package:app/presentation/pages/activities/activities_screen.dart';
+import 'package:app/presentation/pages/chat_request/chat_request_list_screen.dart';
+import 'package:app/presentation/providers/activities_list_notifier.dart';
+import 'package:app/presentation/providers/chat_requests/pending_request_count_provider.dart';
 import 'package:app/presentation/providers/footprint/cached_recent_visitors_provider.dart';
-import 'package:app/presentation/routes/navigator.dart';
 
 /// タイムラインページのアクション通知セクション
 ///
@@ -144,26 +148,52 @@ class _ActionNotificationCard extends ConsumerWidget {
   String _getCountForCardType(ActionNotificationType cardType, WidgetRef ref) {
     switch (cardType) {
       case ActionNotificationType.requests:
-        return '3'; // リクエスト数（仮）
+        final count = ref.watch(pendingRequestCountProvider);
+        return count.toString();
       case ActionNotificationType.footprints:
         final count = ref.watch(safeRecentVisitorsCountProvider);
         return count.toString();
       case ActionNotificationType.notifications:
-        return '7'; // 通知数（仮）
+        final asyncValue = ref.watch(activitiesListNotifierProvider);
+        return asyncValue.when(
+          data: (activities) {
+            final unreadCount = activities.where((item) => !item.isSeen).length;
+            return unreadCount.toString();
+          },
+          loading: () => '-',
+          error: (_, __) => '0',
+        );
     }
   }
 
   void _handleCardTap(BuildContext context, WidgetRef ref) {
     switch (cardType) {
       case ActionNotificationType.requests:
-        // TODO: リクエスト画面への遷移
+        // リクエスト画面への遷移
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ChatRequestListScreen(),
+          ),
+        );
         break;
       case ActionNotificationType.footprints:
         // 足あと画面への遷移
-        ref.read(navigationRouterProvider(context)).goToFootprint();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const FootprintScreen(),
+          ),
+        );
         break;
       case ActionNotificationType.notifications:
-        // TODO: 通知画面への遷移
+        // 通知画面への遷移
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ActivitiesScreen(),
+          ),
+        );
         break;
     }
   }

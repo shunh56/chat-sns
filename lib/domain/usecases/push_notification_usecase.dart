@@ -1,6 +1,5 @@
 import 'package:app/core/utils/flavor.dart';
 import 'package:app/data/datasource/push_notification_datasource.dart';
-import 'package:app/domain/entity/device/active_device_summary.dart';
 import 'package:app/domain/entity/push_notification_model.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/core/toast.dart';
@@ -261,6 +260,47 @@ class PushNotificationUsecase {
       content: PushNotificationContent(
         title: title,
         body: body,
+      ),
+    );
+  }
+
+  // ★ チャットリクエスト送信通知 (マルチデバイス対応)
+  Future<void> sendChatRequest(UserAccount user, String? message) async {
+    final sender = _generateSender();
+    final receivers = _generateReceivers(user);
+
+    if (receivers.isEmpty) return;
+
+    await _sendPushNotification(
+      type: PushNotificationType.chatRequest,
+      sender: sender,
+      recipients: receivers,
+      content: PushNotificationContent(
+        title: sender.name,
+        body: message?.isNotEmpty == true
+            ? message!
+            : "チャットリクエストが届きました。",
+      ),
+      payload: PushNotificationPayload(
+        text: message,
+      ),
+    );
+  }
+
+  // ★ チャットリクエスト承認通知 (マルチデバイス対応)
+  Future<void> sendChatRequestAccepted(UserAccount user) async {
+    final sender = _generateSender();
+    final receivers = _generateReceivers(user);
+
+    if (receivers.isEmpty) return;
+
+    await _sendPushNotification(
+      type: PushNotificationType.chatRequestAccepted,
+      sender: sender,
+      recipients: receivers,
+      content: PushNotificationContent(
+        title: sender.name,
+        body: "チャットリクエストが承認されました。",
       ),
     );
   }

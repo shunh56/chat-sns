@@ -154,9 +154,9 @@ class UserAccount extends HiveObject {
   factory UserAccount.fromJson(Map<String, dynamic> json) {
     return UserAccount(
       userId: json["userId"],
-      createdAt: json["createdAt"],
-      lastOpenedAt: json["lastOpenedAt"],
-      isOnline: json["isOnline"],
+      createdAt: json["createdAt"] ?? Timestamp.now(),
+      lastOpenedAt: json["lastOpenedAt"] ?? Timestamp.now(),
+      isOnline: json["isOnline"] ?? false,
       //
       usedCode: json["usedCode"],
       fcmToken: json["fcmToken"],

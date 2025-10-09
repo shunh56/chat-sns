@@ -18,10 +18,12 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
     super.key,
     required this.postRef,
     required this.user,
+    this.disableNavigation = false,
   });
 
   final Post postRef;
   final UserAccount user;
+  final bool disableNavigation;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -98,7 +100,9 @@ class PostCard extends HookConsumerWidget with AnimatedTapHandler {
 
   /// カードタップ処理
   void _handleCardTap(BuildContext context, WidgetRef ref, Post post) {
-    ref.read(navigationRouterProvider(context)).goToPost(post, user);
+    if (!disableNavigation) {
+      ref.read(navigationRouterProvider(context)).goToPost(post, user);
+    }
   }
 
   /// ユーザータップ処理
