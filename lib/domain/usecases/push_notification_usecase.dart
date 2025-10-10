@@ -265,19 +265,23 @@ class PushNotificationUsecase {
   }
 
   // ★ チャットリクエスト送信通知 (マルチデバイス対応)
+  // 送信者名を隠すことで、受信者の好奇心を刺激する戦略
   Future<void> sendChatRequest(UserAccount user, String? message) async {
     final sender = _generateSender();
     final receivers = _generateReceivers(user);
 
     if (receivers.isEmpty) return;
 
+    // メッセージの有無で通知内容を変える
+    final hasMessage = message?.isNotEmpty == true;
+
     await _sendPushNotification(
       type: PushNotificationType.chatRequest,
       sender: sender,
       recipients: receivers,
       content: PushNotificationContent(
-        title: sender.name,
-        body: message?.isNotEmpty == true ? message! : "チャットリクエストが届きました。",
+        title: hasMessage ? "チャットリクエストが来ました。" : "BLANK", // アプリ名
+        body: hasMessage ? message! : "チャットリクエストが来ました。確認しましょう。",
       ),
       payload: PushNotificationPayload(
         text: message,

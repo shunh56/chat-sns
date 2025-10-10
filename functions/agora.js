@@ -1,5 +1,5 @@
 const agora = require("agora-access-token");
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v1");
 
 // Firebase Cloud Functionのエントリポイント
 exports.generateAgoraToken = functions

@@ -54,6 +54,18 @@ service cloud.firestore {
                                     && request.resource.data.userId == request.auth.uid;
     }
 
+    // 監視コレクション: Cloud Functionsのみ書き込み可、管理者のみ読み取り可
+    match /monitoring/{document=**} {
+      // Cloud Functionsからの書き込みのみ許可（クライアントから直接書き込み不可）
+      allow write: if false;
+
+      // 読み取りは管理者のみ（必要に応じてカスタマイズ）
+      // TODO: 管理者判定ロジックを実装する場合は以下を有効化
+      // allow read: if request.auth != null
+      //             && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow read: if false;  // 現状はCloud Functionsからのみアクセス
+    }
+
     // その他のコレクション: 開発用（要本番用ルール追加）
     match /{document=**} {
       allow read, write: if true;

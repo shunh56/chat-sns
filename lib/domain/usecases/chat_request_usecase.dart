@@ -65,10 +65,12 @@ class ChatRequestUsecase {
       final toUser = await _getUserAccount(toUserId);
       if (toUser != null) {
         await _pushNotificationUsecase.sendChatRequest(toUser, message);
+      } else {
+        print('⚠️ チャットリクエスト通知: ユーザー情報の取得に失敗 (userId: $toUserId)');
       }
     } catch (e) {
       // 通知送信のエラーは握りつぶす（リクエスト送信自体は成功とする）
-      print('チャットリクエスト通知の送信に失敗: $e');
+      print('❌ チャットリクエスト通知の送信に失敗: $e');
     }
   }
 
@@ -90,10 +92,12 @@ class ChatRequestUsecase {
       final fromUser = await _getUserAccount(request.fromUserId);
       if (fromUser != null) {
         await _pushNotificationUsecase.sendChatRequestAccepted(fromUser);
+      } else {
+        print('⚠️ チャットリクエスト承認通知: ユーザー情報の取得に失敗 (userId: ${request.fromUserId})');
       }
     } catch (e) {
       // 通知送信のエラーは握りつぶす（承認処理自体は成功とする）
-      print('チャットリクエスト承認通知の送信に失敗: $e');
+      print('❌ チャットリクエスト承認通知の送信に失敗: $e');
     }
   }
 
