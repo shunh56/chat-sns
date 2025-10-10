@@ -5,7 +5,9 @@ import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/profile/subpages/edit_bio_screen.dart';
 import 'package:app/presentation/pages/profile/profile_page.dart';
 import 'package:app/presentation/pages/settings/settings_screen.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/pages/user_tag/my_tags_page.dart';
+import 'package:app/presentation/pages/user_tag/tag_management_page.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -133,6 +135,80 @@ class ProfileBottomSheet {
                               ),
                               const Icon(
                                 Icons.edit_rounded,
+                                color: ThemeColor.icon,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        height: 0,
+                        thickness: 0.4,
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const MyTagsPage(),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "マイタグ",
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const Icon(
+                                Icons.label_outline,
+                                color: ThemeColor.icon,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        height: 0,
+                        thickness: 0.4,
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TagManagementPage(),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "タグ一覧編集",
+                                style: textStyle.w600(
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const Icon(
+                                Icons.edit_note,
                                 color: ThemeColor.icon,
                               ),
                             ],

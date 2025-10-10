@@ -289,54 +289,26 @@ class UserIcon extends ConsumerWidget {
                 ref.read(navigationRouterProvider(context)).goToProfile(user);
               }
             },
-      child: iconType == IconType.profile
-          ? Hero(
-              tag: 'user_icon_${user.userId}_${iconType.name}',
-              child: Container(
-                padding: enableDecoration
-                    ? const EdgeInsets.all(2)
-                    : EdgeInsets.zero,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(radius),
-                  child: SizedBox(
-                    width: radius * 2,
-                    height: radius * 2,
-                    child: user.imageUrl != null
-                        ? CachedImage.userIcon(
-                            user.imageUrl!, user.name, radius)
-                        : Container(
-                            color: const Color(0xFF2A2A2A),
-                            child: Icon(
-                              Icons.person,
-                              size: radius,
-                              color: Colors.white.withOpacity(0.6),
-                            ),
-                          ),
+      child: Container(
+        padding: enableDecoration ? const EdgeInsets.all(2) : EdgeInsets.zero,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: SizedBox(
+            width: radius * 2,
+            height: radius * 2,
+            child: user.imageUrl != null
+                ? CachedImage.userIcon(user.imageUrl!, user.name, radius)
+                : Container(
+                    color: const Color(0xFF2A2A2A),
+                    child: Icon(
+                      Icons.person,
+                      size: radius,
+                      color: Colors.white.withOpacity(0.6),
+                    ),
                   ),
-                ),
-              ),
-            )
-          : Container(
-              padding:
-                  enableDecoration ? const EdgeInsets.all(2) : EdgeInsets.zero,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(radius),
-                child: SizedBox(
-                  width: radius * 2,
-                  height: radius * 2,
-                  child: user.imageUrl != null
-                      ? CachedImage.userIcon(user.imageUrl!, user.name, radius)
-                      : Container(
-                          color: const Color(0xFF2A2A2A),
-                          child: Icon(
-                            Icons.person,
-                            size: radius,
-                            color: Colors.white.withOpacity(0.6),
-                          ),
-                        ),
-                ),
-              ),
-            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -349,7 +321,6 @@ class UserIcon extends ConsumerWidget {
         pageBuilder: (context, animation, secondaryAnimation) {
           return UserImageOverlay(
             user: user,
-            heroTag: 'user_icon_${user.userId}_${iconType.name}',
           );
         },
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -369,11 +340,9 @@ class UserImageOverlay extends StatefulWidget {
   const UserImageOverlay({
     super.key,
     required this.user,
-    required this.heroTag,
   });
 
   final UserAccount user;
-  final String heroTag;
 
   @override
   State<UserImageOverlay> createState() => _UserImageOverlayState();
@@ -430,32 +399,28 @@ class _UserImageOverlayState extends State<UserImageOverlay>
             children: [
               // メイン画像表示エリア
               Center(
-                child: Hero(
-                  tag: widget.heroTag,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(radius),
-                    child: InteractiveViewer(
-                      transformationController: _transformationController,
-                      minScale: 0.5,
-                      maxScale: 2.0,
-                      onInteractionEnd: (details) {
-                        // ズームアウトしすぎた場合はリセット
-                        if (_transformationController.value
-                                .getMaxScaleOnAxis() <
-                            1.0) {
-                          _resetAnimation();
-                        }
-                      },
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.9,
-                          maxHeight: MediaQuery.of(context).size.height * 0.8,
-                        ),
-                        child: UserIcon(
-                          user: widget.user,
-                          r: radius,
-                          navDisabled: true,
-                        ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(radius),
+                  child: InteractiveViewer(
+                    transformationController: _transformationController,
+                    minScale: 0.5,
+                    maxScale: 2.0,
+                    onInteractionEnd: (details) {
+                      // ズームアウトしすぎた場合はリセット
+                      if (_transformationController.value.getMaxScaleOnAxis() <
+                          1.0) {
+                        _resetAnimation();
+                      }
+                    },
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.9,
+                        maxHeight: MediaQuery.of(context).size.height * 0.8,
+                      ),
+                      child: UserIcon(
+                        user: widget.user,
+                        r: radius,
+                        navDisabled: true,
                       ),
                     ),
                   ),

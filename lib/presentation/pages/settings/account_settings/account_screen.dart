@@ -6,7 +6,7 @@ import 'package:app/presentation/pages/settings/account_settings/sub/mutes_scree
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/users/blocks_list.dart';
 import 'package:app/presentation/providers/users/muted_list.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

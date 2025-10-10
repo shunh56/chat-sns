@@ -1,6 +1,6 @@
 import 'package:app/domain/entity/message_overview.dart';
 import 'package:app/domain/entity/user.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:app/domain/usecases/direct_message_overview_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -52,7 +52,7 @@ class DmOverviewListNotifier
     _usecase.leaveChat(user.userId);
   }
 
-  joinChat(UserAccount user) {
-    _usecase.joinChat(user.userId);
+  Future<void> joinChat(UserAccount user) {
+    return _usecase.joinChat(user.userId);
   }
 }

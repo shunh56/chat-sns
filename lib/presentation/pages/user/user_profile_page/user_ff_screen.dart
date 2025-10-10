@@ -3,14 +3,13 @@ import 'package:app/core/utils/theme.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/tiles/user_request_widget.dart';
 import 'package:app/presentation/components/user_widget.dart';
-
 import 'package:app/presentation/providers/follow/follow_list_notifier.dart';
 import 'package:app/presentation/providers/follow/followers_list_notifier.dart';
 import 'package:app/presentation/providers/follow/user_followings_followers.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
 
 class UserFFScreen extends ConsumerWidget {
@@ -165,7 +164,7 @@ class _GradientPainter extends BoxPainter {
 
 enum FFType { followers, following }
 
-class _FFListView extends ConsumerWidget {
+class _FFListView extends HookConsumerWidget {
   const _FFListView({
     required this.user,
     required this.type,
@@ -178,6 +177,8 @@ class _FFListView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeSize = ref.watch(themeSizeProvider(context));
     final textStyle = ThemeTextStyle(themeSize: themeSize);
+    final searchController = useTextEditingController();
+    final searchQuery = useState('');
 
     final ids = user.userId == ref.read(authProvider).currentUser!.uid
         ? type == FFType.followers
@@ -188,41 +189,111 @@ class _FFListView extends ConsumerWidget {
             : ref.watch(userFollowingsProvider(user.userId)).asData?.value ??
                 [];
 
-    return ids.isEmpty
-        ? _buildEmptyState(textStyle)
-        : ListView.builder(
+    if (ids.isEmpty) {
+      return _buildEmptyState(textStyle, type);
+    }
+
+    return Column(
+      children: [
+        // 検索バー
+        Container(
+          padding: const EdgeInsets.all(12),
+          color: ThemeColor.background,
+          child: TextField(
+            controller: searchController,
+            onChanged: (value) => searchQuery.value = value,
+            decoration: InputDecoration(
+              hintText: '検索...',
+              hintStyle: const TextStyle(color: ThemeColor.subText),
+              prefixIcon: const Icon(Icons.search, color: ThemeColor.subText),
+              suffixIcon: searchQuery.value.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: ThemeColor.subText),
+                      onPressed: () {
+                        searchController.clear();
+                        searchQuery.value = '';
+                      },
+                    )
+                  : null,
+              filled: true,
+              fillColor: ThemeColor.accent,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            ),
+            style: const TextStyle(color: ThemeColor.text),
+          ),
+        ),
+        // リスト
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.only(top: 8),
             itemCount: ids.length,
             itemBuilder: (context, index) => UserWidget(
               userId: ids[index],
               builder: (user) {
+                // 検索フィルター
+                if (searchQuery.value.isNotEmpty) {
+                  final query = searchQuery.value.toLowerCase();
+                  if (!user.name.toLowerCase().contains(query) &&
+                      !user.username.toLowerCase().contains(query) &&
+                      !user.aboutMe.toLowerCase().contains(query)) {
+                    return const SizedBox.shrink();
+                  }
+                }
                 return UserRequestWidget(user: user);
               },
             ),
-          );
+          ),
+        ),
+      ],
+    );
   }
 
-  Widget _buildEmptyState(ThemeTextStyle textStyle) {
-    final message =
-        type == FFType.followers ? 'フォロワーはいません' : 'フォローしているユーザーはいません';
-
+  Widget _buildEmptyState(ThemeTextStyle textStyle, FFType type) {
+    final isFollowers = type == FFType.followers;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.person_outline,
-            size: 48,
-            color: ThemeColor.text.withOpacity(0.5),
-          ),
-          const Gap(16),
-          Text(
-            message,
-            style: textStyle.w400(
-              fontSize: 14,
-              color: ThemeColor.text.withOpacity(0.7),
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: ThemeColor.accent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isFollowers ? Icons.people_outline : Icons.person_add_outlined,
+                size: 64,
+                color: ThemeColor.subText,
+              ),
             ),
-          ),
-        ],
+            const Gap(24),
+            Text(
+              isFollowers ? 'フォロワーはまだいません' : 'まだ誰もフォローしていません',
+              style: textStyle.w600(
+                fontSize: 18,
+                color: ThemeColor.text,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const Gap(12),
+            Text(
+              isFollowers
+                  ? '他のユーザーがあなたをフォローすると\nここに表示されます'
+                  : '興味のあるユーザーをフォローして\nつながりましょう',
+              style: textStyle.w400(
+                fontSize: 14,
+                color: ThemeColor.subText,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -581,6 +581,31 @@ voice_chats/(:id)
 - イベント機能
 - タイムラインの最適化
 
+## 📚 ドキュメント
+
+プロジェクトの詳細なドキュメントは `docs/` ディレクトリに整理されています。
+
+### 📖 [ドキュメント一覧](./docs/README.md)
+
+#### 主要ドキュメント
+
+**機能仕様**
+- [チャットリクエスト機能](./docs/features/chat-request.md)
+- [タグシステム](./docs/features/tagging-system-final.md)
+- [足あと機能](./docs/footprint_specification.md)
+
+**アーキテクチャ**
+- [アーキテクチャレビュー](./docs/architecture/ARCHITECTURE_REVIEW.md)
+- [リファクタリング計画](./docs/architecture/REFACTORING_PLAN.md)
+
+**デプロイ**
+- [Fastlaneセットアップ](./docs/deployment/FASTLANE_SETUP.md)
+- [iOS署名トラブルシューティング](./docs/deployment/IOS_SIGNING_TROUBLESHOOTING.md)
+
+詳細は [docs/README.md](./docs/README.md) をご覧ください。
+
+---
+
 ## 貢献について
 貢献は歓迎します！プルリクエストを自由に提出してください。
 

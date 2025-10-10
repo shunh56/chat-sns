@@ -28,7 +28,7 @@ class DirectMessageOverviewRepository {
     return _datasource.leaveChat(userId);
   }
 
-  joinChat(String userId) {
+  Future<void> joinChat(String userId) {
     return _datasource.joinChat(userId);
   }
 }

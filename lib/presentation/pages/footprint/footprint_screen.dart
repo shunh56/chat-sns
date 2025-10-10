@@ -2,16 +2,14 @@ import 'package:app/core/analytics/screen_name.dart';
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/text_styles.dart';
 import 'package:app/core/utils/theme.dart';
-import 'package:app/domain/entity/footprint.dart';
-import 'package:app/presentation/components/image/image.dart';
+import 'package:app/domain/entity/footprint/footprint.dart';
 import 'package:app/presentation/pages/user/user_profile_page/user_ff_screen.dart';
 import 'package:app/presentation/providers/footprint/footprint_manager_provider.dart';
 import 'package:app/presentation/providers/footprint/visited_provider.dart';
 import 'package:app/presentation/providers/footprint/visitors_provider.dart';
-import 'package:app/presentation/providers/session_provider.dart';
+import 'package:app/presentation/providers/shared/app/session_provider.dart';
 import 'package:app/presentation/providers/users/user_by_user_id_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -27,7 +25,7 @@ class FootprintScreen extends HookConsumerWidget {
     final textStyle = ThemeTextStyle(themeSize: themeSize);
     final tabController = useTabController(initialLength: 2);
     final visitorsState = ref.watch(visitorsProvider);
-    final visitedState = ref.watch(visitedControllerProvider);
+    final visitedState = ref.watch(visitedProvider);
 
     // 足あとを表示時に既読にする
     useEffect(() {
@@ -115,14 +113,14 @@ class FootprintScreen extends HookConsumerWidget {
                         color: ThemeColor.text,
                         backgroundColor: ThemeColor.stroke,
                         onRefresh: () async {
-                          ref.read(visitorsProvider.notifier).refresh();
+                          ref.invalidate(visitorsProvider);
                         },
                         child: FootprintGridView(
                           footprints: visitors,
                           onDelete: (footprint) {
                             ref
                                 .read(footprintManagerProvider)
-                                .removeFootprint(footprint.userId);
+                                .removeFootprint(footprint.visitorId);
                           },
                         ),
                       );
@@ -146,9 +144,7 @@ class FootprintScreen extends HookConsumerWidget {
                         color: ThemeColor.text,
                         backgroundColor: ThemeColor.stroke,
                         onRefresh: () async {
-                          ref
-                              .read(visitedControllerProvider.notifier)
-                              .refresh();
+                          ref.invalidate(visitedProvider);
                         },
                         child: FootprintGridView(
                           footprints: visited,
@@ -156,7 +152,7 @@ class FootprintScreen extends HookConsumerWidget {
                           onDelete: (footprint) {
                             ref
                                 .read(footprintManagerProvider)
-                                .removeFootprint(footprint.userId);
+                                .removeFootprint(footprint.visitedUserId);
                           },
                         ),
                       );
@@ -171,162 +167,6 @@ class FootprintScreen extends HookConsumerWidget {
         ),
       ),
     );
-    /*   return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 160,
-            pinned: true,
-            // backgroundColor: Theme.of(context).colorScheme.primary,
-            flexibleSpace: FlexibleSpaceBar(
-              title: const Text(
-                '足あと',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                      Theme.of(context).colorScheme.primary,
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: 20,
-                      bottom: 80,
-                      child: Icon(
-                        Icons.follow_the_signs_rounded,
-                        size: 80,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimary
-                            .withOpacity(0.2),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              PopupMenuButton<FootprintPrivacy>(
-                icon: const Icon(Icons.settings),
-                tooltip: 'プライバシー設定',
-                onSelected: (privacy) {
-                  // ref.read(footprintManagerProvider).updatePrivacySetting(privacy);
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: FootprintPrivacy.everyone,
-                    child: Row(
-                      children: [
-                        Icon(Icons.public, size: 20),
-                        SizedBox(width: 12),
-                        Text('全員に表示'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: FootprintPrivacy.friendsOnly,
-                    child: Row(
-                      children: [
-                        Icon(Icons.people, size: 20),
-                        SizedBox(width: 12),
-                        Text('友達のみに表示'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: FootprintPrivacy.disabled,
-                    child: Row(
-                      children: [
-                        Icon(Icons.visibility_off, size: 20),
-                        SizedBox(width: 12),
-                        Text('無効にする'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            bottom: TabBar(
-              controller: tabController,
-              indicatorColor: Theme.of(context).colorScheme.onPrimary,
-              tabs: const [
-                Tab(
-                  icon: Icon(Icons.login),
-                  text: "訪問された",
-                ),
-                Tab(
-                  icon: Icon(Icons.logout),
-                  text: "訪問した",
-                ),
-              ],
-            ),
-          ),
-          SliverFillRemaining(
-            child: TabBarView(
-              controller: tabController,
-              children: [
-                // 訪問された
-                visitorsState.when(
-                  data: (visitors) {
-                    if (visitors.isEmpty) {
-                      return const EmptyFootprintState(
-                        message: 'まだ誰も訪問していません',
-                        icon: Icons.person_off,
-                      );
-                    }
-
-                    return FootprintListView(
-                      footprints: visitors,
-                      onDelete: (footprint) {
-                        ref
-                            .read(footprintManagerProvider)
-                            .removeFootprint(footprint.userId);
-                      },
-                    );
-                  },
-                  loading: () => const FootprintLoadingState(),
-                  error: (error, stack) => FootprintErrorState(error: error),
-                ),
-
-                // 訪問した
-                visitedState.when(
-                  data: (visited) {
-                    if (visited.isEmpty) {
-                      return const EmptyFootprintState(
-                        message: 'まだ誰も訪問していません',
-                        icon: Icons.travel_explore,
-                      );
-                    }
-
-                    return FootprintListView(
-                      footprints: visited,
-                      onDelete: (footprint) {
-                        ref
-                            .read(footprintManagerProvider)
-                            .removeFootprint(footprint.userId);
-                      },
-                    );
-                  },
-                  loading: () => const FootprintLoadingState(),
-                  error: (error, stack) => FootprintErrorState(error: error),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  */
   }
 }
 
@@ -344,262 +184,224 @@ class FootprintGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 日付ごとにフットプリントをグループ化
-    final Map<String, List<Footprint>> groupedFootprints = {};
-
-    for (final footprint in footprints) {
-      final dateKey = _getDateKey(footprint.updatedAt);
-      if (!groupedFootprints.containsKey(dateKey)) {
-        groupedFootprints[dateKey] = [];
-      }
-      groupedFootprints[dateKey]!.add(footprint);
-    }
-
-    // 日付キーを降順にソート
-    final sortedDates = groupedFootprints.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
-
-    return CustomScrollView(
-      slivers: [
-        for (final dateKey in sortedDates) ...[
-          // 日付ヘッダー
-          SliverToBoxAdapter(
-            child: _buildDateHeader(
-                context, groupedFootprints[dateKey]![0].updatedAt),
-          ),
-          // グリッドビュー (2列)
-          SliverPadding(
-            padding: const EdgeInsets.all(8.0),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.8, // カードのアスペクト比を調整
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final footprint = groupedFootprints[dateKey]![index];
-                  return AnimatedFootprintGridCard(
-                    footprint: footprint,
-                    onDelete: () => onDelete(footprint),
-                    delay: Duration(milliseconds: index * 50),
-                    isVisitedTile: isVisitedTile,
-                  );
-                },
-                childCount: groupedFootprints[dateKey]!.length,
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  String _getDateKey(Timestamp timestamp) {
-    final date = timestamp.toDate();
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-
-  Widget _buildDateHeader(BuildContext context, Timestamp timestamp) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
-      child: Text(
-        timestamp.toDateStr,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: footprints.length,
+      itemBuilder: (context, index) {
+        final footprint = footprints[index];
+        return FootprintListTile(
+          footprint: footprint,
+          onDelete: () => onDelete(footprint),
+          isVisitedTile: isVisitedTile,
+        );
+      },
     );
   }
 }
 
-class AnimatedFootprintGridCard extends HookConsumerWidget {
+/// 足あとリストタイル
+class FootprintListTile extends ConsumerWidget {
   final Footprint footprint;
   final VoidCallback onDelete;
-  final Duration delay;
   final bool isVisitedTile;
 
-  const AnimatedFootprintGridCard({
+  const FootprintListTile({
     super.key,
     required this.footprint,
     required this.onDelete,
-    this.delay = Duration.zero,
     this.isVisitedTile = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final animationController = useAnimationController(
-      duration: const Duration(milliseconds: 500),
-    );
+    final themeSize = ref.watch(themeSizeProvider(context));
+    final textStyle = ThemeTextStyle(themeSize: themeSize);
 
-    final fadeAnimation = useAnimation(
-      Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-        parent: animationController,
-        curve: Curves.easeOut,
-      )),
-    );
+    // 訪問者タブの場合はvisitorId、つけた足あとタブの場合はvisitedUserIdを使用
+    final targetUserId =
+        isVisitedTile ? footprint.visitedUserId : footprint.visitorId;
+    final userAsyncValue = ref.watch(userByUserIdProvider(targetUserId));
 
-    // グリッド用に横からではなく下からのスライドインに変更
-    final slideAnimation = useAnimation(
-      Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero)
-          .animate(CurvedAnimation(
-        parent: animationController,
-        curve: Curves.easeOutCubic,
-      )),
-    );
+    return userAsyncValue.when(
+      data: (user) {
+        return InkWell(
+          onTap: () {
+            ref.read(navigationRouterProvider(context)).goToProfile(user);
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: themeSize.horizontalPadding,
+              vertical: 12,
+            ),
+            child: Row(
+              children: [
+                // ユーザーアイコン
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: user.imageUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(user.imageUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                    color: user.imageUrl == null
+                        ? Colors.grey.withOpacity(0.3)
+                        : null,
+                  ),
+                  child: user.imageUrl == null
+                      ? Icon(
+                          Icons.person,
+                          size: 28,
+                          color: Colors.white.withOpacity(0.7),
+                        )
+                      : null,
+                ),
+                const Gap(12),
 
-    useEffect(() {
-      Future.delayed(delay, () {
-        animationController.forward();
-      });
-      return null;
-    }, []);
-
-    final userAsyncValue = ref.watch(userByUserIdProvider(footprint.userId));
-
-    return Opacity(
-      opacity: fadeAnimation,
-      child: Transform.translate(
-        offset: slideAnimation,
-        child: Card(
-          margin: EdgeInsets.zero,
-          elevation: 2,
-          color: ThemeColor.accent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: userAsyncValue.when(
-            data: (user) {
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () {
-                    ref
-                        .read(navigationRouterProvider(context))
-                        .goToProfile(user);
-                  },
+                // ユーザー情報
+                Expanded(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: user.imageUrl != null
-                            ? CachedImage.usersCard(user.imageUrl!)
-                            : const SizedBox(),
-                      ),
-                      const Gap(8),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 0,
-                          bottom: 8,
-                          left: 8,
-                          right: 8,
+                      Text(
+                        user.name,
+                        style: textStyle.w600(
+                          fontSize: 15,
+                          color: Colors.white,
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                user.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (isVisitedTile)
-                              SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: IconButton(
-                                  padding: EdgeInsets.zero,
-                                  icon: const Icon(Icons.clear, size: 16),
-                                  onPressed: onDelete,
-                                  style: IconButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.black.withOpacity(0.1),
-                                    foregroundColor:
-                                        Colors.white.withOpacity(0.5),
-                                  ),
-                                ),
-                              ),
-                          ],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const Gap(4),
+                      Text(
+                        footprint.visitedAt.xxAgo,
+                        style: textStyle.w400(
+                          fontSize: 13,
+                          color: ThemeColor.subText,
                         ),
                       ),
                     ],
                   ),
                 ),
-              );
-            },
-            loading: () => const Center(
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-            error: (error, stack) => Center(
-              child: Icon(Icons.error,
-                  color: Colors.red.withOpacity(0.7), size: 20),
+
+                // 削除ボタン（つけた足あとタブのみ）
+                if (isVisitedTile)
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    iconSize: 20,
+                    color: Colors.white.withOpacity(0.5),
+                    onPressed: onDelete,
+                  ),
+              ],
             ),
           ),
+        );
+      },
+      loading: () => Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: themeSize.horizontalPadding,
+          vertical: 12,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.withOpacity(0.2),
+              ),
+            ),
+            const Gap(12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const Gap(6),
+                  Container(
+                    width: 80,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
+      error: (error, stack) => const SizedBox(),
     );
   }
 }
 
-// 既存のサポートクラスの修正版 (必要な部分のみ)
+/// ローディング状態
 class FootprintLoadingState extends StatelessWidget {
   const FootprintLoadingState({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 2.5,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: 6,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey.withOpacity(0.1),
           highlightColor: Colors.white.withOpacity(0.1),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                      shape: BoxShape.circle,
-                    ),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(4),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 120,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 80,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -608,6 +410,7 @@ class FootprintLoadingState extends StatelessWidget {
   }
 }
 
+/// 空状態
 class EmptyFootprintState extends ConsumerWidget {
   final String message;
   final IconData icon;
@@ -628,32 +431,16 @@ class EmptyFootprintState extends ConsumerWidget {
         children: [
           Icon(
             icon,
-            size: 80,
-            color: Colors.grey.withOpacity(0.5),
+            size: 64,
+            color: Colors.white.withOpacity(0.3),
           ),
-          const SizedBox(height: 16),
+          const Gap(16),
           Text(
             message,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.refresh),
-            label: const Text("更新する"),
-            onPressed: isVisitedTile
-                ? () {
-                    ref.read(visitedControllerProvider.notifier).loadVisited();
-                  }
-                : () {
-                    ref.read(visitorsProvider.notifier).refresh();
-                  },
-            style: ElevatedButton.styleFrom(
-              foregroundColor: ThemeColor.subText,
-              backgroundColor: ThemeColor.accent,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              fontWeight: FontWeight.w600,
+              color: ThemeColor.subText,
             ),
           ),
         ],
@@ -662,6 +449,7 @@ class EmptyFootprintState extends ConsumerWidget {
   }
 }
 
+/// エラー状態
 class FootprintErrorState extends StatelessWidget {
   final Object error;
 
@@ -673,48 +461,24 @@ class FootprintErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 64,
-              ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline_rounded,
+            size: 64,
+            color: Colors.red.withOpacity(0.7),
+          ),
+          const Gap(16),
+          const Text(
+            'エラーが発生しました',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: ThemeColor.subText,
             ),
-            const SizedBox(height: 24),
-            Text(
-              'エラーが発生しました',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              error.toString(),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[700]),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.refresh),
-              label: const Text('再試行'),
-              onPressed: () {
-                // リトライロジック
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

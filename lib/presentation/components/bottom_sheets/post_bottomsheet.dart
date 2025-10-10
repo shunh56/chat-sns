@@ -4,11 +4,11 @@ import 'package:app/domain/entity/posts/post.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/core/snackbar.dart';
-import 'package:app/presentation/pages/posts/post/widgets/replies/reply_item.dart';
+import 'package:app/presentation/pages/posts/features/post_detail/replies/reply_item.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/routes/page_transition.dart';
 import 'package:app/presentation/pages/report/report_user_screen.dart';
-import 'package:app/presentation/pages/posts/create/create_post_screen/create_post_screen.dart';
+import 'package:app/presentation/pages/posts/features/post_creation/post_creation_page.dart';
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/presentation/providers/posts/all_posts.dart';
 import 'package:app/presentation/providers/posts/replies.dart';
@@ -58,7 +58,7 @@ class PostBottomModelSheet {
                     Navigator.pushReplacement(
                       context,
                       PageTransitionMethods.slideUp(
-                        const CreatePostScreen(),
+                        const PostCreationPage(),
                       ),
                     );
                   },

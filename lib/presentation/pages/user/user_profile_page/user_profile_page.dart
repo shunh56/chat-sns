@@ -4,6 +4,8 @@ import 'package:app/data/datasource/local/hashtags.dart';
 import 'package:app/domain/entity/user.dart';
 import 'package:app/presentation/components/bottom_sheets/user_bottomsheet.dart';
 import 'package:app/presentation/components/image/user_icon.dart';
+import 'package:app/presentation/components/user_tag/tag_button.dart';
+import 'package:app/presentation/pages/chat_request/send_chat_request_helper.dart';
 import 'package:app/presentation/providers/footprint/footprint_manager_provider.dart';
 import 'package:app/presentation/routes/navigator.dart';
 import 'package:app/presentation/pages/report/report_user_screen.dart';
@@ -19,7 +21,7 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -34,6 +36,8 @@ class UserProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +47,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         ref.read(footprintManagerProvider).visitUserProfile(widget.user);
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -331,104 +341,106 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
           ),
           */
           SingleChildScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ヘッダー部分（グラデーション背景）
-                SizedBox(
-                  height: thumbnailHeight + 56,
-                  child: Stack(
+                Gap(MediaQuery.of(context).padding.top),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        height: thumbnailHeight,
+                      // 戻るボタン
+                      BackButton(
+                        color: canvasTheme.profileTextColor,
+                        onPressed: () => Navigator.pop(context),
                       ),
-                      Positioned(
-                        child: SafeArea(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Expanded(child: SizedBox()),
-                                _buildTopActions(context, ref, user),
-                              ],
-                            ),
-                          ),
-                        ),
+                      _buildTopActions(context, ref, user),
+                    ],
+                  ),
+                ),
+                const Gap(12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // プロフィール画像
+                      UserIcon(
+                        user: user,
+                        iconType: IconType.profile,
                       ),
-                      Positioned(
-                        bottom: 0,
-                        width: themeSize.screenWidth,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              // プロフィール画像
-                              UserIcon(
-                                user: user,
-                                iconType: IconType.profile,
-                              ),
 
-                              if (user.links.isShown)
+                      if (user.links.isShown)
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            children: [
+                              if (user.links.instagram.isShown &&
+                                  user.links.instagram.path != null)
                                 Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Row(
-                                    children: [
-                                      if (user.links.instagram.isShown &&
-                                          user.links.instagram.path != null)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 12),
-                                          child: GestureDetector(
-                                            onTap: () async {
-                                              launchUrl(
-                                                Uri.parse(
-                                                  user.links.instagram.url!,
-                                                ),
-                                                mode: LaunchMode
-                                                    .externalApplication,
-                                              );
-                                            },
-                                            child: SizedBox(
-                                              height: 24,
-                                              width: 24,
-                                              child: Image.asset(
-                                                user.links.instagram
-                                                    .assetString,
-                                                color: canvasTheme
-                                                    .profileLinksColor,
-                                              ),
-                                            ),
-                                          ),
+                                  padding: const EdgeInsets.only(right: 12),
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      launchUrl(
+                                        Uri.parse(
+                                          user.links.instagram.url!,
                                         ),
-                                      if (user.links.x.isShown &&
-                                          user.links.x.path != null)
-                                        GestureDetector(
-                                          onTap: () {
-                                            launchUrl(
-                                              Uri.parse(user.links.x.url!),
-                                              mode: LaunchMode
-                                                  .externalApplication,
-                                            );
-                                          },
-                                          child: SizedBox(
-                                            height: 21,
-                                            width: 21,
-                                            child: Image.asset(
-                                              user.links.x.assetString,
-                                              color:
-                                                  canvasTheme.profileLinksColor,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
+                                        mode: LaunchMode.externalApplication,
+                                      );
+                                    },
+                                    child: SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: Image.asset(
+                                        user.links.instagram.assetString,
+                                        color: canvasTheme.profileLinksColor,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              const Expanded(child: SizedBox()),
-                              _buildFollowButton(),
+                              if (user.links.x.isShown &&
+                                  user.links.x.path != null)
+                                GestureDetector(
+                                  onTap: () {
+                                    launchUrl(
+                                      Uri.parse(user.links.x.url!),
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  },
+                                  child: SizedBox(
+                                    height: 21,
+                                    width: 21,
+                                    child: Image.asset(
+                                      user.links.x.assetString,
+                                      color: canvasTheme.profileLinksColor,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      const Expanded(child: SizedBox()),
+                      // アクションボタン群
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _buildFollowButton(),
+                          const Gap(8),
+                          Row(
+                            children: [
+                              _buildMessageButton(),
+                              const Gap(8),
+                              UserTagButton(targetUserId: user.userId),
+                            ],
+                          ),
+                        ],
+                      ),
 
-                              /*
+                      /*
                               const Gap(12),
                               GestureDetector(
                                 onTap: () {
@@ -454,10 +466,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                                   ),
                                 ),
                               ), */
-                            ],
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -500,6 +508,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           color: ThemeColor.subText,
                         ),
                       ),
+                      // タグアイコン表示
+                      const Gap(8),
+                      UserTagIcons(targetUserId: user.userId),
                       // 自己紹介
                       if (user.aboutMe.isNotEmpty)
                         Padding(
@@ -770,123 +781,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               ],
             ),
           ),
-          Positioned(
-            bottom: 32, // 下からの距離
-            left: 0,
-            right: 0,
-            child: ref.watch(isFollowingProvider(user.userId))
-                ? Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            ref
-                                .read(navigationRouterProvider(context))
-                                .goToChat(user);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 12),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "メッセージを送る",
-                                  style: textStyle.w600(
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const Icon(
-                                  Icons.edit_outlined,
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            height: 48,
-                            width: 48,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: ThemeColor.stroke.withOpacity(0.8),
-                                width: 1.5,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  ThemeColor.stroke,
-                                  ThemeColor.background,
-                                ],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.close_rounded,
-                              size: 24,
-                              color: ThemeColor.text,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Gap(12),
-                    ],
-                  )
-                : Center(
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        height: 48,
-                        width: 48,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: ThemeColor.stroke.withOpacity(0.8),
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              ThemeColor.stroke,
-                              ThemeColor.background,
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.close_rounded,
-                          size: 24,
-                          color: ThemeColor.text,
-                        ),
-                      ),
-                    ),
-                  ),
-          ),
         ],
       ),
     );
@@ -900,37 +794,65 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         final user = widget.user;
         final notifier = ref.read(followingListNotifierProvider.notifier);
         final isFollowing = ref.watch(isFollowingProvider(user.userId));
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Material(
-            color: isFollowing ? Colors.blue : ThemeColor.white,
-            borderRadius: BorderRadius.circular(100),
-            child: InkWell(
-              onTap: () {
-                if (!isFollowing) {
-                  notifier.followUser(user);
-                } else {
-                  notifier.unfollowUser(user);
-                }
-              },
-              borderRadius: BorderRadius.circular(100),
-              child: Container(
-                width: 108,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(
-                    !isFollowing ? 'フォロー' : 'フォロー中',
-                    style: textStyle.w600(
-                      fontSize: 14,
-                      color: isFollowing
-                          ? ThemeColor.white
-                          : ThemeColor.background,
-                    ),
+        return Material(
+          color:
+              isFollowing ? Colors.white.withOpacity(0.15) : ThemeColor.white,
+          borderRadius: BorderRadius.circular(20),
+          child: InkWell(
+            onTap: () {
+              if (!isFollowing) {
+                notifier.followUser(user);
+              } else {
+                notifier.unfollowUser(user);
+              }
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 100),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Center(
+                child: Text(
+                  !isFollowing ? 'フォロー' : 'フォロー中',
+                  style: textStyle.w600(
+                    fontSize: 15,
+                    color:
+                        isFollowing ? ThemeColor.white : ThemeColor.background,
                   ),
                 ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMessageButton() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final user = widget.user;
+        return Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          child: InkWell(
+            onTap: () {
+              SendChatRequestHelper.startChatOrRequest(
+                context: context,
+                ref: ref,
+                targetUserId: user.userId,
+              );
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.chat_bubble_outline,
+                size: 20,
+                color: ThemeColor.white,
               ),
             ),
           ),

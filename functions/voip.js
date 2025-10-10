@@ -1,4 +1,4 @@
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v1");
 const { ApnsClient, Notification } = require("apns2");
 const fs = require("fs");
 

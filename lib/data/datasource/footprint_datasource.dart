@@ -1,5 +1,6 @@
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
 import 'package:app/data/datasource/firebase/firebase_firestore.dart';
+import 'package:app/domain/entity/footprint/footprint.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,107 +17,137 @@ class FootprintDatasource {
   final FirebaseFirestore _firestore;
   FootprintDatasource(this._auth, this._firestore);
 
-  final footprints = "footprints"; // 自分が訪問したユーザー
-  final footprinteds = "footprinteds"; // 自分を訪問したユーザー
-  final settings = "footprint_settings"; // 足あと設定
+  /// v2.0.0: 親コレクション名（全ユーザー共通）
+  static const String footprintsCollection = "footprints";
 
-  // 自分を訪問したユーザーの一覧を取得
-  Future<QuerySnapshot<Map<String, dynamic>>> fetchFootprinteds(
-      {int limit = 20}) async {
-    return await _firestore
-        .collection("users")
-        .doc(_auth.currentUser!.uid)
-        .collection(footprinteds)
-        .orderBy("updatedAt", descending: true)
-        .limit(limit)
-        .get();
-  }
-
-  // 自分が訪問したユーザーの一覧を取得
-  Future<QuerySnapshot<Map<String, dynamic>>> fetchFootprints(
-      {int limit = 20}) async {
-    return await _firestore
-        .collection("users")
-        .doc(_auth.currentUser!.uid)
-        .collection(footprints)
-        .orderBy("updatedAt", descending: true)
-        .limit(limit)
-        .get();
-  }
-
-  // 自分を訪問したユーザーをリアルタイムで監視
-  Stream<QuerySnapshot<Map<String, dynamic>>> streamFootprinteds(
-      {int limit = 20}) {
-    return _firestore
-        .collection("users")
-        .doc(_auth.currentUser!.uid)
-        .collection(footprinteds)
-        .orderBy("updatedAt", descending: true)
-        .limit(limit)
-        .snapshots();
-  }
-
-  // ユーザーのプロフィールを訪問した際に足あとを残す
+  /// ユーザーのプロフィールを訪問した際に足あとを残す
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクション（footprints）に1つのドキュメントのみ作成
+  /// - ドキュメントIDは自動生成
+  /// - データ量が半分に削減（旧: 2ドキュメント → 新: 1ドキュメント）
   Future<void> addFootprint(String userId) async {
     final myUid = _auth.currentUser!.uid;
     final ts = Timestamp.now();
 
-    // 自分と相手のプライバシー設定をチェック
-    /*final mySettings = await getFootprintSettings();
-    final theirSettings = await getFootprintSettings(userId: userId);
+    // 親コレクションに1つのドキュメントを作成
+    final footprintRef =
+        _firestore.collection(footprintsCollection).doc(); // 自動生成ID
 
-    // どちらかが無効にしている場合は記録しない
-    if (mySettings["privacy"] == "disabled" ||
-        theirSettings["privacy"] == "disabled") {
-      return;
-    } */
+    await footprintRef.set({
+      "visitorId": myUid, // 訪問者（自分）
+      "visitedUserId": userId, // 訪問先
+      "visitedAt": ts,
+      "isSeen": false, // 初期状態は未読
+      "version": 2, // v2.0.0データ
+    });
+  }
 
-    // バッチ処理で操作をアトミックに行う
+  /// 特定のユーザーとの足あとを全て削除する
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションから該当する足あとを削除
+  /// - 自分が訪問した記録のみ削除（visitorId == 自分 && visitedUserId == 対象）
+  Future<void> deleteFootprint(String targetUserId) async {
+    final myUid = _auth.currentUser!.uid;
+
+    // 親コレクションから自分→対象ユーザーへの訪問記録を削除
+    final footprints = await _firestore
+        .collection(footprintsCollection)
+        .where("visitorId", isEqualTo: myUid)
+        .where("visitedUserId", isEqualTo: targetUserId)
+        .get();
+
+    // バッチ処理で削除
     final batch = _firestore.batch();
 
-    // 自分の足あと履歴を更新
-    final myFootprintRef = _firestore
-        .collection("users")
-        .doc(myUid)
-        .collection(footprints)
-        .doc(userId);
-
-    // 相手の足あと履歴を更新
-    final theirFootprintedRef = _firestore
-        .collection("users")
-        .doc(userId)
-        .collection(footprinteds)
-        .doc(myUid);
-
-    batch.set(
-        myFootprintRef,
-        {
-          "userId": userId,
-          "count": FieldValue.increment(1),
-          "updatedAt": ts,
-        },
-        SetOptions(merge: true));
-
-    batch.set(
-        theirFootprintedRef,
-        {
-          "userId": myUid,
-          "count": FieldValue.increment(1),
-          "updatedAt": ts,
-          "isSeen": false,
-        },
-        SetOptions(merge: true));
+    for (var doc in footprints.docs) {
+      batch.delete(doc.reference);
+    }
 
     await batch.commit();
   }
 
-  // 足あとを既読にする
-  Future<void> markFootprintsSeen() async {
+  /// 自分を訪問したユーザーのストリーム（訪問者リスト）
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションからvisitedUserId == 自分のドキュメントを取得
+  Stream<List<Footprint>> getVisitors(String userId) {
+    return _firestore
+        .collection(footprintsCollection)
+        .where("visitedUserId", isEqualTo: userId)
+        .orderBy("visitedAt", descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Footprint.fromFirestore(doc.id, doc.data()))
+            .toList());
+  }
+
+  /// 過去24時間の訪問者ストリーム
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションからvisitedUserId == 自分 && visitedAt > 24時間前
+  Stream<List<Footprint>> getRecentVisitors(String userId) {
+    final twentyFourHoursAgo = Timestamp.fromDate(
+      DateTime.now().subtract(const Duration(hours: 24)),
+    );
+
+    return _firestore
+        .collection(footprintsCollection)
+        .where("visitedUserId", isEqualTo: userId)
+        .where('visitedAt', isGreaterThan: twentyFourHoursAgo)
+        .orderBy('visitedAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Footprint.fromFirestore(doc.id, doc.data()))
+            .toList())
+        .handleError((error) {
+      return <Footprint>[];
+    });
+  }
+
+  /// 自分が訪問したユーザーのストリーム（訪問先リスト）
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションからvisitorId == 自分のドキュメントを取得
+  Stream<List<Footprint>> getVisited(String userId) {
+    return _firestore
+        .collection(footprintsCollection)
+        .where("visitorId", isEqualTo: userId)
+        .orderBy("visitedAt", descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Footprint.fromFirestore(doc.id, doc.data()))
+            .toList());
+  }
+
+  /// 複数の足あとを既読にする（バッチ処理）
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションのドキュメントIDを受け取って既読化
+  Future<void> markMultipleAsSeen(
+      String userId, List<String> footprintIds) async {
+    final batch = _firestore.batch();
+
+    for (final footprintId in footprintIds) {
+      final docRef =
+          _firestore.collection(footprintsCollection).doc(footprintId);
+
+      batch.update(docRef, {'isSeen': true});
+    }
+
+    await batch.commit();
+  }
+
+  /// 全ての足あとを既読にする
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションから visitedUserId == 自分 && isSeen == false を取得して既読化
+  Future<void> markSeen(String userId) async {
     final batch = _firestore.batch();
     final snapshot = await _firestore
-        .collection("users")
-        .doc(_auth.currentUser!.uid)
-        .collection(footprinteds)
+        .collection(footprintsCollection)
+        .where("visitedUserId", isEqualTo: userId)
         .where("isSeen", isEqualTo: false)
         .get();
 
@@ -127,71 +158,109 @@ class FootprintDatasource {
     await batch.commit();
   }
 
-  // 足あとを削除する
-  Future<void> deleteFootprint(String userId) async {
-    final batch = _firestore.batch();
+  /// 過去24時間以内の未読足あと数を取得
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションから visitedUserId == 自分 && visitedAt > 24時間前 && isSeen == false
+  Future<int> getRecentUnseenCount(String userId) async {
+    final twentyFourHoursAgo = Timestamp.fromDate(
+      DateTime.now().subtract(const Duration(hours: 24)),
+    );
 
-    // 自分の履歴から削除
-    final myRef = _firestore
-        .collection("users")
-        .doc(_auth.currentUser!.uid)
-        .collection(footprints)
-        .doc(userId);
-
-    // 相手の履歴から削除
-    final theirRef = _firestore
-        .collection("users")
-        .doc(userId)
-        .collection(footprinteds)
-        .doc(_auth.currentUser!.uid);
-
-    batch.delete(myRef);
-    batch.delete(theirRef);
-
-    await batch.commit();
-  }
-
-  // 未読の足あと数を取得
-  Future<int> getUnreadFootprintCount() async {
     final snapshot = await _firestore
-        .collection("users")
-        .doc(_auth.currentUser!.uid)
-        .collection(footprinteds)
-        .where("isSeen", isEqualTo: false)
+        .collection(footprintsCollection)
+        .where('visitedUserId', isEqualTo: userId)
+        .where('visitedAt', isGreaterThan: twentyFourHoursAgo)
+        .where('isSeen', isEqualTo: false)
         .count()
         .get();
+
     return snapshot.count ?? 0;
   }
 
-  /*  // 足あと設定を取得
-  Future<Map<String, dynamic>> getFootprintSettings({String? userId}) async {
-    final uid = userId ?? _auth.currentUser!.uid;
-    final doc = await _firestore
-        .collection("users")
-        .doc(uid)
-        .collection(settings)
-        .doc("settings")
+  /// 指定期間以降の訪問回数を取得
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションから visitedUserId == 自分 && visitedAt > since
+  Future<int> getCountForPeriod(String userId, Timestamp since) async {
+    final snapshot = await _firestore
+        .collection(footprintsCollection)
+        .where('visitedUserId', isEqualTo: userId)
+        .where('visitedAt', isGreaterThan: since)
+        .count()
         .get();
 
-    if (!doc.exists) {
-      // デフォルト設定
-      return {
-        "privacy": "everyone",
-        "notifyOnNew": true,
-      };
+    return snapshot.count ?? 0;
+  }
+
+  /// 未読の訪問者数を取得
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションから visitedUserId == 自分 && isSeen == false
+  Future<int> getUnseenCount(String userId) async {
+    final snapshot = await _firestore
+        .collection(footprintsCollection)
+        .where('visitedUserId', isEqualTo: userId)
+        .where('isSeen', isEqualTo: false)
+        .count()
+        .get();
+
+    return snapshot.count ?? 0;
+  }
+
+  /// 過去24時間の時間帯別訪問回数分布を取得
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションから visitedUserId == 自分 && visitedAt > 24時間前
+  Future<Map<int, int>> getHourlyDistribution(String userId) async {
+    final distribution = <int, int>{};
+
+    final twentyFourHoursAgo = Timestamp.fromDate(
+      DateTime.now().subtract(const Duration(hours: 24)),
+    );
+
+    final snapshot = await _firestore
+        .collection(footprintsCollection)
+        .where('visitedUserId', isEqualTo: userId)
+        .where('visitedAt', isGreaterThan: twentyFourHoursAgo)
+        .get();
+
+    for (final doc in snapshot.docs) {
+      final footprint = Footprint.fromFirestore(doc.id, doc.data());
+      final hour = footprint.visitedAt.toDate().hour;
+      distribution[hour] = (distribution[hour] ?? 0) + 1;
     }
 
-    return doc.data()!;
+    return distribution;
   }
 
-  // 足あと設定を更新
-  Future<void> updateFootprintSettings(Map<String, dynamic> settings) async {
-    await _firestore
-        .collection("users")
-        .doc(_auth.currentUser!.uid)
-        .collection(this.settings)
-        .doc("settings")
-        .set(settings, SetOptions(merge: true));
+  /// 過去1週間の頻繁な訪問者（上位5人）を取得
+  ///
+  /// v2.0.0設計変更:
+  /// - 親コレクションから visitedUserId == 自分 && visitedAt > 1週間前
+  Future<List<String>> getFrequentVisitors(String userId) async {
+    final visitorCounts = <String, int>{};
+
+    final oneWeekAgo = Timestamp.fromDate(
+      DateTime.now().subtract(const Duration(days: 7)),
+    );
+
+    final snapshot = await _firestore
+        .collection(footprintsCollection)
+        .where('visitedUserId', isEqualTo: userId)
+        .where('visitedAt', isGreaterThan: oneWeekAgo)
+        .get();
+
+    for (final doc in snapshot.docs) {
+      final footprint = Footprint.fromFirestore(doc.id, doc.data());
+      visitorCounts[footprint.visitorId] =
+          (visitorCounts[footprint.visitorId] ?? 0) + 1;
+    }
+
+    // 訪問回数でソートして上位5人を返す
+    final sorted = visitorCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return sorted.take(5).map((e) => e.key).toList();
   }
- */
 }

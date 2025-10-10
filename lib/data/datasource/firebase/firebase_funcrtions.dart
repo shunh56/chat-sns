@@ -33,4 +33,10 @@ class HttpsCallables {
   HttpsCallable voip() {
     return _functions.httpsCallable('voip-send');
   }
+
+  /// デバイスクリーンアップ関数
+  /// [functionName] には 'cleanupMyDevices' または 'manualCleanupDevices' を指定
+  HttpsCallable deviceCleanup(String functionName) {
+    return _functions.httpsCallable('deviceCleanup-$functionName');
+  }
 }

@@ -1,63 +1,30 @@
-import 'dart:async';
-
-import 'package:app/core/utils/debug_print.dart';
-import 'package:app/domain/entity/footprint.dart';
+import 'package:app/domain/entity/footprint/footprint.dart';
 import 'package:app/domain/usecases/footprint/get_visitors_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// 訪問者リストのステート（キャッシュ）
-final visitorsProvider = StateNotifierProvider.autoDispose<VisitorsNotifier,
-    AsyncValue<List<Footprint>>>((ref) {
-  ref.keepAlive();
-  return VisitorsNotifier(
-    ref.watch(getVisitorsUsecaseProvider),
-  );
-});
+// 訪問者リストのステート（ストリーム）
+// 各訪問者（visitorId）ごとに最新の1件のみを表示
+final visitorsProvider = StreamProvider.autoDispose<List<Footprint>>((ref) {
+  final usecase = ref.watch(getVisitorsUsecaseProvider);
+  return usecase.getProfileVisitors().map((footprints) {
+    // visitorIdごとに最新の訪問記録のみをフィルタリング
+    final Map<String, Footprint> latestByVisitor = {};
 
-class VisitorsNotifier extends StateNotifier<AsyncValue<List<Footprint>>> {
-  final GetVisitorsUsecase _getVisitorsUsecase;
+    for (final footprint in footprints) {
+      final visitorId = footprint.visitorId;
 
-  VisitorsNotifier(this._getVisitorsUsecase)
-      : super(const AsyncValue.loading()) {
-    _loadVisitors();
-  }
-
-  Future<void> _loadVisitors() async {
-    DebugPrint("Load visitors");
-    try {
-      state = const AsyncValue.loading();
-      final visitors = await _getVisitorsUsecase.getProfileVisitors();
-      state = AsyncValue.data(visitors);
-    } catch (e, stackTrace) {
-      state = AsyncValue.error(e, stackTrace);
-    }
-  }
-
-  /*void _subscribeToVisitors() {
-    _subscription = _streamVisitorsUsecase.streamProfileVisitors().listen(
-      (visitors) {
-        state = AsyncValue.data(visitors);
-      },
-      onError: (error, stackTrace) {
-        state = AsyncValue.error(error, stackTrace);
+      // まだ登録されていないか、より新しい記録の場合は更新
+      if (!latestByVisitor.containsKey(visitorId) ||
+          footprint.visitedAt.compareTo(latestByVisitor[visitorId]!.visitedAt) >
+              0) {
+        latestByVisitor[visitorId] = footprint;
       }
-    );
-  } */
-
-  // 明示的に再読み込みするためのメソッド
-  Future<void> refresh() async {
-    try {
-      final visitors = await _getVisitorsUsecase.getProfileVisitors();
-      state = AsyncValue.data(visitors);
-    } catch (e, stackTrace) {
-      state = AsyncValue.error(e, stackTrace);
     }
-  }
 
-  @override
-  void dispose() {
-    // _subscription?.cancel();
-    DebugPrint("ON DISPOSE");
-    super.dispose();
-  }
-}
+    // 訪問日時の降順でソートして返す
+    final result = latestByVisitor.values.toList()
+      ..sort((a, b) => b.visitedAt.compareTo(a.visitedAt));
+
+    return result;
+  });
+});

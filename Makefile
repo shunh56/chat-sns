@@ -87,6 +87,10 @@ run-dev-debug:
 	@echo "Running dev environment in debug mode..."
 	$(FLUTTER) run --debug $(DART_DEFINE_DEV)
 
+run-dev-debug-wireless:
+	@echo "Running dev environment in debug mode..."
+	$(FLUTTER) run --debug $(DART_DEFINE_DEV) -d 00008110-001E3D9221F2401E
+
 run-dev-profile:
 	@echo "Running dev environment in profile mode..."
 	$(FLUTTER) run --profile $(DART_DEFINE_DEV)
@@ -94,6 +98,11 @@ run-dev-profile:
 run-dev-release:
 	@echo "Running dev environment in release mode..."
 	$(FLUTTER) run --release $(DART_DEFINE_DEV)
+
+run-dev-release-wireless:
+	@echo "Running dev environment in release mode..."
+	$(FLUTTER) run --release $(DART_DEFINE_DEV) -d 00008110-001E3D9221F2401E
+
 
 # ==============================================================================
 # iOS Run Commands - Production Environment
@@ -108,8 +117,12 @@ run-prod-profile:
 	$(FLUTTER) run --profile $(DART_DEFINE_PROD)
 
 run-prod-release:
+	@echo "Running prod environment in releasde mode..."
+	$(FLUTTER) run --release $(DART_DEFINE_PROD) 
+
+run-prod-release-wireless:
 	@echo "Running prod environment in release mode..."
-	$(FLUTTER) run --release $(DART_DEFINE_PROD)
+	$(FLUTTER) run --release $(DART_DEFINE_PROD) -d 00008110-001E3D9221F2401E
 
 # ==============================================================================
 # iOS Run Commands - App Store Environment

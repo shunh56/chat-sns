@@ -162,4 +162,13 @@ class UserDatasource {
         .doc(_auth.currentUser!.uid)
         .update(json);
   }
+
+  /// 特定のフィールドのみを更新
+  /// 部分更新に使用 (例: isOnline, lastOpenedAt のみ更新)
+  Future<void> updateUserFields(
+    String userId,
+    Map<String, dynamic> fields,
+  ) {
+    return _firestore.collection("users").doc(userId).update(fields);
+  }
 }

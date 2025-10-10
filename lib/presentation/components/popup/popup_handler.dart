@@ -7,8 +7,8 @@ import 'package:app/core/utils/logger.dart'; // 新しいロガーをインポ�
 import 'package:app/presentation/components/popup/popups/hashtag_popup.dart';
 import 'package:app/presentation/pages/profile/subpages/edit_bio_screen.dart';
 import 'package:app/presentation/pages/profile/subpages/select_hashtag_screen.dart';
-import 'package:app/presentation/providers/session_provider.dart';
-import 'package:app/presentation/providers/users/my_user_account_notifier.dart';
+import 'package:app/presentation/providers/shared/app/session_provider.dart';
+import 'package:app/presentation/providers/shared/users/my_user_account_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

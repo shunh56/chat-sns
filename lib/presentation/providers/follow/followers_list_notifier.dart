@@ -8,7 +8,7 @@ import 'package:app/domain/usecases/follow/get_followers_stream_usecase.dart';
 import 'package:app/domain/usecases/follow/get_followers_usecase.dart';
 
 import 'package:app/data/datasource/firebase/firebase_auth.dart';
-import 'package:app/presentation/providers/users/all_users_notifier.dart';
+import 'package:app/presentation/providers/shared/users/all_users_notifier.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

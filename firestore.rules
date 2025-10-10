@@ -2,6 +2,71 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Footprint機能 Security Rules（v2.0.0 親コレクション設計）
+    match /footprints/{footprintId} {
+      // 読み取り権限: 訪問者または訪問された人のみ
+      allow read: if request.auth != null
+                  && (resource.data.visitorId == request.auth.uid
+                      || resource.data.visitedUserId == request.auth.uid);
+
+      // 作成権限: 訪問者本人のみ（自分が訪問した記録のみ作成可能）
+      allow create: if request.auth != null
+                    && request.resource.data.visitorId == request.auth.uid
+                    && request.resource.data.visitedUserId != request.auth.uid  // 自分自身への訪問は不可
+                    && request.resource.data.isSeen == false                    // 初期状態は未読
+                    && request.resource.data.version == 2;                      // v2.0.0データ
+
+      // 更新権限: 既読フラグの更新のみ、訪問された人のみが可能
+      allow update: if request.auth != null
+                    && resource.data.visitedUserId == request.auth.uid
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isSeen'])
+                    && request.resource.data.isSeen == true;  // 既読化のみ許可
+
+      // 削除権限: 訪問者のみが自分の訪問記録を削除可能
+      allow delete: if request.auth != null
+                    && resource.data.visitorId == request.auth.uid;
+    }
+
+    // ユーザータグ機能 Security Rules
+    // users/{userId}/tags/{tagId} - タグ定義（プライベート）
+    match /users/{userId}/tags/{tagId} {
+      // 読み取り権限: 本人のみ
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // 作成・更新権限: 本人のみ
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+
+      // 削除権限: 本人のみ（システムタグは削除不可）
+      allow delete: if request.auth != null
+                    && request.auth.uid == userId
+                    && resource.data.isSystemTag == false;
+    }
+
+    // user_tags/{userId}/tagged_users/{targetId} - タグ付けされたユーザー（プライベート）
+    match /user_tags/{userId}/tagged_users/{targetId} {
+      // 読み取り権限: 本人のみ
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // 作成・更新・削除権限: 本人のみ
+      allow create, update, delete: if request.auth != null
+                                    && request.auth.uid == userId
+                                    && request.resource.data.userId == request.auth.uid;
+    }
+
+    // 監視コレクション: Cloud Functionsのみ書き込み可、管理者のみ読み取り可
+    match /monitoring/{document=**} {
+      // Cloud Functionsからの書き込みのみ許可（クライアントから直接書き込み不可）
+      allow write: if false;
+
+      // 読み取りは管理者のみ（必要に応じてカスタマイズ）
+      // TODO: 管理者判定ロジックを実装する場合は以下を有効化
+      // allow read: if request.auth != null
+      //             && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow read: if false;  // 現状はCloud Functionsからのみアクセス
+    }
+
+    // その他のコレクション: 開発用（要本番用ルール追加）
     match /{document=**} {
       allow read, write: if true;
     }

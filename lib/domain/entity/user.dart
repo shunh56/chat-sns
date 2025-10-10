@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:app/core/extenstions/timestamp_extenstion.dart';
 import 'package:app/core/utils/theme.dart';
+import 'package:app/domain/entity/device/active_device_summary.dart';
 import 'package:app/domain/value/user/gender.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -100,6 +101,13 @@ class UserAccount extends HiveObject {
   @HiveField(27)
   final int followerCount;
 
+  // ★ 新規追加: マルチデバイス対応
+  // Hive には保存せず、Firestore のみで管理
+  // activeDevices: ユーザーのアクティブなデバイス情報のキャッシュ (通知送信時に使用)
+  // devicesUpdatedAt: devices サブコレクションの最終更新日時
+  final List<ActiveDeviceSummary> activeDevices;
+  final Timestamp? devicesUpdatedAt;
+
   UserAccount({
     required this.userId,
     required this.createdAt,
@@ -137,14 +145,18 @@ class UserAccount extends HiveObject {
 
     required this.followingCount,
     required this.followerCount,
-  });
+
+    // ★ 新規フィールド
+    List<ActiveDeviceSummary>? activeDevices,
+    this.devicesUpdatedAt,
+  }) : activeDevices = activeDevices ?? [];
 
   factory UserAccount.fromJson(Map<String, dynamic> json) {
     return UserAccount(
       userId: json["userId"],
-      createdAt: json["createdAt"],
-      lastOpenedAt: json["lastOpenedAt"],
-      isOnline: json["isOnline"],
+      createdAt: json["createdAt"] ?? Timestamp.now(),
+      lastOpenedAt: json["lastOpenedAt"] ?? Timestamp.now(),
+      isOnline: json["isOnline"] ?? false,
       //
       usedCode: json["usedCode"],
       fcmToken: json["fcmToken"],
@@ -186,6 +198,15 @@ class UserAccount extends HiveObject {
       friendIds: json["friendIds"] ?? [],
       followingCount: json["followingCount"] ?? 0,
       followerCount: json["followerCount"] ?? 0,
+
+      // ★ 新規フィールド
+      activeDevices: json["activeDevices"] != null
+          ? (json["activeDevices"] as List<dynamic>)
+              .map((d) =>
+                  ActiveDeviceSummary.fromJson(d as Map<String, dynamic>))
+              .toList()
+          : [],
+      devicesUpdatedAt: json["devicesUpdatedAt"],
     );
   }
 
@@ -223,7 +244,11 @@ class UserAccount extends HiveObject {
       //canvas
       "canvasTheme": canvasTheme.toJson(),
       "notificationData": notificationData.toJson(),
-      "privacy": privacy.toJson()
+      "privacy": privacy.toJson(),
+
+      // ★ 新規フィールド
+      "activeDevices": activeDevices.map((d) => d.toJson()).toList(),
+      "devicesUpdatedAt": devicesUpdatedAt,
     };
   }
 
@@ -309,6 +334,8 @@ class UserAccount extends HiveObject {
     List<String>? friendIds,
     int? followingCount,
     int? followerCount,
+    List<ActiveDeviceSummary>? activeDevices,
+    Timestamp? devicesUpdatedAt,
   }) {
     return UserAccount(
       userId: userId,
@@ -344,6 +371,10 @@ class UserAccount extends HiveObject {
       friendIds: friendIds ?? this.friendIds,
       followingCount: followingCount ?? this.followingCount,
       followerCount: followerCount ?? this.followerCount,
+
+      // ★ 新規フィールド
+      activeDevices: activeDevices ?? this.activeDevices,
+      devicesUpdatedAt: devicesUpdatedAt ?? this.devicesUpdatedAt,
     );
   }
 

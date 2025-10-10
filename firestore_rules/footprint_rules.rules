@@ -1,0 +1,41 @@
+// Footprint機能 Security Rules（v2.0.0 親コレクション設計）
+//
+// コレクション構造:
+// footprints/{footprintId}
+//   - visitorId: string      # 訪問者のユーザーID
+//   - visitedUserId: string  # 訪問されたユーザーID
+//   - visitedAt: timestamp   # 訪問日時
+//   - isSeen: boolean        # 既読フラグ
+//   - version: number        # データバージョン
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 親コレクション: footprints
+    match /footprints/{footprintId} {
+
+      // 読み取り権限: 訪問者または訪問された人のみ
+      allow read: if request.auth != null
+                  && (resource.data.visitorId == request.auth.uid
+                      || resource.data.visitedUserId == request.auth.uid);
+
+      // 作成権限: 訪問者本人のみ（自分が訪問した記録のみ作成可能）
+      allow create: if request.auth != null
+                    && request.resource.data.visitorId == request.auth.uid
+                    && request.resource.data.visitedUserId != request.auth.uid  // 自分自身への訪問は不可
+                    && request.resource.data.isSeen == false                    // 初期状態は未読
+                    && request.resource.data.version == 2;                      // v2.0.0データ
+
+      // 更新権限: 既読フラグの更新のみ、訪問された人のみが可能
+      allow update: if request.auth != null
+                    && resource.data.visitedUserId == request.auth.uid
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isSeen'])
+                    && request.resource.data.isSeen == true;  // 既読化のみ許可
+
+      // 削除権限: 訪問者のみが自分の訪問記録を削除可能
+      allow delete: if request.auth != null
+                    && resource.data.visitorId == request.auth.uid;
+    }
+  }
+}

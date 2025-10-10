@@ -62,11 +62,20 @@ class UserUsecase {
     return _repository.updateUser(user.toJson());
   }
 
+  /// 特定のフィールドのみを更新
+  /// 部分更新に使用 (例: isOnline, lastOpenedAt のみ更新)
+  Future<void> updateUserFields({
+    required String userId,
+    required Map<String, dynamic> fields,
+  }) {
+    return _repository.updateUserFields(userId: userId, fields: fields);
+  }
+
   /* Future<UserAccount> getUserByUsername(String username){
     return;
   } */
 
   /* Future<UserAccount> createUserAccount(String name,String username){
-    return 
+    return
   } */
 }
